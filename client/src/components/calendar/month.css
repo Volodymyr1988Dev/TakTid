@@ -1,0 +1,27 @@
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  font-weight: 600;
+  text-align: center;
+}
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.day {
+  background: white;
+  border-radius: 12px;
+  padding: 8px;
+  text-align: center;
+}
+
+.day.today {
+  background: #e1bee7;
+}
+
+.day.muted {
+  opacity: 0.4;
+}

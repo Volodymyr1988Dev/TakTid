@@ -1,0 +1,10 @@
+:root {
+  --purple: #6a1b9a;
+  --purple-light: #ede7f6;
+  --bg: #f6f5f2;
+}
+
+body {
+  background: var(--bg);
+  font-family: system-ui;
+}
