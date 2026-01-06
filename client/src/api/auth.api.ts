@@ -11,3 +11,4 @@ export const login = (data: { email: string; password: string }) =>
 export const me = () => api.get('/auth/me');
 console.log (me,'me api');
 export const logout = () => api.post('/auth/logout');
+export const refresh = () => api.post('/auth/refresh');

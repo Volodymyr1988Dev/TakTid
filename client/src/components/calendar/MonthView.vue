@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import dayjs, { Dayjs } from 'dayjs'
+const emit = defineEmits<{
+  (e: 'select-day', day: Dayjs): void
+}>()
 
 const props = defineProps<{
   current: Dayjs
@@ -37,6 +40,12 @@ const today = dayjs()
 
 const isFuture = (day: Dayjs) =>
   day.isAfter(today, 'day')
+
+//const selectedDay = ref<Dayjs | null>(null)
+function selectDay(day: Dayjs) {
+  if (isFuture(day)) return
+  emit('select-day', day)
+} 
 </script>
 
 <template>
@@ -57,6 +66,7 @@ const isFuture = (day: Dayjs) =>
           muted: !day.isSame(current, 'month'),
           disabled: isFuture(day),
         }"
+        @click="selectDay(day)"
       >
         <span>{{ day.date() }}</span>
 

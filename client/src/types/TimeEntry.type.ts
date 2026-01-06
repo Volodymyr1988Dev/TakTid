@@ -3,4 +3,5 @@ export interface TimeEntry {
   date: string // '2026-01-02'
   hours: number
   comment?: string
+  breakMinutes: number
 }

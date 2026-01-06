@@ -7,6 +7,8 @@ import {
   Post,
   Patch,
   Query,
+  //UseGuards,
+  //Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { TimeEntryService } from '../services/TimeEntry';
@@ -15,6 +17,7 @@ import {
   QueryTimeEntryDto,
   UpdateTimeEntryDto,
 } from '../types/index';
+//import { JwtAuthGuard } from '../types/auth/';
 
 @ApiTags('Time Entries')
 @Controller('time-entries')
@@ -30,9 +33,12 @@ export class TimeEntryController {
   findByUser(@Param('userId') userId: string) {
     return this.timeService.findByUser(userId);
   }
-
+  //@UseGuards(JwtAuthGuard)
   @Get('period')
-  findByPeriod(@Query() query: QueryTimeEntryDto) {
+  findByPeriod(
+    @Query() query: QueryTimeEntryDto,
+    //@Req() req: Request
+  ) {
     return this.timeService.findByPeriod(query.userId, query.from, query.to);
   }
 

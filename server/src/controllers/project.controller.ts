@@ -8,11 +8,11 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ProjectsService } from '../services/Project';
 import { CreateProjectDto, UpdateProjectDto } from '../types/index';
-import { UseGuards } from '@nestjs/common';
 //import { AuthGuard } from '../types/auth/guard';
 import { AdminGuard } from '../types/auth/admin.guard';
 import { FileInterceptor } from '@nestjs/platform-express';

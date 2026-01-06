@@ -20,7 +20,8 @@ const entries = ref<TimeEntry[]>([])
 watch(
   () => [mode.value, current.value],
   async () => {
-    const from =
+    try{
+      const from =
       mode.value === 'week'
         ? current.value.startOf('week')
         : current.value.startOf('month')
@@ -34,13 +35,24 @@ watch(
       from.format('YYYY-MM-DD'),
       to.format('YYYY-MM-DD'),
     )
+    } catch (error) {
+      console.error('Failed to fetch time entries:', error);
+    }
+    
   },
   { immediate: true },
 )
+const emit = defineEmits<{
+  (e: 'select-day', day: Dayjs): void
+}>()
 
 const selectedDay = ref<Dayjs | null>(null)
 const isModalOpen = ref(false)
 
+function openModal(day: Dayjs) {
+  selectedDay.value = day
+  isModalOpen.value = true
+}
 function openDay(day: Dayjs) {
   selectedDay.value = day
   isModalOpen.value = true
@@ -87,6 +99,7 @@ const title = computed(() =>
     v-else
     :current="current"
     :hours-for-day="hoursForDay"
+    @select-day="openModal"
   />
 
   <FabButton @click="openDay(dayjs())" />
