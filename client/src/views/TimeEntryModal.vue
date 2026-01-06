@@ -9,7 +9,7 @@ const emit = defineEmits<{ close: [] }>()
 const form = reactive({
   start: '07:00',
   end: '16:00',
-  breakMinutes: 60,
+  breakMinutes: '60' as unknown as number,
   comment: '',
 });
 

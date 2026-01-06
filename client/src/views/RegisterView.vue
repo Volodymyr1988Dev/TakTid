@@ -12,8 +12,13 @@ const form = reactive({
 })
 
 async function register() {
-  await api.post('/auth/register', form)
-  router.push('/login')
+  try {
+    await api.post('/auth/register', form)
+    await router.push('/login')
+  } catch (err) {
+    console.error('Register failed', err)
+    alert('Помилка реєстрації')
+  }
 }
 </script>
 
@@ -24,6 +29,7 @@ async function register() {
     <input v-model="form.email" type="email" placeholder="Email" />
     <input v-model="form.password" type="password" placeholder="Password" />
     <input v-model="form.name" type="text" placeholder="Name" />
+
     <button @click="register">Register</button>
 
     <p>

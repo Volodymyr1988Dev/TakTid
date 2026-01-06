@@ -1,28 +1,49 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '../stores/auth.store';
-import LoginView from '../views/LoginView.vue';
-import RegisterView from '../views/RegisterView.vue';
-import DashboardView from '../views/DashboardView.vue';
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/auth.store'
+
+import LoginView from '../views/LoginView.vue'
+import RegisterView from '../views/RegisterView.vue'
+import DashboardView from '../views/DashboardView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/login', component: LoginView },
-    { path: '/register', component: RegisterView },
+    {
+      path: '/login',
+      component: LoginView,
+      meta: { guestOnly: true },
+    },
+    {
+      path: '/register',
+      component: RegisterView,
+      meta: { guestOnly: true },
+    },
     {
       path: '/dashboard',
       component: DashboardView,
       meta: { requiresAuth: true },
     },
-    { path: '/', redirect: '/dashboard' },
+    {
+      path: '/',
+      redirect: '/dashboard',
+    },
   ],
-});
+})
 
 router.beforeEach(async (to) => {
-  const auth = useAuthStore();
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return '/login';
+  const auth = useAuthStore()
+  if (!auth.isInitialized) {
+    await auth.fetchMe()
   }
-});
+  //if (auth.isLoading) return true
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return '/login'
+  }
 
-export default router;
+  if (to.meta.guestOnly && auth.isAuthenticated) {
+    return '/dashboard'
+  }
+  return true
+})
+
+export default router

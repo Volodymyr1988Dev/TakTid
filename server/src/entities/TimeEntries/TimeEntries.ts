@@ -45,12 +45,26 @@ export class TimeEntry {
     description: 'Type of the time entry',
     example: 'WORK',
   })
+  @ApiProperty({
+    description: 'Type of the time entry',
+    example: 'WORK',
+  })
   @Column({
     type: 'enum',
     enum: timeKind,
   })
   type: timeKind;
+  @ApiProperty({
+    description: 'Number of break minutes taken',
+    example: 30,
+  })
+  @Column({ type: 'int', default: 0 })
+  breakMinutes: number;
 
+  @ApiProperty({
+    description: 'Additional comments for the time entry',
+    example: 'Worked on project documentation',
+  })
   @Column({ type: 'text', nullable: true })
   comment: string;
 }

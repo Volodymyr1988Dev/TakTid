@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { timeKind } from '../enums/enum';
@@ -34,5 +35,10 @@ export class CreateTimeEntryDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  comment?: string;
+  @MinLength(3)
+  comment: string;
+
+  @ApiProperty({ example: 30, required: false })
+  @IsNumber()
+  breakMinutes: number;
 }

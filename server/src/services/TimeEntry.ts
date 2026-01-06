@@ -35,6 +35,7 @@ export class TimeEntryService {
       date: dto.date,
       hours: dto.hours,
       type: dto.type,
+      breakMinutes: dto.breakMinutes,
       comment: dto.comment,
     });
 

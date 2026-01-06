@@ -24,6 +24,10 @@
   background: #ede7f6;
   border: 2px solid #6a1b9a;
 }
+.week-total {
+  margin-left: auto;
+  font-weight: 600;
+}
 .date {
   font-size: 18px;
   font-weight: 600;
@@ -32,4 +36,22 @@
 .hours {
   margin-top: 6px;
   font-weight: 500;
+}
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.25s ease;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(10px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+.week-day.disabled {
+  opacity: 0.4;
+  pointer-events: none;
 }

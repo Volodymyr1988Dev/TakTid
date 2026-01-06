@@ -10,6 +10,27 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly sessionService: SessionService,
   ) {}
+  async refreshByRefreshToken(refreshToken: string) {
+    const session =
+      await this.sessionService.refreshByRefreshToken(refreshToken);
+
+    if (!session) return null;
+
+    return {
+      token: session.token,
+      refreshToken: session.refresh_token,
+      user: this.sessionService.toAuthUser(session.user),
+    };
+  }
+  async getMe(userId: string) {
+    const user = await this.userService.findById(userId);
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
+    }
+
+    return user;
+  }
 
   async register(registerDto: RegisterDto) {
     const { email, password, name } = registerDto;

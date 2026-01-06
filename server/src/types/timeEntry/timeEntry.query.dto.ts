@@ -1,4 +1,4 @@
-import { IsDateString, IsUUID } from 'class-validator';
+import { IsDateString, IsNumber, IsUUID } from 'class-validator';
 
 export class QueryTimeEntryDto {
   @IsUUID()
@@ -9,4 +9,7 @@ export class QueryTimeEntryDto {
 
   @IsDateString()
   to: string;
+
+  @IsNumber()
+  breakMinutes: number;
 }

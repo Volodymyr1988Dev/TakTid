@@ -3,6 +3,7 @@ import { AuthService } from '../services/AuthService';
 import { AuthController } from '../controllers/auth.controller';
 import { UserModule } from './user.module';
 import { SessionModule } from './session.module';
+//import { AuthGuard } from '../types/auth/guard';
 
 @Module({
   imports: [UserModule, SessionModule],

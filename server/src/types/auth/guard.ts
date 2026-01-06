@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import 'dotenv/config';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { SessionService } from '../../services';
-import { AuthRequest } from '../index';
+import type { AuthRequest } from '../index';
 import { IS_PUBLIC_KEY } from '../../utils/public.decorator';
 import { setAuthCookies } from '../../utils/setAuthCookies';
 
@@ -20,6 +20,7 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    console.log('🔥 AuthGuard activated');
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -28,28 +29,40 @@ export class AuthGuard implements CanActivate {
     if (isPublic) return true;
     const request = context.switchToHttp().getRequest<AuthRequest>();
     const response = context.switchToHttp().getResponse<Response>();
-    const cookies = request.cookies as
-      | { access_token?: string; refresh_token?: string }
-      | undefined;
+    const cookies = request.cookies as {
+      access_token?: string;
+      //refresh_token?: string;
+    };
+    //const { access_token, refresh_token } = request.cookies ?? {};
+    console.log('cookies:', cookies);
+    //const cookies = request.cookies as | { access_token?: string; refresh_token?: string }  | undefined;
 
-    const token = cookies?.access_token;
-    const refreshToken = cookies?.refresh_token;
-
+    //const token = cookies?.access_token;
+    //const refreshToken = cookies?.refresh_token;
+    if (!cookies?.access_token) {
+      throw new UnauthorizedException('No access token');
+    }
+    /*
     if (!token) {
       throw new UnauthorizedException('No token provided');
     }
     const result = await this.sessionService.validateToken(token);
+    */
+    const result = await this.sessionService.validateToken(
+      cookies.access_token,
+    );
     if (!result) {
-      if (!refreshToken)
-        throw new UnauthorizedException('No refresh token provided');
-
-      const refreshed =
-        await this.sessionService.refreshByRefreshToken(refreshToken);
-      if (!refreshed)
-        throw new UnauthorizedException('Invalid or expired refresh token');
-      setAuthCookies(response, { accessToken: refreshed.token });
-      request.user = refreshed.user;
-      return true;
+      //if (!refreshToken)
+      //if (!cookies.refresh_token)
+      throw new UnauthorizedException('Invalid or expired access token');
+      //const refreshed =
+      //await this.sessionService.refreshByRefreshToken(refreshToken);
+      //await this.sessionService.refreshByRefreshToken(cookies.refresh_token);
+      //if (!refreshed)
+      //  throw new UnauthorizedException('Invalid or expired refresh token');
+      //setAuthCookies(response, { accessToken: refreshed.token });
+      //request.user = refreshed.user;
+      //return true;
     }
 
     if (result.newToken) {

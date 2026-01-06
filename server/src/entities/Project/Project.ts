@@ -11,7 +11,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { ProjectAssignment } from '../Project/ProjectAssignment';
 import { TimeEntry } from '../TimeEntries/TimeEntries';
-
+import { ProjectImage } from './ProjectImages';
 @Entity('projects')
 export class Projects {
   @ApiProperty({
@@ -45,4 +45,6 @@ export class Projects {
   assignments: ProjectAssignment[];
   @OneToMany(() => TimeEntry, (timeEntry) => timeEntry.project)
   timeEntries: TimeEntry[];
+  @OneToMany(() => ProjectImage, (img) => img.project)
+  images: ProjectImage[];
 }

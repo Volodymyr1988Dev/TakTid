@@ -6,6 +6,7 @@ import { LessThan, Repository } from 'typeorm';
 import { ValidateTokenResult } from '../types/index';
 import { User, Session } from '../entities';
 import { safeMs } from '../utils/safeMs';
+import { AuthUser } from '../types/index';
 
 @Injectable()
 export class SessionService {
@@ -68,6 +69,7 @@ export class SessionService {
       }
 
       return { user: session.user };
+      //return { user: this.toAuthUser(session.user) };
     } catch (e: unknown) {
       if (e instanceof Error) {
         throw new Error(`Invalid or expired token: ${e.message}`);
@@ -133,5 +135,13 @@ export class SessionService {
     if (result.affected === 0) {
       throw new Error('Session not found');
     }
+  }
+  public toAuthUser(user: User): AuthUser {
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      isAdmin: user.isAdmin,
+    };
   }
 }

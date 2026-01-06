@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia';
 import router from './router';
 import App from './App.vue'
+import { useAuthStore } from './stores/auth.store'
 
 import dayjs from 'dayjs'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
@@ -12,11 +13,27 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import './styles/theme.css'
 import './styles/calendar.css'
 
+//const pinia = createPinia()
 dayjs.extend(weekOfYear)
 dayjs.extend(isoWeek)
 dayjs.extend(isSameOrAfter)
+
 //createApp(App).mount('#app')
+const app = createApp(App);
+const pinia = createPinia();
+
+
+app.use(pinia);
+app.use(router);
+
+/*
 createApp(App)
   .use(createPinia())
+  .use(pinia)
   .use(router)
   .mount('#app');
+*/
+const auth = useAuthStore(pinia)
+auth.fetchMe().finally(() => {
+  app.mount('#app')
+})

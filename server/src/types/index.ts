@@ -15,3 +15,4 @@ export { QueryTimeEntryDto } from './timeEntry/timeEntry.query.dto';
 export { CreateProjectDto } from './project/project.create.dto';
 export { UpdateProjectDto } from './project/project.update.dto';
 export type { AuthRequest } from './auth/auth.request.dto';
+export type { AuthUser } from './auth/auth.types';

@@ -13,4 +13,8 @@ export class UpdateTimeEntryDto {
   @IsOptional()
   @IsString()
   comment?: string;
+
+  @IsOptional()
+  @IsNumber()
+  breakMinutes?: number;
 }

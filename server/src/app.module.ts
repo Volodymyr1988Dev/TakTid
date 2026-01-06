@@ -13,11 +13,13 @@ import { SessionModule } from './modules/session.module';
 import { ProjectAssignmentModule } from './modules/project.assignment.module';
 import { ProjectsModule } from './modules/project.module';
 import { TimeEntryModule } from './modules/timeEntry.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot(baseConfig),
+    ScheduleModule.forRoot(),
     UserModule,
     AuthModule,
     SessionModule,
