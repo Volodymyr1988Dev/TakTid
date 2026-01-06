@@ -1,7 +1,16 @@
+import type { TimeKind } from "./timeKind.enum"
+
 export interface TimeEntry {
   id: string
-  date: string // '2026-01-02'
+  //projectId?: string
+  date: string
   hours: number
-  comment?: string
+  type: TimeKind
+  comment: string
   breakMinutes: number
+  project?: {
+    id: string
+    city: string
+    address: string
+  }
 }

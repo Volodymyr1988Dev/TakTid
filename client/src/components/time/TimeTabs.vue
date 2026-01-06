@@ -81,6 +81,7 @@ const title = computed(() =>
     ? `Week ${current.value.week()} · ${current.value.format('MMM YYYY')}`
     : current.value.format('MMMM YYYY'),
 )
+
 </script>
 
 <template>

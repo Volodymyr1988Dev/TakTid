@@ -1,28 +1,35 @@
 import api from './axios'
 import type { TimeEntry } from '../types/TimeEntry.type'
+import { TimeKind } from '../types/timeKind.enum'
 
-export async function getTimeEntries(from: string, to: string) {
-  const { data } = await api.get<TimeEntry[]>(
-    //`/time-entries?from=${from}&to=${to}`,
-    //`/time-entries/period?from=${from}&to=${to}`
-    `/time-entries/period`,
-    { params: { from, to } },
-  )
+export async function getTimeEntries(from: string, to: string): Promise<TimeEntry[]> {
+ const { data } = await api.get<TimeEntry[]>('/time-entries/period', {
+    params: { from, to },
+  })
   return data
 }
 
-export function createTimeEntry(payload: {
+export async function createTimeEntry(payload: {
   date: string
   hours: number
-  comment?: string
+  type: TimeKind
+  projectId?: string
+  comment: string
   breakMinutes?: number
+  photoUrl?: string
 }) {
-  return api.post<TimeEntry>('/time-entries', payload)
+  const { data } = await api.post<TimeEntry>('/time-entries', payload)
+  return data
 }
 
-export function updateTimeEntry(
+export async function updateTimeEntry(
   id: string,
-  payload: { hours: number; comment?: string, breakMinutes?: number },
+  payload: Partial<{
+    hours: number
+    type: TimeKind
+    comment: string
+    breakMinutes: number
+  }>,
 ) {
-  return api.patch<TimeEntry>(`/time-entries/${id}`, payload)
+  await api.patch(`/time-entries/${id}`, payload)
 }

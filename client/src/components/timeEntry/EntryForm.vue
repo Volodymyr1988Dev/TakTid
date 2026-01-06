@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive } from 'vue'
 import dayjs from 'dayjs'
-import { timeKind, type TimeKind } from '../../types/timeKind.enum'
+import { TimeKind } from '../../types/timeKind.enum'
 
 interface EntryFormState {
   from: string
@@ -15,7 +15,7 @@ const form = reactive<EntryFormState>({
   from: '07:00',
   to: '16:00',
   breakMinutes: 60,
-  kind: timeKind.WORK,
+  kind: TimeKind.WORK,
   extraDescription: '',
 })
 
@@ -43,7 +43,7 @@ const totalHours = computed(() => {
 
     <p>Total: {{ totalHours }} h</p>
 
-    <div v-if="form.kind === timeKind.EXTRA">
+    <div v-if="form.kind === TimeKind.EXTRA">
       <textarea
         v-model="form.extraDescription"
         placeholder="Extra work description"

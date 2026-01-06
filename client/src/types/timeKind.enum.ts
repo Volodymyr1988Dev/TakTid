@@ -1,4 +1,4 @@
-export const timeKind = {
+export const TimeKind = {
   WORK: 'WORK',
   SICK: 'SICK',
   VAB: 'VAB',
@@ -7,5 +7,4 @@ export const timeKind = {
   MEETING: 'MEETING',
 } as const
 
-export type TimeKind =
-  (typeof timeKind)[keyof typeof timeKind]
+export type TimeKind = typeof TimeKind[keyof typeof TimeKind]
