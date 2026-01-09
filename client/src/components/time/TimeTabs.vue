@@ -4,12 +4,12 @@ import dayjs, { Dayjs } from 'dayjs'
 
 import WeekView from '../calendar/WeekView.vue'
 import MonthView from '../calendar/MonthView.vue'
-import DayModal from '../calendar/DayModal.vue'
+//import DayModal from '../calendar/DayModal.vue'
 import SegmentedTabs from '../ui/SegmentedTabs.vue'
 import FabButton from '../ui/FabButton.vue'
 import Toolbar from '../ui/ToolBar.vue'
-
-import { getTimeEntries } from '../../api/TimeEntry'
+import RegisterTimePage from '../pages/RegisterTimePage.vue'
+import { getTimeEntries } from '../../api/TimeEntry.api'
 import type { TimeEntry } from '../../types/TimeEntry.type'
 
 
@@ -105,7 +105,8 @@ const title = computed(() =>
 
   <FabButton @click="openDay(dayjs())" />
 
-  <DayModal
+
+  <RegisterTimePage
     v-if="isModalOpen && selectedDay"
     :day="selectedDay"
     @close="isModalOpen = false"

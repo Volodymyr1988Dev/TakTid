@@ -3,5 +3,5 @@ export interface Project {
   city: string;
   address: string;
   //images?: { url: string }[];
-  images?: string[];
+  photos?: string[];
 }

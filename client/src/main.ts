@@ -27,6 +27,8 @@ app.use(pinia);
 app.use(router);
 
 /*
+навчити приймати optional поля — це нормально в типах
+
 createApp(App)
   .use(createPinia())
   .use(pinia)

@@ -2,6 +2,7 @@
 import { ref, watch, computed } from 'vue'
 import type { Dayjs } from 'dayjs'
 
+//import { createTimeEntry, updateTimeEntry } from '../../api/TimeEntry'
 import { createTimeEntry, updateTimeEntry } from '../../api/TimeEntry'
 import type { TimeEntry } from '../../types/TimeEntry.type'
 import { TimeKind } from '../../types/timeKind.enum'
@@ -76,8 +77,10 @@ async function save() {
       <!-- type -->
       <select v-model="type">
         <option :value="TimeKind.WORK">Work</option>
+        <option :value="TimeKind.EXTRA">Extra Work</option>
         <option :value="TimeKind.SICK">Sick</option>
         <option :value="TimeKind.VACATION">Vacation</option>
+        <option :value="TimeKind.VAB">Vab (Vård av barn)</option>
       </select>
       <input type="file" @change="onFile" />
       <img v-if="photoUrl" :src="photoUrl" class="preview" />
