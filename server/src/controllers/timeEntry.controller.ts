@@ -8,15 +8,19 @@ import {
   Patch,
   Query,
   //UseGuards,
-  //Req,
+  Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { TimeEntryService } from '../services/TimeEntry';
-import {
-  CreateTimeEntryDto,
-  QueryTimeEntryDto,
+import { QueryTimeEntryDto } from '../types/timeEntry/timeEntry.query.dto';
+import type {
+  AuthRequest,
+  //CreateTimeEntryDto,
+  //QueryTimeEntryDto,
   UpdateTimeEntryDto,
 } from '../types/index';
+import { CreateTimeEntryDto } from '../types/timeEntry/timeEntry.create.dto';
 //import { JwtAuthGuard } from '../types/auth/';
 
 @ApiTags('Time Entries')
@@ -24,9 +28,20 @@ import {
 export class TimeEntryController {
   constructor(private readonly timeService: TimeEntryService) {}
 
+  @Get('suggestions')
+  findSuggestions(@Req() req: AuthRequest) {
+    if (!req.user) {
+      throw new UnauthorizedException();
+    }
+    return this.timeService.getSuggestions(req.user.id);
+  }
+
   @Post()
-  create(@Body() dto: CreateTimeEntryDto) {
-    return this.timeService.create(dto);
+  create(@Body() dto: CreateTimeEntryDto, @Req() req: AuthRequest) {
+    if (!req.user) {
+      throw new UnauthorizedException();
+    }
+    return this.timeService.create(dto, req.user.id);
   }
 
   @Get('user/:userId')
@@ -35,11 +50,12 @@ export class TimeEntryController {
   }
   //@UseGuards(JwtAuthGuard)
   @Get('period')
-  findByPeriod(
-    @Query() query: QueryTimeEntryDto,
-    //@Req() req: Request
-  ) {
-    return this.timeService.findByPeriod(query.userId, query.from, query.to);
+  findByPeriod(@Query() query: QueryTimeEntryDto, @Req() req: AuthRequest) {
+    console.log('QUERY DTO:', query);
+    if (!req.user) {
+      throw new UnauthorizedException();
+    }
+    return this.timeService.findByPeriod(req.user.id, query.from, query.to);
   }
 
   @Patch(':id')

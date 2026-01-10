@@ -42,6 +42,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  //const uploaded = await cloudinary.uploader.upload(file.path, {
+  //folder: `projects/${projectId}`,
+  //})
   await app.listen(process.env.PORT ?? 3000);
   logger.log(`
     Application is running on: http://localhost:${process.env.PORT ?? 3000}`);

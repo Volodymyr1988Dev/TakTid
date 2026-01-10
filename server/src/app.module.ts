@@ -14,6 +14,7 @@ import { ProjectAssignmentModule } from './modules/project.assignment.module';
 import { ProjectsModule } from './modules/project.module';
 import { TimeEntryModule } from './modules/timeEntry.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ProjectImagesModule } from './modules/projectImage.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ProjectAssignmentModule,
     ProjectsModule,
     TimeEntryModule,
+    ProjectImagesModule,
   ],
 
   controllers: [AppController],

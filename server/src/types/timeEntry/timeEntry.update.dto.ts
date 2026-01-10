@@ -1,4 +1,10 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 import { timeKind } from '../../types/enums/enum';
 
 export class UpdateTimeEntryDto {
@@ -17,4 +23,12 @@ export class UpdateTimeEntryDto {
   @IsOptional()
   @IsNumber()
   breakMinutes?: number;
+
+  @IsOptional()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/)
+  startTime?: string;
+
+  @IsOptional()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/)
+  endTime?: string;
 }

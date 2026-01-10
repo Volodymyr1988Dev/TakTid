@@ -1,20 +1,16 @@
 import {
+  Matches,
   IsDateString,
   IsEnum,
   IsNumber,
   IsOptional,
   IsString,
   IsUUID,
-  MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { timeKind } from '../enums/enum';
 
 export class CreateTimeEntryDto {
-  @ApiProperty({ format: 'uuid' })
-  @IsUUID()
-  userId: string;
-
   @ApiProperty({ format: 'uuid', required: false })
   @IsOptional()
   @IsUUID()
@@ -35,10 +31,21 @@ export class CreateTimeEntryDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  @MinLength(3)
   comment: string;
 
   @ApiProperty({ example: 30, required: false })
   @IsNumber()
   breakMinutes: number;
+
+  @ApiProperty({ example: '09:00' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+    message: 'startTime must be in HH:mm format',
+  })
+  startTime: string;
+
+  @ApiProperty({ example: '17:30' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+    message: 'endTime must be in HH:mm format',
+  })
+  endTime: string;
 }

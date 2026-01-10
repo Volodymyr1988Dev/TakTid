@@ -17,8 +17,8 @@ export class TimeEntryService {
     private readonly projectRepo: Repository<Projects>,
   ) {}
 
-  async create(dto: CreateTimeEntryDto): Promise<TimeEntry> {
-    const user = await this.userRepo.findOne({ where: { id: dto.userId } });
+  async create(dto: CreateTimeEntryDto, userId: string): Promise<TimeEntry> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
     let project: Projects | null = null;
@@ -37,6 +37,9 @@ export class TimeEntryService {
       type: dto.type,
       breakMinutes: dto.breakMinutes,
       comment: dto.comment,
+      startTime: dto.startTime,
+      endTime: dto.endTime,
+      //...dto,
     });
 
     return this.timeRepo.save(entry);
@@ -65,10 +68,27 @@ export class TimeEntryService {
   ): Promise<TimeEntry[]> {
     return this.timeRepo
       .createQueryBuilder('t')
-      .where('t.userId = :userId', { userId })
+      .leftJoin('t.user', 'user')
+      .where('user.id = :userId', { userId })
       .andWhere('t.date BETWEEN :from AND :to', { from, to })
       .orderBy('t.date', 'ASC')
       .getMany();
+  }
+
+  async getSuggestions(userId: string) {
+    const entries = await this.timeRepo.find({
+      where: { user: { id: userId } },
+      relations: ['project'],
+      order: { date: 'DESC' },
+      take: 5,
+    });
+
+    return entries.map((e) => ({
+      type: e.type,
+      title: e.project ? `${e.project.city} – ${e.project.address}` : 'Work',
+      projectId: e.project?.id,
+      breakMinutes: e.breakMinutes ?? 0,
+    }));
   }
 
   async remove(id: string): Promise<void> {

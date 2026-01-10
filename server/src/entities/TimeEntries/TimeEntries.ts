@@ -67,4 +67,10 @@ export class TimeEntry {
   })
   @Column({ type: 'text', nullable: true })
   comment: string;
+
+  @Column({ type: 'time', nullable: true })
+  startTime: string;
+
+  @Column({ type: 'time', nullable: true })
+  endTime: string;
 }

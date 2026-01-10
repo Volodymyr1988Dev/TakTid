@@ -3,35 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Projects } from '../entities/Project/Project';
 import { CreateProjectDto, UpdateProjectDto } from '../types/index';
-import { ProjectImage } from '../entities/Project/ProjectImages';
 @Injectable()
 export class ProjectsService {
   constructor(
     @InjectRepository(Projects)
     private readonly projectRepo: Repository<Projects>,
-    @InjectRepository(ProjectImage)
-    private readonly imageRepo: Repository<ProjectImage>,
   ) {}
-  async addImage(projectId: string, image: { url: string; publicId: string }) {
-    const project = await this.projectRepo.findOne({
-      where: { id: projectId },
-      relations: ['images'],
-    });
-
-    if (!project) {
-      throw new NotFoundException('Project not found');
-    }
-
-    const img = this.imageRepo.create({
-      url: image.url,
-      publicId: image.publicId,
-      project,
-    });
-
-    await this.imageRepo.save(img);
-
-    return img;
-  }
   async create(dto: CreateProjectDto): Promise<Projects> {
     const project = this.projectRepo.create(dto);
     return this.projectRepo.save(project);
