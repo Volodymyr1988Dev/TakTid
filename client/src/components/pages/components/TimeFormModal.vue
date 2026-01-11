@@ -12,7 +12,6 @@ const props = defineProps<{
   entry?: TimeEntry | null
 }>()
 
-//const emit = defineEmits<{(e: 'close'): void}>()
 const emit = defineEmits(['close', 'saved'])
 const store = useTimeEntryStore()
 
@@ -23,20 +22,18 @@ const breakMinutes = ref(60)
 const kind = ref<TimeKind>(TimeKind.WORK)
 const comment = ref('')
 const projectId = ref<string | null>(null)
-//const title = ref(props.entry?.title ?? props.preset?.title ?? '')
 
 /* ================= PRE-FILL FROM ENTRY ================= */
 watch(
   () => props.entry,
-  entry => {
-    if (!entry) return
-
-    start.value = entry.startTime ?? '08:00'
-    end.value = entry.endTime ?? '17:00'
-    breakMinutes.value = entry.breakMinutes ?? 0
-    kind.value = entry.type
-    comment.value = entry.comment ?? ''
-    projectId.value = entry.projectId ?? null
+  e => {
+    if (!e) return
+    start.value = e.startTime ?? '08:00'
+    end.value = e.endTime ?? '17:00'
+    breakMinutes.value = e.breakMinutes ?? 0
+    kind.value = e.type
+    comment.value = e.comment ?? ''
+    projectId.value = e.projectId ?? null
   },
   { immediate: true },
 )
@@ -46,7 +43,6 @@ watch(
   () => props.preset,
   p => {
     if (!p) return
-
     kind.value = p.type
     breakMinutes.value = p.breakMinutes ?? 60
     projectId.value = p.projectId ?? null
@@ -55,84 +51,86 @@ watch(
 )
 
 /* ================= HELPERS ================= */
-function toMin(t: string): number {
-  const [h, m] = t.split(':').map(Number)
-  return (h ?? 0) * 60 + (m ?? 0)
+function toMinutes(t: string): number {
+  const parts = t.split(':')
+  if (parts.length !== 2) return 0
+
+  const h = Number(parts[0])
+  const m = Number(parts[1])
+
+  if (Number.isNaN(h) || Number.isNaN(m)) return 0
+
+  return h * 60 + m
 }
 
 /* ================= COMPUTED ================= */
-const hours = computed(() => {
-  const total =
-    toMin(end.value) -
-    toMin(start.value) -
-    breakMinutes.value
+const calculatedHours = computed(() => {
+  if (!start.value || !end.value) return '0.00'
 
-  return Math.max(total / 60, 0)
+  let startMin = toMinutes(start.value)
+  let endMin = toMinutes(end.value)
+
+  // 🌙 night shift support
+  if (endMin <= startMin) {
+    endMin += 24 * 60
+  }
+
+  const worked = endMin - startMin - breakMinutes.value
+  if (worked <= 0) return '0.00'
+
+  return (worked / 60).toFixed(2)
 })
 
 const isEdit = computed(() => !!props.entry)
 const isWork = computed(() => kind.value === TimeKind.WORK)
-
-const ABSENCE_KINDS = [
-  TimeKind.SICK,
-  TimeKind.VAB,
-  TimeKind.VACATION,
-  TimeKind.MEETING,
-] as const
+const isMeeting = computed(() => kind.value === TimeKind.MEETING)
 
 const isAbsence = computed(() =>
-  ABSENCE_KINDS.includes(kind.value as any),
+  kind.value === TimeKind.SICK ||
+  kind.value === TimeKind.VAB ||
+  kind.value === TimeKind.VACATION,
 )
-
-const isMeeting = computed(() => kind.value === TimeKind.MEETING)
 
 /* ================= SAVE ================= */
 async function save() {
-  /* -------- ABSENCE / MEETING -------- */
+  /* -------- ABSENCE -------- */
   if (isAbsence.value) {
     const payload = {
+      date: props.date,
       type: kind.value,
+      startTime: '8:00',
+      endTime: '17:00',
+      breakMinutes: 60,
       comment: comment.value,
-      hours: 8,
     }
 
-    if (props.entry) {
-      await store.update(props.entry.id, payload)
-    } else {
-      await store.add({
-        date: props.date,
-        ...payload,
-      })
-    }
+    props.entry
+      ? await store.update(props.entry.id, payload)
+      : await store.add(payload)
 
     emit('close')
     return
   }
 
-  /* -------- WORK -------- */
-  if (!projectId.value) {
-    console.warn('Project is required')
+  /* -------- WORK / MEETING -------- */
+  if (isWork && !projectId.value) {
+    alert('Project is required')
     return
   }
 
   const payload = {
+    date: props.date,
+    type: kind.value,
+    ...(isWork && projectId.value ? { projectId: projectId.value } : {}),
     startTime: start.value,
     endTime: end.value,
     breakMinutes: breakMinutes.value,
-    hours: hours.value,
     comment: comment.value,
   }
 
-  if (props.entry) {
-    await store.update(props.entry.id, payload)
-  } else {
-    await store.add({
-      date: props.date,
-      type: TimeKind.WORK,
-      projectId: projectId.value,
-      ...payload,
-    })
-  }
+  props.entry
+    ? await store.update(props.entry.id, payload)
+    : await store.add(payload)
 
   emit('close')
 }
@@ -145,8 +143,8 @@ async function save() {
 
       <p><strong>Date:</strong> {{ date }}</p>
 
-      <!-- ================= WORK ================= -->
-      <div v-if="isWork">
+      <!-- WORK / MEETING -->
+      <div v-if="isWork || isMeeting">
         <label>
           Start
           <input type="time" v-model="start" />
@@ -159,28 +157,17 @@ async function save() {
 
         <label>
           Break (minutes)
-          <input
-            type="number"
-            min="0"
-            step="5"
-            v-model.number="breakMinutes"
-          />
+          <input type="number" min="0" step="5" v-model.number="breakMinutes" />
         </label>
 
-        <p><strong>Hours:</strong> {{ hours.toFixed(2) }}</p>
+        <p><strong>Hours:</strong> {{ calculatedHours }} h</p>
       </div>
 
-      <!-- ================= MEETING ================= -->
-      <div v-else-if="isMeeting">
-        <p>Meeting / internal time</p>
-      </div>
-
-      <!-- ================= ABSENCE ================= -->
+      <!-- ABSENCE -->
       <div v-else-if="isAbsence">
         <p>Absence: {{ kind }}</p>
       </div>
 
-      <!-- ================= COMMENT ================= -->
       <textarea v-model="comment" placeholder="Comment" />
 
       <div class="actions">

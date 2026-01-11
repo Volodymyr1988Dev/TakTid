@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { TimeEntry } from '../types/TimeEntry.type'
-import type { TimeEntryPayload } from '../types/TimeEntryPayload.type'
+import type { TimeEntryCreatePayload } from '../types/TimeEntryCreatePayload'
+import type { TimeEntryUpdatePayload } from '../types/TimeEntryUpdatePayload.type'
 import {
   createTimeEntry,
   updateTimeEntry,
@@ -15,12 +16,12 @@ export const useTimeEntryStore = defineStore('timeEntries', () => {
     entries.value = await getTimeEntries(from, to)
   }
 
-  async function add(payload: TimeEntryPayload) {
+  async function add(payload: TimeEntryCreatePayload) {
     const { data } = await createTimeEntry(payload)
     entries.value.unshift(data)
   }
 
-  async function update(id: string, payload: Partial<TimeEntry>) {
+  async function update(id: string, payload: TimeEntryUpdatePayload) {
   const { data } = await updateTimeEntry(id, payload)
 
   const idx = entries.value.findIndex(e => e.id === id)

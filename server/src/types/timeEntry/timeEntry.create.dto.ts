@@ -20,9 +20,9 @@ export class CreateTimeEntryDto {
   @IsDateString()
   date: string;
 
-  @ApiProperty({ example: 8.5 })
-  @IsNumber()
-  hours: number;
+  //@ApiProperty({ example: 8.5 })
+  //@IsNumber()
+  //hours: number;
 
   @ApiProperty({ enum: timeKind })
   @IsEnum(timeKind)

@@ -1,7 +1,8 @@
 import api from './axios'
 import type { TimeEntry } from '../types/TimeEntry.type'
 //import type { TimeKind } from '../types/timeKind.enum'
-import type { TimeEntryPayload } from '../types/TimeEntryPayload.type'
+import type { TimeEntryCreatePayload } from '../types/TimeEntryCreatePayload'
+import type { TimeEntryUpdatePayload } from '../types/TimeEntryUpdatePayload.type'
 
 export async function getTimeEntries(
   from: string,
@@ -14,14 +15,22 @@ export async function getTimeEntries(
 }
 
 export async function createTimeEntry(
-  payload: TimeEntryPayload,
+  payload: TimeEntryCreatePayload,
 ): Promise<{ data: TimeEntry }> {
   return api.post('/time-entries', payload)
 }
 
 export async function updateTimeEntry(
   id: string,
-  payload: Partial<TimeEntryPayload>,
+  payload: TimeEntryUpdatePayload,
 ) {
   return api.patch(`/time-entries/${id}`, payload)
+}
+
+export async function getAdminMonthStats(year: number, month: number) {
+  const { data } = await api.get(
+    '/time-entries/stats/month/admin',
+    { params: { year, month } },
+  )
+  return data
 }

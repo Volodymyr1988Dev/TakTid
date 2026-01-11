@@ -8,9 +8,9 @@ import {
 import { timeKind } from '../../types/enums/enum';
 
 export class UpdateTimeEntryDto {
-  @IsOptional()
-  @IsNumber()
-  hours?: number;
+  //@IsOptional()
+  //@IsNumber()
+  //hours?: number;
 
   @IsOptional()
   @IsEnum(timeKind)

@@ -10,6 +10,7 @@ import {
   //UseGuards,
   Req,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { TimeEntryService } from '../services/TimeEntry';
@@ -19,6 +20,7 @@ import type {
   //CreateTimeEntryDto,
   //QueryTimeEntryDto,
   UpdateTimeEntryDto,
+  AdminMonthStatsQueryDto,
 } from '../types/index';
 import { CreateTimeEntryDto } from '../types/timeEntry/timeEntry.create.dto';
 //import { JwtAuthGuard } from '../types/auth/';
@@ -66,5 +68,16 @@ export class TimeEntryController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.timeService.remove(id);
+  }
+  @Get('stats/month/admin')
+  getAdminStats(
+    @Query() query: AdminMonthStatsQueryDto,
+    @Req() req: AuthRequest,
+  ) {
+    if (!req.user?.isAdmin) {
+      throw new ForbiddenException();
+    }
+
+    return this.timeService.getAdminMonthStats(query.year, query.month);
   }
 }
