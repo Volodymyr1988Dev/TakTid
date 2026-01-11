@@ -119,3 +119,4 @@ async function reloadProjects() {
     />
   </div>
 </template>
+<style scoped src="./project-list.css"></style>

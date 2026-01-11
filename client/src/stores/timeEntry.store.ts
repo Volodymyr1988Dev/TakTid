@@ -7,6 +7,7 @@ import {
   createTimeEntry,
   updateTimeEntry,
   getTimeEntries,
+  deleteTimeEntry,
 } from '../api/TimeEntry.api'
 
 export const useTimeEntryStore = defineStore('timeEntries', () => {
@@ -21,6 +22,11 @@ export const useTimeEntryStore = defineStore('timeEntries', () => {
     entries.value.unshift(data)
   }
 
+   async function remove(id: string) {
+    await deleteTimeEntry(id)
+    entries.value = entries.value.filter(e => e.id !== id)
+  }
+
   async function update(id: string, payload: TimeEntryUpdatePayload) {
   const { data } = await updateTimeEntry(id, payload)
 
@@ -30,5 +36,5 @@ export const useTimeEntryStore = defineStore('timeEntries', () => {
     }
   }
 
-  return { entries, load, add, update }
+  return { entries, load, add, update, remove }
 })

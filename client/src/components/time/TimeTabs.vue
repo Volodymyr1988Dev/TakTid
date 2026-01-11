@@ -4,115 +4,202 @@ import dayjs, { Dayjs } from 'dayjs'
 
 import WeekView from '../calendar/WeekView.vue'
 import MonthView from '../calendar/MonthView.vue'
-//import DayModal from '../calendar/DayModal.vue'
 import SegmentedTabs from '../ui/SegmentedTabs.vue'
-import FabButton from '../ui/FabButton.vue'
 import Toolbar from '../ui/ToolBar.vue'
 import RegisterTimePage from '../pages/RegisterTimePage.vue'
+import TimeFormModal from '../pages/components/TimeFormModal.vue'
+import DayEntryPage from '../pages/components/DayEntryPage.vue'
+
 import { getTimeEntries } from '../../api/TimeEntry.api'
 import type { TimeEntry } from '../../types/TimeEntry.type'
+import type { TimeSuggestion } from '../../types/Suggestion.type'
 
+/* ================= STATE ================= */
+type ViewState = 'calendar' | 'tabs' |'dayEntries' | 'modal'
+const view = ref<ViewState>('calendar')
 
 const mode = ref<'week' | 'month'>('week')
 const current = ref(dayjs())
+
 const entries = ref<TimeEntry[]>([])
-
-watch(
-  () => [mode.value, current.value],
-  async () => {
-    try{
-      const from =
-      mode.value === 'week'
-        ? current.value.startOf('week')
-        : current.value.startOf('month')
-
-    const to =
-      mode.value === 'week'
-        ? current.value.endOf('week')
-        : current.value.endOf('month')
-
-    entries.value = await getTimeEntries(
-      from.format('YYYY-MM-DD'),
-      to.format('YYYY-MM-DD'),
-    )
-    } catch (error) {
-      console.error('Failed to fetch time entries:', error);
-    }
-    
-  },
-  { immediate: true },
-)
-//const emit = defineEmits<{
-//  (e: 'select-day', day: Dayjs): void
-//}>()
-
 const selectedDay = ref<Dayjs | null>(null)
-const isModalOpen = ref(false)
 
-function openModal(day: Dayjs) {
-  selectedDay.value = day
-  isModalOpen.value = true
-}
+const selectedDayEntries = ref<TimeEntry[]>([])
+const editEntry = ref<TimeEntry | null>(null)
+const selectedSuggestion = ref<TimeSuggestion | null>(null)
+
+/* ================= FETCH ================= */
+watch([mode, current], async () => {
+  const from =
+    mode.value === 'week'
+      ? current.value.clone().startOf('week')
+      : current.value.clone().startOf('month')
+
+  const to =
+    mode.value === 'week'
+      ? current.value.clone().endOf('week')
+      : current.value.clone().endOf('month')
+
+  entries.value = await getTimeEntries(
+    from.format('YYYY-MM-DD'),
+    to.format('YYYY-MM-DD'),
+  )
+}, { immediate: true })
+
+/* ================= HELPERS ================= */
+const hoursForDay = (day: Dayjs): number =>
+  entries.value
+    .filter(e => e.date === day.format('YYYY-MM-DD'))
+    .reduce((sum, e) => sum + Number(e.hours), 0)
+
+const isWork = (e: TimeEntry) =>
+  ['WORK', 'EXTRA', 'MEETING'].includes(e.type)
+
+const weekTotal = computed(() => {
+  if (mode.value !== 'week') return 0
+  const start = current.value.startOf('week')
+  const end = current.value.endOf('week')
+
+  return entries.value
+    .filter(isWork)
+    .filter(e =>
+      dayjs(e.date).isBetween(start, end, 'day', '[]'),
+    )
+    .reduce((sum, e) => sum + Number(e.hours), 0)
+})
+
+const monthTotal = computed(() => {
+  if (mode.value !== 'month') return 0
+  return entries.value
+    .filter(isWork)
+    .reduce((sum, e) => sum + Number(e.hours), 0)
+})
+
+/* ================= ACTIONS ================= */
 function openDay(day: Dayjs) {
   selectedDay.value = day
-  isModalOpen.value = true
+  const list = entries.value.filter(
+    e => e.date === day.format('YYYY-MM-DD'),
+  )
+  if (list.length > 0) {
+    selectedDayEntries.value = list
+    view.value = 'dayEntries'
+  } else {
+    view.value = 'tabs'
+  }
+  //view.value = 'tabs'
+}
+
+function editFromList(entry: TimeEntry) {
+  editEntry.value = entry
+  selectedSuggestion.value = null
+  view.value = 'modal'
+}
+
+function selectSuggestion(s: TimeSuggestion) {
+  selectedSuggestion.value = s
+  view.value = 'modal'
+}
+
+function cancelModal() {
+  view.value = selectedDayEntries.value.length
+    ? 'dayEntries'
+    : 'tabs'
+}
+
+async function onSaved() {
+  editEntry.value = null
+  selectedSuggestion.value = null
+  view.value = 'calendar'
+
+  const from =
+    mode.value === 'week'
+      ? current.value.startOf('week')
+      : current.value.startOf('month')
+
+  const to =
+    mode.value === 'week'
+      ? current.value.endOf('week')
+      : current.value.endOf('month')
+
+  entries.value = await getTimeEntries(
+    from.format('YYYY-MM-DD'),
+    to.format('YYYY-MM-DD'),
+  )
 }
 
 function prev() {
   current.value =
     mode.value === 'week'
-      ? current.value.subtract(1, 'week')
-      : current.value.subtract(1, 'month')
+      ? current.value.clone().subtract(1, 'week')
+      : current.value.clone().subtract(1, 'month')
 }
 
 function next() {
   current.value =
     mode.value === 'week'
-      ? current.value.add(1, 'week')
-      : current.value.add(1, 'month')
+      ? current.value.clone().add(1, 'week')
+      : current.value.clone().add(1, 'month')
 }
-const hoursForDay = (day: Dayjs) =>
-  entries.value
-    .filter(e => e.date === day.format('YYYY-MM-DD'))
-    .reduce((sum, e) => sum + e.hours, 0)
-
-const title = computed(() =>
-  mode.value === 'week'
-    ? `Week ${current.value.week()} · ${current.value.format('MMM YYYY')}`
-    : current.value.format('MMMM YYYY'),
-)
-
 </script>
 
 <template>
-  <SegmentedTabs v-model="mode" />
+  <!-- CALENDAR -->
+  <template v-if="view === 'calendar'">
+    <SegmentedTabs v-model="mode" />
 
-  <Toolbar
-    :title="title"
-    @prev="prev"
-    @next="next"
+    <Toolbar
+      :title="mode === 'week'
+        ? `Week ${current.week()}`
+        : current.format('MMMM YYYY')"
+      @prev="prev"
+      @next="next"
+    />
+
+    <WeekView
+      v-if="mode === 'week'"
+      :current="current"
+      :hours-for-day="hoursForDay"
+      @select-day="openDay"
+    />
+
+    <MonthView
+      v-else
+      :current="current"
+      :hours-for-day="hoursForDay"
+      @select-day="openDay"
+    />
+
+    <div class="totals">
+      <strong v-if="mode === 'week'">Week total: {{ weekTotal }} h</strong>
+      <strong v-else>Month total: {{ monthTotal }} h</strong>
+    </div>
+  </template>
+
+  <DayEntryPage
+    v-if="view === 'dayEntries' && selectedDay"
+    :date="selectedDay.format('YYYY-MM-DD')"
+    :entries="selectedDayEntries"
+    @edit="editFromList"
+    @back="view = 'calendar'"
   />
 
-  <WeekView
-    v-if="mode === 'week'"
-    :current="current"
-    :hours-for-day="hoursForDay"
-    @select-day="openDay"
-  />
-
-  <MonthView
-    v-else
-    :current="current"
-    :hours-for-day="hoursForDay"
-    @select-day="openModal"
-  />
-
-  <FabButton @click="openDay(dayjs())" />
-
-
+  <!-- TABS -->
   <RegisterTimePage
-    v-if="isModalOpen && selectedDay"
+    v-else-if="view === 'tabs' && selectedDay"
     :day="selectedDay"
-    @close="isModalOpen = false"
+    @select-suggestion="selectSuggestion"
+    @close="view = 'calendar'"
+  />
+
+  <!-- MODAL -->
+  <TimeFormModal
+    v-else-if="view === 'modal' && selectedDay"
+    :date="selectedDay.format('YYYY-MM-DD')"
+    :preset="selectedSuggestion"
+    :entry="editEntry"
+    @cancel="cancelModal"
+    @saved="onSaved"
   />
 </template>
+//v-else-if="view === 'modal' && selectedDay && selectedSuggestion"

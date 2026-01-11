@@ -41,13 +41,14 @@ const today = dayjs()
 const isFuture = (day: Dayjs): boolean =>
   day.isAfter(today, 'day')
 
-/* ========= TOTAL ========= */
+/* ========= TOTAL ========= 
 const totalWeekHours = computed((): number =>
   days.value.reduce(
     (sum, day) => sum + props.hoursForDay(day),
     0,
   ),
 )
+*/
 </script>
 
 <template>
@@ -74,10 +75,6 @@ const totalWeekHours = computed((): number =>
       <div class="hours">
         {{ hoursForDay(day) }}h
       </div>
-    </div>
-
-    <div class="week-total">
-      {{ totalWeekHours }}h
     </div>
   </div>
 </template>

@@ -12,7 +12,10 @@ const props = defineProps<{
   entry?: TimeEntry | null
 }>()
 
-const emit = defineEmits(['close', 'saved'])
+const emit = defineEmits<{
+  (e: 'cancel'): void
+  (e: 'saved'): void
+}>()
 const store = useTimeEntryStore()
 
 /* ================= STATE ================= */
@@ -90,15 +93,25 @@ const isAbsence = computed(() =>
   kind.value === TimeKind.VAB ||
   kind.value === TimeKind.VACATION,
 )
+const isSaving = ref(false)
 
+async function remove() {
+  if (!props.entry) return
+  if (!confirm('Delete this entry?')) return
+
+  await store.remove(props.entry.id)
+  emit('saved')
+}
 /* ================= SAVE ================= */
 async function save() {
-  /* -------- ABSENCE -------- */
-  if (isAbsence.value) {
+  if (isSaving.value) return
+  isSaving.value = true
+  try{
+    if (isAbsence.value) {
     const payload = {
       date: props.date,
       type: kind.value,
-      startTime: '8:00',
+      startTime: '08:00',
       endTime: '17:00',
       breakMinutes: 60,
       comment: comment.value,
@@ -108,7 +121,7 @@ async function save() {
       ? await store.update(props.entry.id, payload)
       : await store.add(payload)
 
-    emit('close')
+    emit('saved')
     return
   }
 
@@ -132,7 +145,15 @@ async function save() {
     ? await store.update(props.entry.id, payload)
     : await store.add(payload)
 
-  emit('close')
+  emit('saved')
+  } catch{
+    alert('Something went wrong during saving')
+  }
+  finally{
+    isSaving.value = false
+  }
+  /* -------- ABSENCE -------- */
+  
 }
 </script>
 
@@ -185,8 +206,15 @@ async function save() {
       />
 
       <div class="actions">
-        <button @click="emit('close')">
+        <button @click="emit('cancel')">
           Cancel
+        </button>
+        <button 
+          v-if="isEdit"
+          class="danger" 
+          @click="remove"
+        >
+          Delete
         </button>
         <button
           class="primary"

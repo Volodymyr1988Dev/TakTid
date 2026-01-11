@@ -27,6 +27,10 @@ export async function updateTimeEntry(
   return api.patch(`/time-entries/${id}`, payload)
 }
 
+export async function deleteTimeEntry(id: string): Promise<void> {
+  await api.delete(`/time-entries/${id}`)
+}
+
 export async function getAdminMonthStats(year: number, month: number) {
   const { data } = await api.get(
     '/time-entries/stats/month/admin',

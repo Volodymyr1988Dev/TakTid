@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { AdminUserMonthStats } from '../types/AdminUserMonthStats.type'
+//import StatsRow from './StatsRow.vue'
 
-defineProps<{ stats: any }>()
+defineProps<{ stats: AdminUserMonthStats }>()
 
 const open = ref(false)
 </script>

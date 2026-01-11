@@ -67,7 +67,7 @@ async function confirmDelete(e: MouseEvent) {
 
     <!-- INFO -->
     <div class="info">
-      <strong>{{ project.city }}</strong>
+      <strong class="info-strong">{{ project.city }}</strong>
       <span>{{ project.address }}</span>
     </div>
 

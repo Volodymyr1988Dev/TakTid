@@ -8,6 +8,7 @@ import dayjs from 'dayjs'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
 import isoWeek from 'dayjs/plugin/isoWeek'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
+import isBetween from 'dayjs/plugin/isBetween'
 
 //import './style.css'
 import './styles/theme.css'
@@ -17,6 +18,7 @@ import './styles/calendar.css'
 dayjs.extend(weekOfYear)
 dayjs.extend(isoWeek)
 dayjs.extend(isSameOrAfter)
+dayjs.extend(isBetween)
 
 //createApp(App).mount('#app')
 const app = createApp(App);
@@ -27,7 +29,6 @@ app.use(pinia);
 app.use(router);
 
 /*
-навчити приймати optional поля — це нормально в типах
 
 createApp(App)
   .use(createPinia())

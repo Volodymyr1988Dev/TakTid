@@ -9,9 +9,12 @@ export const useStatsStore = defineStore('stats', {
 
   actions: {
     async loadMonth(year: number, month: number) {
-      this.users = await api.get(`/time-entries/stats/month`, {
-        params: { year, month },
-      })
+      const { data } = await api.get<AdminUserMonthStats[]>(
+        '/time-entries/stats/month/admin',
+        { params: { year, month } },
+      )
+
+      this.users = data
     },
   },
 })

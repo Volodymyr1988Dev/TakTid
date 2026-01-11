@@ -4,6 +4,8 @@ import { useAuthStore } from '../stores/auth.store'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import DashboardView from '../views/DashboardView.vue'
+import AdminStatsView from '../views/AdminStatsView.vue'
+
 
 const router = createRouter({
   history: createWebHistory(),
@@ -27,6 +29,11 @@ const router = createRouter({
       path: '/',
       redirect: '/dashboard',
     },
+    {
+      path: '/stats',
+      component: AdminStatsView,
+      meta: { requiresAdmin: true },
+    }
   ],
 })
 
@@ -35,7 +42,9 @@ router.beforeEach(async (to) => {
   if (!auth.isInitialized) {
     await auth.fetchMe()
   }
-  //if (auth.isLoading) return true
+  if (to.meta.requiresAdmin && !auth.user?.isAdmin) {
+    return '/dashboard'
+  }
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return '/login'
   }
