@@ -17,16 +17,28 @@ const emit = defineEmits<{
 
 <template>
   <div class="tabs">
-    <button :class="{ active: tab === 'suggestions' }" @click="tab = 'suggestions'">
+    <button
+      :class="{ active: tab === 'suggestions' }"
+      @click="tab = 'suggestions'"
+    >
       Suggestions
     </button>
-    <button :class="{ active: tab === 'projects' }" @click="tab = 'projects'">
+    <button
+      :class="{ active: tab === 'projects' }"
+      @click="tab = 'projects'"
+    >
       Projects
     </button>
-    <button :class="{ active: tab === 'internal' }" @click="tab = 'internal'">
+    <button
+      :class="{ active: tab === 'internal' }"
+      @click="tab = 'internal'"
+    >
       Internal
     </button>
-    <button :class="{ active: tab === 'absence' }" @click="tab = 'absence'">
+    <button
+      :class="{ active: tab === 'absence' }"
+      @click="tab = 'absence'"
+    >
       Absence
     </button>
   </div>
@@ -42,11 +54,11 @@ const emit = defineEmits<{
   />
 
   <InternalTab
-  v-if="tab === 'internal'"
-  @select="s => emit('selectSuggestion', s)"
+    v-if="tab === 'internal'"
+    @select="s => emit('selectSuggestion', s)"
   />
   <AbsenceTab
-  v-if="tab === 'absence'"
-  @select="s => emit('selectSuggestion', s)"
+    v-if="tab === 'absence'"
+    @select="s => emit('selectSuggestion', s)"
   />
 </template>

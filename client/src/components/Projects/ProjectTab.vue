@@ -25,7 +25,7 @@ const projects = ref<Project[]>([])
 /* ================= MODALS ================= */
 const createModalOpen = ref(false) // ✅ ADD
 //const galleryOpen = ref(false) // ✅ ADD
-const activeProject = ref<Project | null>(null) // ✅ ADD
+//const activeProject = ref<Project | null>(null) // ✅ ADD
 const selectedProject = ref<Project | null>(null)
 const photoModalOpen = ref(false)
 /* ================= LOAD ================= */
@@ -58,32 +58,6 @@ function onProjectCreated(project: Project) {
 //  activeProject.value = project
 //  galleryOpen.value = true
 //}
-
-async function uploadImages(files: FileList) {
-  if (!activeProject.value) return
-
-  for (const file of Array.from(files)) {
-    await api.post(
-      `/project-images/${activeProject.value.id}`,
-      { file },
-      { headers: { 'Content-Type': 'multipart/form-data' } },
-    )
-  }
-
-  // 🔄 reload project
-  const { data } = await api.get<Project>(`/projects/${activeProject.value.id}`)
-  const idx = projects.value.findIndex(p => p.id === data.id)
-  if (idx !== -1) projects.value[idx] = data
-}
-
-async function removeImage(id: string) {
-  await api.delete(`/project-images/${id}`)
-
-  if (!activeProject.value) return
-  activeProject.value.images = activeProject.value.images?.filter(
-    img => img.id !== id,
-  )
-}
 
 async function loadProjects() {
   const { data } = await api.get<Project[]>('/projects')

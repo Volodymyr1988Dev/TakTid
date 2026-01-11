@@ -17,11 +17,17 @@ function select(type: TimeKind, title: string) {
 
 <template>
   <div class="grid">
-    <div class="card" @click="select(TimeKind.MEETING, 'Meeting')">
+    <div
+      class="card"
+      @click="select(TimeKind.MEETING, 'Meeting')"
+    >
       <strong>Meeting</strong>
     </div>
 
-    <div class="card" @click="select(TimeKind.MEETING, 'Semester')">
+    <div
+      class="card"
+      @click="select(TimeKind.MEETING, 'Semester')"
+    >
       <strong>Semester</strong>
     </div>
   </div>

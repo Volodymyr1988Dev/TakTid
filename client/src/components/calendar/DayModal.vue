@@ -3,7 +3,7 @@ import { ref, watch, computed } from 'vue'
 import type { Dayjs } from 'dayjs'
 
 //import { createTimeEntry, updateTimeEntry } from '../../api/TimeEntry'
-import { createTimeEntry, updateTimeEntry } from '../../api/TimeEntry'
+import { createTimeEntry, updateTimeEntry } from '../../api/TimeEntry.api'
 import type { TimeEntry } from '../../types/TimeEntry.type'
 import { TimeKind } from '../../types/timeKind.enum'
 import { uploadPhoto } from '../../api/files'
@@ -27,7 +27,7 @@ async function onFile(e: Event) {
 // ===== state =====
 const isEdit = computed(() => !!props.entry)
 
-const hours = ref<number>(props.entry?.hours ?? 0) // ✅ FIX
+//const hours = ref<number>(props.entry?.hours ?? 0) // ✅ FIX
 const comment = ref<string>(props.entry?.comment ?? '')
 const type = ref<TimeKind>(props.entry?.type ?? TimeKind.WORK)
 const photoUrl = ref<string | null>(null)   
@@ -36,7 +36,7 @@ const photoUrl = ref<string | null>(null)
 watch(
   () => props.entry,
   e => {
-    hours.value = e?.hours ?? 0
+    //hours.value = e?.hours ?? 0
     comment.value = e?.comment ?? ''
     type.value = e?.type ?? TimeKind.WORK
   },
@@ -46,7 +46,6 @@ watch(
 async function save() {
   if (isEdit.value && props.entry) {
     await updateTimeEntry(props.entry.id, {
-      hours: hours.value,
       comment: comment.value,
       type: type.value,
       breakMinutes: props.entry.breakMinutes,
@@ -54,10 +53,9 @@ async function save() {
   } else {
     await createTimeEntry({
       date: props.day.format('YYYY-MM-DD'),
-      hours: hours.value,
       type: type.value,
       comment: comment.value,
-      photoUrl: photoUrl.value ?? undefined, // ✅ FIX
+      //photoUrl: photoUrl.value ?? undefined, // ✅ FIX
     })
   }
 
@@ -67,24 +65,48 @@ async function save() {
 </script>
 
 <template>
-  <div class="overlay" @click.self="emit('close')">
+  <div
+    class="overlay"
+    @click.self="emit('close')"
+  >
     <div class="modal">
       <h3>{{ day.format('D MMMM') }}</h3>
 
-      <input type="number" v-model="hours" min="0" />
-      <textarea v-model="comment" placeholder="Comment" />
+      <textarea
+        v-model="comment"
+        placeholder="Comment"
+      />
 
       <!-- type -->
       <select v-model="type">
-        <option :value="TimeKind.WORK">Work</option>
-        <option :value="TimeKind.EXTRA">Extra Work</option>
-        <option :value="TimeKind.SICK">Sick</option>
-        <option :value="TimeKind.VACATION">Vacation</option>
-        <option :value="TimeKind.VAB">Vab (Vård av barn)</option>
+        <option :value="TimeKind.WORK">
+          Work
+        </option>
+        <option :value="TimeKind.EXTRA">
+          Extra Work
+        </option>
+        <option :value="TimeKind.SICK">
+          Sick
+        </option>
+        <option :value="TimeKind.VACATION">
+          Vacation
+        </option>
+        <option :value="TimeKind.VAB">
+          Vab (Vård av barn)
+        </option>
       </select>
-      <input type="file" @change="onFile" />
-      <img v-if="photoUrl" :src="photoUrl" class="preview" />
-      <button @click="save">Save</button>
+      <input
+        type="file"
+        @change="onFile"
+      >
+      <img
+        v-if="photoUrl"
+        :src="photoUrl"
+        class="preview"
+      >
+      <button @click="save">
+        Save
+      </button>
     </div>
   </div>
 </template>

@@ -32,14 +32,20 @@ const totalHours = computed(() => {
 
 <template>
   <div>
-    <input type="time" v-model="form.from" />
-    <input type="time" v-model="form.to" />
+    <input
+      v-model="form.from"
+      type="time"
+    >
+    <input
+      v-model="form.to"
+      type="time"
+    >
 
     <input
-      type="number"
       v-model.number="form.breakMinutes"
+      type="number"
       placeholder="Break (minutes)"
-    />
+    >
 
     <p>Total: {{ totalHours }} h</p>
 

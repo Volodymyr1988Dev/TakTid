@@ -23,7 +23,10 @@ function removeProject(id: string) {
 
 <template>
   <div class="projects">
-    <button v-if="isAdmin" @click="showCreateModal = true">
+    <button
+      v-if="isAdmin"
+      @click="showCreateModal = true"
+    >
       + Add Project
     </button>
 

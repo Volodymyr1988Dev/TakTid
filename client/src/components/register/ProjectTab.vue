@@ -15,10 +15,10 @@ onMounted(async () => {
 <template>
   <div class="tab-content">
     <input
-      class="search"
       v-model="search"
+      class="search"
       placeholder="Search"
-    />
+    >
 
     <div
       v-for="p in projects"

@@ -8,9 +8,17 @@ const model = defineModel<
 
 <template>
   <div class="tabs">
-    <button @click="model = 'suggestions'">Suggestions</button>
-    <button @click="model = 'projects'">Projects</button>
-    <button @click="model = 'internal'">Internal</button>
-    <button @click="model = 'absence'">Absence</button>
+    <button @click="model = 'suggestions'">
+      Suggestions
+    </button>
+    <button @click="model = 'projects'">
+      Projects
+    </button>
+    <button @click="model = 'internal'">
+      Internal
+    </button>
+    <button @click="model = 'absence'">
+      Absence
+    </button>
   </div>
 </template>

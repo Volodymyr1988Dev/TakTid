@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import dayjs, { Dayjs } from 'dayjs'
+
 const emit = defineEmits<{
   (e: 'select-day', day: Dayjs): void
 }>()
@@ -10,48 +11,46 @@ const props = defineProps<{
   hoursForDay: (day: Dayjs) => number
 }>()
 
-/* ========= WEEKDAYS ========= */
 const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-/* ========= RANGE ========= */
 const start = computed(() =>
-  props.current.startOf('month').startOf('week'),
+  props.current.clone().startOf('month').startOf('week'),
 )
 
 const end = computed(() =>
-  props.current.endOf('month').endOf('week'),
+  props.current.clone().endOf('month').endOf('week'),
 )
 
-/* ========= DAYS ========= */
 const days = computed(() => {
   const result: Dayjs[] = []
-  let d = start.value
+  let d = start.value.clone()
 
   while (d.isBefore(end.value)) {
     result.push(d)
-    d = d.add(1, 'day')
+    d = d.clone().add(1, 'day')
   }
 
   return result
 })
 
-/* ========= HELPERS ========= */
 const today = dayjs()
 
-const isFuture = (day: Dayjs) =>
+const isFuture = (day: Dayjs): boolean =>
   day.isAfter(today, 'day')
 
-//const selectedDay = ref<Dayjs | null>(null)
-function selectDay(day: Dayjs) {
+function selectDay(day: Dayjs): void {
   if (isFuture(day)) return
   emit('select-day', day)
-} 
+}
 </script>
 
 <template>
   <div class="month">
     <div class="weekdays">
-      <div v-for="w in weekdays" :key="w">
+      <div
+        v-for="w in weekdays"
+        :key="w"
+      >
         {{ w }}
       </div>
     </div>
@@ -68,11 +67,16 @@ function selectDay(day: Dayjs) {
         }"
         @click="selectDay(day)"
       >
-        <span>{{ day.date() }}</span>
+        <div class="day-number">
+          {{ day.date() }}
+        </div>
 
-        <small v-if="hoursForDay(day) > 0">
-          {{ hoursForDay(day) }}h
-        </small>
+        <div
+          v-if="hoursForDay(day) > 0"
+          class="day-hours"
+        >
+          {{ hoursForDay(day) }} h
+        </div>
       </div>
     </div>
   </div>

@@ -26,32 +26,35 @@ useSwipe(el, {
 
 /* ========= DAYS ========= */
 const startOfWeek = computed(() =>
-  props.current.startOf('week'),
+  props.current.clone().startOf('week'),
 )
 
 const days = computed(() =>
   Array.from({ length: 7 }, (_, i) =>
-    startOfWeek.value.add(i, 'day'),
+    startOfWeek.value.clone().add(i, 'day'),
   ),
 )
 
 /* ========= HELPERS ========= */
 const today = dayjs()
 
-const isFuture = (day: Dayjs) =>
+const isFuture = (day: Dayjs): boolean =>
   day.isAfter(today, 'day')
 
 /* ========= TOTAL ========= */
-const totalWeekHours = computed(() =>
+const totalWeekHours = computed((): number =>
   days.value.reduce(
-    (s, d) => s + props.hoursForDay(d),
+    (sum, day) => sum + props.hoursForDay(day),
     0,
   ),
 )
 </script>
 
 <template>
-  <div ref="el" class="week-row">
+  <div
+    ref="el"
+    class="week-row"
+  >
     <div
       v-for="day in days"
       :key="day.format('YYYY-MM-DD')"
@@ -62,8 +65,12 @@ const totalWeekHours = computed(() =>
       }"
       @click="!isFuture(day) && emit('select-day', day)"
     >
-      <div class="weekday">{{ day.format('ddd') }}</div>
-      <div class="date">{{ day.format('D') }}</div>
+      <div class="weekday">
+        {{ day.format('ddd') }}
+      </div>
+      <div class="date">
+        {{ day.format('D') }}
+      </div>
       <div class="hours">
         {{ hoursForDay(day) }}h
       </div>

@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { TimeKind } from '../../../types/timeKind.enum'
 import type { TimeEntry } from '../../../types/TimeEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
-import { useTimeEntryStore } from '../../../stores/timeEntry.store2'
+import { useTimeEntryStore } from '../../../stores/timeEntry.store'
 
 /* ================= PROPS ================= */
 const props = defineProps<{
@@ -113,7 +113,7 @@ async function save() {
   }
 
   /* -------- WORK / MEETING -------- */
-  if (isWork && !projectId.value) {
+  if (isWork.value && !projectId.value) {
     alert('Project is required')
     return
   }
@@ -121,7 +121,7 @@ async function save() {
   const payload = {
     date: props.date,
     type: kind.value,
-    ...(isWork && projectId.value ? { projectId: projectId.value } : {}),
+    ...(isWork.value && projectId.value ? { projectId: projectId.value } : {}),
     startTime: start.value,
     endTime: end.value,
     breakMinutes: breakMinutes.value,
@@ -147,17 +147,28 @@ async function save() {
       <div v-if="isWork || isMeeting">
         <label>
           Start
-          <input type="time" v-model="start" />
+          <input
+            v-model="start"
+            type="time"
+          >
         </label>
 
         <label>
           End
-          <input type="time" v-model="end" />
+          <input
+            v-model="end"
+            type="time"
+          >
         </label>
 
         <label>
           Break (minutes)
-          <input type="number" min="0" step="5" v-model.number="breakMinutes" />
+          <input
+            v-model.number="breakMinutes"
+            type="number"
+            min="0"
+            step="5"
+          >
         </label>
 
         <p><strong>Hours:</strong> {{ calculatedHours }} h</p>
@@ -168,11 +179,21 @@ async function save() {
         <p>Absence: {{ kind }}</p>
       </div>
 
-      <textarea v-model="comment" placeholder="Comment" />
+      <textarea
+        v-model="comment"
+        placeholder="Comment"
+      />
 
       <div class="actions">
-        <button @click="emit('close')">Cancel</button>
-        <button class="primary" @click="save">Save</button>
+        <button @click="emit('close')">
+          Cancel
+        </button>
+        <button
+          class="primary"
+          @click="save"
+        >
+          Save
+        </button>
       </div>
     </div>
   </div>

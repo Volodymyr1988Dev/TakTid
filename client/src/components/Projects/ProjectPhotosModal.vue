@@ -36,10 +36,12 @@ async function upload() {
         type="file"
         accept="image/*"
         @change="e => file = (e.target as HTMLInputElement).files?.[0] ?? null"
-      />
+      >
 
       <div class="actions">
-        <button @click="emit('close')">Cancel</button>
+        <button @click="emit('close')">
+          Cancel
+        </button>
         <button
           class="primary"
           :disabled="!file || loading"

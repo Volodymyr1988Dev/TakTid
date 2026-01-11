@@ -29,10 +29,20 @@ async function login() {
   <div class="auth">
     <h1>Login</h1>
 
-    <input v-model="form.email" type="email" placeholder="Email" />
-    <input v-model="form.password" type="password" placeholder="Password" />
+    <input
+      v-model="form.email"
+      type="email"
+      placeholder="Email"
+    >
+    <input
+      v-model="form.password"
+      type="password"
+      placeholder="Password"
+    >
 
-    <button @click="login">Login</button>
+    <button @click="login">
+      Login
+    </button>
 
     <p>
       Немає акаунту?

@@ -11,9 +11,19 @@ const emit = defineEmits<{
 
 <template>
   <div class="toolbar">
-    <button class="nav" @click="emit('prev')">‹</button>
+    <button
+      class="nav"
+      @click="emit('prev')"
+    >
+      ‹
+    </button>
     <span class="title">{{ title }}</span>
-    <button class="nav" @click="emit('next')">›</button>
+    <button
+      class="nav"
+      @click="emit('next')"
+    >
+      ›
+    </button>
   </div>
 </template>
 

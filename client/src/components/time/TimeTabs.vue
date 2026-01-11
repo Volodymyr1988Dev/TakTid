@@ -42,9 +42,9 @@ watch(
   },
   { immediate: true },
 )
-const emit = defineEmits<{
-  (e: 'select-day', day: Dayjs): void
-}>()
+//const emit = defineEmits<{
+//  (e: 'select-day', day: Dayjs): void
+//}>()
 
 const selectedDay = ref<Dayjs | null>(null)
 const isModalOpen = ref(false)
@@ -87,7 +87,11 @@ const title = computed(() =>
 <template>
   <SegmentedTabs v-model="mode" />
 
-  <Toolbar :title="title" @prev="prev" @next="next" />
+  <Toolbar
+    :title="title"
+    @prev="prev"
+    @next="next"
+  />
 
   <WeekView
     v-if="mode === 'week'"

@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import BottomTabs from '../components/bottomTabs/BottomTabs.vue'
 import TimeTab from '../components/time/TimeTabs.vue'
 import ProjectsTab from '../components/Projects/ProjectTab.vue'
 import AppHeader from './AppHeader.vue'
+import { useAuthStore } from '../stores/auth.store'
 
-const bottomTab = ref<'time' | 'projects'>('time')
+const auth = useAuthStore()
+const isAdmin = computed(() => auth.user?.isAdmin === true)
+const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
 </script>
 
 <template>
@@ -15,7 +18,10 @@ const bottomTab = ref<'time' | 'projects'>('time')
     <TimeTab v-if="bottomTab === 'time'" />
     <ProjectsTab v-else />
 
-    <BottomTabs v-model="bottomTab" />
+    <BottomTabs
+      v-model="bottomTab"
+      :is-admin="isAdmin"
+    />
   </div>
 </template>
 <style scoped>

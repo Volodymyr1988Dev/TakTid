@@ -39,15 +39,23 @@ async function confirmDelete(e: MouseEvent) {
 </script>
 
 <template>
-  <div class="project-card" @click="emit('select', project)">
+  <div
+    class="project-card"
+    @click="emit('select', project)"
+  >
     <!-- PHOTO -->
     <div class="photo">
       <img
         v-if="firstImageUrl"
         :src="firstImageUrl"
         alt="Project photo"
-      />
-      <div v-else class="placeholder">No photo</div>
+      >
+      <div
+        v-else
+        class="placeholder"
+      >
+        No photo
+      </div>
 
       <span
         v-if="project.images && project.images.length > 1"
@@ -72,10 +80,20 @@ async function confirmDelete(e: MouseEvent) {
       ⋮
     </span>
 
-    <ul v-if="openMenu" class="menu">
+    <ul
+      v-if="openMenu"
+      class="menu"
+    >
       <li>Info</li>
-      <li class="danger" @click="confirmDelete">Delete</li>
-      <li @click.stop="emit('upload', project)">Add photo</li>
+      <li
+        class="danger"
+        @click="confirmDelete"
+      >
+        Delete
+      </li>
+      <li @click.stop="emit('upload', project)">
+        Add photo
+      </li>
     </ul>
   </div>
 </template>

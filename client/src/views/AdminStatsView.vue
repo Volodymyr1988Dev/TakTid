@@ -16,11 +16,23 @@ watch([year, month], async () => {
 <template>
   <div class="filters">
     <select v-model.number="year">
-      <option v-for="y in [2024,2025,2026]" :key="y" :value="y">{{ y }}</option>
+      <option
+        v-for="y in [2024,2025,2026]"
+        :key="y"
+        :value="y"
+      >
+        {{ y }}
+      </option>
     </select>
 
     <select v-model.number="month">
-      <option v-for="m in 12" :key="m" :value="m">{{ m }}</option>
+      <option
+        v-for="m in 12"
+        :key="m"
+        :value="m"
+      >
+        {{ m }}
+      </option>
     </select>
   </div>
 

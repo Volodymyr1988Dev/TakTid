@@ -34,11 +34,13 @@ function openEdit(entry: TimeEntry) {
 
 <template>
   <div class="register-page">
-    <header class="header">Register time</header>
+    <header class="header">
+      Register time
+    </header>
 
     <RegisterTabs
-      @selectSuggestion="openFromSuggestion"
-      @editEntry="openEdit"
+      @select-suggestion="openFromSuggestion"
+      @edit-entry="openEdit"
     />
 
     <TimeFormModal

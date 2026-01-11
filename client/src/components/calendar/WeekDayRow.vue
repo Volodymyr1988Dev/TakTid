@@ -12,10 +12,17 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="week-row" @click="$emit('select', day)">
+  <div
+    class="week-row"
+    @click="$emit('select', day)"
+  >
     <div class="date">
-      <div class="weekday">{{ day.format('ddd') }}</div>
-      <div class="day">{{ day.format('D MMM') }}</div>
+      <div class="weekday">
+        {{ day.format('ddd') }}
+      </div>
+      <div class="day">
+        {{ day.format('D MMM') }}
+      </div>
     </div>
 
     <div class="hours">
