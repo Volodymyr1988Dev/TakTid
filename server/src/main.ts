@@ -19,6 +19,9 @@ async function bootstrap() {
       'http://localhost:8000',
       'http://localhost:8001',
       'http://localhost:8080',
+      'https://tidtak-git-main-volodymyr1988devs-projects.vercel.app',
+      'http://localhost:5173',
+      'https://tidtak.vercel.app',
     ],
     credentials: true,
   });
