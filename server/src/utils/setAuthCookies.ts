@@ -9,23 +9,23 @@ export function setAuthCookies(
 ): void {
   res.cookie('access_token', tokens.accessToken, {
     httpOnly: true,
-    //secure: true,
-    secure: process.env.NODE_ENV === 'production',
-    //sameSite: 'none',
-    sameSite: 'lax',
+    secure: true,
+    //secure: process.env.NODE_ENV === 'production',
+    sameSite: 'none',
+    //sameSite: 'lax',
     path: '/',
-    maxAge: safeMs(process.env.EXPIRES_AT ?? '4h'),
+    maxAge: safeMs(process.env.EXPIRES_AT ?? '30d'),
   });
 
   if (tokens.refreshToken) {
     res.cookie('refresh_token', tokens.refreshToken, {
       httpOnly: true,
-      //secure: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
+      //secure: process.env.NODE_ENV === 'production',
       path: '/auth/refresh',
-      //sameSite: 'none',
-      sameSite: 'lax',
-      maxAge: safeMs(process.env.REFRESH_TOKEN_BEFORE_EXPIRES ?? '1h'),
+      sameSite: 'none',
+      //sameSite: 'lax',
+      maxAge: safeMs(process.env.REFRESH_TOKEN_BEFORE_EXPIRES ?? '10d'),
     });
   }
   /*
