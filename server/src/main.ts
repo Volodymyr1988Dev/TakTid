@@ -2,17 +2,18 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import { NestExpressApplication } from '@nestjs/platform-express';
 //import * as cookieParser from 'cookie-parser';
 import express from 'express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 //import * as express from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bodyParser: false });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false,
+  });
   const logger = new Logger('Bootstrap');
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  app.use(cookieParser());
-  app.use(express.json());
+  app.set('trust proxy', 1);
   app.enableCors({
     origin: [
       'http://localhost:5173',
@@ -25,6 +26,9 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  app.use(cookieParser());
+  app.use(express.json());
   const config = new DocumentBuilder()
     .setTitle('TakTid API')
     .setDescription('Time tracking system API')
