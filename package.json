@@ -1,0 +1,23 @@
+{
+  "name": "taktid",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/dist/main.js",
+    "build": "cd server && npm install && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Volodymyr1988Dev/TakTid.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Volodymyr1988Dev/TakTid/issues"
+  },
+  "homepage": "https://github.com/Volodymyr1988Dev/TakTid#readme"
+}
