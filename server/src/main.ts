@@ -14,16 +14,27 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(express.json());
   app.enableCors({
-    origin: process.env.CORS_ORIGIN?.split(',') ?? [
-      'http://localhost:5173',
-      'http://localhost:8000',
-      'http://localhost:8001',
-      'http://localhost:8080',
-      'https://tidtak-git-main-volodymyr1988devs-projects.vercel.app',
-      'http://localhost:5173',
-      'https://tidtak.vercel.app',
-    ],
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
+      const allowedOrigins: string[] = process.env.CORS_ORIGIN?.split(',') ?? [
+        'http://localhost:5173',
+        'http://localhost:8000',
+        'http://localhost:8080',
+        'https://tidtak-git-main-volodymyr1988devs-projects.vercel.app',
+        'https://tidtak.vercel.app',
+      ];
+
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
   const config = new DocumentBuilder()
     .setTitle('TakTid API')
@@ -48,7 +59,8 @@ async function bootstrap() {
   //const uploaded = await cloudinary.uploader.upload(file.path, {
   //folder: `projects/${projectId}`,
   //})
-  await app.listen(process.env.PORT ?? 8080, '0.0.0.0');
+  const port = process.env.PORT ? Number(process.env.PORT) : 8080;
+  await app.listen(port, '0.0.0.0');
   logger.log(`
     Application is running on: http://localhost:${process.env.PORT ?? 8080}`);
   logger.log(`
