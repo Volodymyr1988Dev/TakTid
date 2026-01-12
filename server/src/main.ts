@@ -14,26 +14,15 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(express.json());
   app.enableCors({
-    origin: (
-      origin: string | undefined,
-      callback: (err: Error | null, allow?: boolean) => void,
-    ) => {
-      const allowedOrigins: string[] = process.env.CORS_ORIGIN?.split(',') ?? [
-        'http://localhost:5173',
-        'http://localhost:8000',
-        'http://localhost:8080',
-        'https://tidtak-git-main-volodymyr1988devs-projects.vercel.app',
-        'https://tidtak.vercel.app',
-      ];
-
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:8000',
+      'http://localhost:8080',
+      'https://tidtak-git-main-volodymyr1988devs-projects.vercel.app',
+      'https://tidtak.vercel.app',
+    ],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
   const config = new DocumentBuilder()
