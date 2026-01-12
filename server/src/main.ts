@@ -45,10 +45,10 @@ async function bootstrap() {
   //const uploaded = await cloudinary.uploader.upload(file.path, {
   //folder: `projects/${projectId}`,
   //})
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 8080, '0.0.0.0');
   logger.log(`
-    Application is running on: http://localhost:${process.env.PORT ?? 3000}`);
+    Application is running on: http://localhost:${process.env.PORT ?? 8080}`);
   logger.log(`
-    📚 Swagger: http://localhost:${process.env.PORT ?? 3000}/api-docs`);
+    📚 Swagger: http://localhost:${process.env.PORT ?? 8080}/api-docs`);
 }
 void bootstrap();
