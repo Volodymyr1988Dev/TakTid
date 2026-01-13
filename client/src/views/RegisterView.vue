@@ -47,9 +47,9 @@ async function register() {
     </button>
 
     <p>
-      Вже маєш акаунт?
+      Already have account?
       <router-link to="/login">
-        Увійти
+        Log in
       </router-link>
     </p>
   </div>

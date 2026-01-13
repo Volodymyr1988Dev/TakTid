@@ -19,8 +19,9 @@ async function login() {
     auth.setUser(data.user)
     //router.push('/dashboard')
     router.replace('/dashboard')
-  } catch (err) {
+  } catch (e) {
     alert('Невірний email або пароль')
+    console.log(e)
   }
 }
 </script>
@@ -47,7 +48,7 @@ async function login() {
     <p>
       Немає акаунту?
       <router-link to="/register">
-        Зареєструватися
+        Register
       </router-link>
     </p>
   </div>

@@ -28,6 +28,7 @@ export class AuthController {
     @Req() req: Request & { cookies: { refresh_token?: string } },
     @Res({ passthrough: true }) res: Response,
   ) {
+    //const refreshToken = req.cookies?.refresh_token;
     const cookies = req.cookies as {
       //access_token?: string;
       refresh_token?: string;
@@ -49,7 +50,11 @@ export class AuthController {
       refreshToken: refreshed.refreshToken,
     });
 
-    return { ok: true };
+    return {
+      accessToken: refreshed.token,
+      user: refreshed.user,
+      //ok: true
+    };
   }
   @Get('me')
   //@UseGuards(AuthGuard)

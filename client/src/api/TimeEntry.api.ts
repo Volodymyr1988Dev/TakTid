@@ -9,6 +9,7 @@ export async function getTimeEntries(
   to: string,
 ): Promise<TimeEntry[]> {
   const { data } = await api.get<TimeEntry[]>('/time-entries/period', {
+    //withCredentials: true,
     params: { from, to },
   })
   return data

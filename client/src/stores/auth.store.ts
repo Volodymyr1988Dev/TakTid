@@ -5,10 +5,27 @@ import type { User } from '../types/userInterface'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
+  const accessToken = ref<string | null>(null)
   const isLoading = ref(false)
   const isInitialized = ref(false) // ✅ FIX
 
   const isAuthenticated = computed(() => !!user.value)
+
+  async function initAuth() {
+    try {
+      isLoading.value = true
+
+      const { data } = await api.post('/auth/refresh')
+      accessToken.value = data.accessToken
+      user.value = data.user
+    } catch {
+      user.value = null
+      accessToken.value = null
+    } finally {
+      isLoading.value = false
+      isInitialized.value = true
+    }
+  }
 
   async function fetchMe() {
     //if (isInitialized.value) return
@@ -28,6 +45,8 @@ export const useAuthStore = defineStore('auth', () => {
   }
   async function login(payload: { email: string, password: string }) {
     const { data } = await api.post('/auth/login', payload)
+
+    accessToken.value = data.token
     user.value = data.user
   }
   function setUser(newUser: User) {
@@ -39,15 +58,18 @@ export const useAuthStore = defineStore('auth', () => {
       await api.post('/auth/logout')
     } finally {
       user.value = null
+      accessToken.value = null
     }
   }
 
   return {
     user,
+    accessToken,
     isLoading,
     isAuthenticated,
     isInitialized, // ✅
     fetchMe,
+    initAuth,
     setUser,
     logout,
     login,
