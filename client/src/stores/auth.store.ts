@@ -11,6 +11,12 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!user.value)
 
+   function clearAuth() {
+    user.value = null
+    accessToken.value = null
+    localStorage.removeItem('access_token')
+  }
+
   async function initAuth() {
     try {
       isLoading.value = true
@@ -18,9 +24,24 @@ export const useAuthStore = defineStore('auth', () => {
       const { data } = await api.post('/auth/refresh')
       accessToken.value = data.accessToken
       user.value = data.user
+
+      localStorage.setItem('access_token', data.accessToken)
     } catch {
-      user.value = null
-      accessToken.value = null
+
+      const storedToken = localStorage.getItem('access_token')
+
+      if (storedToken) {
+        accessToken.value = storedToken
+
+        try {
+          const { data } = await api.get('/auth/me')
+          user.value = data
+        } catch {
+          clearAuth()
+        }
+      } else {
+        clearAuth()
+      }
     } finally {
       isLoading.value = false
       isInitialized.value = true
@@ -46,8 +67,13 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(payload: { email: string, password: string }) {
     const { data } = await api.post('/auth/login', payload)
 
-    accessToken.value = data.token
-    user.value = data.user
+    const refreshed = await api.post('/auth/refresh')
+
+    //accessToken.value = data.token
+    accessToken.value = refreshed.data.token
+    //user.value = data.user
+    user.value = refreshed.data.user
+    localStorage.setItem('access_token', refreshed.data.accessToken)
   }
   function setUser(newUser: User) {
     user.value = newUser
@@ -57,8 +83,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await api.post('/auth/logout')
     } finally {
-      user.value = null
-      accessToken.value = null
+      //user.value = null
+      //accessToken.value = null
+      clearAuth()
     }
   }
 
