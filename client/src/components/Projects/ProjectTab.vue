@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import api from '../../api/axios'
 import { useAuthStore } from '../../stores/auth.store'
 import ProjectCard from './ProjectCard.vue'
@@ -13,7 +13,8 @@ import type { TimeSuggestion } from '../../types/Suggestion.type'
 import { TimeKind } from '../../types/timeKind.enum'
 
 const auth = useAuthStore()
-const isAdmin = auth.user?.isAdmin === true
+//const isAdmin = auth.user?.isAdmin === true
+const isAdmin = computed(() => auth.user?.isAdmin === true)
 
 const emit = defineEmits<{
   (e: 'select', s: TimeSuggestion): void

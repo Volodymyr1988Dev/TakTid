@@ -37,6 +37,8 @@ createApp(App)
   .mount('#app');
 */
 const auth = useAuthStore(pinia)
+await auth.initAuth()
+
 //auth.fetchMe().finally(() => {
 auth.initAuth().finally(() => {
   app.mount('#app')
