@@ -64,8 +64,9 @@ export const useAuthStore = defineStore('auth', () => {
       isInitialized.value = true // ✅ FIX
     }
   }
-  async function login(payload: { email: string, password: string }) {
-    const { data } = await api.post('/auth/login', payload)
+  //async function login(payload: { email: string, password: string }) {
+  async function login() {
+    //const { data } = await api.post('/auth/login', payload)
 
     const refreshed = await api.post('/auth/refresh')
 
