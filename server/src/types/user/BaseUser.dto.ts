@@ -16,7 +16,7 @@ export class BaseUserDto {
   })
   @IsOptional()
   @MinLength(6)
-  @MaxLength(255)
+  @MaxLength(25)
   password?: string;
 
   @ApiProperty({

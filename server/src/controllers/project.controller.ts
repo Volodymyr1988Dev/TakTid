@@ -7,10 +7,13 @@ import {
   Patch,
   Post,
   UseGuards,
+  Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ProjectsService } from '../services/Project';
 import { CreateProjectDto, UpdateProjectDto } from '../types/index';
+import type { AuthRequest } from '../types/index';
 //import { AuthGuard } from '../types/auth/guard';
 import { AdminGuard } from '../types/auth/admin.guard';
 @ApiTags('Projects')
@@ -24,7 +27,10 @@ export class ProjectsController {
   }
 
   @Get()
-  findAll() {
+  findAll(@Req() req: AuthRequest) {
+    if (!req.user) {
+      throw new UnauthorizedException();
+    }
     return this.projectsService.findAll();
   }
 
