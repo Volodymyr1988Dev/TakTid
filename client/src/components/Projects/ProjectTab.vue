@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+//import { ref, onMounted, computed, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import api from '../../api/axios'
 import { useAuthStore } from '../../stores/auth.store'
 import ProjectCard from './ProjectCard.vue'
@@ -30,7 +31,16 @@ const createModalOpen = ref(false) // ✅ ADD
 const selectedProject = ref<Project | null>(null)
 const photoModalOpen = ref(false)
 /* ================= LOAD ================= */
-onMounted(loadProjects)
+//onMounted(loadProjects)
+watch(
+  () => auth.isInitialized,
+  (ready: boolean) => {
+    if (ready && auth.isAuthenticated) {
+      loadProjects()
+    }
+  },
+  { immediate: true }
+)
 /* ================= ACTIONS ================= */
 function removeProject(id: string) {
   projects.value = projects.value.filter(p => p.id !== id)
