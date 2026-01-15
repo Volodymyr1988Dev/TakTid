@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TimeEntry } from '../../../types/TimeEntry.type'
+import { TimeKind } from '../../../types/timeKind.enum';
 
 defineProps<{
   date: string
@@ -10,6 +11,18 @@ const emit = defineEmits<{
   (e: 'edit', entry: TimeEntry): void
   (e: 'back'): void
 }>()
+
+function getTitle(entry: TimeEntry) {
+  if (entry.type === TimeKind.EXTRA) return 'Extra'
+  if (
+    entry.type === TimeKind.SICK ||
+    entry.type === TimeKind.VAB ||
+    entry.type === TimeKind.VACATION
+  ) {
+    return `Absence (${entry.type})`
+  }
+  return 'Work'
+}
 </script>
 
 <template>
@@ -28,8 +41,17 @@ const emit = defineEmits<{
       @click="emit('edit', e)"
     >
       <div>
-        {{ e.startTime }} – {{ e.endTime }}
-        ({{ e.hours }}h)
+        <strong>{{ getTitle(e) }}</strong>
+      </div>
+      <div v-if="e.type === TimeKind.WORK">
+        {{ e.startTime }} – {{ e.endTime }} ({{ e.hours }}h)
+      </div>
+
+      <div v-else-if="e.type === TimeKind.EXTRA">
+        <em>Extra work</em>
+      </div>
+      <div v-else>
+        <em>Absence</em>
       </div>
       <small>{{ e.type }}</small>
     </div>

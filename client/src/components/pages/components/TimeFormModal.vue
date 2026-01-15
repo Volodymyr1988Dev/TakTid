@@ -4,6 +4,7 @@ import { TimeKind } from '../../../types/timeKind.enum'
 import type { TimeEntry } from '../../../types/TimeEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
 import { useTimeEntryStore } from '../../../stores/timeEntry.store'
+import { useProjectAssignmentStore } from '../../../stores/projectAssignment.store'
 
 /* ================= PROPS ================= */
 const props = defineProps<{
@@ -16,8 +17,9 @@ const emit = defineEmits<{
   (e: 'cancel'): void
   (e: 'saved'): void
 }>()
-const store = useTimeEntryStore()
-
+const timeStore = useTimeEntryStore()
+//const store = useTimeEntryStore()
+const assignmentStore = useProjectAssignmentStore()
 /* ================= STATE ================= */
 const start = ref('08:00')
 const end = ref('17:00')
@@ -26,6 +28,9 @@ const kind = ref<TimeKind>(TimeKind.WORK)
 const comment = ref('')
 const projectId = ref<string | null>(null)
 
+const mode = ref<'WORK' | 'EXTRA' | 'ABSENCE'>('WORK')
+const extraText = ref('')
+const extraWork = ref('')
 /* ================= PRE-FILL FROM ENTRY ================= */
 watch(
   () => props.entry,
@@ -33,15 +38,25 @@ watch(
     if (!e) return
     start.value = e.startTime ?? '08:00'
     end.value = e.endTime ?? '17:00'
-    breakMinutes.value = e.breakMinutes ?? 0
+    breakMinutes.value = e.breakMinutes ?? 30
     kind.value = e.type
     comment.value = e.comment ?? ''
     projectId.value = e.projectId ?? null
+    if (
+      e.type === TimeKind.SICK ||
+      e.type === TimeKind.VAB ||
+      e.type === TimeKind.VACATION
+    ) {
+      mode.value = 'ABSENCE'
+    } else {
+      mode.value = 'WORK'
+    }
   },
   { immediate: true },
 )
 
-/* ================= PRE-FILL FROM PRESET ================= */
+/* ================= PRE-FILL FROM PRESET ================= 
+
 watch(
   () => props.preset,
   p => {
@@ -52,7 +67,7 @@ watch(
   },
   { immediate: true },
 )
-
+*/
 /* ================= HELPERS ================= */
 function toMinutes(t: string): number {
   const parts = t.split(':')
@@ -81,12 +96,13 @@ const calculatedHours = computed(() => {
   const worked = endMin - startMin - breakMinutes.value
   if (worked <= 0) return '0.00'
 
-  return (worked / 60).toFixed(2)
+  //return (worked / 60).toFixed(2)
+  return worked > 0 ? (worked / 60).toFixed(2) : '0.00'
 })
 
 const isEdit = computed(() => !!props.entry)
 const isWork = computed(() => kind.value === TimeKind.WORK)
-const isMeeting = computed(() => kind.value === TimeKind.MEETING)
+//const isMeeting = computed(() => kind.value === TimeKind.MEETING)
 
 const isAbsence = computed(() =>
   kind.value === TimeKind.SICK ||
@@ -99,7 +115,7 @@ async function remove() {
   if (!props.entry) return
   if (!confirm('Delete this entry?')) return
 
-  await store.remove(props.entry.id)
+  await timeStore.remove(props.entry.id)
   emit('saved')
 }
 /* ================= SAVE ================= */
@@ -118,33 +134,51 @@ async function save() {
     }
 
     props.entry
-      ? await store.update(props.entry.id, payload)
-      : await store.add(payload)
+      ? await timeStore.update(props.entry.id, payload)
+      : await timeStore.add(payload)
 
     emit('saved')
     return
   }
-
+  if (!projectId.value) {
+      alert('Project is required')
+      return
+    }
   /* -------- WORK / MEETING -------- */
   if (isWork.value && !projectId.value) {
     alert('Project is required')
     return
   }
 
-  const payload = {
-    date: props.date,
-    type: kind.value,
-    ...(isWork.value && projectId.value ? { projectId: projectId.value } : {}),
-    startTime: start.value,
-    endTime: end.value,
-    breakMinutes: breakMinutes.value,
-    comment: comment.value,
-  }
+  //const extraWork = ref('')
+  if (mode.value === 'WORK') {
+    const payload = {
+      date: props.date,
+      type: kind.value,
+      //...(isWork.value && projectId.value ? { projectId: projectId.value } : {}),
+      projectId: projectId.value!,
+      startTime: start.value,
+      endTime: end.value,
+      breakMinutes: breakMinutes.value,
+      comment: comment.value,
+      extraWork: extraWork.value || null,
+    }
 
   props.entry
-    ? await store.update(props.entry.id, payload)
-    : await store.add(payload)
-
+    ? await timeStore.update(props.entry.id, payload)
+    : await timeStore.add(payload)
+  }
+  if (mode.value === 'EXTRA') {
+    if (!projectId.value || !extraText.value.trim()) {
+        alert('Project and text required')
+        return
+      }
+      await assignmentStore.create({
+        projectId: projectId.value,
+        date: props.date,
+        text: extraWork.value,
+      })
+    }
   emit('saved')
   } catch{
     alert('Something went wrong during saving')
@@ -160,12 +194,28 @@ async function save() {
 <template>
   <div class="modal-backdrop">
     <div class="modal">
+      <header class="modal-header">
+        <button 
+          class="back-btn" 
+          @click="emit('cancel')"
+        >
+          ← Back
+        </button>
+      </header>
       <h3>{{ isEdit ? 'Edit time' : 'Register time' }}</h3>
 
       <p><strong>Date:</strong> {{ date }}</p>
 
       <!-- WORK / MEETING -->
-      <div v-if="isWork || isMeeting">
+      <label>
+        Mode
+        <select v-model="mode">
+          <option value="WORK">Work</option>
+          <option value="EXTRA">Extra work</option>
+          <option value="ABSENCE">Absence</option>
+        </select>
+      </label>
+      <div v-if="mode === 'WORK'">
         <label>
           Start
           <input
@@ -173,7 +223,6 @@ async function save() {
             type="time"
           >
         </label>
-
         <label>
           End
           <input
@@ -191,8 +240,14 @@ async function save() {
             step="5"
           >
         </label>
-
         <p><strong>Hours:</strong> {{ calculatedHours }} h</p>
+      </div>
+      <div v-else-if="mode === 'EXTRA'">
+        <textarea
+          v-model="extraText"
+          placeholder="Describe extra work"
+          class="extra-work"
+        />
       </div>
 
       <!-- ABSENCE -->
@@ -206,9 +261,6 @@ async function save() {
       />
 
       <div class="actions">
-        <button @click="emit('cancel')">
-          Cancel
-        </button>
         <button 
           v-if="isEdit"
           class="danger" 
@@ -226,3 +278,24 @@ async function save() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.modal-header {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  color: #374151;
+}
+
+.extra-work {
+  margin-top: 8px;
+  min-height: 60px;
+}
+</style>
