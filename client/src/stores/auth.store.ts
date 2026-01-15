@@ -22,24 +22,27 @@ export const useAuthStore = defineStore('auth', () => {
       isLoading.value = true
 
       const { data } = await api.post('/auth/refresh')
-      accessToken.value = data.accessToken
+
       user.value = data.user
+      accessToken.value = data.accessToken
 
-      localStorage.setItem('access_token', data.accessToken)
+      if (data.accessToken) {
+        localStorage.setItem('access_token', data.accessToken)
+      }
     } catch {
-
       const storedToken = localStorage.getItem('access_token')
 
-      if (storedToken) {
-        accessToken.value = storedToken
+      if (!storedToken) {
+        clearAuth()
+        return
+      }
 
-        try {
-          const { data } = await api.get('/auth/me')
-          user.value = data
-        } catch {
-          clearAuth()
-        }
-      } else {
+      accessToken.value = storedToken
+
+      try {
+        const { data } = await api.get('/auth/me')
+        user.value = data
+      } catch {
         clearAuth()
       }
     } finally {
@@ -58,7 +61,8 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = data
       console.log(data,'data from fetchMe');
     } catch {
-      user.value = null
+      //user.value = null
+      clearAuth()
     } finally {
       isLoading.value = false
       isInitialized.value = true // ✅ FIX
@@ -69,13 +73,14 @@ export const useAuthStore = defineStore('auth', () => {
     const { data } = await api.post('/auth/login', payload)
 
     //const refreshed = await api.post('/auth/refresh')
-
+    user.value = data.user
     //accessToken.value = data.token
     accessToken.value = data.token
     //user.value = data.user
-    user.value = data.user
-    localStorage.setItem('access_token', data.accessToken)
-    console.log('access_token:', localStorage.getItem(data.accessToken))
+    if (data.accessToken) {
+      localStorage.setItem('access_token', data.accessToken)
+      console.log('access_token:', localStorage.getItem(data.accessToken))
+    }
   }
   function setUser(newUser: User) {
     user.value = newUser
