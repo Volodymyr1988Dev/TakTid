@@ -14,11 +14,11 @@ const props = defineProps<{
 const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const start = computed(() =>
-  props.current.clone().startOf('month').startOf('week'),
+  props.current.clone().startOf('month').startOf('isoWeek'),
 )
 
 const end = computed(() =>
-  props.current.clone().endOf('month').endOf('week'),
+  props.current.clone().endOf('month').endOf('isoWeek'),
 )
 
 const days = computed(() => {

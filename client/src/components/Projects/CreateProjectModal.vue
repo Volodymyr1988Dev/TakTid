@@ -23,6 +23,9 @@ async function submit() {
 
 <template>
   <div class="modal">
+    <button @click="$emit('close')">
+      ← Back
+    </button>
     <input
       v-model="city"
       placeholder="City"
@@ -33,9 +36,6 @@ async function submit() {
     >
     <button @click="submit">
       Create
-    </button>
-    <button @click="$emit('close')">
-      Cancel
     </button>
   </div>
 </template>

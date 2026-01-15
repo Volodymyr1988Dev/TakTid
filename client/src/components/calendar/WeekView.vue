@@ -26,7 +26,7 @@ useSwipe(el, {
 
 /* ========= DAYS ========= */
 const startOfWeek = computed(() =>
-  props.current.clone().startOf('week'),
+  props.current.clone().startOf('isoWeek'),
 )
 
 const days = computed(() =>

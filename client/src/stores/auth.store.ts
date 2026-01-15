@@ -75,6 +75,7 @@ export const useAuthStore = defineStore('auth', () => {
     //user.value = data.user
     user.value = data.user
     localStorage.setItem('access_token', data.accessToken)
+    console.log('access_token:', localStorage.getItem(data.accessToken))
   }
   function setUser(newUser: User) {
     user.value = newUser
