@@ -28,9 +28,9 @@ const kind = ref<TimeKind>(TimeKind.WORK)
 const comment = ref('')
 const projectId = ref<string | null>(null)
 
-const mode = ref<'WORK' | 'EXTRA' | 'ABSENCE'>('WORK')
+const mode = ref<'WORK' | 'EXTRA'>('WORK')
 const extraText = ref('')
-const extraWork = ref('')
+//const extraWork = ref('')
 /* ================= PRE-FILL FROM ENTRY ================= */
 watch(
   () => props.entry,
@@ -42,20 +42,12 @@ watch(
     kind.value = e.type
     comment.value = e.comment ?? ''
     projectId.value = e.projectId ?? null
-    if (
-      e.type === TimeKind.SICK ||
-      e.type === TimeKind.VAB ||
-      e.type === TimeKind.VACATION
-    ) {
-      mode.value = 'ABSENCE'
-    } else {
-      mode.value = 'WORK'
-    }
+    mode.value = e.type === TimeKind.EXTRA ? 'EXTRA' : 'WORK'
   },
   { immediate: true },
 )
 
-/* ================= PRE-FILL FROM PRESET ================= 
+/* ================= PRE-FILL FROM PRESET =================*/ 
 
 watch(
   () => props.preset,
@@ -64,10 +56,13 @@ watch(
     kind.value = p.type
     breakMinutes.value = p.breakMinutes ?? 60
     projectId.value = p.projectId ?? null
+    //if (!isAbsence.value) {
+    //  mode.value = p.type === TimeKind.EXTRA ? 'EXTRA' : 'WORK'
+    //}
   },
   { immediate: true },
 )
-*/
+
 /* ================= HELPERS ================= */
 function toMinutes(t: string): number {
   const parts = t.split(':')
@@ -101,7 +96,7 @@ const calculatedHours = computed(() => {
 })
 
 const isEdit = computed(() => !!props.entry)
-const isWork = computed(() => kind.value === TimeKind.WORK)
+//const isWork = computed(() => kind.value === TimeKind.WORK)
 //const isMeeting = computed(() => kind.value === TimeKind.MEETING)
 
 const isAbsence = computed(() =>
@@ -140,28 +135,22 @@ async function save() {
     emit('saved')
     return
   }
+  /* -------- WORK / MEETING -------- */
   if (!projectId.value) {
       alert('Project is required')
       return
     }
-  /* -------- WORK / MEETING -------- */
-  if (isWork.value && !projectId.value) {
-    alert('Project is required')
-    return
-  }
 
   //const extraWork = ref('')
   if (mode.value === 'WORK') {
-    const payload = {
+    const payload ={
       date: props.date,
       type: kind.value,
-      //...(isWork.value && projectId.value ? { projectId: projectId.value } : {}),
-      projectId: projectId.value!,
+      projectId: projectId.value,
       startTime: start.value,
       endTime: end.value,
       breakMinutes: breakMinutes.value,
       comment: comment.value,
-      extraWork: extraWork.value || null,
     }
 
   props.entry
@@ -169,14 +158,15 @@ async function save() {
     : await timeStore.add(payload)
   }
   if (mode.value === 'EXTRA') {
-    if (!projectId.value || !extraText.value.trim()) {
-        alert('Project and text required')
+      if (!extraText.value.trim()) {
+        alert('Extra work description required')
         return
       }
+
       await assignmentStore.create({
         projectId: projectId.value,
         date: props.date,
-        text: extraWork.value,
+        text: extraText.value,
       })
     }
   emit('saved')
@@ -207,53 +197,45 @@ async function save() {
       <p><strong>Date:</strong> {{ date }}</p>
 
       <!-- WORK / MEETING -->
-      <label>
-        Mode
+      <!-- MODE -->
+      <div v-if="!isAbsence">
         <select v-model="mode">
-          <option value="WORK">Work</option>
-          <option value="EXTRA">Extra work</option>
-          <option value="ABSENCE">Absence</option>
+          <option value="WORK">
+            Work
+          </option>
+          <option value="EXTRA">
+            Extra work
+          </option>
         </select>
-      </label>
-      <div v-if="mode === 'WORK'">
-        <label>
-          Start
-          <input
-            v-model="start"
-            type="time"
-          >
-        </label>
-        <label>
-          End
-          <input
-            v-model="end"
-            type="time"
-          >
-        </label>
+      </div>
+      <!-- WORK / EXTRA -->
+      <div v-if="!isAbsence">
+        <input 
+          v-model="start" 
+          type="time"
+        >
+        <input 
+          v-model="end" 
+          type="time" 
+        >
+        <input 
+          v-model.number="breakMinutes"
+          type="number" 
+        >
+        <p>{{ calculatedHours }} h</p>
+      </div>
 
-        <label>
-          Break (minutes)
-          <input
-            v-model.number="breakMinutes"
-            type="number"
-            min="0"
-            step="5"
-          >
-        </label>
-        <p><strong>Hours:</strong> {{ calculatedHours }} h</p>
-      </div>
-      <div v-else-if="mode === 'EXTRA'">
-        <textarea
-          v-model="extraText"
-          placeholder="Describe extra work"
-          class="extra-work"
-        />
-      </div>
+      <!-- EXTRA -->
+      <textarea
+        v-if="mode === 'EXTRA'"
+        v-model="extraText"
+        placeholder="Describe extra work"
+      />
 
       <!-- ABSENCE -->
-      <div v-else-if="isAbsence">
-        <p>Absence: {{ kind }}</p>
-      </div>
+      <p v-if="isAbsence">
+        Absence: {{ kind }}
+      </p>
 
       <textarea
         v-model="comment"
