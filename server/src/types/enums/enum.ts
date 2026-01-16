@@ -3,6 +3,6 @@ export enum timeKind {
   SICK = 'SICK',
   VAB = 'VAB',
   VACATION = 'VACATION',
-  EXTRA = 'EXTRA',
+  //EXTRA = 'EXTRA',
   MEETING = 'MEETING',
 }

@@ -21,5 +21,5 @@ export class ProjectAssignment {
     example: 'Installed additional sensors',
   })
   @Column({ type: 'text', nullable: true })
-  extraWork: string;
+  comment: string;
 }

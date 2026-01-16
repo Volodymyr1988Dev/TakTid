@@ -5,7 +5,7 @@ export const useProjectAssignmentStore = defineStore('projectAssignment', () => 
   async function create(payload: {
     projectId: string
     date: string
-    //text: string
+    comment?: string
   }) {
     await api.createExtraWork(payload)
   }

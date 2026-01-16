@@ -29,7 +29,7 @@ const comment = ref('')
 const projectId = ref<string | null>(null)
 
 const mode = ref<'WORK' | 'EXTRA'>('WORK')
-const extraText = ref('')
+//const extraText = ref('')
 //const extraWork = ref('')
 /* ================= PRE-FILL FROM ENTRY ================= */
 watch(
@@ -42,7 +42,7 @@ watch(
     kind.value = e.type
     comment.value = e.comment ?? ''
     projectId.value = e.projectId ?? null
-    mode.value = e.type === TimeKind.EXTRA ? 'EXTRA' : 'WORK'
+    mode.value = 'WORK'
   },
   { immediate: true },
 )
@@ -158,14 +158,10 @@ async function save() {
     : await timeStore.add(payload)
   }
   if (mode.value === 'EXTRA') {
-      if (!extraText.value.trim()) {
-        alert('Extra work description required')
-        return
-      }
-
       await assignmentStore.create({
         projectId: projectId.value,
         date: props.date,
+        comment: comment.value,
         //text: extraText.value,
       })
     }

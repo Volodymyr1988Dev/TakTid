@@ -32,7 +32,7 @@ export class ProjectAssignmentService {
     const assignment = this.assignmentRepo.create({
       user,
       project,
-      extraWork: dto.extraWork,
+      comment: dto.comment,
     });
 
     return this.assignmentRepo.save(assignment);
@@ -51,12 +51,12 @@ export class ProjectAssignmentService {
 
   async updateExtraWork(
     id: string,
-    extraWork: string,
+    comment: string,
   ): Promise<ProjectAssignment> {
     const assignment = await this.assignmentRepo.findOne({ where: { id } });
     if (!assignment) throw new NotFoundException('Assignment not found');
 
-    assignment.extraWork = extraWork;
+    assignment.comment = comment;
     return this.assignmentRepo.save(assignment);
   }
 

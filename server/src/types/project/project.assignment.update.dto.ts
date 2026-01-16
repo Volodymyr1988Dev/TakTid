@@ -5,5 +5,5 @@ export class UpdateProjectAssignmentDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  extraWork: string;
+  comment?: string;
 }

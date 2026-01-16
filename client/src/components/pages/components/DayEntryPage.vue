@@ -13,7 +13,7 @@ const emit = defineEmits<{
 }>()
 
 function getTitle(entry: TimeEntry) {
-  if (entry.type === TimeKind.EXTRA) return 'Extra'
+  //if (entry.type === TimeKind.EXTRA) return 'Extra'
   if (
     entry.type === TimeKind.SICK ||
     entry.type === TimeKind.VAB ||
@@ -47,7 +47,7 @@ function getTitle(entry: TimeEntry) {
         {{ e.startTime }} – {{ e.endTime }} ({{ e.hours }}h)
       </div>
 
-      <div v-else-if="e.type === TimeKind.EXTRA">
+      <div v-else-if="e.type === 'EXTRA'">
         <em>Extra work</em>
       </div>
       <div v-else>

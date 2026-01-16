@@ -12,5 +12,5 @@ export class CreateProjectAssignmentDto {
 
   @ApiProperty({ required: false })
   @IsString()
-  extraWork: string;
+  comment?: string;
 }
