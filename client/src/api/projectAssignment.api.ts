@@ -3,7 +3,7 @@ import api from './axios'
 export function createExtraWork(payload: {
   projectId: string
   date: string
-  text: string
+  //text: string
 }) {
   return api.post('/project-assignments', payload)
 }

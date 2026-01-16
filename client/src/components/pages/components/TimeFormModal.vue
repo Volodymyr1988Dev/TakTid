@@ -166,7 +166,7 @@ async function save() {
       await assignmentStore.create({
         projectId: projectId.value,
         date: props.date,
-        text: extraText.value,
+        //text: extraText.value,
       })
     }
   emit('saved')
@@ -225,12 +225,12 @@ async function save() {
         <p>{{ calculatedHours }} h</p>
       </div>
 
-      <!-- EXTRA -->
+      <!-- EXTRA 
       <textarea
         v-if="mode === 'EXTRA'"
         v-model="extraText"
         placeholder="Describe extra work"
-      />
+      /> -->
 
       <!-- ABSENCE -->
       <p v-if="isAbsence">
