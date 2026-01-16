@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
    function clearAuth() {
     user.value = null
     accessToken.value = null
-    localStorage.removeItem('access_token')
+    //localStorage.removeItem('access_token')
   }
 
   async function initAuth() {
@@ -26,18 +26,18 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = data.user
       accessToken.value = data.accessToken
 
-      if (data.accessToken) {
-        localStorage.setItem('access_token', data.accessToken)
-      }
+      //if (data.accessToken) {
+      //  localStorage.setItem('access_token', data.accessToken)
+      //}
     } catch {
-      const storedToken = localStorage.getItem('access_token')
+      //const storedToken = localStorage.getItem('access_token')
 
-      if (!storedToken) {
-        clearAuth()
-        return
-      }
+      //if (!storedToken) {
+      //  clearAuth()
+      //  return
+      //}
 
-      accessToken.value = storedToken
+      //accessToken.value = storedToken
 
       try {
         const { data } = await api.get('/auth/me')
@@ -77,10 +77,10 @@ export const useAuthStore = defineStore('auth', () => {
     //accessToken.value = data.token
     accessToken.value = data.token
     //user.value = data.user
-    if (data.accessToken) {
-      localStorage.setItem('access_token', data.accessToken)
-      console.log('access_token:', localStorage.getItem(data.accessToken))
-    }
+    //if (data.accessToken) {
+    //  localStorage.setItem('access_token', data.accessToken)
+    //  console.log('access_token:', localStorage.getItem(data.accessToken))
+    //}
   }
   function setUser(newUser: User) {
     user.value = newUser

@@ -1,11 +1,11 @@
 import axios from 'axios';
-import { useAuthStore } from '../stores/auth.store';
+//import { useAuthStore } from '../stores/auth.store';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 });
-
+/*
 api.interceptors.request.use((config) => {
   const authStore = useAuthStore()
 
@@ -24,5 +24,5 @@ api.interceptors.request.use((config) => {
 
   return config
 })
-
+*/
 export default api;

@@ -32,25 +32,25 @@ export class AuthGuard implements CanActivate {
       access_token?: string;
       //refresh_token?: string;
     };
-    const token =
-      cookies?.access_token ||
-      request.headers.authorization?.replace('Bearer ', '');
+    //const token =
+    //  cookies?.access_token ||
+    //  request.headers.authorization?.replace('Bearer ', '');
     //const { access_token, refresh_token } = request.cookies ?? {};
     //const cookies = request.cookies as | { access_token?: string; refresh_token?: string }  | undefined;
 
     //const token = cookies?.access_token;
     //const refreshToken = cookies?.refresh_token;
 
-    //if (!cookies?.access_token) {
-    //  throw new UnauthorizedException('No access token');
-    //}
-    if (!token) {
-      throw new UnauthorizedException('No token provided');
+    if (!cookies?.access_token) {
+      throw new UnauthorizedException('No access token');
     }
-    const result = await this.sessionService.validateToken(token);
-    //const result = await this.sessionService.validateToken(
-    //  cookies.access_token,
-    //);
+    //if (!token) {
+    //  throw new UnauthorizedException('No token provided');
+    //}
+    //const result = await this.sessionService.validateToken(token);
+    const result = await this.sessionService.validateToken(
+      cookies.access_token,
+    );
     if (!result) {
       //if (!refreshToken)
       //if (!cookies.refresh_token)
