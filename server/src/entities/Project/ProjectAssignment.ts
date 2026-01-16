@@ -22,4 +22,31 @@ export class ProjectAssignment {
   })
   @Column({ type: 'text', nullable: true })
   comment: string;
+
+  @ApiProperty({
+    description: 'Number of hours logged',
+    example: 8.5,
+  })
+  @Column({ type: 'decimal', precision: 5, scale: 2 })
+  hours: number;
+
+  @ApiProperty({
+    description: 'Number of break minutes taken',
+    example: 30,
+  })
+  @Column({ type: 'int', default: 0 })
+  breakMinutes: number;
+
+  @ApiProperty({
+    description: 'Start time of the assignment',
+    example: '08:00',
+  })
+  @Column({ type: 'time', nullable: true })
+  startTime: string;
+  @ApiProperty({
+    description: 'End time of the assignment',
+    example: '16:30',
+  })
+  @Column({ type: 'time', nullable: true })
+  endTime: string;
 }

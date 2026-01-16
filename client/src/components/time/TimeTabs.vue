@@ -11,8 +11,11 @@ import TimeFormModal from '../pages/components/TimeFormModal.vue'
 import DayEntryPage from '../pages/components/DayEntryPage.vue'
 
 import { getTimeEntries } from '../../api/TimeEntry.api'
-import type { TimeEntry } from '../../types/TimeEntry.type'
+//import type { TimeEntry } from '../../types/TimeEntry.type'
 import type { TimeSuggestion } from '../../types/Suggestion.type'
+import type { DayEntry } from '../../types/DayEntry.type'
+import { getProjectAssignments } from '../../api/projectAssignment.api'
+import type { ProjectAssignment } from '../../types/ProjectAssignment.type'
 
 /* ================= STATE ================= */
 type ViewState = 'calendar' | 'tabs' |'dayEntries' | 'modal'
@@ -21,11 +24,14 @@ const view = ref<ViewState>('calendar')
 const mode = ref<'week' | 'month'>('week')
 const current = ref(dayjs())
 
-const entries = ref<TimeEntry[]>([])
+const entries = ref<DayEntry[]>([])
+const selectedDayEntries = ref<DayEntry[]>([])
+const editEntry = ref<DayEntry | null>(null)
+//const entries = ref<TimeEntry[]>([])
 const selectedDay = ref<Dayjs | null>(null)
 
-const selectedDayEntries = ref<TimeEntry[]>([])
-const editEntry = ref<TimeEntry | null>(null)
+//const selectedDayEntries = ref<TimeEntry[]>([])
+//const editEntry = ref<TimeEntry | null>(null)
 const selectedSuggestion = ref<TimeSuggestion | null>(null)
 
 /* ================= FETCH ================= */
@@ -40,10 +46,35 @@ watch([mode, current], async () => {
       ? current.value.clone().endOf('week')
       : current.value.clone().endOf('month')
 
-  entries.value = await getTimeEntries(
+  const timeEntries = await getTimeEntries(
     from.format('YYYY-MM-DD'),
     to.format('YYYY-MM-DD'),
   )
+   const assignments = await getProjectAssignments(
+    from.format('YYYY-MM-DD'),
+    to.format('YYYY-MM-DD'),
+  )
+  entries.value = [
+    ...timeEntries.map(e => ({
+      ...e,
+      kind: 'WORK' as const,
+    })),
+    ...assignments.map((a : ProjectAssignment) => ({
+      kind: 'EXTRA' as const,
+      id: a.id,
+      date: a.date,
+      hours: a.hours,
+      projectId: a.project.id,
+      comment: a.extraWork,
+      startTime: a.startTime,
+      endTime: a.endTime,
+      breakMinutes: a.breakMinutes,
+    })),
+  ] 
+  //entries.value = await getTimeEntries(
+  //  from.format('YYYY-MM-DD'),
+  //  to.format('YYYY-MM-DD'),
+  //)
 }, { immediate: true })
 
 /* ================= HELPERS ================= */
@@ -52,8 +83,10 @@ const hoursForDay = (day: Dayjs): number =>
     .filter(e => e.date === day.format('YYYY-MM-DD'))
     .reduce((sum, e) => sum + Number(e.hours), 0)
 
-const isWork = (e: TimeEntry) =>
-  ['WORK', 'EXTRA', 'MEETING'].includes(e.type)
+//const isWork = (e: TimeEntry) =>
+//  ['WORK', 'EXTRA', 'MEETING'].includes(e.type)
+const isWork = (e: DayEntry) =>
+  e.kind === 'WORK' || e.kind === 'EXTRA'
 
 const weekTotal = computed(() => {
   if (mode.value !== 'week') return 0
@@ -78,7 +111,14 @@ const monthTotal = computed(() => {
 /* ================= ACTIONS ================= */
 function openDay(day: Dayjs) {
   selectedDay.value = day
-  const list = entries.value.filter(
+  selectedDayEntries.value = entries.value.filter(
+    e => e.date === day.format('YYYY-MM-DD'),
+  )
+  view.value = selectedDayEntries.value.length
+    ? 'dayEntries'
+    : 'tabs'
+    /*
+    const list = entries.value.filter(
     e => e.date === day.format('YYYY-MM-DD'),
   )
   if (list.length > 0) {
@@ -88,9 +128,11 @@ function openDay(day: Dayjs) {
     view.value = 'tabs'
   }
   //view.value = 'tabs'
+  */
 }
 
-function editFromList(entry: TimeEntry) {
+//function editFromList(entry: TimeEntry) {
+function editFromList(entry: DayEntry) {
   editEntry.value = entry
   selectedSuggestion.value = null
   view.value = 'modal'
@@ -122,10 +164,34 @@ async function onSaved() {
       ? current.value.endOf('week')
       : current.value.endOf('month')
 
-  entries.value = await getTimeEntries(
+  //entries.value = await getTimeEntries(
+  //  from.format('YYYY-MM-DD'),
+  //  to.format('YYYY-MM-DD'),
+  //)
+  const timeEntries = await getTimeEntries(
     from.format('YYYY-MM-DD'),
     to.format('YYYY-MM-DD'),
   )
+
+  const assignments = await getProjectAssignments(
+    from.format('YYYY-MM-DD'),
+    to.format('YYYY-MM-DD'),
+  )
+
+  entries.value = [
+    ...timeEntries.map(e => ({ ...e, kind: 'WORK' as const })),
+    ...assignments.map((a : ProjectAssignment) => ({
+      kind: 'EXTRA' as const,
+      id: a.id,
+      date: a.date,
+      hours: a.hours,
+      projectId: a.project.id,
+      comment: a.extraWork,
+      startTime: a.startTime,
+      endTime: a.endTime,
+      breakMinutes: a.breakMinutes,
+    })),
+  ]
 }
 
 function prev() {

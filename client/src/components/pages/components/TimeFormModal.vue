@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { TimeKind } from '../../../types/timeKind.enum'
-import type { TimeEntry } from '../../../types/TimeEntry.type'
+//import type { TimeEntry } from '../../../types/TimeEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
 import { useTimeEntryStore } from '../../../stores/timeEntry.store'
 import { useProjectAssignmentStore } from '../../../stores/projectAssignment.store'
+import type { DayEntry } from '../../../types/DayEntry.type'
 
 /* ================= PROPS ================= */
 const props = defineProps<{
   date: string
   preset?: TimeSuggestion | null
-  entry?: TimeEntry | null
+  //entry?: TimeEntry | null
+  entry?: DayEntry  | null
 }>()
 
 const emit = defineEmits<{
@@ -36,13 +38,22 @@ watch(
   () => props.entry,
   e => {
     if (!e) return
-    start.value = e.startTime ?? '08:00'
-    end.value = e.endTime ?? '17:00'
-    breakMinutes.value = e.breakMinutes ?? 30
-    kind.value = e.type
-    comment.value = e.comment ?? ''
-    projectId.value = e.projectId ?? null
-    mode.value = 'WORK'
+    if (e.kind === 'WORK') {
+      mode.value = 'WORK'
+      kind.value = e.type
+      start.value = e.startTime
+      end.value = e.endTime
+      breakMinutes.value = e.breakMinutes
+      projectId.value = e.projectId ?? null
+      comment.value = e.comment ?? ''
+    } else {
+      mode.value = 'EXTRA'
+      start.value = e.startTime ?? '08:00'
+      end.value = e.endTime ?? '17:00'
+      breakMinutes.value = e.breakMinutes ?? 60
+      projectId.value = e.projectId
+      comment.value = e.comment ?? ''
+    }
   },
   { immediate: true },
 )
@@ -105,65 +116,79 @@ const isAbsence = computed(() =>
   kind.value === TimeKind.VACATION,
 )
 const isSaving = ref(false)
+const isExtra = computed(() => mode.value === 'EXTRA')
 
 async function remove() {
   if (!props.entry) return
   if (!confirm('Delete this entry?')) return
-
-  await timeStore.remove(props.entry.id)
+  props.entry.kind === 'EXTRA'
+    ? await assignmentStore.remove(props.entry.id)
+    : await timeStore.remove(props.entry.id)
+  //if (props.entry.kind === 'EXTRA') {
+  //  await assignmentStore.remove(props.entry.id)
+  //} else {
+  //  await timeStore.remove(props.entry.id)
+  //}
   emit('saved')
 }
 /* ================= SAVE ================= */
 async function save() {
   if (isSaving.value) return
   isSaving.value = true
-  try{
+  try {
     if (isAbsence.value) {
-    const payload = {
-      date: props.date,
-      type: kind.value,
-      startTime: '08:00',
-      endTime: '17:00',
-      breakMinutes: 60,
-      comment: comment.value,
+      const payload = {
+        date: props.date,
+        type: kind.value,
+        startTime: '08:00',
+        endTime: '17:00',
+        breakMinutes: 60,
+        comment: comment.value,
+      }
+
+      props.entry?.kind === 'WORK'
+        ? await timeStore.update(props.entry.id, payload)
+        : await timeStore.add(payload)
+
+      emit('saved')
+      return
     }
 
-    props.entry
-      ? await timeStore.update(props.entry.id, payload)
-      : await timeStore.add(payload)
-
-    emit('saved')
-    return
-  }
-  /* -------- WORK / MEETING -------- */
-  if (!projectId.value) {
+    if (!projectId.value) {
       alert('Project is required')
       return
     }
 
-  //const extraWork = ref('')
-  if (mode.value === 'WORK') {
-    const payload ={
-      date: props.date,
-      type: kind.value,
-      projectId: projectId.value,
-      startTime: start.value,
-      endTime: end.value,
-      breakMinutes: breakMinutes.value,
-      comment: comment.value,
-    }
-
-  props.entry
-    ? await timeStore.update(props.entry.id, payload)
-    : await timeStore.add(payload)
-  }
-  if (mode.value === 'EXTRA') {
-      await assignmentStore.create({
-        projectId: projectId.value,
+    if (isExtra.value) {
+      props.entry?.kind === 'EXTRA'
+        ? await assignmentStore.update(props.entry.id, {
+            comment: comment.value,
+            startTime: start.value,
+            endTime: end.value,
+            breakMinutes: breakMinutes.value,
+          })
+        : await assignmentStore.create({
+            projectId: projectId.value,
+            date: props.date,
+            comment: comment.value,
+            startTime: start.value,
+            endTime: end.value,
+            breakMinutes: breakMinutes.value,
+          })
+    } else {
+      const payload = {
         date: props.date,
+        type: kind.value,
+        projectId: projectId.value,
+        startTime: start.value,
+        endTime: end.value,
+        breakMinutes: breakMinutes.value,
         comment: comment.value,
-        //text: extraText.value,
-      })
+      }
+
+      props.entry?.kind === 'WORK'
+        ? await timeStore.update(props.entry.id, payload)
+        : await timeStore.add(payload)
     }
   emit('saved')
   } catch{

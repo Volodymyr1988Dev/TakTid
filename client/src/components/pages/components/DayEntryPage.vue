@@ -1,19 +1,23 @@
 <script setup lang="ts">
-import type { TimeEntry } from '../../../types/TimeEntry.type'
+import type { DayEntry } from '../../../types/DayEntry.type';
+//import type { TimeEntry } from '../../../types/TimeEntry.type'
 import { TimeKind } from '../../../types/timeKind.enum';
 
 defineProps<{
   date: string
-  entries: TimeEntry[]
+  //entries: TimeEntry[]
+  entries: DayEntry[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'edit', entry: TimeEntry): void
+  //(e: 'edit', entry: TimeEntry): void
+  (e: 'edit', entry: DayEntry): void
   (e: 'back'): void
 }>()
 
-function getTitle(entry: TimeEntry) {
-  //if (entry.type === TimeKind.EXTRA) return 'Extra'
+//function getTitle(entry: TimeEntry) {
+function getTitle(entry: DayEntry) {
+  if (entry.kind === 'EXTRA') return 'Extra work'
   if (
     entry.type === TimeKind.SICK ||
     entry.type === TimeKind.VAB ||
@@ -43,17 +47,7 @@ function getTitle(entry: TimeEntry) {
       <div>
         <strong>{{ getTitle(e) }}</strong>
       </div>
-      <div v-if="e.type === TimeKind.WORK">
-        {{ e.startTime }} – {{ e.endTime }} ({{ e.hours }}h)
-      </div>
-
-      <div v-else-if="e.type === 'EXTRA'">
-        <em>Extra work</em>
-      </div>
-      <div v-else>
-        <em>Absence</em>
-      </div>
-      <small>{{ e.type }}</small>
+      <small>{{ e.comment }}</small>
     </div>
   </div>
 </template>

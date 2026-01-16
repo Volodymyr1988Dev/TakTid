@@ -20,19 +20,30 @@ export class ProjectAssignmentService {
     private readonly projectRepo: Repository<Projects>,
   ) {}
 
-  async create(dto: CreateProjectAssignmentDto): Promise<ProjectAssignment> {
-    const user = await this.userRepo.findOne({ where: { id: dto.userId } });
-    if (!user) throw new NotFoundException('User not found');
+  async create(
+    dto: CreateProjectAssignmentDto,
+    user: User,
+  ): Promise<ProjectAssignment> {
+    //const user = await this.userRepo.findOne({ where: { id: dto.userId } });
+    //if (!user) throw new NotFoundException('User not found');
 
     const project = await this.projectRepo.findOne({
       where: { id: dto.projectId },
     });
     if (!project) throw new NotFoundException('Project not found');
-
+    const hours = this.calculateHours(
+      dto.startTime,
+      dto.endTime,
+      dto.breakMinutes,
+    );
     const assignment = this.assignmentRepo.create({
       user,
       project,
       comment: dto.comment,
+      startTime: dto.startTime,
+      endTime: dto.endTime,
+      breakMinutes: dto.breakMinutes,
+      hours,
     });
 
     return this.assignmentRepo.save(assignment);
@@ -72,5 +83,24 @@ export class ProjectAssignmentService {
     if (result.affected === 0) {
       throw new NotFoundException('Assignment not found');
     }
+  }
+
+  private calculateHours(
+    startTime: string,
+    endTime: string,
+    breakMinutes: number,
+  ): number {
+    const [sh, sm] = startTime.split(':').map(Number);
+    const [eh, em] = endTime.split(':').map(Number);
+
+    const start = sh * 60 + sm;
+    let end = eh * 60 + em;
+
+    if (end <= start) {
+      end += 24 * 60;
+    }
+
+    const workedMinutes = end - start - breakMinutes;
+    return workedMinutes > 0 ? Number((workedMinutes / 60).toFixed(2)) : 0;
   }
 }

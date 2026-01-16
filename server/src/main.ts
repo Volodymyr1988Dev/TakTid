@@ -24,8 +24,8 @@ async function bootstrap() {
       'https://tak-tid.vercel.app',
     ],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    //methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    //allowedHeaders: ['Content-Type', 'Authorization'],
   });
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   app.use(cookieParser());

@@ -169,9 +169,6 @@ export class TimeEntryService {
         case timeKind.WORK:
           stats.workHours += e.hours;
           break;
-        case timeKind.EXTRA:
-          stats.extraHours += e.hours;
-          break;
         case timeKind.MEETING:
           stats.meetingHours += e.hours;
           break;

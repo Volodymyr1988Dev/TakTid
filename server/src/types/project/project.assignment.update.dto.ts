@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsInt } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateProjectAssignmentDto {
@@ -6,4 +6,13 @@ export class UpdateProjectAssignmentDto {
   @IsString()
   @IsOptional()
   comment?: string;
+
+  @IsString()
+  startTime: string;
+
+  @IsString()
+  endTime: string;
+
+  @IsInt()
+  breakMinutes: number;
 }

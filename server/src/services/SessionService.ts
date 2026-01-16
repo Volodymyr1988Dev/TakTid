@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import 'dotenv/config';
@@ -70,11 +70,14 @@ export class SessionService {
 
       return { user: session.user };
       //return { user: this.toAuthUser(session.user) };
-    } catch (e: unknown) {
+    } /*catch (e: unknown) {
       if (e instanceof Error) {
         throw new Error(`Invalid or expired token: ${e.message}`);
       }
       return null;
+    }
+      */ catch {
+      throw new UnauthorizedException('Invalid or expired token');
     }
   }
 

@@ -1,10 +1,10 @@
-import { IsString, IsUUID } from 'class-validator';
+import { IsString, IsUUID, IsInt } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProjectAssignmentDto {
-  @ApiProperty({ format: 'uuid' })
-  @IsUUID()
-  userId: string;
+  //@ApiProperty({ format: 'uuid' })
+  //@IsUUID()
+  //userId: string;
 
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
@@ -13,4 +13,13 @@ export class CreateProjectAssignmentDto {
   @ApiProperty({ required: false })
   @IsString()
   comment?: string;
+
+  @IsString()
+  startTime: string;
+
+  @IsString()
+  endTime: string;
+
+  @IsInt()
+  breakMinutes: number;
 }

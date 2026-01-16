@@ -6,12 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ProjectAssignmentService } from '../services/ProjectAssignment';
 import { CreateProjectAssignmentDto } from '../types/project/project.assignment.create.dto';
 import { UpdateProjectAssignmentDto } from '../types/project/project.assignment.update.dto';
 import { UseGuards } from '@nestjs/common';
+import type { AuthRequest } from '../types/index';
 //import { AuthGuard } from '../types/auth/guard';
 import { AdminGuard } from '../types/auth/admin.guard';
 
@@ -22,8 +24,11 @@ export class ProjectAssignmentController {
   constructor(private readonly assignmentService: ProjectAssignmentService) {}
   @UseGuards(AdminGuard)
   @Post()
-  create(@Body() dto: CreateProjectAssignmentDto) {
-    return this.assignmentService.create(dto);
+  create(@Body() dto: CreateProjectAssignmentDto, @Req() req: AuthRequest) {
+    if (!req.user) {
+      throw new Error('Unauthorized');
+    }
+    return this.assignmentService.create(dto, req.user);
   }
 
   @Patch(':id')
