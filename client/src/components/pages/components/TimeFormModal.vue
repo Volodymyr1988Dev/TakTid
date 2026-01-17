@@ -134,9 +134,14 @@ const isExtra = computed(() => mode.value === 'EXTRA')
 async function remove() {
   if (!props.entry) return
   if (!confirm('Delete this entry?')) return
-  props.entry.kind === 'EXTRA'
-    ? await assignmentStore.remove(props.entry.id)
-    : await timeStore.remove(props.entry.id)
+  if (isExtraEntry(props.entry)) {
+    await assignmentStore.remove(props.entry.id)
+  } else if (isWorkEntry(props.entry)) {
+    await timeStore.remove(props.entry.id)
+  }
+  //props.entry.kind === 'EXTRA'
+  //  ? await assignmentStore.remove(props.entry.id)
+  //  : await timeStore.remove(props.entry.id)
   //if (props.entry.kind === 'EXTRA') {
   //  await assignmentStore.remove(props.entry.id)
   //} else {

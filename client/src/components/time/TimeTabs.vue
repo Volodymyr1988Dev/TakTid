@@ -226,7 +226,7 @@ function next() {
 function addWork() {
   editEntry.value = null
   selectedSuggestion.value = null
-  view.value = 'modal'
+  view.value = 'tabs'
 }
 </script>
 
