@@ -8,11 +8,11 @@ export class UpdateProjectAssignmentDto {
   comment?: string;
 
   @IsString()
-  startTime: string;
+  startTime?: string;
 
   @IsString()
-  endTime: string;
+  endTime?: string;
 
   @IsInt()
-  breakMinutes: number;
+  breakMinutes?: number;
 }

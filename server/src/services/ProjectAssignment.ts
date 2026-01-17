@@ -40,6 +40,7 @@ export class ProjectAssignmentService {
     const assignment = this.assignmentRepo.create({
       user,
       project,
+      date: dto.date,
       comment: dto.comment,
       startTime: dto.startTime,
       endTime: dto.endTime,
@@ -57,7 +58,13 @@ export class ProjectAssignmentService {
     const assignment = await this.assignmentRepo.findOne({ where: { id } });
     if (!assignment) throw new NotFoundException('Assignment not found');
 
+    const start = dto.startTime ?? assignment.startTime;
+    const end = dto.endTime ?? assignment.endTime;
+    const breakMinutes = dto.breakMinutes ?? assignment.breakMinutes;
+
+    assignment.hours = this.calculateHours(start, end, breakMinutes);
     Object.assign(assignment, dto);
+
     return this.assignmentRepo.save(assignment);
   }
 

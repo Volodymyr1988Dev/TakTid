@@ -1,4 +1,4 @@
-import { IsString, IsUUID, IsInt } from 'class-validator';
+import { IsString, IsUUID, IsInt, IsDateString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProjectAssignmentDto {
@@ -14,12 +14,19 @@ export class CreateProjectAssignmentDto {
   @IsString()
   comment?: string;
 
+  @ApiProperty({ example: '09:00' })
   @IsString()
   startTime: string;
 
+  @ApiProperty({ example: '17:30' })
   @IsString()
   endTime: string;
 
+  @ApiProperty({ example: 30 })
   @IsInt()
   breakMinutes: number;
+
+  @ApiProperty({ example: '2025-01-15' })
+  @IsDateString()
+  date: string;
 }

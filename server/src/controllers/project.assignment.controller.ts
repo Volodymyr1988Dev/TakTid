@@ -14,6 +14,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { ProjectAssignmentService } from '../services/ProjectAssignment';
 import { CreateProjectAssignmentDto } from '../types/project/project.assignment.create.dto';
 import { UpdateProjectAssignmentDto } from '../types/project/project.assignment.update.dto';
+import { QueryProjectAssignmentDto } from '../types/project/project.assignments.query.dto';
 import { UseGuards } from '@nestjs/common';
 import type { AuthRequest } from '../types/index';
 //import { AuthGuard } from '../types/auth/guard';
@@ -39,15 +40,18 @@ export class ProjectAssignmentController {
   }
   @Get()
   findByPeriod(
-    @Query('from') from: string,
-    @Query('to') to: string,
+    @Query() query: QueryProjectAssignmentDto,
     @Req() req: AuthRequest,
   ) {
     if (!req.user) {
       throw new UnauthorizedException();
     }
 
-    return this.assignmentService.findByPeriod(req.user.id, from, to);
+    return this.assignmentService.findByPeriod(
+      req.user.id,
+      query.from,
+      query.to,
+    );
   }
   @Get('project/:projectId')
   findByProject(@Param('projectId') projectId: string) {
