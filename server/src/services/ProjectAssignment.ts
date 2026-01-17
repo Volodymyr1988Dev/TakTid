@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ProjectAssignment } from '../entities/Project/ProjectAssignment';
 import { User } from '../entities/User/User';
 import { Projects } from '../entities/Project/Project';
+import { Between } from 'typeorm';
 import {
   UpdateProjectAssignmentDto,
   CreateProjectAssignmentDto,
@@ -84,7 +85,18 @@ export class ProjectAssignmentService {
       throw new NotFoundException('Assignment not found');
     }
   }
-
+  async findByPeriod(userId: string, from: string, to: string) {
+    return this.assignmentRepo.find({
+      where: {
+        user: { id: userId },
+        date: Between(from, to),
+      },
+      relations: ['project'],
+      order: {
+        date: 'ASC',
+      },
+    });
+  }
   private calculateHours(
     startTime: string,
     endTime: string,

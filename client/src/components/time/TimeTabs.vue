@@ -50,10 +50,16 @@ watch([mode, current], async () => {
     from.format('YYYY-MM-DD'),
     to.format('YYYY-MM-DD'),
   )
-   const assignments = await getProjectAssignments(
-    from.format('YYYY-MM-DD'),
-    to.format('YYYY-MM-DD'),
-  )
+  
+    let assignments = []
+   try {
+    assignments = await getProjectAssignments(
+      from.format('YYYY-MM-DD'),
+      to.format('YYYY-MM-DD'),
+    )
+    } catch (e) {
+      console.warn('Assignments not loaded', e)
+    }
   entries.value = [
     ...timeEntries.map(e => ({
       ...e,
@@ -65,7 +71,8 @@ watch([mode, current], async () => {
       date: a.date,
       hours: a.hours,
       projectId: a.project.id,
-      comment: a.extraWork,
+      //comment: a.extraWork,
+      comment: a.comment,
       startTime: a.startTime,
       endTime: a.endTime,
       breakMinutes: a.breakMinutes,
@@ -172,11 +179,19 @@ async function onSaved() {
     from.format('YYYY-MM-DD'),
     to.format('YYYY-MM-DD'),
   )
-
-  const assignments = await getProjectAssignments(
-    from.format('YYYY-MM-DD'),
-    to.format('YYYY-MM-DD'),
-  )
+  let assignments = []
+  try {
+    assignments = await getProjectAssignments(
+      from.format('YYYY-MM-DD'),
+      to.format('YYYY-MM-DD'),
+    )
+    } catch (e) {
+      console.warn('Assignments not loaded', e)
+    }
+  //const assignments = await getProjectAssignments(
+  //  from.format('YYYY-MM-DD'),
+  //  to.format('YYYY-MM-DD'),
+  //)
 
   entries.value = [
     ...timeEntries.map(e => ({ ...e, kind: 'WORK' as const })),
@@ -186,7 +201,7 @@ async function onSaved() {
       date: a.date,
       hours: a.hours,
       projectId: a.project.id,
-      comment: a.extraWork,
+      comment: a.comment,
       startTime: a.startTime,
       endTime: a.endTime,
       breakMinutes: a.breakMinutes,

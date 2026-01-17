@@ -2,7 +2,7 @@ export interface ProjectAssignment {
   id: string
   date: string
   hours: number
-  extraWork?: string | null
+  comment?: string | null
   startTime?: string | null
   endTime?: string | null
   breakMinutes?: number | null

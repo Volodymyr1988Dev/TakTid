@@ -43,10 +43,18 @@ export class ProjectAssignment {
   })
   @Column({ type: 'time', nullable: true })
   startTime: string;
+
   @ApiProperty({
     description: 'End time of the assignment',
     example: '16:30',
   })
   @Column({ type: 'time', nullable: true })
   endTime: string;
+
+  @ApiProperty({
+    description: 'Date of the time entry',
+    example: '2025-01-15',
+  })
+  @Column({ type: 'date' })
+  date: string;
 }

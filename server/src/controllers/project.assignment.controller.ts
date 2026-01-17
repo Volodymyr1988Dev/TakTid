@@ -7,6 +7,8 @@ import {
   Patch,
   Post,
   Req,
+  Query,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ProjectAssignmentService } from '../services/ProjectAssignment';
@@ -35,7 +37,18 @@ export class ProjectAssignmentController {
   update(@Param('id') id: string, @Body() dto: UpdateProjectAssignmentDto) {
     return this.assignmentService.update(id, dto);
   }
+  @Get()
+  findByPeriod(
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @Req() req: AuthRequest,
+  ) {
+    if (!req.user) {
+      throw new UnauthorizedException();
+    }
 
+    return this.assignmentService.findByPeriod(req.user.id, from, to);
+  }
   @Get('project/:projectId')
   findByProject(@Param('projectId') projectId: string) {
     return this.assignmentService.findByProject(projectId);
