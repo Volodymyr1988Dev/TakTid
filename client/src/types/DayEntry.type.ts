@@ -1,6 +1,7 @@
 import type { TimeEntry } from './TimeEntry.type'
 import type { TimeKind } from './timeKind.enum'
-
+import type { Project } from './Project.dto'
+/*
 export type DayEntry =
   | ({
       kind: 'WORK'
@@ -17,3 +18,48 @@ export type DayEntry =
       endTime?: string
       breakMinutes?: number
     }
+      */
+  export type DayEntry =
+  | WorkDayEntry
+  | ExtraDayEntry
+  | AbsenceDayEntry
+
+interface BaseDayEntry {
+  id: string
+  date: string
+  hours: number
+  kind: 'WORK' | 'EXTRA' | 'ABSENCE'
+  /**
+   * UI-only joined project
+   */
+  project?: Project
+}
+
+/**
+ * WORK = regular TimeEntry
+ */
+export interface WorkDayEntry extends BaseDayEntry, TimeEntry {
+  kind: 'WORK'
+  type: TimeKind
+  projectId?: string
+}
+
+/**
+ * EXTRA = ProjectAssignment
+ */
+export interface ExtraDayEntry extends BaseDayEntry {
+  kind: 'EXTRA'
+  projectId: string
+  comment?: string
+  startTime?: string
+  endTime?: string
+  breakMinutes?: number
+}
+
+/**
+ * ABSENCE = vacation / sick / vab
+ */
+export interface AbsenceDayEntry extends BaseDayEntry {
+  kind: 'ABSENCE'
+  type: TimeKind
+}

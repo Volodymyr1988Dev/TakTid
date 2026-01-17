@@ -222,6 +222,12 @@ function next() {
       ? current.value.clone().add(1, 'week')
       : current.value.clone().add(1, 'month')
 }
+
+function addWork() {
+  editEntry.value = null
+  selectedSuggestion.value = null
+  view.value = 'modal'
+}
 </script>
 
 <template>
@@ -262,6 +268,7 @@ function next() {
     :date="selectedDay.format('YYYY-MM-DD')"
     :entries="selectedDayEntries"
     @edit="editFromList"
+    @add="addWork"
     @back="view = 'calendar'"
   />
 

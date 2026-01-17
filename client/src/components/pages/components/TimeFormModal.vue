@@ -5,7 +5,7 @@ import { TimeKind } from '../../../types/timeKind.enum'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
 import { useTimeEntryStore } from '../../../stores/timeEntry.store'
 import { useProjectAssignmentStore } from '../../../stores/projectAssignment.store'
-import type { DayEntry } from '../../../types/DayEntry.type'
+import type { DayEntry,  WorkDayEntry, ExtraDayEntry, } from '../../../types/DayEntry.type'
 
 /* ================= PROPS ================= */
 const props = defineProps<{
@@ -38,7 +38,8 @@ watch(
   () => props.entry,
   e => {
     if (!e) return
-    if (e.kind === 'WORK') {
+    //if (e.kind === 'WORK') {
+    if (isWorkEntry(e)) {
       mode.value = 'WORK'
       kind.value = e.type
       start.value = e.startTime
@@ -46,13 +47,17 @@ watch(
       breakMinutes.value = e.breakMinutes
       projectId.value = e.projectId ?? null
       comment.value = e.comment ?? ''
-    } else {
+    } //else {
+    if (isExtraEntry(e)) {
       mode.value = 'EXTRA'
       start.value = e.startTime ?? '08:00'
       end.value = e.endTime ?? '17:00'
       breakMinutes.value = e.breakMinutes ?? 60
       projectId.value = e.projectId
       comment.value = e.comment ?? ''
+    }
+    else {
+      console.warn('Unknown entry kind', e)
     }
   },
   { immediate: true },
@@ -75,6 +80,14 @@ watch(
 )
 
 /* ================= HELPERS ================= */
+function isWorkEntry(e: DayEntry): e is WorkDayEntry {
+  return e.kind === 'WORK'
+}
+
+function isExtraEntry(e: DayEntry): e is ExtraDayEntry {
+  return e.kind === 'EXTRA'
+}
+
 function toMinutes(t: string): number {
   const parts = t.split(':')
   if (parts.length !== 2) return 0

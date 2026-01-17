@@ -13,6 +13,7 @@ const emit = defineEmits<{
   //(e: 'edit', entry: TimeEntry): void
   (e: 'edit', entry: DayEntry): void
   (e: 'back'): void
+  (e: 'add'): void
 }>()
 
 //function getTitle(entry: TimeEntry) {
@@ -27,6 +28,17 @@ function getTitle(entry: DayEntry) {
   }
   return 'Work'
 }
+
+function getProjectSubtitle(e: DayEntry) {
+  if (!e.project) return ''
+
+  const city = e.project.city
+  const address = e.project.address
+
+  return address
+    ? `${city}, ${address.split(',')[0]}`
+    : city
+}
 </script>
 
 <template>
@@ -34,6 +46,9 @@ function getTitle(entry: DayEntry) {
     <header>
       <button @click="emit('back')">
         ← Back
+      </button>
+      <button @click="emit('add')">
+        + Add work
       </button>
       <strong>{{ date }}</strong>
     </header>
@@ -47,7 +62,9 @@ function getTitle(entry: DayEntry) {
       <div>
         <strong>{{ getTitle(e) }}</strong>
       </div>
-      <small>{{ e.comment }}</small>
+      <small v-if="e.kind === 'WORK' || e.kind === 'EXTRA'">
+        {{ getProjectSubtitle(e) }}
+      </small>
     </div>
   </div>
 </template>
