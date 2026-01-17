@@ -24,12 +24,13 @@ export const useAuthStore = defineStore('auth', () => {
       const { data } = await api.post('/auth/refresh')
 
       user.value = data.user
-      accessToken.value = data.accessToken
+      //accessToken.value = data.accessToken
 
       //if (data.accessToken) {
       //  localStorage.setItem('access_token', data.accessToken)
       //}
     } catch {
+      
       //const storedToken = localStorage.getItem('access_token')
 
       //if (!storedToken) {
@@ -70,12 +71,13 @@ export const useAuthStore = defineStore('auth', () => {
   }
   async function login(payload: { email: string, password: string }) {
   //async function login() {
-    const { data } = await api.post('/auth/login', payload)
+    await api.post('/auth/login', payload)
+    //const { data } = await api.post('/auth/login', payload)
 
     //const refreshed = await api.post('/auth/refresh')
-    user.value = data.user
+    //user.value = data.user
     //accessToken.value = data.token
-    accessToken.value = data.token
+    //accessToken.value = data.token
     //user.value = data.user
     //if (data.accessToken) {
     //  localStorage.setItem('access_token', data.accessToken)

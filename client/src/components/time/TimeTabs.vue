@@ -16,6 +16,7 @@ import type { TimeSuggestion } from '../../types/Suggestion.type'
 import type { DayEntry } from '../../types/DayEntry.type'
 import { getProjectAssignments } from '../../api/projectAssignment.api'
 import type { ProjectAssignment } from '../../types/ProjectAssignment.type'
+import { TimeKind } from '../../types/timeKind.enum'
 
 /* ================= STATE ================= */
 type ViewState = 'calendar' | 'tabs' |'dayEntries' | 'modal'
@@ -225,7 +226,9 @@ function next() {
 
 function addWork() {
   editEntry.value = null
-  selectedSuggestion.value = null
+  selectedSuggestion.value = {
+    type: TimeKind.WORK,
+  } as TimeSuggestion
   view.value = 'tabs'
 }
 </script>

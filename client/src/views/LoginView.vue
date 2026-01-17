@@ -18,7 +18,8 @@ async function login() {
     //const { data } = await api.post('/auth/login', form)
     //auth.setUser(data.user)
     //router.push('/dashboard')
-    auth.login(form)
+    await auth.login(form)
+    await auth.initAuth()
     router.replace('/dashboard')
   } catch (e) {
     alert('Невірний email або пароль')
