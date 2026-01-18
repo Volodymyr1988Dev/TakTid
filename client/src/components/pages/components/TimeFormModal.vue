@@ -44,7 +44,7 @@ watch(
       kind.value = e.type
       start.value = e.startTime
       end.value = e.endTime
-      breakMinutes.value = e.breakMinutes
+      breakMinutes.value = e.breakMinutes ?? 0
       projectId.value = e.projectId ?? null
       comment.value = e.comment ?? ''
     } //else {
@@ -131,6 +131,11 @@ const isAbsence = computed(() =>
 const isSaving = ref(false)
 const isExtra = computed(() => mode.value === 'EXTRA')
 
+const normalizedBreakMinutes = computed(() => {
+  const value = Number(breakMinutes.value)
+  return Number.isFinite(value) && value >= 0 ? value : 0
+})
+
 async function remove() {
   if (!props.entry) return
   if (!confirm('Delete this entry?')) return
@@ -183,7 +188,7 @@ async function save() {
             comment: comment.value,
             startTime: start.value,
             endTime: end.value,
-            breakMinutes: breakMinutes.value,
+            breakMinutes: normalizedBreakMinutes.value,
           })
         : await assignmentStore.create({
             projectId: projectId.value,
@@ -191,7 +196,7 @@ async function save() {
             comment: comment.value,
             startTime: start.value,
             endTime: end.value,
-            breakMinutes: breakMinutes.value,
+            breakMinutes: normalizedBreakMinutes.value,
           })
     } else {
       const payload = {
@@ -200,7 +205,7 @@ async function save() {
         projectId: projectId.value,
         startTime: start.value,
         endTime: end.value,
-        breakMinutes: breakMinutes.value,
+        breakMinutes: normalizedBreakMinutes.value,
         comment: comment.value,
       }
 
