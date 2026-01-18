@@ -18,40 +18,15 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function initAuth() {
-    try {
-      isLoading.value = true
-
-      //const { data } = await api.post('/auth/refresh')
-      //const { data } = await api.post('/auth/me')
-      const { data } = await api.get('/auth/me')
-      user.value = data
-      //accessToken.value = data.accessToken
-
-      //if (data.accessToken) {
-      //  localStorage.setItem('access_token', data.accessToken)
-      //}
-    } catch {
-
-      //const storedToken = localStorage.getItem('access_token')
-
-      //if (!storedToken) {
-      //  clearAuth()
-      //  return
-      //}
-
-      //accessToken.value = storedToken
-
-      try {
-        const { data } = await api.get('/auth/me')
-        user.value = data
-      } catch {
-        clearAuth()
-      }
-    } finally {
-      isLoading.value = false
-      isInitialized.value = true
-    }
+  try {
+    const { data } = await api.get('/auth/me')
+    user.value = data
+  } catch {
+    clearAuth()
+  } finally {
+    isInitialized.value = true
   }
+}
 
   async function fetchMe() {
     //if (isInitialized.value) return

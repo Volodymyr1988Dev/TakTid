@@ -87,8 +87,8 @@ async function loadEntries() {
 /* ================= FETCH ================= */
 watch(
   ()=>[ auth.isAuthenticated, mode.value, current.value],
-  async ([isAuth]) => {
-    if (!isAuth) {
+  async ([isInitialized, isAuth]) => {
+    if (!isInitialized || !isAuth) {
       console.error('User not authenticated, skipping time entries load')
       return
     }

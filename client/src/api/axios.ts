@@ -6,32 +6,43 @@ const api = axios.create({
   withCredentials: true,
 });
 
+let isRefreshing = false
+//let refreshPromise: Promise<void> | null = null
+let refreshPromise: Promise<unknown> | null = null
+
 api.interceptors.response.use(
   res => res,
   async error => {
-    const originalRequest = error.config;
+    const originalRequest = error.config
 
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
       !originalRequest.url.includes('/auth/refresh')
     ) {
-      originalRequest._retry = true;
+      originalRequest._retry = true
+
+      if (!isRefreshing) {
+        isRefreshing = true
+        refreshPromise = api
+          .post('/auth/refresh')
+          .finally(() => {
+            isRefreshing = false
+            refreshPromise = null
+          })
+      }
 
       try {
-        await api.post('/auth/refresh', {}, { withCredentials: true });
-
-        await new Promise(r => setTimeout(r, 50));
-
-        return api(originalRequest);
+        await refreshPromise
+        return api(originalRequest)
       } catch {
-        useAuthStore().clearAuth();
+        useAuthStore().clearAuth()
       }
     }
 
-    return Promise.reject(error);
+    return Promise.reject(error)
   }
-);
+)
 
 /*
 api.interceptors.request.use((config) => {

@@ -19,7 +19,8 @@ async function login() {
     //auth.setUser(data.user)
     //router.push('/dashboard')
     await auth.login(form)
-    await auth.initAuth()
+    //await auth.fetchMe()
+    //await auth.initAuth()
     router.replace('/dashboard')
   } catch (e) {
     alert('Невірний email або пароль')
