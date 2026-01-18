@@ -18,18 +18,19 @@ import { getProjectAssignments } from '../../api/projectAssignment.api'
 import type { ProjectAssignment } from '../../types/ProjectAssignment.type'
 import { TimeKind } from '../../types/timeKind.enum'
 import { useAuthStore } from '../../stores/auth.store'
+import { useProjectStore } from '../../stores/project.store'
 
 /* ================= STATE ================= */
 type ViewState = 'calendar' | 'tabs' |'dayEntries' | 'modal'
 const view = ref<ViewState>('calendar')
 
+const projectStore = useProjectStore()
 const mode = ref<'week' | 'month'>('week')
 const current = ref(dayjs())
 
 const entries = ref<DayEntry[]>([])
 const selectedDayEntries = ref<DayEntry[]>([])
 const editEntry = ref<DayEntry | null>(null)
-//const entries = ref<TimeEntry[]>([])
 const selectedDay = ref<Dayjs | null>(null)
 
 const auth = useAuthStore()
@@ -37,6 +38,7 @@ const auth = useAuthStore()
 //const editEntry = ref<TimeEntry | null>(null)
 const selectedSuggestion = ref<TimeSuggestion | null>(null)
 async function loadEntries() {
+
   const from =
     mode.value === 'week'
       ? current.value.clone().startOf('isoWeek')
@@ -46,6 +48,8 @@ async function loadEntries() {
     mode.value === 'week'
       ? current.value.clone().endOf('isoWeek')
       : current.value.clone().endOf('month')
+
+  await projectStore.load()
 
   const timeEntries = await getTimeEntries(
     from.format('YYYY-MM-DD'),
@@ -65,6 +69,7 @@ async function loadEntries() {
     ...timeEntries.map(e => ({
       ...e,
       kind: 'WORK' as const,
+      project: projectStore.getById(e.projectId),
     })),
     ...assignments.map((a : ProjectAssignment) => ({
       kind: 'EXTRA' as const,
@@ -72,7 +77,6 @@ async function loadEntries() {
       date: a.date,
       hours: a.hours,
       projectId: a.project.id,
-      //comment: a.extraWork,
       comment: a.comment,
       startTime: a.startTime,
       endTime: a.endTime,
@@ -102,8 +106,6 @@ const hoursForDay = (day: Dayjs): number =>
     .filter(e => dayjs(e.date).isSame(day, 'day'))
     .reduce((sum, e) => sum + Number(e.hours), 0)
 
-//const isWork = (e: TimeEntry) =>
-//  ['WORK', 'EXTRA', 'MEETING'].includes(e.type)
 const isWork = (e: DayEntry) =>
   e.kind === 'WORK' || e.kind === 'EXTRA'
 
@@ -111,12 +113,9 @@ const weekTotal = computed(() => {
   if (mode.value !== 'week') return 0
   const start = current.value.startOf('isoWeek')
 
-  //const end = current.value.endOf('isoWeek')
-
   return entries.value
     .filter(isWork)
     .filter(e =>
-      //dayjs(e.date).isBetween(start, end, 'day', '[]'),
       dayjs(e.date).isSame(start, 'week')
     )
     .reduce((sum, e) => sum + Number(e.hours), 0)

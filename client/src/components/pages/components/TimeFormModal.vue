@@ -112,7 +112,7 @@ const calculatedHours = computed(() => {
     endMin += 24 * 60
   }
 
-  const worked = endMin - startMin - breakMinutes.value
+  const worked = endMin - startMin - normalizedBreakMinutes.value
   if (worked <= 0) return '0.00'
 
   //return (worked / 60).toFixed(2)
@@ -264,7 +264,8 @@ async function save() {
         >
         <input 
           v-model.number="breakMinutes"
-          type="number" 
+          type="number"
+          min="0"
         >
         <p>{{ calculatedHours }} h</p>
       </div>
