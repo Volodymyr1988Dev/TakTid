@@ -17,6 +17,7 @@ import type { DayEntry } from '../../types/DayEntry.type'
 import { getProjectAssignments } from '../../api/projectAssignment.api'
 import type { ProjectAssignment } from '../../types/ProjectAssignment.type'
 import { TimeKind } from '../../types/timeKind.enum'
+import { useAuthStore } from '../../stores/auth.store'
 
 /* ================= STATE ================= */
 type ViewState = 'calendar' | 'tabs' |'dayEntries' | 'modal'
@@ -31,27 +32,26 @@ const editEntry = ref<DayEntry | null>(null)
 //const entries = ref<TimeEntry[]>([])
 const selectedDay = ref<Dayjs | null>(null)
 
+const auth = useAuthStore()
 //const selectedDayEntries = ref<TimeEntry[]>([])
 //const editEntry = ref<TimeEntry | null>(null)
 const selectedSuggestion = ref<TimeSuggestion | null>(null)
-
-/* ================= FETCH ================= */
-watch([mode, current], async () => {
+async function loadEntries() {
   const from =
     mode.value === 'week'
-      ? current.value.clone().startOf('week')
+      ? current.value.clone().startOf('isoWeek')
       : current.value.clone().startOf('month')
 
   const to =
     mode.value === 'week'
-      ? current.value.clone().endOf('week')
+      ? current.value.clone().endOf('isoWeek')
       : current.value.clone().endOf('month')
 
   const timeEntries = await getTimeEntries(
     from.format('YYYY-MM-DD'),
     to.format('YYYY-MM-DD'),
   )
-  
+    //let assignments: ProjectAssignment[] = []
     let assignments = []
    try {
     assignments = await getProjectAssignments(
@@ -78,17 +78,28 @@ watch([mode, current], async () => {
       endTime: a.endTime,
       breakMinutes: a.breakMinutes,
     })),
-  ] 
-  //entries.value = await getTimeEntries(
-  //  from.format('YYYY-MM-DD'),
-  //  to.format('YYYY-MM-DD'),
-  //)
+  ]
+}
+/* ================= FETCH ================= */
+watch(
+  ()=>[ auth.isAuthenticated, mode.value, current.value],
+  async ([isAuth]) => {
+    if (!isAuth) {
+      console.error('User not authenticated, skipping time entries load')
+      return
+    }
+    try {
+      await loadEntries()
+    } catch (e) {
+      console.error('Failed to load time entries', e)
+  }
 }, { immediate: true })
 
 /* ================= HELPERS ================= */
 const hoursForDay = (day: Dayjs): number =>
   entries.value
-    .filter(e => e.date === day.format('YYYY-MM-DD'))
+    //.filter(e => e.date === day.format('YYYY-MM-DD'))
+    .filter(e => dayjs(e.date).isSame(day, 'day'))
     .reduce((sum, e) => sum + Number(e.hours), 0)
 
 //const isWork = (e: TimeEntry) =>
@@ -98,13 +109,15 @@ const isWork = (e: DayEntry) =>
 
 const weekTotal = computed(() => {
   if (mode.value !== 'week') return 0
-  const start = current.value.startOf('week')
-  const end = current.value.endOf('week')
+  const start = current.value.startOf('isoWeek')
+
+  //const end = current.value.endOf('isoWeek')
 
   return entries.value
     .filter(isWork)
     .filter(e =>
-      dayjs(e.date).isBetween(start, end, 'day', '[]'),
+      //dayjs(e.date).isBetween(start, end, 'day', '[]'),
+      dayjs(e.date).isSame(start, 'week')
     )
     .reduce((sum, e) => sum + Number(e.hours), 0)
 })
@@ -120,7 +133,8 @@ const monthTotal = computed(() => {
 function openDay(day: Dayjs) {
   selectedDay.value = day
   selectedDayEntries.value = entries.value.filter(
-    e => e.date === day.format('YYYY-MM-DD'),
+    //e => e.date === day.format('YYYY-MM-DD'),
+    e => dayjs(e.date).isSame(day, 'day'),
   )
   view.value = selectedDayEntries.value.length
     ? 'dayEntries'
@@ -164,12 +178,12 @@ async function onSaved() {
 
   const from =
     mode.value === 'week'
-      ? current.value.startOf('week')
+      ? current.value.startOf('isoWeek')
       : current.value.startOf('month')
 
   const to =
     mode.value === 'week'
-      ? current.value.endOf('week')
+      ? current.value.endOf('isoWeek')
       : current.value.endOf('month')
 
   //entries.value = await getTimeEntries(
