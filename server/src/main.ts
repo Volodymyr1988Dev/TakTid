@@ -22,6 +22,7 @@ async function bootstrap() {
       'https://tidtak-git-main-volodymyr1988devs-projects.vercel.app',
       'https://tidtak.vercel.app',
       'https://tak-tid.vercel.app',
+      'https://tak-tid-el9s.vercel.app',
     ],
     credentials: true,
     //methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
