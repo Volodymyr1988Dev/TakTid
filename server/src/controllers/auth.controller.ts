@@ -15,7 +15,7 @@ import 'dotenv/config';
 import { AuthService } from '../services/AuthService';
 import { LoginDto, RegisterDto, AuthResponseDto } from '../types';
 import { Public } from '../utils/public.decorator';
-import { setAuthCookies } from '../utils/setAuthCookies';
+import { setAuthCookies, clearAuthCookies } from '../utils/setAuthCookies';
 //import { AuthGuard } from '../types/auth/guard';
 import type { AuthRequest } from '../types/index';
 //@Public()
@@ -44,7 +44,7 @@ export class AuthController {
     if (!refreshed) {
       throw new UnauthorizedException('Invalid refresh token');
     }
-
+    clearAuthCookies(res);
     setAuthCookies(res, {
       accessToken: refreshed.token,
       refreshToken: refreshed.refreshToken,
@@ -103,6 +103,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.authService.login(loginDto);
+    clearAuthCookies(res);
     setAuthCookies(res, {
       accessToken: result.token,
       refreshToken: result.refreshToken,

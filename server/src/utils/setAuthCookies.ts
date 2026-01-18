@@ -40,3 +40,16 @@ export function setAuthCookies(
   }
   */
 }
+export function clearAuthCookies(res: Response) {
+  res.clearCookie('access_token', {
+    path: '/',
+    secure: true,
+    sameSite: 'none',
+  });
+
+  res.clearCookie('refresh_token', {
+    path: '/',
+    secure: true,
+    sameSite: 'none',
+  });
+}
