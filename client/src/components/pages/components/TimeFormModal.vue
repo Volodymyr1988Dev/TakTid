@@ -5,7 +5,7 @@ import { TimeKind } from '../../../types/timeKind.enum'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
 import { useTimeEntryStore } from '../../../stores/timeEntry.store'
 import { useProjectAssignmentStore } from '../../../stores/projectAssignment.store'
-import type { DayEntry,  WorkDayEntry, ExtraDayEntry, } from '../../../types/DayEntry.type'
+import type { DayEntry } from '../../../types/DayEntry.type'
 
 /* ================= PROPS ================= */
 const props = defineProps<{
@@ -39,7 +39,8 @@ watch(
   e => {
     if (!e) return
     //if (e.kind === 'WORK') {
-    if (isWorkEntry(e)) {
+    //if (isWorkEntry(e)) {
+    if (e.kind === 'WORK') {
       mode.value = 'WORK'
       kind.value = e.type
       start.value = e.startTime
@@ -48,7 +49,8 @@ watch(
       projectId.value = e.projectId ?? null
       comment.value = e.comment ?? ''
     } //else {
-    if (isExtraEntry(e)) {
+    //if (isExtraEntry(e)) {
+    if (e.kind === 'EXTRA') {
       mode.value = 'EXTRA'
       start.value = e.startTime ?? '08:00'
       end.value = e.endTime ?? '17:00'
@@ -80,13 +82,13 @@ watch(
 )
 
 /* ================= HELPERS ================= */
-function isWorkEntry(e: DayEntry): e is WorkDayEntry {
-  return e.kind === 'WORK'
-}
+//function isWorkEntry(e: DayEntry): e is WorkDayEntry {
+//  return e.kind === 'WORK'
+//}
 
-function isExtraEntry(e: DayEntry): e is ExtraDayEntry {
-  return e.kind === 'EXTRA'
-}
+//function isExtraEntry(e: DayEntry): e is ExtraDayEntry {
+//  return e.kind === 'EXTRA'
+//}
 
 function toMinutes(t: string): number {
   const parts = t.split(':')
@@ -140,9 +142,11 @@ const normalizedBreakMinutes = computed(() => {
 async function remove() {
   if (!props.entry) return
   if (!confirm('Delete this entry?')) return
-  if (isExtraEntry(props.entry)) {
+  //if (isExtraEntry(props.entry)) {
+  if (props.entry.kind === 'EXTRA') {
     await assignmentStore.remove(props.entry.id)
-  } else if (isWorkEntry(props.entry)) {
+  //} else if (isWorkEntry(props.entry)) {
+  } else if (props.entry.kind === 'WORK') {
     await timeStore.remove(props.entry.id)
   }
   //props.entry.kind === 'EXTRA'

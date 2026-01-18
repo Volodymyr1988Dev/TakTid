@@ -10,7 +10,7 @@ import type { Response } from 'express';
 import { SessionService } from '../../services';
 import type { AuthRequest } from '../index';
 import { IS_PUBLIC_KEY } from '../../utils/public.decorator';
-import { setAuthCookies } from '../../utils/setAuthCookies';
+//import { setAuthCookies } from '../../utils/setAuthCookies';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -27,7 +27,7 @@ export class AuthGuard implements CanActivate {
 
     if (isPublic) return true;
     const request = context.switchToHttp().getRequest<AuthRequest>();
-    const response = context.switchToHttp().getResponse<Response>();
+    //const response = context.switchToHttp().getResponse<Response>();
     const cookies = request.cookies as {
       access_token?: string;
       //refresh_token?: string;
@@ -52,21 +52,28 @@ export class AuthGuard implements CanActivate {
     //  cookies.access_token,
     //);
     if (!result) {
-      //if (!refreshToken)
-      //if (!cookies.refresh_token)
       throw new UnauthorizedException('Invalid or expired access token');
-      //const refreshed =
-      //await this.sessionService.refreshByRefreshToken(refreshToken);
-      //await this.sessionService.refreshByRefreshToken(cookies.refresh_token);
-      //if (!refreshed)
-      //  throw new UnauthorizedException('Invalid or expired refresh token');
-      //setAuthCookies(response, { accessToken: refreshed.token });
-      //request.user = refreshed.user;
-      //return true;
     }
+    //if (!refreshToken)
+    //if (!cookies.refresh_token)
 
-    if (result.newToken) {
-      setAuthCookies(response, { accessToken: result.newToken });
+    //throw new UnauthorizedException('Invalid or expired access token');
+
+    //const refreshed =
+    //await this.sessionService.refreshByRefreshToken(refreshToken);
+    //await this.sessionService.refreshByRefreshToken(cookies.refresh_token);
+    //if (!refreshed)
+    //  throw new UnauthorizedException('Invalid or expired refresh token');
+    //setAuthCookies(response, { accessToken: refreshed.token });
+    //request.user = refreshed.user;
+    //return true;
+    //}
+
+    //if (result.newToken) {
+    //  setAuthCookies(response, { accessToken: result.newToken });
+    //}
+    if (!cookies.access_token) {
+      throw new UnauthorizedException('Invalid or expired access token');
     }
     request.user = result.user;
     return true;
