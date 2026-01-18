@@ -48,7 +48,9 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(payload: { email: string, password: string }) {
   //async function login() {
     await api.post('/auth/login', payload)
+    await fetchMe()
     //const { data } = await api.post('/auth/login', payload)
+    
 
     //const refreshed = await api.post('/auth/refresh')
     //user.value = data.user
