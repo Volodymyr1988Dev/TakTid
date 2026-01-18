@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia';
 import router from './router';
 import App from './App.vue'
-import { useAuthStore } from './stores/auth.store'
+//import { useAuthStore } from './stores/auth.store'
 
 import dayjs from 'dayjs'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
@@ -36,9 +36,9 @@ createApp(App)
   .use(router)
   .mount('#app');
 */
-const auth = useAuthStore(pinia)
+//const auth = useAuthStore(pinia)
 
 //auth.fetchMe().finally(() => {
-auth.initAuth().finally(() => {
+//auth.initAuth().finally(() => {
   app.mount('#app')
-})
+//})

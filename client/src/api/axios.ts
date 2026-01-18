@@ -21,6 +21,8 @@ api.interceptors.response.use(
 
     if (
       error.response?.status === 401 &&
+      authStore.isInitialized &&
+      authStore.isAuthenticated &&
       !originalRequest._retry &&
       !originalRequest.url.includes('/auth/refresh')
     ) {

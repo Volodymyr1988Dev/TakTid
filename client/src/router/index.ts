@@ -40,7 +40,7 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
   if (!auth.isInitialized) {
-    await auth.fetchMe()
+    await auth.initAuth()
   }
   if (to.meta.requiresAdmin && !auth.user?.isAdmin) {
     return '/dashboard'

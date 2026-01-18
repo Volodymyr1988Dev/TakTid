@@ -88,15 +88,15 @@ async function loadEntries() {
 watch(
   ()=>[ auth.isInitialized, auth.isAuthenticated, mode.value, current.value],
   async ([Initialized, isAuth]) => {
-    if (!Initialized || !isAuth) {
-      console.error('User not authenticated, skipping time entries load')
+    if (!Initialized || !isAuth) //{
+      //console.error('User not authenticated, skipping time entries load')
       return
-    }
-    try {
+    //}
+   // try {
       await loadEntries()
-    } catch (e) {
-      console.error('Failed to load time entries', e)
-  }
+    //} catch (e) {
+    //  console.error('Failed to load time entries', e)
+  //}
 }, { immediate: true })
 
 /* ================= HELPERS ================= */
