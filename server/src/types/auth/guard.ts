@@ -28,7 +28,7 @@ export class AuthGuard implements CanActivate {
     if (isPublic) return true;
     const request = context.switchToHttp().getRequest<AuthRequest>();
     //const response = context.switchToHttp().getResponse<Response>();
-    const cookies = request.cookies as {
+    const coocki = request.cookies as {
       access_token?: string;
       //refresh_token?: string;
     };
@@ -37,8 +37,8 @@ export class AuthGuard implements CanActivate {
     //  request.headers.authorization?.replace('Bearer ', '');
     //const { access_token, refresh_token } = request.cookies ?? {};
     //const cookies = request.cookies as | { access_token?: string; refresh_token?: string }  | undefined;
-
-    const token = cookies?.access_token;
+    const token = coocki?.access_token;
+    //const token = cookies?.access_token;
     //const refreshToken = cookies?.refresh_token;
 
     //if (!cookies?.access_token) {
@@ -72,9 +72,9 @@ export class AuthGuard implements CanActivate {
     //if (result.newToken) {
     //  setAuthCookies(response, { accessToken: result.newToken });
     //}
-    if (!cookies.access_token) {
-      throw new UnauthorizedException('Invalid or expired access token');
-    }
+    //if (!cookies.access_token) {
+    //  throw new UnauthorizedException('Invalid or expired access token');
+    //}
     request.user = result.user;
     return true;
   }
