@@ -136,6 +136,7 @@ const normalizedBreakMinutes = computed(() => {
   return Number.isFinite(value) && value >= 0 ? value : 0
 })
 
+
 async function remove() {
   if (!props.entry) return
   if (!confirm('Delete this entry?')) return
