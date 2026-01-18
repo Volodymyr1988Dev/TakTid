@@ -53,9 +53,6 @@ button {
   font-weight: bold;
 }
 .bottom-tabs-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   padding-bottom: 56px;
 }
 </style>
