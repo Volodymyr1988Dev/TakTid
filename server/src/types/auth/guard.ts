@@ -41,9 +41,9 @@ export class AuthGuard implements CanActivate {
     const token = cookies?.access_token;
     //const refreshToken = cookies?.refresh_token;
 
-    if (!cookies?.access_token) {
-      throw new UnauthorizedException('No access token');
-    }
+    //if (!cookies?.access_token) {
+    //  throw new UnauthorizedException('No access token');
+    //}
     if (!token) {
       throw new UnauthorizedException('No token provided');
     }

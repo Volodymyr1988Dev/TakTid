@@ -22,8 +22,8 @@ export const useAuthStore = defineStore('auth', () => {
       isLoading.value = true
 
       //const { data } = await api.post('/auth/refresh')
-      const { data } = await api.post('/auth/me')
-
+      //const { data } = await api.post('/auth/me')
+      const { data } = await api.get('/auth/me')
       user.value = data
       //accessToken.value = data.accessToken
 
