@@ -13,7 +13,11 @@ let refreshPromise: Promise<unknown> | null = null
 api.interceptors.response.use(
   res => res,
   async error => {
+    const authStore = useAuthStore()
     const originalRequest = error.config
+    if (!authStore.isAuthenticated) {
+      return Promise.reject(error)
+    }
 
     if (
       error.response?.status === 401 &&
@@ -39,7 +43,6 @@ api.interceptors.response.use(
         useAuthStore().clearAuth()
       }
     }
-
     return Promise.reject(error)
   }
 )
