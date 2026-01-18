@@ -34,6 +34,9 @@ defineProps<{
 
 <style scoped>
 .bottom-tabs {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: fixed;
   bottom: 0;
   left: 0;
