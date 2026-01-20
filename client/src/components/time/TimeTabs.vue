@@ -264,6 +264,7 @@ async function onSaved() {
   selectedSuggestion.value = null
   view.value = 'calendar'
   await loadEntries()
+  
   /*
   const from =
     mode.value === 'week'
