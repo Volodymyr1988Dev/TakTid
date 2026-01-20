@@ -46,13 +46,10 @@ function mapToDayEntries(
   assignments: ProjectAssignment[],
 ): DayEntry[] {
   const workEntries: DayEntry[] = timeEntries.map(e => {
-    const project = projectStore.getById(e.projectId)
-
-    if (!project) {
-      throw new Error(
-        `Project not found for TimeEntry ${e.id} (projectId=${e.projectId})`,
-      )
-    }
+    const project =
+    e.projectId
+      ? projectStore.getById(e.projectId)
+      : undefined
 
     return {
       ...e,
