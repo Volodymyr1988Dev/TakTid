@@ -155,7 +155,7 @@ const totals = computed<Totals>(() => {
 
         return acc
       },
-      { work: 0, sick: 0, vab: 0, vacation: 0 },
+      { work: 0, sick: 0, vab: 0},
     )
 })
 /* ================= FETCH ================= */
