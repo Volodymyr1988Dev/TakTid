@@ -17,6 +17,7 @@ import type { DayEntry } from '../../types/DayEntry.type'
 import type { TimeEntry } from '../../types/TimeEntry.type'
 import { getProjectAssignments } from '../../api/projectAssignment.api'
 import type { ProjectAssignment } from '../../types/ProjectAssignment.type'
+//import type { AbsenceKind } from '../../types/AbsenceKind'
 import { TimeKind } from '../../types/timeKind.enum'
 import { useAuthStore } from '../../stores/auth.store'
 import { useProjectStore } from '../../stores/project.store'
@@ -147,12 +148,10 @@ const totals = computed<Totals>(() => {
       (acc, e) => {
         const hours = Number(e.hours)
 
-        if (isWork(e)) acc.work += hours
+        if (isPaidWork(e)) acc.work += hours
 
         if (isAbsence(e, TimeKind.SICK)) acc.sick += hours
         if (isAbsence(e, TimeKind.VAB)) acc.vab += hours
-        if (isAbsence(e, TimeKind.VACATION)) acc.vacation += hours
-        if (isAbsence(e, TimeKind.MEETING)) acc.vacation += hours
 
         return acc
       },
@@ -179,6 +178,15 @@ watch(
 /* ================= HELPERS ================= */
 function isWork(e: DayEntry) {
   return e.kind === 'WORK' || e.kind === 'EXTRA'
+}
+
+function isPaidWork(e: DayEntry) {
+  return (
+    e.kind === 'EXTRA' ||
+    (e.kind === 'WORK' &&
+      (e.type === TimeKind.WORK ||
+       e.type === TimeKind.MEETING))
+  )
 }
 
 function isAbsence(e: DayEntry, kind: TimeKind) {

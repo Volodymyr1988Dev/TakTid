@@ -4,8 +4,8 @@ export interface TimeEntryCreatePayload {
   date: string
   type: TimeKind
   projectId?: string
-  startTime?: string
-  endTime?: string
-  breakMinutes?: number
+  startTime: string
+  endTime: string
+  breakMinutes: number
   comment?: string
 }

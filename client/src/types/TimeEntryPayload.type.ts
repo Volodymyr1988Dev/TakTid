@@ -5,9 +5,9 @@ export interface TimeEntryPayload {
   type: TimeKind
   hours: number
 
-  startTime?: string
-  endTime?: string
-  breakMinutes?: number
+  startTime: string
+  endTime: string
+  breakMinutes: number
 
   comment?: string
   projectId?: string
