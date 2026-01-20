@@ -3,9 +3,9 @@ export interface ProjectAssignment {
   date: string
   hours: number
   comment?: string | null
-  startTime?: string | null
-  endTime?: string | null
-  breakMinutes?: number | null
+  startTime: string
+  endTime: string
+  breakMinutes: number | null
 
   project: {
     id: string

@@ -14,29 +14,79 @@ import { getTimeEntries } from '../../api/TimeEntry.api'
 //import type { TimeEntry } from '../../types/TimeEntry.type'
 import type { TimeSuggestion } from '../../types/Suggestion.type'
 import type { DayEntry } from '../../types/DayEntry.type'
+import type { TimeEntry } from '../../types/TimeEntry.type'
 import { getProjectAssignments } from '../../api/projectAssignment.api'
 import type { ProjectAssignment } from '../../types/ProjectAssignment.type'
 import { TimeKind } from '../../types/timeKind.enum'
 import { useAuthStore } from '../../stores/auth.store'
 import { useProjectStore } from '../../stores/project.store'
+import type { Totals } from '../../types/totals'
 
 /* ================= STATE ================= */
 type ViewState = 'calendar' | 'tabs' |'dayEntries' | 'modal'
 const view = ref<ViewState>('calendar')
 
-const projectStore = useProjectStore()
 const mode = ref<'week' | 'month'>('week')
 const current = ref(dayjs())
 
 const entries = ref<DayEntry[]>([])
 const selectedDayEntries = ref<DayEntry[]>([])
-const editEntry = ref<DayEntry | null>(null)
+
 const selectedDay = ref<Dayjs | null>(null)
+const editEntry = ref<DayEntry | null>(null)
 
 const auth = useAuthStore()
+const projectStore = useProjectStore()
 //const selectedDayEntries = ref<TimeEntry[]>([])
 //const editEntry = ref<TimeEntry | null>(null)
 const selectedSuggestion = ref<TimeSuggestion | null>(null)
+
+function mapToDayEntries(
+  timeEntries: TimeEntry[],
+  assignments: ProjectAssignment[],
+): DayEntry[] {
+  const workEntries: DayEntry[] = timeEntries.map(e => {
+    const project = projectStore.getById(e.projectId)
+
+    if (!project) {
+      throw new Error(
+        `Project not found for TimeEntry ${e.id} (projectId=${e.projectId})`,
+      )
+    }
+
+    return {
+      ...e,
+      kind: 'WORK',
+      project,
+      comment: e.comment ?? '',
+    }
+  })
+
+  const extraEntries: DayEntry[] = assignments.map(a => {
+    if (!a.project) {
+      throw new Error(
+        `Project missing in ProjectAssignment ${a.id}`,
+      )
+    }
+
+    return {
+      kind: 'EXTRA',
+      id: a.id,
+      date: a.date,
+      hours: a.hours,
+      projectId: a.project.id,
+      project: a.project,
+
+      comment: a.comment ?? '',
+      startTime: a.startTime,
+      endTime: a.endTime,
+      breakMinutes: a.breakMinutes ?? 0,
+    }
+  })
+
+  return [...workEntries, ...extraEntries]
+}
+
 async function loadEntries() {
 
   const from =
@@ -50,7 +100,14 @@ async function loadEntries() {
       : current.value.clone().endOf('month')
 
   await projectStore.load()
+  const [timeEntries, assignments] = await Promise.all([
+    getTimeEntries(from.format('YYYY-MM-DD'), to.format('YYYY-MM-DD')),
+    getProjectAssignments(from.format('YYYY-MM-DD'), to.format('YYYY-MM-DD'))
+      .catch(() => []),
+  ])
 
+  entries.value = mapToDayEntries(timeEntries, assignments)
+  /*
   const timeEntries = await getTimeEntries(
     from.format('YYYY-MM-DD'),
     to.format('YYYY-MM-DD'),
@@ -64,7 +121,7 @@ async function loadEntries() {
     )
     } catch (e) {
       console.warn('Assignments not loaded', e)
-    }
+    }  
   entries.value = [
     ...timeEntries.map(e => ({
       ...e,
@@ -83,14 +140,37 @@ async function loadEntries() {
       breakMinutes: a.breakMinutes,
     })),
   ]
+  */
 }
+
+const totals = computed<Totals>(() => {
+  return entries.value
+    .filter(inCurrentPeriod)
+    .reduce<Totals>(
+      (acc, e) => {
+        const hours = Number(e.hours)
+
+        if (isWork(e)) acc.work += hours
+
+        if (isAbsence(e, TimeKind.SICK)) acc.sick += hours
+        if (isAbsence(e, TimeKind.VAB)) acc.vab += hours
+        if (isAbsence(e, TimeKind.VACATION)) acc.vacation += hours
+        if (isAbsence(e, TimeKind.MEETING)) acc.vacation += hours
+
+        return acc
+      },
+      { work: 0, sick: 0, vab: 0, vacation: 0 },
+    )
+})
 /* ================= FETCH ================= */
 watch(
   ()=>[ auth.isInitialized, auth.isAuthenticated, mode.value, current.value],
-  async ([Initialized, isAuth]) => {
-    if (!Initialized || !isAuth) //{
+  //async ([isInitialized, isAuth]) => {
+  async ([ready, isAuth]) => {
+    if (ready && isAuth) //loadEntries()
+    //if (!Initialized || !isAuth) //{
       //console.error('User not authenticated, skipping time entries load')
-      return
+    //  return
     //}
    // try {
       await loadEntries()
@@ -100,14 +180,31 @@ watch(
 }, { immediate: true })
 
 /* ================= HELPERS ================= */
-const hoursForDay = (day: Dayjs): number =>
-  entries.value
-    //.filter(e => e.date === day.format('YYYY-MM-DD'))
-    .filter(e => dayjs(e.date).isSame(day, 'day'))
-    .reduce((sum, e) => sum + Number(e.hours), 0)
+function isWork(e: DayEntry) {
+  return e.kind === 'WORK' || e.kind === 'EXTRA'
+}
 
-const isWork = (e: DayEntry) =>
-  e.kind === 'WORK' || e.kind === 'EXTRA'
+function isAbsence(e: DayEntry, kind: TimeKind) {
+  return e.kind === 'WORK' && e.type === kind
+}
+
+function inCurrentPeriod(e: DayEntry): boolean {
+  return mode.value === 'week'
+    ? dayjs(e.date).isSame(current.value, 'week')
+    : dayjs(e.date).isSame(current.value, 'month')
+}
+
+function sumHours(list: DayEntry[]) {
+  return list.reduce((s, e) => s + Number(e.hours), 0)
+}
+
+const hoursForDay = (day: Dayjs): number =>
+sumHours(entries.value.filter(e => dayjs(e.date).isSame(day, 'day')))
+  //entries.value
+    //.filter(e => e.date === day.format('YYYY-MM-DD'))
+
+    //.filter(e => dayjs(e.date).isSame(day, 'day'))
+    //.reduce((sum, e) => sum + Number(e.hours), 0)
 
 const weekTotal = computed(() => {
   if (mode.value !== 'week') return 0
@@ -138,21 +235,8 @@ function openDay(day: Dayjs) {
   view.value = selectedDayEntries.value.length
     ? 'dayEntries'
     : 'tabs'
-    /*
-    const list = entries.value.filter(
-    e => e.date === day.format('YYYY-MM-DD'),
-  )
-  if (list.length > 0) {
-    selectedDayEntries.value = list
-    view.value = 'dayEntries'
-  } else {
-    view.value = 'tabs'
-  }
-  //view.value = 'tabs'
-  */
 }
 
-//function editFromList(entry: TimeEntry) {
 function editFromList(entry: DayEntry) {
   editEntry.value = entry
   selectedSuggestion.value = null
@@ -174,7 +258,8 @@ async function onSaved() {
   editEntry.value = null
   selectedSuggestion.value = null
   view.value = 'calendar'
-
+  await loadEntries()
+  /*
   const from =
     mode.value === 'week'
       ? current.value.startOf('isoWeek')
@@ -208,12 +293,13 @@ async function onSaved() {
   //)
 
   entries.value = [
-    ...timeEntries.map(e => ({ ...e, kind: 'WORK' as const })),
+    ...timeEntries.map(e => ({ ...e, kind: 'WORK' as const, project: projectStore.getById(e.projectId)})),
     ...assignments.map((a : ProjectAssignment) => ({
       kind: 'EXTRA' as const,
       id: a.id,
       date: a.date,
       hours: a.hours,
+      project: a.project,
       projectId: a.project.id,
       comment: a.comment,
       startTime: a.startTime,
@@ -221,6 +307,7 @@ async function onSaved() {
       breakMinutes: a.breakMinutes,
     })),
   ]
+  */
 }
 
 function prev() {
@@ -274,8 +361,25 @@ function addWork() {
     />
 
     <div class="totals">
-      <strong v-if="mode === 'week'">Week total: {{ weekTotal }} h</strong>
-      <strong v-else>Month total: {{ monthTotal }} h</strong>
+      <div class="total-item main">
+        <span>{{ mode === 'week' ? 'Week total' : 'Month total' }}</span>
+        <strong>{{ mode === 'week' ? weekTotal : monthTotal }} h</strong>
+      </div>
+
+      <div class="total-item">
+        <span>Sick</span>
+        <strong>{{ totals.sick }} h</strong>
+      </div>
+
+      <div class="total-item">
+        <span>VAB</span>
+        <strong>{{ totals.vab }} h</strong>
+      </div>
+
+      <div class="total-item">
+        <span>Total work</span>
+        <strong>{{ totals.work }} h</strong>
+      </div>
     </div>
   </template>
 

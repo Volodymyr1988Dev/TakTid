@@ -10,6 +10,6 @@ export interface TimeEntry {
   type: TimeKind
   comment: string
   breakMinutes: number
-  projectId?: string
+  projectId: string
   photoUrl?: string
 }

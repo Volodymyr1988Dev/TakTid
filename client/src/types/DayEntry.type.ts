@@ -41,7 +41,7 @@ interface BaseDayEntry {
 export interface WorkDayEntry extends BaseDayEntry, TimeEntry {
   kind: 'WORK'
   type: TimeKind
-  projectId?: string
+  projectId: string
 }
 
 /**
@@ -51,9 +51,9 @@ export interface ExtraDayEntry extends BaseDayEntry {
   kind: 'EXTRA'
   projectId: string
   comment?: string
-  startTime?: string
-  endTime?: string
-  breakMinutes?: number
+  startTime: string
+  endTime: string
+  breakMinutes: number
 }
 
 /**
