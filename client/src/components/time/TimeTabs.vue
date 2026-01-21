@@ -54,6 +54,7 @@ function mapToDayEntries(
 
     return {
       ...e,
+      hours: Number(e.hours),
       kind: 'WORK',
       //project,
       project: e.project ?? undefined,

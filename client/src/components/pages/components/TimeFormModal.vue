@@ -50,7 +50,7 @@ watch(
       comment.value = e.comment ?? ''
     } //else {
     //if (isExtraEntry(e)) {
-    if (e.kind === 'EXTRA') {
+    else if (e.kind === 'EXTRA') {
       mode.value = 'EXTRA'
       start.value = e.startTime ?? '08:00'
       end.value = e.endTime ?? '17:00'
