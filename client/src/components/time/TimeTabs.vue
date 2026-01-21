@@ -47,16 +47,18 @@ function mapToDayEntries(
   assignments: ProjectAssignment[],
 ): DayEntry[] {
   const workEntries: DayEntry[] = timeEntries.map(e => {
-    //const project =
-    //e.projectId
+    const projectId =
+    e.projectId ?? e.project?.id
     //  ? projectStore.getById(e.projectId)
     //  : undefined
-
+    if (!projectId) {
+      console.warn('WORK entry without projectId', e)
+    }
     return {
       ...e,
       hours: Number(e.hours),
       kind: 'WORK',
-      //project,
+      projectId,
       project: e.project ?? undefined,
       comment: e.comment ?? '',
     }

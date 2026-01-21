@@ -26,7 +26,10 @@ function getTitle(entry: DayEntry) {
   ) {
     return `Absence (${entry.type})`
   }
-  return 'Work'
+  //return 'Work'
+  return entry.project
+  ? `Work · ${entry.project.city}`
+  : 'Work'
 }
 
 function getProjectSubtitle(e: DayEntry) {
@@ -34,8 +37,8 @@ function getProjectSubtitle(e: DayEntry) {
 
   const city = e.project.city
   const address = e.project.address
-  //console.log('address', address)
-  //console.log('city', city)
+  console.log('address', address)
+  console.log('city', city)
 
   return address
     ? `${city}, ${address.split(',')[0]}`
