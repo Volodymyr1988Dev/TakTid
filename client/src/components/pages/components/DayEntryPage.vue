@@ -34,8 +34,8 @@ function getProjectSubtitle(e: DayEntry) {
 
   const city = e.project.city
   const address = e.project.address
-  console.log('address', address)
-  console.log('city', city)
+  //console.log('address', address)
+  //console.log('city', city)
 
   return address
     ? `${city}, ${address.split(',')[0]}`

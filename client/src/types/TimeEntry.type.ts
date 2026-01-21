@@ -12,4 +12,15 @@ export interface TimeEntry {
   breakMinutes: number
   projectId?: string
   photoUrl?: string
+  
+  project?: {
+    id: string
+    city: string
+    address: string
+  }
+
+  user?: {
+    id: string
+    email?: string
+  }
 }

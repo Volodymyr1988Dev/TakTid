@@ -47,15 +47,16 @@ function mapToDayEntries(
   assignments: ProjectAssignment[],
 ): DayEntry[] {
   const workEntries: DayEntry[] = timeEntries.map(e => {
-    const project =
-    e.projectId
-      ? projectStore.getById(e.projectId)
-      : undefined
+    //const project =
+    //e.projectId
+    //  ? projectStore.getById(e.projectId)
+    //  : undefined
 
     return {
       ...e,
       kind: 'WORK',
-      project,
+      //project,
+      project: e.project ?? undefined,
       comment: e.comment ?? '',
     }
   })
