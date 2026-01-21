@@ -43,12 +43,10 @@ export class TimeEntryService {
       dto.endTime,
       dto.breakMinutes,
     );
-
-    const hours = Number((workedMinutes / 60).toFixed(2));
-
     if (workedMinutes <= 0) {
-      throw new BadRequestException('Break time is too long');
+      throw new BadRequestException('Break time incorrect');
     }
+    const hours = Number((workedMinutes / 60).toFixed(2));
 
     //const hours = Number((workedMinutes / 60).toFixed(2));
     const entry = this.timeRepo.create({
@@ -64,8 +62,19 @@ export class TimeEntryService {
       endTime: dto.endTime,
       //...dto,
     });
+    const saved = await this.timeRepo.save(entry);
 
-    return this.timeRepo.save(entry);
+    const withProject = await this.timeRepo.findOne({
+      where: { id: saved.id },
+      relations: ['project'],
+    });
+
+    if (!withProject) {
+      throw new NotFoundException('Saved time entry not found');
+    }
+
+    //return this.timeRepo.save(entry);
+    return withProject;
   }
 
   async update(id: string, dto: UpdateTimeEntryDto): Promise<TimeEntry> {
