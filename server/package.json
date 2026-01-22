@@ -13,7 +13,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli",
-    "migration:generate": "npm run typeorm migration:generate -- -d ./src/config/typeorm.config.ts ./src/migrations/AutoMigrationAddProjectAssignmentDate",
+    "migration:generate": "npm run typeorm migration:generate -- -d ./src/config/typeorm.config.ts ./src/migrations/AutoMigrationAddTimeEntriesProjectId",
     "migration:run": "npm run typeorm -- migration:run -d ./dist/config/typeorm.config.js",
     "migration:revert": "npm run typeorm -- migration:revert -d ./dist/config/typeorm.config.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -21,7 +21,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "backup:once": "ts-node -r tsconfig-paths/register ./src/utils/backup.once.ts",
+    "restore": "ts-node -r tsconfig-paths/register ./src/utils/restore.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

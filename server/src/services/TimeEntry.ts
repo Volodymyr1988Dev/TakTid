@@ -27,6 +27,8 @@ export class TimeEntryService {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
+    this.forbidProjectForAbsence(dto.type, dto.projectId);
+
     let project: Projects | null = null;
     if (dto.projectId) {
       project = await this.projectRepo.findOne({
@@ -52,6 +54,7 @@ export class TimeEntryService {
     const entry = this.timeRepo.create({
       user,
       project,
+      projectId: dto.projectId,
       date: dto.date,
       hours,
       //hours: dto.hours,
@@ -78,7 +81,10 @@ export class TimeEntryService {
   }
 
   async update(id: string, dto: UpdateTimeEntryDto): Promise<TimeEntry> {
-    const entry = await this.timeRepo.findOne({ where: { id } });
+    const entry = await this.timeRepo.findOne({
+      where: { id },
+      relations: ['project'],
+    });
     if (!entry) throw new NotFoundException('Time entry not found');
     const startTime = dto.startTime ?? entry.startTime;
     const endTime = dto.endTime ?? entry.endTime;
@@ -95,9 +101,23 @@ export class TimeEntryService {
       throw new BadRequestException('Invalid time range');
     }
 
-    entry.hours = Number((workedMinutes / 60).toFixed(2));
+    if (dto.projectId !== undefined) {
+      entry.projectId = dto.projectId;
+      entry.project = dto.projectId
+        ? await this.projectRepo.findOne({ where: { id: dto.projectId } })
+        : null;
+    }
+    const effectiveType = dto.type ?? entry.type;
+    const effectiveProjectId =
+      dto.projectId !== undefined ? dto.projectId : entry.projectId;
 
-    Object.assign(entry, dto);
+    this.forbidProjectForAbsence(effectiveType, effectiveProjectId);
+    entry.hours = Number((workedMinutes / 60).toFixed(2));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { projectId: _projectId, ...rest } = dto;
+
+    //Object.assign(entry, dto);
+    Object.assign(entry, rest);
     return this.timeRepo.save(entry);
   }
 
@@ -117,6 +137,7 @@ export class TimeEntryService {
     return this.timeRepo
       .createQueryBuilder('t')
       .leftJoin('t.user', 'user')
+      .leftJoinAndSelect('t.project', 'project')
       .where('user.id = :userId', { userId })
       .andWhere('t.date BETWEEN :from AND :to', { from, to })
       .orderBy('t.date', 'ASC')
@@ -206,6 +227,15 @@ export class TimeEntryService {
   private timeToMinutes(time: string): number {
     const [h, m] = time.split(':').map(Number);
     return h * 60 + m;
+  }
+  private forbidProjectForAbsence(type: timeKind, projectId?: string) {
+    const forbidden = [timeKind.SICK, timeKind.VACATION, timeKind.VAB];
+
+    if (forbidden.includes(type) && projectId) {
+      throw new BadRequestException(
+        `projectId is not allowed for ${type} entries`,
+      );
+    }
   }
   private getWorkedMinutes(
     startTime: string,

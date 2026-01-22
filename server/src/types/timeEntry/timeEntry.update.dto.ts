@@ -4,13 +4,20 @@ import {
   IsOptional,
   IsString,
   Matches,
+  IsUUID,
 } from 'class-validator';
 import { timeKind } from '../../types/enums/enum';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateTimeEntryDto {
   //@IsOptional()
   //@IsNumber()
   //hours?: number;
+
+  @ApiProperty({ format: 'uuid', required: false })
+  @IsOptional()
+  @IsUUID()
+  projectId?: string;
 
   @IsOptional()
   @IsEnum(timeKind)

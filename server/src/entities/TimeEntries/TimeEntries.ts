@@ -7,6 +7,7 @@ import {
   //OneToOne,
   PrimaryGeneratedColumn,
   //UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../User/User';
@@ -26,7 +27,15 @@ export class TimeEntry {
   user: User;
 
   @ManyToOne(() => Projects, { nullable: true })
+  @JoinColumn({ name: 'projectId' })
   project: Projects | null;
+
+  @ApiProperty({
+    description: 'Project ID',
+    example: 'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6',
+  })
+  @Column({ nullable: true })
+  projectId?: string;
 
   @ApiProperty({
     description: 'Date of the time entry',
