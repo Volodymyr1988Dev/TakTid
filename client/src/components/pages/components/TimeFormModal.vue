@@ -6,7 +6,7 @@ import type { TimeSuggestion } from '../../../types/Suggestion.type'
 import { useTimeEntryStore } from '../../../stores/timeEntry.store'
 import { useProjectAssignmentStore } from '../../../stores/projectAssignment.store'
 import type { DayEntry } from '../../../types/DayEntry.type'
-
+import { calculateWorkedMinutes } from '../../pages/components/helpers/time'
 /* ================= PROPS ================= */
 const props = defineProps<{
   date: string
@@ -28,7 +28,7 @@ const end = ref('17:00')
 const breakMinutes = ref(60)
 const kind = ref<TimeKind>(TimeKind.WORK)
 const comment = ref('')
-const projectId = ref<string | null>(null)
+const projectId = ref<string | undefined>(undefined)
 
 const mode = ref<'WORK' | 'EXTRA'>('WORK')
 //const extraText = ref('')
@@ -46,7 +46,7 @@ watch(
       start.value = e.startTime
       end.value = e.endTime
       breakMinutes.value = e.breakMinutes ?? 0
-      projectId.value = e.projectId ?? null
+      projectId.value = e.projectId
       comment.value = e.comment ?? ''
     } //else {
     //if (isExtraEntry(e)) {
@@ -73,7 +73,7 @@ watch(
     if (!p) return
     kind.value = p.type
     breakMinutes.value = p.breakMinutes ?? 60
-    projectId.value = p.projectId ?? null
+    projectId.value = p.projectId
     //if (!isAbsence.value) {
     //  mode.value = p.type === TimeKind.EXTRA ? 'EXTRA' : 'WORK'
     //}
@@ -89,7 +89,7 @@ watch(
 //function isExtraEntry(e: DayEntry): e is ExtraDayEntry {
 //  return e.kind === 'EXTRA'
 //}
-
+/*
 function toMinutes(t: string): number {
   const parts = t.split(':')
   if (parts.length !== 2) return 0
@@ -101,21 +101,26 @@ function toMinutes(t: string): number {
 
   return h * 60 + m
 }
-
+*/
 /* ================= COMPUTED ================= */
 const calculatedHours = computed(() => {
-  if (!start.value || !end.value) return '0.00'
+  //if (!start.value || !end.value) return '0.00'
 
-  let startMin = toMinutes(start.value)
-  let endMin = toMinutes(end.value)
+  //let startMin = toMinutes(start.value)
+  //let endMin = toMinutes(end.value)
 
   // 🌙 night shift support
-  if (endMin <= startMin) {
-    endMin += 24 * 60
-  }
+  //if (endMin <= startMin) {
+  //  endMin += 24 * 60
+  //}
 
-  const worked = endMin - startMin - normalizedBreakMinutes.value
-  if (worked <= 0) return '0.00'
+  const worked =calculateWorkedMinutes(
+    start.value,
+    end.value,
+    normalizedBreakMinutes.value,
+)
+   //endMin - startMin - normalizedBreakMinutes.value
+  //if (worked <= 0) return '0.00'
 
   //return (worked / 60).toFixed(2)
   return worked > 0 ? (worked / 60).toFixed(2) : '0.00'
@@ -182,20 +187,36 @@ async function save() {
       return
     }
 
-    if (!projectId.value) {
-      alert('Project is required')
+    //if (!projectId.value) {
+    //  alert('Project is required')
+    //  return
+    //}
+
+    if (
+      kind.value === TimeKind.WORK &&
+      !projectId.value
+    ) {
+      alert('Project is required for work')
       return
     }
 
     if (isExtra.value) {
-      props.entry?.kind === 'EXTRA'
-        ? await assignmentStore.update(props.entry.id, {
+      if (props.entry && props.entry.kind === 'EXTRA') 
+      {
+        //? 
+        await assignmentStore.update(props.entry.id, {
             comment: comment.value,
             startTime: start.value,
             endTime: end.value,
             breakMinutes: normalizedBreakMinutes.value,
           })
-        : await assignmentStore.create({
+        } else {
+        //: 
+        if (!projectId.value) {
+            alert('Project is required for extra work')
+            return
+          }  
+         await assignmentStore.create({
             projectId: projectId.value,
             date: props.date,
             comment: comment.value,
@@ -203,15 +224,17 @@ async function save() {
             endTime: end.value,
             breakMinutes: normalizedBreakMinutes.value,
           })
+        }
     } else {
       const payload = {
         date: props.date,
         type: kind.value,
-        projectId: projectId.value,
+        //projectId: projectId.value,
         startTime: start.value,
         endTime: end.value,
         breakMinutes: normalizedBreakMinutes.value,
         comment: comment.value,
+        ...(projectId.value && { projectId: projectId.value }),
       }
 
       props.entry?.kind === 'WORK'

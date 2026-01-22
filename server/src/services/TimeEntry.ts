@@ -233,7 +233,7 @@ export class TimeEntryService {
       timeKind.SICK,
       timeKind.VACATION,
       timeKind.VAB,
-      timeKind.MEETING,
+      //timeKind.MEETING,
     ];
 
     if (forbidden.includes(type) && projectId) {

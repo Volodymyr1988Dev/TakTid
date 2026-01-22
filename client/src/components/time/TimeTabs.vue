@@ -47,19 +47,48 @@ function mapToDayEntries(
   assignments: ProjectAssignment[],
 ): DayEntry[] {
   const workEntries: DayEntry[] = timeEntries.map(e => {
+    const isAbsence =
+    e.type === TimeKind.SICK ||
+    e.type === TimeKind.VAB ||
+    e.type === TimeKind.VACATION
+
+    //const kind: DayEntry['kind'] = isAbsence ? 'ABSENCE' : 'WORK'
+    //const projectId = e.projectId ?? e.project?.id
     const projectId =
-    e.projectId ?? e.project?.id
+    e.type === TimeKind.WORK ? e.projectId ?? e.project?.id: undefined
     //  ? projectStore.getById(e.projectId)
     //  : undefined
-    if (!projectId) {
-      console.warn('WORK entry without projectId', e)
+    //if (!projectId) {console.warn('WORK entry without projectId', e)}
+    if (e.type === TimeKind.WORK && !projectId) {
+    console.warn('WORK entry without projectId', e)
+    }
+
+    if (isAbsence) {
+    return {
+      kind: 'ABSENCE',
+      id: e.id,
+      date: e.date,
+      hours: Number(e.hours),
+      type: e.type as 'SICK' | 'VAB' | 'VACATION',
+      comment: e.comment ?? '',
+      }
     }
     return {
-      ...e,
-      hours: Number(e.hours),
+      //...e,
       kind: 'WORK',
-      projectId,
-      project: e.project ?? undefined,
+      id: e.id,
+      date: e.date,
+      //type: e.type,
+      type: e.type as 'WORK' | 'MEETING',
+      startTime: e.startTime,
+      endTime: e.endTime,
+      breakMinutes: e.breakMinutes ?? 0,
+      hours: Number(e.hours),
+      //kind: 'WORK',
+      //kind,
+       projectId: e.projectId ?? e.project?.id,
+      //projectId,
+      project: e.project,
       comment: e.comment ?? '',
     }
   })
@@ -194,7 +223,7 @@ function isPaidWork(e: DayEntry) {
 }
 
 function isAbsence(e: DayEntry, kind: TimeKind) {
-  return e.kind === 'WORK' && e.type === kind
+  return e.kind === 'ABSENCE' && e.type === kind
 }
 
 function inCurrentPeriod(e: DayEntry): boolean {
