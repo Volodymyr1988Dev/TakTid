@@ -58,6 +58,11 @@ watch(
       projectId.value = e.projectId
       comment.value = e.comment ?? ''
     }
+    else if (e.kind === 'ABSENCE') {
+      mode.value = 'WORK'
+      kind.value = e.type
+      comment.value = e.comment ?? ''
+    }
     else {
       console.warn('Unknown entry kind', e)
     }
@@ -151,7 +156,8 @@ async function remove() {
   if (props.entry.kind === 'EXTRA') {
     await assignmentStore.remove(props.entry.id)
   //} else if (isWorkEntry(props.entry)) {
-  } else if (props.entry.kind === 'WORK') {
+  } else //if (props.entry.kind === 'WORK') 
+  {
     await timeStore.remove(props.entry.id)
   }
   //props.entry.kind === 'EXTRA'
@@ -226,7 +232,7 @@ async function save() {
           })
         }
     } else {
-      const payload = {
+      const createPayload = {
         date: props.date,
         type: kind.value,
         //projectId: projectId.value,
@@ -236,10 +242,17 @@ async function save() {
         comment: comment.value,
         ...(projectId.value && { projectId: projectId.value }),
       }
+      const updatePayload = {
+        startTime: start.value,
+        endTime: end.value,
+        breakMinutes: normalizedBreakMinutes.value,
+        comment: comment.value,
+        ...(projectId.value && { projectId: projectId.value }),
+      }
 
       props.entry?.kind === 'WORK'
-        ? await timeStore.update(props.entry.id, payload)
-        : await timeStore.add(payload)
+        ? await timeStore.update(props.entry.id, updatePayload)
+        : await timeStore.add(createPayload)
     }
   emit('saved')
   } catch{

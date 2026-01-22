@@ -72,6 +72,7 @@ export interface AbsenceDayEntry extends BaseDayEntry {
   kind: 'ABSENCE'
   //type: TimeKind
   type: 'SICK' | 'VAB' | 'VACATION'
+  comment?: string
 }
 
 export function isWorkEntry(e: DayEntry): e is WorkDayEntry {
