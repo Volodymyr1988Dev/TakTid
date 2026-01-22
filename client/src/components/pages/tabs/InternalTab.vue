@@ -23,12 +23,5 @@ function select(type: TimeKind, title: string) {
     >
       <strong>Meeting</strong>
     </div>
-
-    <div
-      class="card"
-      @click="select(TimeKind.MEETING, 'Semester')"
-    >
-      <strong>Semester</strong>
-    </div>
   </div>
 </template>
