@@ -229,7 +229,12 @@ export class TimeEntryService {
     return h * 60 + m;
   }
   private forbidProjectForAbsence(type: timeKind, projectId?: string) {
-    const forbidden = [timeKind.SICK, timeKind.VACATION, timeKind.VAB];
+    const forbidden = [
+      timeKind.SICK,
+      timeKind.VACATION,
+      timeKind.VAB,
+      timeKind.MEETING,
+    ];
 
     if (forbidden.includes(type) && projectId) {
       throw new BadRequestException(
