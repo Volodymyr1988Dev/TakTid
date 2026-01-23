@@ -86,38 +86,46 @@ export class TimeEntryService {
       relations: ['project'],
     });
     if (!entry) throw new NotFoundException('Time entry not found');
-    const startTime = dto.startTime ?? entry.startTime;
-    const endTime = dto.endTime ?? entry.endTime;
-    const breakMinutes = dto.breakMinutes ?? entry.breakMinutes;
+    //const startTime = dto.startTime ?? entry.startTime;
+    //const endTime = dto.endTime ?? entry.endTime;
+    //const breakMinutes = dto.breakMinutes ?? entry.breakMinutes;
 
-    const workedMinutes = this.getWorkedMinutes(
-      startTime,
-      endTime,
-      breakMinutes,
-    );
+    //const workedMinutes = this.getWorkedMinutes(
+    //  startTime,
+    //  endTime,
+    //  breakMinutes,
+    //);
 
-    entry.hours = Number((workedMinutes / 60).toFixed(2));
-    if (workedMinutes <= 0) {
-      throw new BadRequestException('Invalid time range');
-    }
+    //entry.hours = Number((workedMinutes / 60).toFixed(2));
 
     if (dto.projectId !== undefined) {
-      entry.projectId = dto.projectId;
+      //entry.projectId = dto.projectId;
       entry.project = dto.projectId
         ? await this.projectRepo.findOne({ where: { id: dto.projectId } })
         : null;
     }
-    const effectiveType = dto.type ?? entry.type;
-    const effectiveProjectId =
-      dto.projectId !== undefined ? dto.projectId : entry.projectId;
+    //const effectiveType = dto.type ?? entry.type;
+    //const effectiveProjectId =
+    //  dto.projectId !== undefined ? dto.projectId : entry.projectId;
 
-    this.forbidProjectForAbsence(effectiveType, effectiveProjectId);
-    entry.hours = Number((workedMinutes / 60).toFixed(2));
+    //entry.hours = Number((workedMinutes / 60).toFixed(2));
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { projectId: _projectId, ...rest } = dto;
+    const { projectId: _, ...rest } = dto;
+    //this.forbidProjectForAbsence(effectiveType, effectiveProjectId);
+    this.forbidProjectForAbsence(entry.type, entry.project?.id);
 
-    //Object.assign(entry, dto);
+    const workedMinutes = this.getWorkedMinutes(
+      entry.startTime,
+      entry.endTime,
+      entry.breakMinutes ?? 0,
+    );
     Object.assign(entry, rest);
+    if (workedMinutes <= 0) {
+      throw new BadRequestException('Invalid time range');
+    }
+    entry.hours = Number((workedMinutes / 60).toFixed(2));
+    //Object.assign(entry, dto);
+    //Object.assign(entry, rest);
     return this.timeRepo.save(entry);
   }
 
