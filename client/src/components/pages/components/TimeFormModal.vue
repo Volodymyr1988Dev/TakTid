@@ -29,7 +29,7 @@ const breakMinutes = ref(60)
 const kind = ref<TimeKind>(TimeKind.WORK)
 const comment = ref('')
 const projectId = ref<string | undefined>(undefined)
-
+const isMeeting = computed(() => kind.value === TimeKind.MEETING)
 const mode = ref<'WORK' | 'EXTRA'>('WORK')
 //const extraText = ref('')
 //const extraWork = ref('')
@@ -283,7 +283,7 @@ async function save() {
 
       <!-- WORK / MEETING -->
       <!-- MODE -->
-      <div v-if="!isAbsence">
+      <div v-if="!isAbsence && !isMeeting">
         <select v-model="mode">
           <option value="WORK">
             Work

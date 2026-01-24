@@ -1,5 +1,9 @@
 <script setup lang="ts">
+
+//import { ref } from 'vue'
+
 const model = defineModel<'time' | 'projects' | 'stats'>()
+//const selectedProjectId = ref<string | null>(null)
 defineProps<{
   isAdmin: boolean
 }>()

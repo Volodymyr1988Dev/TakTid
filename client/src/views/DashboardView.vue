@@ -6,13 +6,16 @@ import TimeTab from '../components/time/TimeTabs.vue'
 import ProjectsTab from '../components/Projects/ProjectTab.vue'
 import AppHeader from './AppHeader.vue'
 import { useAuthStore } from '../stores/auth.store'
+import { useProjectNavigationStore } from '../stores/projectNavigation.store'
 
 const auth = useAuthStore()
+const projectNav = useProjectNavigationStore()
 const isAdmin = computed(() => {
   if (!auth.isInitialized) return false
   return auth.user?.isAdmin === true
 })
 const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
+const selectedProjectId = ref<string | null>(null)
 </script>
 
 <template>
@@ -25,8 +28,19 @@ const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
   </div>
   <div class="page">
     <TimeTab v-if="bottomTab === 'time'" />
-    <ProjectsTab v-else />
-
+    <!--@open-details="id => projectNav.openProject(id)"
+    @open-details=" projectNav.openProject"-->
+    <ProjectsTab
+      v-else-if="bottomTab === 'projects' && !projectNav.selectedProjectId"
+      mode="details"
+      :project-id="projectNav.selectedProjectId"
+      @back="projectNav.closeProject"
+    />
+    <ProjectInfo
+      v-else-if="bottomTab === 'projects' && projectNav.selectedProjectId"
+      :project-id="selectedProjectId"
+      @back="selectedProjectId = null"
+    />
     <BottomTabs
       v-model="bottomTab"
       :is-admin="isAdmin"

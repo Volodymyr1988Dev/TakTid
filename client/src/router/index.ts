@@ -5,7 +5,7 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import AdminStatsView from '../views/AdminStatsView.vue'
-
+import ProjectInfo from '../components/Projects/ProjectInfo.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -33,6 +33,10 @@ const router = createRouter({
       path: '/stats',
       component: AdminStatsView,
       meta: { requiresAdmin: true },
+    },
+    {
+      path: '/projects/:id',
+      component: ProjectInfo,
     }
   ],
 })

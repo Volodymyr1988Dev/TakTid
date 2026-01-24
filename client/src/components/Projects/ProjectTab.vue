@@ -12,6 +12,7 @@ import type { Project } from '../../types/Project.dto'
 import type { TimeSuggestion } from '../../types/Suggestion.type'
 //import type { ProjectImages } from '../../types/ProjectImages'
 import { TimeKind } from '../../types/timeKind.enum'
+import { useProjectNavigationStore } from '../../stores/projectNavigation.store'
 
 const auth = useAuthStore()
 //const isAdmin = auth.user?.isAdmin === true
@@ -19,9 +20,11 @@ const isAdmin = computed(() => auth.user?.isAdmin === true)
 
 const emit = defineEmits<{
   (e: 'select', s: TimeSuggestion): void
-
+  (e: 'open-details', projectId: string): void
 }>()
-
+const props = defineProps<{
+  mode: 'select' | 'details'
+}>()
 const projects = ref<Project[]>([])
 
 /* ================= MODALS ================= */
@@ -30,6 +33,8 @@ const createModalOpen = ref(false) // ✅ ADD
 //const activeProject = ref<Project | null>(null) // ✅ ADD
 const selectedProject = ref<Project | null>(null)
 const photoModalOpen = ref(false)
+
+const projectNav = useProjectNavigationStore()
 /* ================= LOAD ================= */
 //onMounted(loadProjects)
 watch(
@@ -51,13 +56,23 @@ function openPhotoModal(project: Project) {
   photoModalOpen.value = true
 }
 
-function selectProject(project: Project) {
-  emit('select', {
-    type: TimeKind.WORK,
-    title: `${project.city} – ${project.address}`,
-    projectId: project.id,
-    breakMinutes: 60,
-  })
+function onProjectClick(project: Project) {
+  if (props.mode === 'select') {
+    emit('select', {
+      type: TimeKind.WORK,
+      title: `${project.city} – ${project.address}`,
+      projectId: project.id,
+      breakMinutes: 60,
+    })
+  }
+  else {
+    //emit('open-details', project.id)
+    projectNav.openProject(project.id)
+  }
+
+  if (props.mode === 'details') {
+    emit('open-details', project.id)
+  }
 }
 
 /* ================= ADMIN ================= */
@@ -101,7 +116,7 @@ async function reloadProjects() {
     >
       + Add project
     </button>
-
+    <!--@select="selectProject"-->
     <div class="grid">
       <ProjectCard
         v-for="p in projects"
@@ -109,7 +124,7 @@ async function reloadProjects() {
         :project="p"
         :is-admin="isAdmin"
         @deleted="removeProject"
-        @select="selectProject"
+        @select="onProjectClick(p)"
         @upload="openPhotoModal"
       />
     </div>

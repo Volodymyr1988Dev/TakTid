@@ -129,6 +129,13 @@ export class TimeEntryService {
     return this.timeRepo.save(entry);
   }
 
+  async findByProject(projectId: string): Promise<TimeEntry[]> {
+    return this.timeRepo.find({
+      where: { project: { id: projectId } },
+      relations: ['user'],
+    });
+  }
+
   async findByUser(userId: string): Promise<TimeEntry[]> {
     return this.timeRepo.find({
       where: { user: { id: userId } },
