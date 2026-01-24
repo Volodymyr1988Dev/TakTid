@@ -50,6 +50,7 @@ const emit = defineEmits<{
 
   <ProjectTab
     v-if="tab === 'projects'"
+    mode="select"
     @select="s => emit('selectSuggestion', s)"
   />
 
