@@ -5,6 +5,7 @@ import BottomTabs from '../components/bottomTabs/BottomTabs.vue'
 import TimeTab from '../components/time/TimeTabs.vue'
 import ProjectsTab from '../components/Projects/ProjectTab.vue'
 import AppHeader from './AppHeader.vue'
+import ProjectInfo from '../components/Projects/ProjectInfo.vue'
 import { useAuthStore } from '../stores/auth.store'
 import { useProjectNavigationStore } from '../stores/projectNavigation.store'
 
@@ -38,7 +39,7 @@ const selectedProjectId = ref<string | null>(null)
     />
     <ProjectInfo
       v-else-if="bottomTab === 'projects' && projectNav.selectedProjectId"
-      :project-id="selectedProjectId"
+      :project-id="projectNav.selectedProjectId!"
       @back="selectedProjectId = null"
     />
     <BottomTabs
