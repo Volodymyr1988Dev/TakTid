@@ -16,7 +16,7 @@ const isAdmin = computed(() => {
   return auth.user?.isAdmin === true
 })
 const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
-const selectedProjectId = ref<string | null>(null)
+//const selectedProjectId = ref<string | null>(null)
 </script>
 
 <template>
@@ -40,7 +40,7 @@ const selectedProjectId = ref<string | null>(null)
     <ProjectInfo
       v-else-if="bottomTab === 'projects' && projectNav.selectedProjectId"
       :project-id="projectNav.selectedProjectId!"
-      @back="selectedProjectId = null"
+      @back="projectNav.closeProject"
     />
     <BottomTabs
       v-model="bottomTab"
