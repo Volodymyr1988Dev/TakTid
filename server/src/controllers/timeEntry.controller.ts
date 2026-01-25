@@ -62,6 +62,7 @@ export class TimeEntryController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateTimeEntryDto) {
+    console.log('DTO:', dto);
     return this.timeService.update(id, dto);
   }
 

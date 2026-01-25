@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 import { timeKind } from '../../types/enums/enum';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class UpdateTimeEntryDto {
   //@IsOptional()
@@ -28,6 +29,7 @@ export class UpdateTimeEntryDto {
   comment?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   breakMinutes?: number;
 
