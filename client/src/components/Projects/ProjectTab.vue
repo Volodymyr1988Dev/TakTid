@@ -6,7 +6,6 @@ import { useAuthStore } from '../../stores/auth.store'
 import ProjectCard from './ProjectCard.vue'
 import CreateProjectModal from './CreateProjectModal.vue'
 //import ProjectGalleryModal from './ProjectGalleryModal.vue'
-import ProjectPhotosModal from './ProjectPhotosModal.vue'
 
 import type { Project } from '../../types/Project.dto'
 import type { TimeSuggestion } from '../../types/Suggestion.type'
@@ -88,27 +87,11 @@ function onProjectCreated(project: Project) {
 async function loadProjects() {
   const { data } = await api.get<Project[]>('/projects')
   projects.value = data
-}
-
-async function reloadProjects() {
-  const { data } = await api.get<Project[]>('/projects')
-  projects.value = data
-}
-/*
-<ProjectGalleryModal
-      v-if="galleryOpen && activeProject"
-      :photos="activeProject.images ?? []"
-      :is-admin="isAdmin"
-      @upload="uploadImages"
-      @remove="removeImage"
-      @close="galleryOpen = false"
-    />
-*/    
+}   
 </script>
 
 <template>
   <div class="projects">
-    <!-- ✅ ADD PROJECT BUTTON -->
     <button
       v-if="isAdmin"
       class="add-project"
@@ -135,13 +118,6 @@ async function reloadProjects() {
       v-if="createModalOpen"
       @close="createModalOpen = false"
       @created="onProjectCreated"
-    />
-
-    <ProjectPhotosModal
-      v-if="photoModalOpen && selectedProject"
-      :project="selectedProject"
-      @close="photoModalOpen = false"
-      @uploaded="reloadProjects"
     />
   </div>
 </template>

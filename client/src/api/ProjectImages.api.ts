@@ -1,23 +1,28 @@
 import api from './axios'
+import type { ProjectImage } from '../types/ProjectImage.type'
 
-export async function uploadProjectImage(
+export function uploadProjectImages(
   projectId: string,
-  file: File,
+  files: File[],
 ) {
-  const form = new FormData()
-  form.append('file', file)
+  const formData = new FormData()
 
-  const { data } = await api.post(
-    `/project-images/${projectId}`,
-    form,
-    {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    },
+  files.forEach(file => {
+    formData.append('files', file)
+  })
+
+  return api.post<ProjectImage[]>(
+    `/project-images/${projectId}/multiple`,
+    formData,
   )
-
-  return data
 }
 
-export async function deleteProjectImage(imageId: string) {
-  await api.delete(`/project-images/${imageId}`)
+export function getProjectImages(projectId: string) {
+  return api.get<ProjectImage[]>(
+    `/project-images/project/${projectId}`,
+  )
+}
+
+export function removeProjectImage(imageId: string) {
+  return api.delete(`/project-images/${imageId}`)
 }

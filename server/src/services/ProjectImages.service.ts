@@ -18,33 +18,37 @@ export class ProjectImagesService {
   /**
    * ADD IMAGE
    */
-  async upload(projectId: string, file: Express.Multer.File) {
-    const project = await this.projectRepo.findOne({
-      where: { id: projectId },
-    });
+  async uploadMultiple(projectId: string, files: Express.Multer.File[]) {
+    const project = await this.projectRepo.findOneBy({ id: projectId });
+    if (!project) throw new NotFoundException();
 
-    if (!project) {
-      throw new NotFoundException('Project not found');
+    const results: ProjectImage[] = [];
+
+    for (const file of files) {
+      const uploaded = await cloudinary.uploader.upload(file.path, {
+        folder: `projects/${projectId}`,
+      });
+
+      const image = this.imageRepo.create({
+        url: uploaded.secure_url,
+        publicId: uploaded.public_id,
+        project,
+      } as Partial<ProjectImage>);
+
+      const saved = await this.imageRepo.save(image);
+      results.push(saved);
     }
 
-    // ⬆️ Cloudinary upload
-    const uploaded = await cloudinary.uploader.upload(file.path, {
-      folder: `projects/${projectId}`,
-    });
-
-    // ⬇️ Save metadata
-    const image = this.imageRepo.create({
-      url: uploaded.secure_url,
-      publicId: uploaded.public_id,
-      project,
-    });
-
-    return this.imageRepo.save(image);
+    return results;
   }
 
-  /**
-   * REMOVE IMAGE
-   */
+  async getByProject(projectId: string) {
+    return this.imageRepo.find({
+      where: { project: { id: projectId } },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async remove(imageId: string) {
     const image = await this.imageRepo.findOne({
       where: { id: imageId },

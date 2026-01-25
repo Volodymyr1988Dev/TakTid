@@ -4,36 +4,36 @@ import {
   Param,
   Post,
   UseInterceptors,
-  UploadedFile,
+  //UploadedFile,
   UseGuards,
+  Get,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 //import { AuthGuard } from '../types/auth/guard';
 import { AdminGuard } from '../types/auth/admin.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProjectImagesService } from '../services/ProjectImages.service';
+import { UploadedFiles } from '@nestjs/common/decorators/http/route-params.decorator';
 
 @ApiTags('Project Images')
 @Controller('project-images')
 export class ProjectImagesController {
   constructor(private readonly imagesService: ProjectImagesService) {}
 
-  /**
-   * UPLOAD
-   */
-  @UseGuards(AdminGuard)
   @Post(':projectId')
-  @UseInterceptors(FileInterceptor('file'))
-  upload(
+  @UseInterceptors(FilesInterceptor('files'))
+  uploadMultiple(
     @Param('projectId') projectId: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() files: Express.Multer.File[],
   ) {
-    return this.imagesService.upload(projectId, file);
+    return this.imagesService.uploadMultiple(projectId, files);
   }
 
-  /**
-   * DELETE
-   */
+  @Get('project/:projectId')
+  getByProject(@Param('projectId') projectId: string) {
+    return this.imagesService.getByProject(projectId);
+  }
+
   @UseGuards(AdminGuard)
   @Delete(':imageId')
   remove(@Param('imageId') imageId: string) {

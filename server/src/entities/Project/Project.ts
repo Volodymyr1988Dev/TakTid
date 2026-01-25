@@ -45,6 +45,9 @@ export class Projects {
   assignments: ProjectAssignment[];
   @OneToMany(() => TimeEntry, (timeEntry) => timeEntry.project)
   timeEntries: TimeEntry[];
-  @OneToMany(() => ProjectImage, (img) => img.project)
+  @OneToMany(() => ProjectImage, (img) => img.project, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   images: ProjectImage[];
 }

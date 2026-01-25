@@ -2,6 +2,7 @@
 import { ref, watch, computed } from 'vue'
 //import api from '../../api/axios'
 import { getProjectStats } from '../../api/projectStats.api'
+import { useProjectImageStore } from '../../stores/projectImage.store'
 
 type UserStat = {
   id: string
@@ -36,6 +37,9 @@ const emit = defineEmits<{
 
 const stats = ref<ProjectStats | null>(null)
 const loading = ref(true)
+const imageStore = useProjectImageStore()
+const showImages = ref(false)
+const fullscreenUrl = ref<string | null>(null)
 /*
 const totals = computed(() => {
   const entries = entriesStore.byProject(props.projectId)
@@ -52,6 +56,14 @@ watch(
   { immediate: true }
 )
 
+watch(showImages, async (val) => {
+  if (val) {
+    await imageStore.load(props.projectId)
+  }
+})
+watch(fullscreenUrl, val => {
+  document.body.style.overflow = val ? 'hidden' : ''
+})
 async function loadStats() {
   loading.value = true
   try {
@@ -61,7 +73,13 @@ async function loadStats() {
     loading.value = false
   }
 }
-
+function openFullscreen(url: string) {
+  fullscreenUrl.value = url
+}
+function closeFullscreen() {
+  fullscreenUrl.value = null
+}
+//const lazyImages = ref<HTMLImageElement[]>([])
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
 //const totalAll = computed(() => stats.value?.total.all ?? 0)
@@ -113,6 +131,52 @@ const totalAll = computed(() => {
         </div>
       </div>
     </div>
+    <button 
+      class="toggle-images"
+      @click="showImages = !showImages"
+    >
+      {{ showImages ? 'Hide images' : 'Show project images' }}
+    </button>
+    <div 
+      v-if="showImages" 
+      class="images"
+    >
+      <div v-if="imageStore.loading">
+        Loading images…
+      </div>
+      <Swiper
+        v-else
+        :slides-per-view="1"
+        navigation
+        pagination
+      >
+        <SwiperSlide
+          v-for="img in imageStore.images"
+          :key="img.id"
+        >
+          <img
+            class="slide-img"
+            :src="img.url"
+            @click="openFullscreen(img.url)"
+          >  
+        </SwiperSlide>
+      </Swiper>
+      <div
+        v-if="fullscreenUrl"
+        class="fullscreen"
+        @click.self="closeFullscreen"
+      >
+        <button 
+          class="close" 
+          @click="closeFullscreen"
+        >
+          ✕
+        </button>
+        <img 
+          :src="fullscreenUrl"
+        >
+      </div>
+    </div>
   </div>
 </template>
 
@@ -144,5 +208,43 @@ const totalAll = computed(() => {
   display: flex;
   gap: 12px;
   margin-top: 6px;
+}
+.toggle-images {
+  margin-top: 16px;
+}
+.images {
+  margin-top: 12px;
+}
+.slide-img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.fullscreen {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.fullscreen img {
+  max-width: 95%;
+  max-height: 95%;
+}
+
+.close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
 }
 </style>

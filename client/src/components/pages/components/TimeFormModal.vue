@@ -7,6 +7,8 @@ import { useTimeEntryStore } from '../../../stores/timeEntry.store'
 import { useProjectAssignmentStore } from '../../../stores/projectAssignment.store'
 import type { DayEntry } from '../../../types/DayEntry.type'
 import { calculateWorkedMinutes } from '../../pages/components/helpers/time'
+import { useProjectImageStore } from '../../../stores/projectImage.store'
+
 /* ================= PROPS ================= */
 const props = defineProps<{
   date: string
@@ -31,6 +33,8 @@ const comment = ref('')
 const projectId = ref<string | undefined>(undefined)
 const isMeeting = computed(() => kind.value === TimeKind.MEETING)
 const mode = ref<'WORK' | 'EXTRA'>('WORK')
+const images = ref<File[]>([])
+const imageStore = useProjectImageStore()
 //const extraText = ref('')
 //const extraWork = ref('')
 /* ================= PRE-FILL FROM ENTRY ================= */
@@ -86,48 +90,13 @@ watch(
   { immediate: true },
 )
 
-/* ================= HELPERS ================= */
-//function isWorkEntry(e: DayEntry): e is WorkDayEntry {
-//  return e.kind === 'WORK'
-//}
-
-//function isExtraEntry(e: DayEntry): e is ExtraDayEntry {
-//  return e.kind === 'EXTRA'
-//}
-/*
-function toMinutes(t: string): number {
-  const parts = t.split(':')
-  if (parts.length !== 2) return 0
-
-  const h = Number(parts[0])
-  const m = Number(parts[1])
-
-  if (Number.isNaN(h) || Number.isNaN(m)) return 0
-
-  return h * 60 + m
-}
-*/
-/* ================= COMPUTED ================= */
 const calculatedHours = computed(() => {
-  //if (!start.value || !end.value) return '0.00'
-
-  //let startMin = toMinutes(start.value)
-  //let endMin = toMinutes(end.value)
-
-  // 🌙 night shift support
-  //if (endMin <= startMin) {
-  //  endMin += 24 * 60
-  //}
 
   const worked =calculateWorkedMinutes(
     start.value,
     end.value,
     normalizedBreakMinutes.value,
 )
-   //endMin - startMin - normalizedBreakMinutes.value
-  //if (worked <= 0) return '0.00'
-
-  //return (worked / 60).toFixed(2)
   return worked > 0 ? (worked / 60).toFixed(2) : '0.00'
 })
 
@@ -149,6 +118,24 @@ const normalizedBreakMinutes = computed(() => {
 })
 
 
+function onImagesSelected(e: Event) {
+  const files = Array.from((e.target as HTMLInputElement).files ?? [])
+
+  const MAX_FILES = 10
+  const MAX_SIZE = 10 * 1024 * 1024 // 10MB
+
+  const valid = files.filter(f =>
+    f.type.startsWith('image/') && f.size <= MAX_SIZE
+  )
+
+  if (valid.length > MAX_FILES) {
+    alert('Max 10 images allowed')
+    return
+  }
+
+  images.value = valid
+}
+
 async function remove() {
   if (!props.entry) return
   if (!confirm('Delete this entry?')) return
@@ -169,6 +156,7 @@ async function remove() {
   //  await timeStore.remove(props.entry.id)
   //}
   emit('saved')
+  images.value = []
 }
 /* ================= SAVE ================= */
 async function save() {
@@ -216,6 +204,9 @@ async function save() {
             endTime: end.value,
             breakMinutes: normalizedBreakMinutes.value,
           })
+          //if (images.value.length && projectId.value) {
+          //  await imageStore.upload(projectId.value, images.value)
+          //}
         } else {
         //: 
         if (!projectId.value) {
@@ -230,6 +221,9 @@ async function save() {
             endTime: end.value,
             breakMinutes: normalizedBreakMinutes.value,
           })
+        }
+        if (images.value.length && projectId.value) {
+          await imageStore.upload(projectId.value, images.value)
         }
     } else {
       const createPayload = {
@@ -253,8 +247,13 @@ async function save() {
       props.entry?.kind === 'WORK'
         ? await timeStore.update(props.entry.id, updatePayload)
         : await timeStore.add(createPayload)
+
+      if (images.value.length && projectId.value) {
+        await imageStore.upload(projectId.value, images.value)
+      }
     }
   emit('saved')
+  images.value = []
   } catch{
     alert('Something went wrong during saving')
   }
@@ -272,7 +271,7 @@ async function save() {
       <header class="modal-header">
         <button 
           class="back-btn" 
-          @click="emit('cancel')"
+          @click="emit('cancel'), images = []"
         >
           ← Back
         </button>
@@ -308,6 +307,27 @@ async function save() {
           type="number"
           min="0"
         >
+        <input
+          v-if="projectId"
+          type="file"
+          multiple
+          accept="image/*"
+          @change="onImagesSelected"
+        >
+        <div
+          v-if="images.length"
+          class="selected-images"
+        >
+          <p>Selected images:</p>
+          <ul>
+            <li
+              v-for="(img, i) in images"
+              :key="i"
+            >
+              {{ img.name }}
+            </li>
+          </ul>
+        </div>
         <p>{{ calculatedHours }} h</p>
       </div>
 
@@ -365,5 +385,18 @@ async function save() {
 .extra-work {
   margin-top: 8px;
   min-height: 60px;
+}
+.selected-images {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #444;
+}
+
+.selected-images ul {
+  padding-left: 16px;
+}
+
+.selected-images li {
+  line-height: 1.4;
 }
 </style>

@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Projects } from './Project';
 
 @Entity('project_images')
@@ -15,8 +21,12 @@ export class ProjectImage {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
+  @Column()
+  projectId: string;
+
   @ManyToOne(() => Projects, (project) => project.images, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'projectId' })
   project: Projects;
 }
