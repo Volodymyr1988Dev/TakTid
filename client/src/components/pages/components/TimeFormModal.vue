@@ -8,7 +8,7 @@ import { useProjectAssignmentStore } from '../../../stores/projectAssignment.sto
 import type { DayEntry } from '../../../types/DayEntry.type'
 import { calculateWorkedMinutes } from '../../pages/components/helpers/time'
 import { useProjectImageStore } from '../../../stores/projectImage.store'
-
+import type { TimeEntryUpdatePayload } from '../../../types/TimeEntryUpdatePayload.type'
 /* ================= PROPS ================= */
 const props = defineProps<{
   date: string
@@ -35,6 +35,7 @@ const isMeeting = computed(() => kind.value === TimeKind.MEETING)
 const mode = ref<'WORK' | 'EXTRA'>('WORK')
 const images = ref<File[]>([])
 const imageStore = useProjectImageStore()
+const isInitialized = ref(false)
 //const extraText = ref('')
 //const extraWork = ref('')
 /* ================= PRE-FILL FROM ENTRY ================= */
@@ -44,6 +45,7 @@ watch(
     if (!e) return
     //if (e.kind === 'WORK') {
     //if (isWorkEntry(e)) {
+    isInitialized.value = false
     if (e.kind === 'WORK') {
       mode.value = 'WORK'
       kind.value = e.type
@@ -81,6 +83,7 @@ watch(
     else {
       console.warn('Unknown entry kind', e)
     }
+    isInitialized.value = true
   },
   { immediate: true },
 )
@@ -102,7 +105,7 @@ watch(
 )
 
 const calculatedHours = computed(() => {
-
+if (!isInitialized.value) return '0.00'
   const worked =calculateWorkedMinutes(
     start.value,
     end.value,
@@ -251,7 +254,7 @@ async function save() {
         comment: comment.value,
         ...(projectId.value && { projectId: projectId.value }),
       }
-      const updatePayload = {
+      const updatePayload: TimeEntryUpdatePayload = {
         startTime: start.value,
         endTime: end.value,
         breakMinutes: normalizedBreakMinutes.value,
