@@ -104,13 +104,15 @@ export class TimeEntryService {
         ? await this.projectRepo.findOneBy({ id: dto.projectId })
         : null;
     }
+    if (dto.type !== undefined) {
+      entry.type = dto.type;
+    }
     //const effectiveType = dto.type ?? entry.type;
     //const effectiveProjectId =
     //  dto.projectId !== undefined ? dto.projectId : entry.projectId;
 
     //entry.hours = Number((workedMinutes / 60).toFixed(2));
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { projectId: _, ...rest } = dto;
+    //const { projectId: _, ...rest } = dto;
     //this.forbidProjectForAbsence(effectiveType, effectiveProjectId);
     this.forbidProjectForAbsence(entry.type, entry.project?.id);
     const startTime = dto.startTime ?? entry.startTime;
@@ -128,11 +130,11 @@ export class TimeEntryService {
     if (dto.comment !== undefined) {
       entry.comment = dto.comment;
     }
+    entry.hours = Number((workedMinutes / 60).toFixed(2));
     //Object.assign(entry, rest);
     if (workedMinutes <= 0) {
       throw new BadRequestException('Invalid time range');
     }
-    entry.hours = Number((workedMinutes / 60).toFixed(2));
     //Object.assign(entry, dto);
     //Object.assign(entry, rest);
     return this.timeRepo.save(entry);
