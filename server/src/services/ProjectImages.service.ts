@@ -8,6 +8,8 @@ import { Repository } from 'typeorm';
 import { ProjectImage } from '../entities/Project/ProjectImages';
 import { Projects } from '../entities';
 import cloudinary from '../config/cloudinary.config';
+import { Readable } from 'stream';
+import { UploadApiResponse } from 'cloudinary';
 
 @Injectable()
 export class ProjectImagesService {
@@ -22,7 +24,10 @@ export class ProjectImagesService {
   /**
    * ADD IMAGE
    */
-  async uploadMultiple(projectId: string, files: Express.Multer.File[]) {
+  async uploadMultiple(
+    projectId: string,
+    files: Express.Multer.File[],
+  ): Promise<ProjectImage[]> {
     console.log('SERVICE FILES:', files);
     const project = await this.projectRepo.findOneBy({ id: projectId });
     if (!project) throw new NotFoundException();
@@ -32,10 +37,12 @@ export class ProjectImagesService {
     const results: ProjectImage[] = [];
 
     for (const file of files) {
-      const uploaded = await cloudinary.uploader.upload(file.path, {
-        folder: `projects/${projectId}`,
-      });
-
+      //const uploaded = await cloudinary.uploader.upload(file.path, {
+      //  folder: `projects/${projectId}`,
+      const uploaded: UploadApiResponse = await this.uploadToCloudinary(
+        file.buffer,
+        projectId,
+      );
       const image = this.imageRepo.create({
         url: uploaded.secure_url,
         publicId: uploaded.public_id,
@@ -55,7 +62,17 @@ export class ProjectImagesService {
       order: { createdAt: 'DESC' },
     });
   }
+  async removeByProject(projectId: string): Promise<void> {
+    const images = await this.imageRepo.find({
+      where: { project: { id: projectId } },
+    });
 
+    await Promise.all(
+      images.map((image) => cloudinary.uploader.destroy(image.publicId)),
+    );
+
+    await this.imageRepo.remove(images);
+  }
   async remove(imageId: string) {
     const image = await this.imageRepo.findOne({
       where: { id: imageId },
@@ -70,5 +87,37 @@ export class ProjectImagesService {
 
     // ❗ delete from DB
     await this.imageRepo.remove(image);
+  }
+  private uploadToCloudinary(
+    buffer: Buffer,
+    projectId: string,
+  ): Promise<UploadApiResponse> {
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: `projects/${projectId}`,
+          transformation: [
+            {
+              width: 1600,
+              height: 1600,
+              crop: 'limit', // ⬅️ do not upscale
+            },
+            {
+              quality: 'auto',
+              fetch_format: 'auto',
+            },
+          ],
+        },
+        (error, result) => {
+          if (error) return reject(new Error(error.message));
+          if (!result) {
+            return reject(new Error('Cloudinary upload failed'));
+          }
+          resolve(result);
+        },
+      );
+
+      Readable.from(buffer).pipe(uploadStream);
+    });
   }
 }

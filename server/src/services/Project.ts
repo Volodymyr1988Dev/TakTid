@@ -3,11 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Projects } from '../entities/Project/Project';
 import { CreateProjectDto, UpdateProjectDto } from '../types/index';
+import { ProjectImagesService } from './ProjectImages.service';
 @Injectable()
 export class ProjectsService {
   constructor(
     @InjectRepository(Projects)
     private readonly projectRepo: Repository<Projects>,
+    private readonly imagesService: ProjectImagesService,
   ) {}
   async create(dto: CreateProjectDto): Promise<Projects> {
     const project = this.projectRepo.create(dto);
@@ -41,9 +43,15 @@ export class ProjectsService {
   }
 
   async remove(id: string): Promise<void> {
-    const result = await this.projectRepo.delete(id);
-    if (result.affected === 0) {
+    const project = await this.projectRepo.findOneBy({ id });
+    if (!project) {
       throw new NotFoundException('Project not found');
     }
+    await this.imagesService.removeByProject(id);
+    await this.projectRepo.remove(project);
+    //const result = await this.projectRepo.delete(id);
+    //if (result.affected === 0) {
+    //  throw new NotFoundException('Project not found');
+    //}
   }
 }
