@@ -35,7 +35,7 @@ const isMeeting = computed(() => kind.value === TimeKind.MEETING)
 const mode = ref<'WORK' | 'EXTRA'>('WORK')
 const images = ref<File[]>([])
 const imageStore = useProjectImageStore()
-const isInitialized = ref(false)
+//const isInitialized = ref(false)
 //const extraText = ref('')
 //const extraWork = ref('')
 /* ================= PRE-FILL FROM ENTRY ================= */
@@ -45,7 +45,7 @@ watch(
     if (!e) return
     //if (e.kind === 'WORK') {
     //if (isWorkEntry(e)) {
-    isInitialized.value = false
+    //isInitialized.value = false
     if (e.kind === 'WORK') {
       mode.value = 'WORK'
       kind.value = e.type
@@ -83,7 +83,7 @@ watch(
     else {
       console.warn('Unknown entry kind', e)
     }
-    isInitialized.value = true
+    //isInitialized.value = true
   },
   { immediate: true },
 )
@@ -105,7 +105,7 @@ watch(
 )
 
 const calculatedHours = computed(() => {
-if (!isInitialized.value) return '0.00'
+//if (!isInitialized.value) return '0.00'
   const worked =calculateWorkedMinutes(
     start.value,
     end.value,

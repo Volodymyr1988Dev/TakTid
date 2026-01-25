@@ -19,9 +19,10 @@ import type {
   AuthRequest,
   //CreateTimeEntryDto,
   //QueryTimeEntryDto,
-  UpdateTimeEntryDto,
+  //UpdateTimeEntryDto,
   AdminMonthStatsQueryDto,
 } from '../types/index';
+import { UpdateTimeEntryDto } from '../types/timeEntry/timeEntry.update.dto';
 import { CreateTimeEntryDto } from '../types/timeEntry/timeEntry.create.dto';
 //import { JwtAuthGuard } from '../types/auth/';
 

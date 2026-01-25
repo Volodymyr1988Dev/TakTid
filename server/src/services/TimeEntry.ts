@@ -8,7 +8,8 @@ import { Repository, Between } from 'typeorm';
 import { TimeEntry } from '../entities/TimeEntries/TimeEntries';
 import { User } from '../entities/User/User';
 import { Projects } from '../entities/Project/Project';
-import { CreateTimeEntryDto, UpdateTimeEntryDto } from '../types/index';
+import { CreateTimeEntryDto } from '../types/index';
+import { UpdateTimeEntryDto } from '../types/timeEntry/timeEntry.update.dto';
 import { timeKind } from '../types/enums/enum';
 import { UserMonthStats } from '../types/stats/UserMonthStats';
 
