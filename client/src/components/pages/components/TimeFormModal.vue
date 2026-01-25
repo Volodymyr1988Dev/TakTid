@@ -257,6 +257,7 @@ async function save() {
         breakMinutes: normalizedBreakMinutes.value,
         comment: comment.value,
         ...(projectId.value && { projectId: projectId.value }),
+        //projectId: projectId.value ?? null,
       }
 
       props.entry?.kind === 'WORK'
