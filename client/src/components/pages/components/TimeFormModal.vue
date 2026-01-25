@@ -52,7 +52,11 @@ watch(
       breakMinutes.value = e.breakMinutes ?? 0
       projectId.value = e.projectId
       comment.value = e.comment ?? ''
-      if (e.projectId) {
+      //if (e.projectId) {
+      //  await imageStore.load(e.projectId)
+      //}
+      if (hasProjectId(e)) {
+        projectId.value = e.projectId
         await imageStore.load(e.projectId)
       }
     } //else {
@@ -64,7 +68,8 @@ watch(
       breakMinutes.value = e.breakMinutes ?? 60
       projectId.value = e.projectId
       comment.value = e.comment ?? ''
-      if (e.projectId) {
+      if (hasProjectId(e)) {
+        projectId.value = e.projectId
         await imageStore.load(e.projectId)
       }
     }
@@ -105,6 +110,10 @@ const calculatedHours = computed(() => {
 )
   return worked > 0 ? (worked / 60).toFixed(2) : '0.00'
 })
+
+function hasProjectId(e: DayEntry): e is DayEntry & { projectId: string } {
+  return e.kind === 'WORK' || e.kind === 'EXTRA'
+}
 
 const isEdit = computed(() => !!props.entry)
 //const isWork = computed(() => kind.value === TimeKind.WORK)
