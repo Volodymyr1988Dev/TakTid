@@ -28,7 +28,6 @@ export class ProjectImagesService {
     projectId: string,
     files: Express.Multer.File[],
   ): Promise<ProjectImage[]> {
-    console.log('SERVICE FILES:', files);
     const project = await this.projectRepo.findOneBy({ id: projectId });
     if (!project) throw new NotFoundException();
     if (!files || !files.length) {
@@ -82,10 +81,8 @@ export class ProjectImagesService {
       throw new NotFoundException('Image not found');
     }
 
-    // ❗ delete from Cloudinary
     await cloudinary.uploader.destroy(image.publicId);
 
-    // ❗ delete from DB
     await this.imageRepo.remove(image);
   }
   private uploadToCloudinary(
@@ -100,7 +97,7 @@ export class ProjectImagesService {
             {
               width: 1600,
               height: 1600,
-              crop: 'limit', // ⬅️ do not upscale
+              crop: 'limit',
             },
             {
               quality: 'auto',
