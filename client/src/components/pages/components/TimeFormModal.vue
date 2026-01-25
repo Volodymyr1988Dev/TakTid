@@ -40,7 +40,7 @@ const imageStore = useProjectImageStore()
 /* ================= PRE-FILL FROM ENTRY ================= */
 watch(
   () => props.entry,
-  e => {
+  async (e) => {
     if (!e) return
     //if (e.kind === 'WORK') {
     //if (isWorkEntry(e)) {
@@ -52,6 +52,9 @@ watch(
       breakMinutes.value = e.breakMinutes ?? 0
       projectId.value = e.projectId
       comment.value = e.comment ?? ''
+      if (e.projectId) {
+        await imageStore.load(e.projectId)
+      }
     } //else {
     //if (isExtraEntry(e)) {
     else if (e.kind === 'EXTRA') {
@@ -61,6 +64,9 @@ watch(
       breakMinutes.value = e.breakMinutes ?? 60
       projectId.value = e.projectId
       comment.value = e.comment ?? ''
+      if (e.projectId) {
+        await imageStore.load(e.projectId)
+      }
     }
     else if (e.kind === 'ABSENCE') {
       mode.value = 'WORK'
@@ -222,9 +228,9 @@ async function save() {
             breakMinutes: normalizedBreakMinutes.value,
           })
         }
-        if (images.value.length && projectId.value) {
-          await imageStore.upload(projectId.value, images.value)
-        }
+        //if (images.value.length && projectId.value) {
+        //  await imageStore.upload(projectId.value, images.value)
+        //}
     } else {
       const createPayload = {
         date: props.date,
@@ -248,12 +254,13 @@ async function save() {
         ? await timeStore.update(props.entry.id, updatePayload)
         : await timeStore.add(createPayload)
 
-      if (images.value.length && projectId.value) {
+    }
+    if (images.value.length && projectId.value) {
         await imageStore.upload(projectId.value, images.value)
       }
-    }
+  images.value = []    
   emit('saved')
-  images.value = []
+  
   } catch{
     alert('Something went wrong during saving')
   }
@@ -271,7 +278,7 @@ async function save() {
       <header class="modal-header">
         <button 
           class="back-btn" 
-          @click="emit('cancel'), images = []"
+          @click="emit('cancel'); images = []"
         >
           ← Back
         </button>
@@ -314,6 +321,28 @@ async function save() {
           accept="image/*"
           @change="onImagesSelected"
         >
+        <div
+          v-if="imageStore.images.length"
+          class="existing-images"
+        >
+          <p>Existing images:</p>
+
+          <div class="thumbs">
+            <div
+              v-for="img in imageStore.images"
+              :key="img.id"
+              class="thumb"
+            >
+              <img :src="img.url">
+              <button
+                class="remove"
+                @click="imageStore.remove(img.id)"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
         <div
           v-if="images.length"
           class="selected-images"
@@ -398,5 +427,38 @@ async function save() {
 
 .selected-images li {
   line-height: 1.4;
+}
+.existing-images {
+  margin-top: 12px;
+}
+
+.thumbs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.thumb {
+  position: relative;
+}
+
+.thumb img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.thumb .remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #e11d48;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }
 </style>
