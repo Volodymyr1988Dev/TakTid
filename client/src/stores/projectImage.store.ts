@@ -5,7 +5,7 @@ import {
   getProjectImages,
   uploadProjectImages,
   removeProjectImage
-} from '../api/projectImages.api'
+} from '../api/ProjectImages.api'
 
 import type { ProjectImage } from '../types/ProjectImage.type'
 
