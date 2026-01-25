@@ -9,5 +9,6 @@ import { ProjectImagesService } from '../services/ProjectImages.service';
   imports: [TypeOrmModule.forFeature([ProjectImage, Projects])],
   providers: [ProjectImagesService],
   controllers: [ProjectImagesController],
+  exports: [ProjectImagesService],
 })
 export class ProjectImagesModule {}
