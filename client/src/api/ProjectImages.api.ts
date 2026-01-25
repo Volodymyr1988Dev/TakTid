@@ -12,7 +12,7 @@ export function uploadProjectImages(
   })
 
   return api.post<ProjectImage[]>(
-    `/project-images/${projectId}/multiple`,
+    `/project-images/${projectId}`,
     formData,
   )
 }
