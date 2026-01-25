@@ -21,11 +21,18 @@ export class ProjectImagesController {
   constructor(private readonly imagesService: ProjectImagesService) {}
 
   @Post(':projectId')
-  @UseInterceptors(FilesInterceptor('files'))
+  @UseInterceptors(
+    FilesInterceptor('files', 10, {
+      limits: {
+        fileSize: 10 * 1024 * 1024,
+      },
+    }),
+  )
   uploadMultiple(
     @Param('projectId') projectId: string,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
+    console.log('FILES:', files);
     return this.imagesService.uploadMultiple(projectId, files);
   }
 

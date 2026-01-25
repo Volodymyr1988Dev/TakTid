@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProjectImage } from '../entities/Project/ProjectImages';
@@ -19,9 +23,12 @@ export class ProjectImagesService {
    * ADD IMAGE
    */
   async uploadMultiple(projectId: string, files: Express.Multer.File[]) {
+    console.log('SERVICE FILES:', files);
     const project = await this.projectRepo.findOneBy({ id: projectId });
     if (!project) throw new NotFoundException();
-
+    if (!files || !files.length) {
+      throw new BadRequestException('No files uploaded');
+    }
     const results: ProjectImage[] = [];
 
     for (const file of files) {
