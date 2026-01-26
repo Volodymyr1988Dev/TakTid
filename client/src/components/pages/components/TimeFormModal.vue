@@ -6,7 +6,7 @@ import type { TimeSuggestion } from '../../../types/Suggestion.type'
 import { useTimeEntryStore } from '../../../stores/timeEntry.store'
 import { useProjectAssignmentStore } from '../../../stores/projectAssignment.store'
 import type { DayEntry } from '../../../types/DayEntry.type'
-import { calculateWorkedMinutes } from '../../pages/components/helpers/time'
+//import { calculateWorkedMinutes } from '../../pages/components/helpers/time'
 import { useProjectImageStore } from '../../../stores/projectImage.store'
 import type { TimeEntryUpdatePayload } from '../../../types/TimeEntryUpdatePayload.type'
 /* ================= PROPS ================= */
@@ -59,7 +59,7 @@ watch(
       //}
       if (hasProjectId(e)) {
         projectId.value = e.projectId
-        await imageStore.load(e.projectId)
+        //await imageStore.load(e.projectId)
       }
     } //else {
     //if (isExtraEntry(e)) {
@@ -72,7 +72,7 @@ watch(
       comment.value = e.comment ?? ''
       if (hasProjectId(e)) {
         projectId.value = e.projectId
-        await imageStore.load(e.projectId)
+        //await imageStore.load(e.projectId)
       }
     }
     else if (e.kind === 'ABSENCE') {
@@ -103,7 +103,11 @@ watch(
   },
   { immediate: true },
 )
-
+const calculatedHours = computed(() => {
+  if (!props.entry) return '0.00'
+  return Number(props.entry.hours).toFixed(2)
+})
+/*
 const calculatedHours = computed(() => {
 //if (!isInitialized.value) return '0.00'
   const worked =calculateWorkedMinutes(
@@ -113,7 +117,7 @@ const calculatedHours = computed(() => {
 )
   return worked > 0 ? (worked / 60).toFixed(2) : '0.00'
 })
-
+*/
 function hasProjectId(e: DayEntry): e is DayEntry & { projectId: string } {
   return e.kind === 'WORK' || e.kind === 'EXTRA'
 }
