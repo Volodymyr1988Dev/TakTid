@@ -36,6 +36,7 @@ const mode = ref<'WORK' | 'EXTRA'>('WORK')
 const images = ref<File[]>([])
 const imageStore = useProjectImageStore()
 const isDirty = ref(false)
+const isHydrating = ref(false)
 //const isInitialized = ref(false)
 //const extraText = ref('')
 //const extraWork = ref('')
@@ -43,6 +44,7 @@ const isDirty = ref(false)
 watch(
   [start, end, breakMinutes],
   () => {
+    if (isHydrating.value) return
     if (!props.entry) return
     isDirty.value = true
   }
@@ -51,8 +53,12 @@ watch(
 watch(
   () => props.entry,
   async (e) => {
+    isHydrating.value = true
     isDirty.value = false
-    if (!e) return
+    if (!e) {
+      isHydrating.value = false
+      return
+    }
     //if (e.kind === 'WORK') {
     //if (isWorkEntry(e)) {
     //isInitialized.value = false
@@ -93,6 +99,7 @@ watch(
     else {
       console.warn('Unknown entry kind', e)
     }
+    isHydrating.value = false
     //isInitialized.value = true
   },
   { immediate: true },
