@@ -76,7 +76,9 @@ export class TimeEntryService {
     if (!withProject) {
       throw new NotFoundException('Saved time entry not found');
     }
-
+    if ([timeKind.SICK, timeKind.VACATION, timeKind.VAB].includes(entry.type)) {
+      entry.project = null;
+    }
     //return this.timeRepo.save(entry);
     return withProject;
   }
@@ -98,13 +100,27 @@ export class TimeEntryService {
     //);
 
     //entry.hours = Number((workedMinutes / 60).toFixed(2));
-
+    if ([timeKind.SICK, timeKind.VACATION, timeKind.VAB].includes(entry.type)) {
+      entry.project = null;
+    }
+    if (dto.projectId !== undefined) {
+      if (!dto.projectId) {
+        entry.project = null;
+      } else {
+        const project = await this.projectRepo.findOneBy({ id: dto.projectId });
+        if (!project) {
+          throw new NotFoundException('Project not found');
+        }
+        entry.project = project;
+      }
+    }
+    /*
     if (dto.projectId !== undefined) {
       //entry.projectId = dto.projectId;
       entry.project = dto.projectId
         ? await this.projectRepo.findOneBy({ id: dto.projectId })
         : null;
-    }
+    } */
     if (dto.type !== undefined) {
       entry.type = dto.type;
     }
