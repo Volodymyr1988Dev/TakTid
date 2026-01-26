@@ -6,7 +6,7 @@ import type { TimeSuggestion } from '../../../types/Suggestion.type'
 import { useTimeEntryStore } from '../../../stores/timeEntry.store'
 import { useProjectAssignmentStore } from '../../../stores/projectAssignment.store'
 import type { DayEntry } from '../../../types/DayEntry.type'
-//import { calculateWorkedMinutes } from '../../pages/components/helpers/time'
+import { calculateWorkedMinutes } from '../../pages/components/helpers/time'
 import { useProjectImageStore } from '../../../stores/projectImage.store'
 import type { TimeEntryUpdatePayload } from '../../../types/TimeEntryUpdatePayload.type'
 /* ================= PROPS ================= */
@@ -35,13 +35,23 @@ const isMeeting = computed(() => kind.value === TimeKind.MEETING)
 const mode = ref<'WORK' | 'EXTRA'>('WORK')
 const images = ref<File[]>([])
 const imageStore = useProjectImageStore()
+const isDirty = ref(false)
 //const isInitialized = ref(false)
 //const extraText = ref('')
 //const extraWork = ref('')
 /* ================= PRE-FILL FROM ENTRY ================= */
 watch(
+  [start, end, breakMinutes],
+  () => {
+    if (!props.entry) return
+    isDirty.value = true
+  }
+)
+
+watch(
   () => props.entry,
   async (e) => {
+    isDirty.value = false
     if (!e) return
     //if (e.kind === 'WORK') {
     //if (isWorkEntry(e)) {
@@ -104,8 +114,19 @@ watch(
   { immediate: true },
 )
 const calculatedHours = computed(() => {
-  if (!props.entry) return '0.00'
-  return Number(props.entry.hours).toFixed(2)
+  if (props.entry && !isDirty.value) {
+    return Number(props.entry.hours).toFixed(2)
+  }
+
+  const workedMinutes = calculateWorkedMinutes(
+    start.value,
+    end.value,
+    normalizedBreakMinutes.value,
+  )
+
+  return workedMinutes > 0
+    ? (workedMinutes / 60).toFixed(2)
+    : '0.00'
 })
 /*
 const calculatedHours = computed(() => {
