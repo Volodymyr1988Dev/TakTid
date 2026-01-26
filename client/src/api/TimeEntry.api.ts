@@ -3,6 +3,7 @@ import type { TimeEntry } from '../types/TimeEntry.type'
 //import type { TimeKind } from '../types/timeKind.enum'
 import type { TimeEntryCreatePayload } from '../types/TimeEntryCreatePayload'
 import type { TimeEntryUpdatePayload } from '../types/TimeEntryUpdatePayload.type'
+import { normalizeTime } from '../components/pages/components/helpers/helpers'
 
 export async function getTimeEntries(
   from: string,
@@ -25,7 +26,12 @@ export async function updateTimeEntry(
   id: string,
   payload: TimeEntryUpdatePayload,
 ) {
-  return api.patch(`/time-entries/${id}`, payload)
+  const dto = {
+    ...payload,
+    startTime: normalizeTime(payload.startTime),
+    endTime: normalizeTime(payload.endTime),
+  };//payload
+  return api.patch(`/time-entries/${id}`, dto)  //payload
 }
 
 export async function deleteTimeEntry(id: string): Promise<void> {

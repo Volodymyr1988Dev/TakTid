@@ -84,6 +84,7 @@ export class TimeEntryService {
   }
 
   async update(id: string, dto: UpdateTimeEntryDto): Promise<TimeEntry> {
+    console.log('update started', dto);
     const entry = await this.timeRepo.findOne({
       where: { id },
       relations: ['project'],
