@@ -117,20 +117,25 @@ watch(
 )
 
 /* ================= PRE-FILL FROM PRESET =================*/ 
+watch(kind, k => {
+  if (isAbsence.value) return
+  mode.value = k === TimeKind.EXTRA ? 'EXTRA' : 'WORK'
+})
 
 watch(
   () => props.preset,
   p => {
     if (!p) return
     kind.value = p.type
-    if (props.entry) return
+    //if (props.entry) return
     breakMinutes.value = p.breakMinutes ?? 60
     projectId.value = p.projectId
+    mode.value = p.type === TimeKind.EXTRA ? 'EXTRA' : 'WORK'
     //if (!isAbsence.value) {
     //  mode.value = p.type === TimeKind.EXTRA ? 'EXTRA' : 'WORK'
     //}
   },
-  //{ immediate: true },
+  { immediate: true },
 )
 const calculatedHours = computed(() => {
   if (props.entry && !isDirty.value) {
