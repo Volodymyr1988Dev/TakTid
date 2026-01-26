@@ -46,6 +46,13 @@ watch(
   () => {
     if (isHydrating.value) return
     if (!props.entry) return
+
+    //const same =
+    //  normalizeTime(start.value) === normalizeTime(props.entry.startTime) &&
+    //  normalizeTime(end.value) === normalizeTime(props.entry.endTime) &&
+    //  normalizedBreakMinutes.value === props.entry.breakMinutes
+
+    //isDirty.value = !same
     isDirty.value = true
   }
 )
@@ -65,8 +72,10 @@ watch(
     if (e.kind === 'WORK') {
       mode.value = 'WORK'
       kind.value = e.type
-      start.value = e.startTime
-      end.value = e.endTime
+      //start.value = e.startTime
+      start.value = normalizeTime(e.startTime)
+      //end.value = e.endTime
+      end.value = normalizeTime(e.endTime)
       breakMinutes.value = e.breakMinutes ?? 0
       projectId.value = e.projectId
       comment.value = e.comment ?? ''
@@ -81,8 +90,10 @@ watch(
     //if (isExtraEntry(e)) {
     else if (e.kind === 'EXTRA') {
       mode.value = 'EXTRA'
-      start.value = e.startTime ?? '08:00'
-      end.value = e.endTime ?? '17:00'
+      //start.value = e.startTime ?? '08:00'
+      start.value = normalizeTime(e.startTime) ?? '08:00'
+      //end.value = e.endTime ?? '17:00'
+      end.value = normalizeTime(e.endTime) ?? '17:00'
       breakMinutes.value = e.breakMinutes ?? 60
       projectId.value = e.projectId
       comment.value = e.comment ?? ''
@@ -112,13 +123,14 @@ watch(
   p => {
     if (!p) return
     kind.value = p.type
+    if (props.entry) return
     breakMinutes.value = p.breakMinutes ?? 60
     projectId.value = p.projectId
     //if (!isAbsence.value) {
     //  mode.value = p.type === TimeKind.EXTRA ? 'EXTRA' : 'WORK'
     //}
   },
-  { immediate: true },
+  //{ immediate: true },
 )
 const calculatedHours = computed(() => {
   if (props.entry && !isDirty.value) {
@@ -148,6 +160,10 @@ const calculatedHours = computed(() => {
 */
 function hasProjectId(e: DayEntry): e is DayEntry & { projectId: string } {
   return e.kind === 'WORK' || e.kind === 'EXTRA'
+}
+
+function normalizeTime(t: string) {
+  return t.slice(0, 5)
 }
 
 const isEdit = computed(() => !!props.entry)
