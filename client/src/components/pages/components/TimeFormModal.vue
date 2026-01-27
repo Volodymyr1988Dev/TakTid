@@ -5,7 +5,7 @@ import type { TimeSuggestion } from '../../../types/Suggestion.type'
 
 const props = defineProps<{
   date: string
-  entry?: DayEntry  | null
+  entry?: DayEntry | null
   preset?: TimeSuggestion | null
 }>()
 
@@ -18,135 +18,121 @@ const {
   end,
   breakMinutes,
   comment,
-  //projectId,
-  //images,
   imageStore,
-  errors,
   calculatedHours,
-  //isEdit,
-  //isAbsence,
-  onImagesSelected,
-  removeExistingImage,
+  isEdit,
   save,
+  remove,
 } = form
+
+async function onSave() {
+  await save()
+  emit('saved') // 🔥 оновлення календаря
+}
+
+async function onDelete() {
+  await remove()
+  emit('saved')
+}
 </script>
 
 <template>
   <div class="modal">
-    <button @click="emit('cancel')">
-      ← Back
-    </button>
+    <header>
+      <button class="back" @click="emit('cancel')">← Back</button>
+      <h3>{{ isEdit ? 'Edit time entry' : 'Add time entry' }}</h3>
+    </header>
 
-    <input
-      v-model="start" 
-      type="time"  
-    >
-    <span class="error">{{ errors.start }}</span>
+    <label>
+      Start time
+      <input v-model="start" type="time" />
+    </label>
 
-    <input 
-      v-model="end"
-      type="time" 
-    >
-    <span class="error">{{ errors.end }}</span>
+    <label>
+      End time
+      <input v-model="end" type="time" />
+    </label>
 
-    <input
-      v-model.number="breakMinutes"
-      type="number"
-    >
+    <label>
+      Break (minutes)
+      <input v-model.number="breakMinutes" type="number" min="0" />
+    </label>
 
-    <input 
-      type="file" 
-      multiple 
-      accept="image/*" 
-      @change="onImagesSelected" 
-    >
+    <label>
+      Comment
+      <textarea v-model="comment" />
+    </label>
 
-    <!-- EXISTING -->
-    <div v-if="imageStore.images.length">
-      <div 
-        v-for="img in imageStore.images" 
-        :key="img.id"
-      >
-        <img :src="img.url">
-        <button @click="removeExistingImage(img.id)">
-          ✕
-        </button>
-      </div>
+    <p class="hours">
+      Worked: <strong>{{ calculatedHours }} h</strong>
+    </p>
+
+    <div class="actions">
+      <button v-if="isEdit" class="danger" @click="onDelete">
+        Delete
+      </button>
+      <button class="primary" @click="onSave">
+        Save
+      </button>
     </div>
-
-    <textarea v-model="comment" />
-
-    <p>{{ calculatedHours }} h</p>
-
-    <button @click="save">
-      Save
-    </button>
   </div>
 </template>
 
 <style scoped>
-.modal-header {
+.modal {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  max-width: 420px;
+}
+
+header {
   display: flex;
-  justify-content: flex-start;
-  margin-bottom: 8px;
+  align-items: center;
+  gap: 12px;
 }
 
-.back-btn {
-  background: none;
-  border: none;
+label {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
   font-size: 14px;
-  cursor: pointer;
-  color: #374151;
 }
 
-.extra-work {
-  margin-top: 8px;
-  min-height: 60px;
-}
-.selected-images {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #444;
+input,
+textarea {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
-.selected-images ul {
-  padding-left: 16px;
-}
-
-.selected-images li {
-  line-height: 1.4;
-}
-.existing-images {
+.hours {
   margin-top: 12px;
 }
 
-.thumbs {
+.actions {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 16px;
 }
 
-.thumb {
-  position: relative;
-}
-
-.thumb img {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-
-.thumb .remove {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #e11d48;
+.primary {
+  background: #2563eb;
   color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.danger {
+  background: #dc2626;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.back {
+  background: none;
   border: none;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
   cursor: pointer;
 }
 </style>

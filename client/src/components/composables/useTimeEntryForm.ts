@@ -4,6 +4,7 @@ import type { DayEntry } from '../../types/DayEntry.type'
 import type { TimeSuggestion } from '../../types/Suggestion.type'
 import type { TimeEntryUpdatePayload } from '../../types/TimeEntryUpdatePayload.type'
 //import type { TimeEntryFormKind } from '../../types/TimeEntryFormKind'
+//import { normalizeTime } from '../pages/components/helpers/helpers'
 import { calculateWorkedMinutes } from '../../components/pages/components/helpers/time'
 import { useTimeEntryStore } from '../../stores/timeEntry.store'
 import { useProjectAssignmentStore } from '../../stores/projectAssignment.store'
@@ -34,19 +35,19 @@ export function useTimeEntryForm(props: {
   const projectId = ref<string | undefined>()
   const images = ref<File[]>([])
 
-  /* ================= UI STATE ================= */
-  const errors = ref<Record<string, string>>({})
+  /* ================= UI ================= */
+  //const errors = ref<Record<string, string>>({})
   const isSaving = ref(false)
   const isHydrating = ref(false)
   const isDirty = ref(false)
 
-  /* ================= FLAGS ================= */
   const isEdit = computed(() => !!props.entry)
 
-  const isAbsence = computed(() =>
-      kind.value === 'SICK' ||
-      kind.value === 'VAB' ||
-      kind.value === 'VACATION',
+  const isAbsence = computed(
+    () =>
+      kind.value === TimeKind.SICK ||
+      kind.value === TimeKind.VAB ||
+      kind.value === TimeKind.VACATION,
   )
 
   const isExtra = computed(() => kind.value === TimeKind.EXTRA)
@@ -56,45 +57,44 @@ export function useTimeEntryForm(props: {
     return Number.isFinite(v) && v >= 0 ? v : 0
   })
 
-  /* ================= VALIDATION ================= */
-  function validate(): boolean {
-    errors.value = {}
+    function normalizeTime(
+    time?: string | null,
+    fallback = '00:00',
+    ): string {
+    if (!time) return fallback
 
-    if (!isAbsence.value) {
-      if (!start.value) errors.value.start = 'Start time is required'
-      if (!end.value) errors.value.end = 'End time is required'
+    return time.slice(0, 5)
     }
 
-    if (kind.value === TimeKind.WORK && !projectId.value) {
-      errors.value.projectId = 'Project is required'
-    }
-
-    return Object.keys(errors.value).length === 0
+  function requireProjectId(): string {
+  if (!projectId.value) {
+    throw new Error('Project is required for this entry type')
   }
+  return projectId.value
+}
 
-  /* ================= PREFILL: ENTRY ================= */
+  /* ================= PREFILL ENTRY ================= */
   watch(
     () => props.entry,
-    async (e) => {
+    async e => {
       if (!e) return
 
       isHydrating.value = true
       isDirty.value = false
+
       if (isAbsenceEntry(e)) {
         kind.value = e.type
       } else if (isExtraEntry(e)) {
-        kind.value = 'EXTRA'
+        kind.value = TimeKind.EXTRA
       } else {
         kind.value = e.type
       }
 
       comment.value = e.comment ?? ''
-      //kind.value = isAbsenceEntry(e) ? e.type : TimeKind.WORK
-      //comment.value = e.comment ?? ''
 
       if (isWorkEntry(e) || isExtraEntry(e)) {
-        start.value = e.startTime
-        end.value = e.endTime
+        start.value = normalizeTime(e.startTime)
+        end.value = normalizeTime(e.endTime)
         breakMinutes.value = e.breakMinutes
         projectId.value = e.projectId
       }
@@ -108,7 +108,7 @@ export function useTimeEntryForm(props: {
     { immediate: true },
   )
 
-  /* ================= PREFILL: PRESET ================= */
+  /* ================= PREFILL PRESET ================= */
   watch(
     () => props.preset,
     p => {
@@ -124,18 +124,6 @@ export function useTimeEntryForm(props: {
   watch([start, end, breakMinutes], () => {
     if (!isHydrating.value) isDirty.value = true
   })
-
-  /* ================= IMAGES ================= */
-  function onImagesSelected(e: Event) {
-    const input = e.target as HTMLInputElement
-    if (!input.files) return
-    //images.value = [...images.value, ...Array.from(input.files)]
-    images.value.push(...Array.from(input.files))
-  }
-
-  function removeExistingImage(id: string) {
-    imageStore.remove(id)
-  }
 
   /* ================= HOURS ================= */
   const calculatedHours = computed(() => {
@@ -154,8 +142,7 @@ export function useTimeEntryForm(props: {
 
   /* ================= SAVE ================= */
   async function save() {
-    if (isSaving.value || !validate()) return
-
+    if (isSaving.value) return
     isSaving.value = true
 
     try {
@@ -175,13 +162,14 @@ export function useTimeEntryForm(props: {
 
         return
       }
+      const pid = requireProjectId()
 
       const payload: TimeEntryUpdatePayload = {
         startTime: start.value,
         endTime: end.value,
         breakMinutes: normalizedBreakMinutes.value,
         comment: comment.value,
-        projectId: projectId.value,
+        projectId: pid,
       }
 
       if (isExtra.value) {
@@ -189,7 +177,7 @@ export function useTimeEntryForm(props: {
           ? await assignmentStore.update(props.entry.id, payload)
           : await assignmentStore.create({
               date: props.date,
-              projectId: projectId.value!,
+              projectId: pid,
               ...payload,
             })
       } else {
@@ -211,30 +199,34 @@ export function useTimeEntryForm(props: {
     }
   }
 
+  /* ================= DELETE ================= */
+  async function remove() {
+    if (!props.entry) return
+    if (!confirm('Delete this entry?')) return
+
+    if (props.entry.kind === 'EXTRA') {
+      await assignmentStore.remove(props.entry.id)
+    } else {
+      await timeStore.remove(props.entry.id)
+    }
+  }
+
   return {
-    // state
     start,
     end,
     breakMinutes,
     kind,
     comment,
     projectId,
-    images,
 
-    // images
     imageStore,
-    onImagesSelected,
-    removeExistingImage,
-
-    // ui
-    errors,
-    isEdit,
-    isAbsence,
-    isExtra,
-    isSaving,
     calculatedHours,
 
-    // actions
+    isEdit,
+    isAbsence,
+    isSaving,
+
     save,
+    remove,
   }
 }
