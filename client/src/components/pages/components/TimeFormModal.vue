@@ -27,7 +27,7 @@ const {
 
 async function onSave() {
   await save()
-  emit('saved') // 🔥 оновлення календаря
+  emit('saved')
 }
 
 async function onDelete() {
@@ -39,23 +39,38 @@ async function onDelete() {
 <template>
   <div class="modal">
     <header>
-      <button class="back" @click="emit('cancel')">← Back</button>
+      <button 
+        class="back" 
+        @click="emit('cancel')"
+      >
+        ← Back
+      </button>
       <h3>{{ isEdit ? 'Edit time entry' : 'Add time entry' }}</h3>
     </header>
 
     <label>
       Start time
-      <input v-model="start" type="time" />
+      <input 
+        v-model="start" 
+        type="time" 
+      >
     </label>
 
     <label>
       End time
-      <input v-model="end" type="time" />
+      <input 
+        v-model="end" 
+        type="time" 
+      >
     </label>
 
     <label>
       Break (minutes)
-      <input v-model.number="breakMinutes" type="number" min="0" />
+      <input 
+        v-model.number="breakMinutes" 
+        type="number" 
+        min="0" 
+      >
     </label>
 
     <label>
@@ -68,10 +83,17 @@ async function onDelete() {
     </p>
 
     <div class="actions">
-      <button v-if="isEdit" class="danger" @click="onDelete">
+      <button 
+        v-if="isEdit" 
+        class="danger" 
+        @click="onDelete"
+      >
         Delete
       </button>
-      <button class="primary" @click="onSave">
+      <button 
+        class="primary" 
+        @click="onSave"
+      >
         Save
       </button>
     </div>
