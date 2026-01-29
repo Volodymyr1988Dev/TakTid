@@ -22,10 +22,14 @@ const {
   breakMinutes,
   calculatedHours,
   images,
+  kind,
 } = useTimeEntryForm(props)
 const emit = defineEmits(['saved', 'cancel'])
-
-const form = useTimeEntryForm(props)
+async function onSave() {
+  await save()
+  emit('saved')
+}
+//const form = useTimeEntryForm(props)
 </script>
 
 <template>
@@ -40,11 +44,11 @@ const form = useTimeEntryForm(props)
         </button>
       </header>
 
-      <h3>{{ form.isEdit ? 'Edit time' : 'Register time' }}</h3>
+      <h3>{{ isEdit ? 'Edit time' : 'Register time' }}</h3>
       <p><strong>Date:</strong> {{ date }}</p>
 
       <select 
-        v-if="!form.isAbsence" 
+        v-if="!isAbsence" 
         v-model="mode"
       >
         <option value="WORK">
@@ -81,7 +85,7 @@ const form = useTimeEntryForm(props)
       </div>
 
       <p v-else>
-        Absence: {{ form.kind }}
+        Absence: {{ kind }}
       </p>
 
       <textarea 
@@ -100,7 +104,7 @@ const form = useTimeEntryForm(props)
         <button 
           class="primary" 
           :disabled="isSaving" 
-          @click="save"
+          @click="onSave"
         >
           Save
         </button>
