@@ -49,8 +49,9 @@ export interface WorkDayEntry extends BaseDayEntry//, TimeEntry
   breakMinutes: number
   comment?: string
 
-  projectId?: string
+  projectId: string
   project?: Project
+
 }
 
 /**

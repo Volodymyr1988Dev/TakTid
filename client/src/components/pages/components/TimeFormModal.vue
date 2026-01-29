@@ -1,135 +1,139 @@
 <script setup lang="ts">
 import { useTimeEntryForm } from '../../composables/useTimeEntryForm'
+//import { TimeKind } from '../../../types/timeKind.enum'
 import type { DayEntry } from '../../../types/DayEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
 
 const props = defineProps<{
   date: string
-  entry?: DayEntry | null
+  entry?: DayEntry  | null
   preset?: TimeSuggestion | null
 }>()
-
-const emit = defineEmits(['saved', 'cancel'])
-
-const form = useTimeEntryForm(props)
-
 const {
+  comment,
+  isSaving,
+  save,
+  remove,
+  isEdit,
+  isAbsence,
+  mode,
   start,
   end,
   breakMinutes,
-  comment,
-  //imageStore,
   calculatedHours,
-  isEdit,
-  save,
-  remove,
-} = form
+  images,
+} = useTimeEntryForm(props)
+const emit = defineEmits(['saved', 'cancel'])
 
-async function onSave() {
-  await save()
-  emit('saved')
-}
-
-async function onDelete() {
-  await remove()
-  emit('saved')
-}
+const form = useTimeEntryForm(props)
 </script>
 
 <template>
-  <div class="modal">
-    <header>
-      <button 
-        class="back" 
-        @click="emit('cancel')"
-      >
-        ← Back
-      </button>
-      <h3>{{ isEdit ? 'Edit time entry' : 'Add time entry' }}</h3>
-    </header>
+  <div class="modal-backdrop">
+    <div class="modal">
+      <header class="modal-header">
+        <button 
+          class="back-btn" 
+          @click="emit('cancel')"
+        >
+          ← Back
+        </button>
+      </header>
 
-    <label>
-      Start time
-      <input 
-        v-model="start" 
-        type="time" 
-      >
-    </label>
+      <h3>{{ form.isEdit ? 'Edit time' : 'Register time' }}</h3>
+      <p><strong>Date:</strong> {{ date }}</p>
 
-    <label>
-      End time
-      <input 
-        v-model="end" 
-        type="time" 
+      <select 
+        v-if="!form.isAbsence" 
+        v-model="mode"
       >
-    </label>
+        <option value="WORK">
+          Work
+        </option>
+        <option value="EXTRA">
+          Extra work
+        </option>
+      </select>
 
-    <label>
-      Break (minutes)
-      <input 
-        v-model.number="breakMinutes" 
-        type="number" 
-        min="0" 
-      >
-    </label>
+      <div v-if="!isAbsence">
+        <input 
+          v-model="start" 
+          type="time" 
+        >
+        <input 
+          v-model="end" 
+          type="time" 
+        >
+        <input 
+          v-model.number="breakMinutes" 
+          type="number" 
+          min="0" 
+        >
 
-    <label>
-      Comment
-      <textarea v-model="comment" />
-    </label>
+        <input 
+          type="file" 
+          multiple 
+          accept="image/*" 
+          @change="images.onSelect" 
+        >
 
-    <p class="hours">
-      Worked: <strong>{{ calculatedHours }} h</strong>
-    </p>
+        <p>{{ calculatedHours }} h</p>
+      </div>
 
-    <div class="actions">
-      <button 
-        v-if="isEdit" 
-        class="danger" 
-        @click="onDelete"
-      >
-        Delete
-      </button>
-      <button 
-        class="primary" 
-        @click="onSave"
-      >
-        Save
-      </button>
+      <p v-else>
+        Absence: {{ form.kind }}
+      </p>
+
+      <textarea 
+        v-model="comment" 
+        placeholder="Comment" 
+      />
+
+      <div class="actions">
+        <button 
+          v-if="isEdit" 
+          class="danger" 
+          @click="remove"
+        >
+          Delete
+        </button>
+        <button 
+          class="primary" 
+          :disabled="isSaving" 
+          @click="save"
+        >
+          Save
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .modal {
   background: white;
   padding: 16px;
   border-radius: 12px;
-  max-width: 420px;
+  width: 420px;
 }
 
-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.modal-header {
+  margin-bottom: 8px;
 }
 
-label {
-  display: flex;
-  flex-direction: column;
-  margin-top: 12px;
-  font-size: 14px;
-}
-
-input,
-textarea {
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.hours {
-  margin-top: 12px;
+.back-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .actions {
@@ -150,11 +154,5 @@ textarea {
   color: white;
   padding: 8px 16px;
   border-radius: 8px;
-}
-
-.back {
-  background: none;
-  border: none;
-  cursor: pointer;
 }
 </style>
