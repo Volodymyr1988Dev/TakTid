@@ -76,7 +76,7 @@ export function useTimeEntryForm(props: {
         start.value = e.startTime.slice(0, 5)
         end.value = e.endTime.slice(0, 5)
         breakMinutes.value = e.breakMinutes
-        projectId.value = e.projectId
+        projectId.value = e.projectId ?? null
         mode.value = 'WORK'
       }
 
