@@ -134,9 +134,9 @@ function mapToDayEntries(
       id: a.id,
       date: a.date,
       hours: a.hours,
-      projectId: a.project.id,
       project: a.project,
-
+      projectId: a.project.id,
+      
       comment: a.comment ?? '',
       startTime: a.startTime,
       endTime: a.endTime,

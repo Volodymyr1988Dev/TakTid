@@ -5,10 +5,11 @@ import type { TimeSuggestion } from '../../types/Suggestion.type'
 import type { TimeEntryUpdatePayload } from '../../types/TimeEntryUpdatePayload.type'
 import { calculateWorkedMinutes } from '../pages/components/helpers/time'
 import { useTimeEntryStore } from '../../stores/timeEntry.store'
-import { useProjectAssignmentStore } from '../../stores/projectAssignment.store'
+//import { useProjectAssignmentStore } from '../../stores/projectAssignment.store'
 import { useTimeEntryImages } from './useTimeEntryImages'
 import { useProjectStore } from '../../stores/project.store'
 import { EntryState } from '../../types/EntryState';
+import { useExtraEntryForm } from './useExtraEntryForm'
 
 export function useTimeEntryForm(props: {
   date: string
@@ -16,16 +17,18 @@ export function useTimeEntryForm(props: {
   preset?: TimeSuggestion | null
 }) {
   const timeStore = useTimeEntryStore()
-  const assignmentStore = useProjectAssignmentStore()
+  //const assignmentStore = useProjectAssignmentStore()
   const images = useTimeEntryImages()
   const projectStore = useProjectStore()
+  const extraForm = useExtraEntryForm({
+  date: props.date,
+  entry: props.entry,
+  })
 
+  
   /* STATE */
   const state = computed<EntryState>(() => {
-    if (props.entry) {
-      return props.entry.kind
-    }
-
+    if (props.entry) {return props.entry.kind}
     if (isAbsence.value) return EntryState.ABSENCE
     if (mode.value === 'EXTRA') return EntryState.EXTRA
     return EntryState.WORK
@@ -103,16 +106,21 @@ export function useTimeEntryForm(props: {
       comment.value = e.comment ?? ''
 
       //if (e.kind === 'WORK') {
-      if (e.kind === EntryState.WORK) {
+      if (e.kind === EntryState.WORK /*|| e.kind === EntryState.EXTRA*/) {
         kind.value = e.type
         start.value = e.startTime.slice(0, 5)
         end.value = e.endTime.slice(0, 5)
         breakMinutes.value = e.breakMinutes
         projectId.value = e.projectId ?? null
         mode.value = 'WORK'
+        //mode.value = e.kind === EntryState.EXTRA ? 'EXTRA' : 'WORK'
+      }
+      if (e.kind === EntryState.EXTRA) {
+        mode.value = 'EXTRA'
       }
 
       //if (e.kind === 'EXTRA') {
+      /*
       if (e.kind === EntryState.EXTRA) {
         start.value = e.startTime.slice(0, 5)
         end.value = e.endTime.slice(0, 5)
@@ -120,7 +128,7 @@ export function useTimeEntryForm(props: {
         projectId.value = e.projectId
         mode.value = 'EXTRA'
       }
-
+      */
       //if (e.kind === 'ABSENCE') {
       if (e.kind === EntryState.ABSENCE) {
         kind.value = e.type
@@ -156,16 +164,18 @@ export function useTimeEntryForm(props: {
     if (!isHydrating.value) isDirty.value = true
   })
 
+  
   /* SAVE */
   async function save(): Promise<DayEntry | undefined> {
     //let saved
-    if (props.entry?.kind === EntryState.EXTRA && state.value !== EntryState.EXTRA ) {
-      throw new Error ('Cannot convert Extra to Work')
-    }
+
     if (isSaving.value) return
     isSaving.value = true
 
     try {
+      if (state.value === EntryState.EXTRA) {
+        return await extraForm.save()
+      }
       /* ABSENCE */
       //if (isAbsence.value) {
       if (state.value === EntryState.ABSENCE) {
@@ -196,6 +206,7 @@ export function useTimeEntryForm(props: {
 
       /* EXTRA */
       //if (mode.value === 'EXTRA') {
+      /*
       if (state.value === EntryState.EXTRA) {
         if (!projectId.value) {
           alert('Project is required')
@@ -234,7 +245,7 @@ export function useTimeEntryForm(props: {
           comment: saved.comment ?? '',
         }
       }
-
+      */
       /* WORK */
       const payload: TimeEntryUpdatePayload = {
         startTime: start.value,
@@ -281,7 +292,8 @@ export function useTimeEntryForm(props: {
     if (
       props.entry.kind === EntryState.EXTRA 
     ) {
-      await assignmentStore.remove(props.entry.id)
+      //await assignmentStore.remove(props.entry.id)
+      await extraForm.remove()
       //return
     } else {
       await timeStore.remove(props.entry.id)

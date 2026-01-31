@@ -33,6 +33,8 @@ const {
   previews,
   //onSelect
 } = images
+
+//const form = useTimeEntryForm(props)
 //const emit = defineEmits(['saved', 'cancel'])
 const emit = defineEmits<{
   (e: 'saved', entry: DayEntry): void
@@ -69,7 +71,7 @@ async function onDelete() {
         v-if="project"
         class="project-pill"
       >
-        <strong>{{ project.city }}</strong>
+        <strong>{{ project.city }}  </strong>
         <small>{{ project.address }}</small>
       </div>
       <select 
