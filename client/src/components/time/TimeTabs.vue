@@ -59,6 +59,10 @@ function mapToDayEntries(
     //  ? projectStore.getById(e.projectId)
     //  : undefined
     //if (!projectId) {console.warn('WORK entry without projectId', e)}
+    const project =
+    e.project ??
+    (e.projectId ? projectStore.getById(e.projectId) : undefined)
+    console.log('project', project)
     if (e.type === TimeKind.WORK && !projectId) {
     console.warn('WORK entry without projectId', e)
     }
@@ -139,40 +143,6 @@ async function loadEntries() {
   ])
 
   entries.value = mapToDayEntries(timeEntries, assignments)
-  /*
-  const timeEntries = await getTimeEntries(
-    from.format('YYYY-MM-DD'),
-    to.format('YYYY-MM-DD'),
-  )
-    //let assignments: ProjectAssignment[] = []
-    let assignments = []
-   try {
-    assignments = await getProjectAssignments(
-      from.format('YYYY-MM-DD'),
-      to.format('YYYY-MM-DD'),
-    )
-    } catch (e) {
-      console.warn('Assignments not loaded', e)
-    }  
-  entries.value = [
-    ...timeEntries.map(e => ({
-      ...e,
-      kind: 'WORK' as const,
-      project: projectStore.getById(e.projectId),
-    })),
-    ...assignments.map((a : ProjectAssignment) => ({
-      kind: 'EXTRA' as const,
-      id: a.id,
-      date: a.date,
-      hours: a.hours,
-      projectId: a.project.id,
-      comment: a.comment,
-      startTime: a.startTime,
-      endTime: a.endTime,
-      breakMinutes: a.breakMinutes,
-    })),
-  ]
-  */
 }
 
 const totals = computed<Totals>(() => {
@@ -239,11 +209,6 @@ function sumHours(list: DayEntry[]) {
 
 const hoursForDay = (day: Dayjs): number =>
 sumHours(entries.value.filter(e => dayjs(e.date).isSame(day, 'day')))
-  //entries.value
-    //.filter(e => e.date === day.format('YYYY-MM-DD'))
-
-    //.filter(e => dayjs(e.date).isSame(day, 'day'))
-    //.reduce((sum, e) => sum + Number(e.hours), 0)
 
 const weekTotal = computed(() => {
   if (mode.value !== 'week') return 0
@@ -293,61 +258,26 @@ function cancelModal() {
     : 'tabs'
 }
 
-async function onSaved() {
+async function onSaved(entry: DayEntry) {
   editEntry.value = null
   selectedSuggestion.value = null
-  view.value = 'calendar'
-  await loadEntries()
+
+   const index = entries.value.findIndex(e => e.id === entry.id)
+
+  if (index === -1) {
+    // 🟢 CREATE
+    entries.value.push(entry)
+  } else {
+    // 🟡 UPDATE
+    entries.value[index] = entry
+  }
+
+  entries.value = [...entries.value]
+
   
-  /*
-  const from =
-    mode.value === 'week'
-      ? current.value.startOf('isoWeek')
-      : current.value.startOf('month')
-
-  const to =
-    mode.value === 'week'
-      ? current.value.endOf('isoWeek')
-      : current.value.endOf('month')
-
-  //entries.value = await getTimeEntries(
-  //  from.format('YYYY-MM-DD'),
-  //  to.format('YYYY-MM-DD'),
-  //)
-  const timeEntries = await getTimeEntries(
-    from.format('YYYY-MM-DD'),
-    to.format('YYYY-MM-DD'),
-  )
-  let assignments = []
-  try {
-    assignments = await getProjectAssignments(
-      from.format('YYYY-MM-DD'),
-      to.format('YYYY-MM-DD'),
-    )
-    } catch (e) {
-      console.warn('Assignments not loaded', e)
-    }
-  //const assignments = await getProjectAssignments(
-  //  from.format('YYYY-MM-DD'),
-  //  to.format('YYYY-MM-DD'),
-  //)
-
-  entries.value = [
-    ...timeEntries.map(e => ({ ...e, kind: 'WORK' as const, project: projectStore.getById(e.projectId)})),
-    ...assignments.map((a : ProjectAssignment) => ({
-      kind: 'EXTRA' as const,
-      id: a.id,
-      date: a.date,
-      hours: a.hours,
-      project: a.project,
-      projectId: a.project.id,
-      comment: a.comment,
-      startTime: a.startTime,
-      endTime: a.endTime,
-      breakMinutes: a.breakMinutes,
-    })),
-  ]
-  */
+  view.value = 'calendar'
+  //await loadEntries()
+  
 }
 
 function prev() {

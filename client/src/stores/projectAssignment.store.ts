@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import * as api from '../api/projectAssignment.api'
+import type { ProjectAssignment } from '../types/ProjectAssignment.type'
 
 export const useProjectAssignmentStore = defineStore('projectAssignment', () => {
   async function create(payload: {
@@ -9,8 +10,9 @@ export const useProjectAssignmentStore = defineStore('projectAssignment', () => 
       startTime?: string
       endTime?: string
       breakMinutes?: number
-  }) {
-    await api.createExtraWork(payload)
+  }): Promise<ProjectAssignment> {
+    const { data } = await api.createExtraWork(payload)
+    return data
   }
 
   async function update(id: string, payload: {
@@ -18,8 +20,9 @@ export const useProjectAssignmentStore = defineStore('projectAssignment', () => 
         startTime?: string
         endTime?: string
         breakMinutes?: number
-  }) {
-    await api.updateExtraWork(id, payload)
+  }): Promise<ProjectAssignment> {
+    const { data } = await api.updateExtraWork(id, payload)
+    return data
   }
 
   async function remove(id: string) {

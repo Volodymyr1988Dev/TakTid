@@ -3,6 +3,9 @@ import { useTimeEntryForm } from '../../composables/useTimeEntryForm'
 //import { TimeKind } from '../../../types/timeKind.enum'
 import type { DayEntry } from '../../../types/DayEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
+//import { loadProjects } from '../../composables/useProjectLoader'
+//import { EntryState } from '../../../types/EntryState';
+//import { computed } from 'vue'
 
 const props = defineProps<{
   date: string
@@ -23,11 +26,22 @@ const {
   calculatedHours,
   images,
   kind,
+  //projectId,
+  project,
 } = useTimeEntryForm(props)
-const emit = defineEmits(['saved', 'cancel'])
+const {
+  previews,
+  //onSelect
+} = images
+//const emit = defineEmits(['saved', 'cancel'])
+const emit = defineEmits<{
+  (e: 'saved', entry: DayEntry): void
+  (e: 'cancel'): void
+}>()
+
 async function onSave() {
-  await save()
-  emit('saved')
+  const entry = await save()
+  if (entry) emit('saved', entry)
 }
 //const form = useTimeEntryForm(props)
 </script>
@@ -46,7 +60,13 @@ async function onSave() {
 
       <h3>{{ isEdit ? 'Edit time' : 'Register time' }}</h3>
       <p><strong>Date:</strong> {{ date }}</p>
-
+      <div
+        v-if="project"
+        class="project-pill"
+      >
+        <strong>{{ project.city }}</strong>
+        <small>{{ project.address }}</small>
+      </div>
       <select 
         v-if="!isAbsence" 
         v-model="mode"
@@ -80,6 +100,13 @@ async function onSave() {
           accept="image/*" 
           @change="images.onSelect" 
         >
+        <div class="previews">
+          <img
+            v-for="(src, i) in previews"
+            :key="i"
+            :src="src"
+          >
+        </div>
 
         <p>{{ calculatedHours }} h</p>
       </div>
@@ -114,6 +141,13 @@ async function onSave() {
 </template>
 
 <style scoped>
+.project-pill {
+  background: #f1f5f9;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -158,5 +192,16 @@ async function onSave() {
   color: white;
   padding: 8px 16px;
   border-radius: 8px;
+}
+.previews {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.previews img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 6px;
 }
 </style>

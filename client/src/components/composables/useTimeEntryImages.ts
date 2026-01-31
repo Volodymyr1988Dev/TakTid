@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useProjectImageStore } from '../../stores/projectImage.store'
 
 const MAX_FILES = 10
@@ -7,6 +7,15 @@ const MAX_SIZE = 10 * 1024 * 1024
 export function useTimeEntryImages() {
   const store = useProjectImageStore()
   const files = ref<File[]>([])
+  const previews = ref<string[]>([])
+  // const previews = computed<string[]>(() =>
+  //  files.value.map(file => URL.createObjectURL(file)),
+  //)
+
+  watch(files, () => {
+    previews.value.forEach(URL.revokeObjectURL)
+    previews.value = files.value.map(f => URL.createObjectURL(f))
+  })
 
   function onSelect(e: Event) {
     const input = e.target as HTMLInputElement
@@ -20,11 +29,14 @@ export function useTimeEntryImages() {
       alert('Max 10 images allowed')
       return
     }
+    //previews.value = selected.map(file =>
+    //URL.createObjectURL(file),
+  //)
 
-    files.value = valid
+    //files.value = valid
+    files.value = valid //selected
     input.value = ''
   }
-
   async function upload(projectId?: string) {
     if (!projectId || files.value.length === 0) return
     await store.upload(projectId, files.value)
@@ -34,9 +46,11 @@ export function useTimeEntryImages() {
   function clear() {
     files.value = []
   }
+  
 
   return {
     files,
+    previews,
     images: store.images,
     onSelect,
     upload,

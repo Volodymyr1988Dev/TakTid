@@ -20,6 +20,8 @@ export const useTimeEntryStore = defineStore('timeEntries', () => {
   async function add(payload: TimeEntryCreatePayload) {
     const { data } = await createTimeEntry(payload)
     entries.value.unshift(data)
+
+    return data
   }
 
    async function remove(id: string) {
@@ -34,6 +36,7 @@ export const useTimeEntryStore = defineStore('timeEntries', () => {
     if (idx !== -1) {
       entries.value[idx] = data
     }
+    return data
   }
 
   return { entries, load, add, update, remove }
