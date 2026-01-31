@@ -37,11 +37,16 @@ const {
 const emit = defineEmits<{
   (e: 'saved', entry: DayEntry): void
   (e: 'cancel'): void
+  (e: 'deleted'): void
 }>()
 
 async function onSave() {
   const entry = await save()
   if (entry) emit('saved', entry)
+}
+async function onDelete() {
+  await remove()
+    emit('deleted')
 }
 //const form = useTimeEntryForm(props)
 </script>
@@ -124,7 +129,7 @@ async function onSave() {
         <button 
           v-if="isEdit" 
           class="danger" 
-          @click="remove"
+          @click="onDelete"
         >
           Delete
         </button>

@@ -303,6 +303,14 @@ function addWork() {
   } as TimeSuggestion
   view.value = 'tabs'
 }
+
+async function reloadCalendar () {
+  editEntry.value = null
+  selectedSuggestion.value = null
+
+  await loadEntries()
+  view.value = 'calendar'
+}
 </script>
 
 <template>
@@ -379,6 +387,7 @@ function addWork() {
     :preset="selectedSuggestion"
     :entry="editEntry"
     @cancel="cancelModal"
+    @deleted="reloadCalendar"
     @saved="onSaved"
   />
 </template>
