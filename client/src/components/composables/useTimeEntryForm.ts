@@ -149,6 +149,9 @@ export function useTimeEntryForm(props: {
   /* SAVE */
   async function save(): Promise<DayEntry | undefined> {
     //let saved
+    if (props.entry?.kind === EntryState.EXTRA && state.value !== EntryState.EXTRA ) {
+      throw new Error ('Cannot convert Extra to Work')
+    }
     if (isSaving.value) return
     isSaving.value = true
 

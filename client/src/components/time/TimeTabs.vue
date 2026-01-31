@@ -22,6 +22,7 @@ import { TimeKind } from '../../types/timeKind.enum'
 import { useAuthStore } from '../../stores/auth.store'
 import { useProjectStore } from '../../stores/project.store'
 import type { Totals } from '../../types/totals'
+import { EntryState } from '../../types/EntryState'
 
 /* ================= STATE ================= */
 type ViewState = 'calendar' | 'tabs' |'dayEntries' | 'modal'
@@ -88,7 +89,8 @@ function mapToDayEntries(
 
     if (isAbsence) {
     return {
-      kind: 'ABSENCE',
+      //kind: 'ABSENCE',
+      kind: EntryState.ABSENCE,
       id: e.id,
       date: e.date,
       hours: Number(e.hours),
@@ -98,12 +100,14 @@ function mapToDayEntries(
     }
     return {
       //...e,
-      kind: 'WORK',
+      //kind: 'WORK',
+      kind: EntryState.WORK,
       id: e.id,
       date: e.date,
       //type: e.type,
       //type: e.type as 'WORK' | 'MEETING',
       type: e.type as 'WORK',
+      //type: e.type,
       startTime: e.startTime,
       endTime: e.endTime,
       breakMinutes: e.breakMinutes ?? 0,
@@ -125,7 +129,8 @@ function mapToDayEntries(
     }
 
     return {
-      kind: 'EXTRA',
+      //kind: 'EXTRA',
+      kind: EntryState.EXTRA,
       id: a.id,
       date: a.date,
       hours: a.hours,
