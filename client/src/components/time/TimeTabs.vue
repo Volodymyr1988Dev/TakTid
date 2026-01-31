@@ -260,10 +260,10 @@ function cancelModal() {
     : 'tabs'
 }
 
-async function onSaved(entry: DayEntry) {
+async function onSaved(/*entry: DayEntry*/) {
   editEntry.value = null
   selectedSuggestion.value = null
-
+  /*
    const index = entries.value.findIndex(e => e.id === entry.id)
 
   if (index === -1) {
@@ -275,8 +275,9 @@ async function onSaved(entry: DayEntry) {
   }
 
   entries.value = [...entries.value]
+  */
 
-  
+  await loadEntries()
   view.value = 'calendar'
   //await loadEntries()
   

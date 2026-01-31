@@ -23,7 +23,7 @@ async function login() {
     //await auth.initAuth()
     router.replace('/dashboard')
   } catch (e) {
-    alert('Невірний email або пароль')
+    alert('Invalid password or email')
     console.log(e)
   }
 }
@@ -49,7 +49,7 @@ async function login() {
     </button>
 
     <p>
-      Немає акаунту?
+      Don't have account?
       <router-link to="/register">
         Register
       </router-link>
