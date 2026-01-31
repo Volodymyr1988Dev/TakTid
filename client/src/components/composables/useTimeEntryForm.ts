@@ -49,7 +49,7 @@ export function useTimeEntryForm(props: {
     kind.value === TimeKind.VAB ||
     kind.value === TimeKind.VACATION,
   )
-  
+
   watch(kind, k => {
     if (
       k === TimeKind.SICK ||
@@ -120,6 +120,27 @@ export function useTimeEntryForm(props: {
     },
     { immediate: true },
   )
+
+  watch(
+  () => props.preset,
+  preset => {
+    if (!preset) return
+
+    isHydrating.value = true
+    isDirty.value = false
+
+    kind.value = preset.type
+    breakMinutes.value = preset.breakMinutes ?? 60
+
+    if (preset.projectId) {
+      projectId.value = preset.projectId
+      mode.value = 'WORK'
+    }
+
+    isHydrating.value = false
+  },
+  { immediate: true },
+)
 
   watch([start, end, breakMinutes, kind], () => {
     if (!isHydrating.value) isDirty.value = true

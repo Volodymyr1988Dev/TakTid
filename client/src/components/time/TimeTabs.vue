@@ -59,10 +59,12 @@ function mapToDayEntries(
     //  ? projectStore.getById(e.projectId)
     //  : undefined
     //if (!projectId) {console.warn('WORK entry without projectId', e)}
-    const project =
-    e.project ??
-    (e.projectId ? projectStore.getById(e.projectId) : undefined)
-    console.log('project', project)
+    
+    
+    //const project =
+    //e.project ??
+    //(e.projectId ? projectStore.getById(e.projectId) : undefined)
+    //console.log('project', project)
     if (e.type === TimeKind.WORK && !projectId) {
     console.warn('WORK entry without projectId', e)
     }
