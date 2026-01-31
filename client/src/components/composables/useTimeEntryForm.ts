@@ -28,7 +28,7 @@ export function useTimeEntryForm(props: {
   
   /* STATE */
   const state = computed<EntryState>(() => {
-    if (props.entry) {return props.entry.kind}
+    //if (props.entry) {return props.entry.kind}
     if (isAbsence.value) return EntryState.ABSENCE
     if (mode.value === 'EXTRA') return EntryState.EXTRA
     return EntryState.WORK
