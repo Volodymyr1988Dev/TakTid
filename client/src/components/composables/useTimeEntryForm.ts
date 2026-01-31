@@ -22,10 +22,19 @@ export function useTimeEntryForm(props: {
 
   /* STATE */
   const state = computed<EntryState>(() => {
+    if (props.entry) {
+      return props.entry.kind
+    }
+
     if (isAbsence.value) return EntryState.ABSENCE
     if (mode.value === 'EXTRA') return EntryState.EXTRA
-  return EntryState.WORK
+    return EntryState.WORK
   })
+  //const state = computed<EntryState>(() => {
+  //  if (isAbsence.value) return EntryState.ABSENCE
+  //  if (mode.value === 'EXTRA') return EntryState.EXTRA
+  //return EntryState.WORK
+  //})
   const project = computed(() =>
   projectId.value ? projectStore.getById(projectId.value) : null,
   )
@@ -51,6 +60,7 @@ export function useTimeEntryForm(props: {
   )
 
   watch(kind, k => {
+    if (props.entry) return
     if (
       k === TimeKind.SICK ||
       k === TimeKind.VAB ||
@@ -269,16 +279,17 @@ export function useTimeEntryForm(props: {
     if (!confirm('Delete this entry?')) return
 
     if (
-      props.entry.kind === EntryState.WORK &&
-      !props.entry.projectId
+      props.entry.kind === EntryState.EXTRA 
     ) {
+      await assignmentStore.remove(props.entry.id)
+      //return
+    } else {
       await timeStore.remove(props.entry.id)
-      return
     }
     //props.entry.kind === 'EXTRA'
-    props.entry.kind === EntryState.EXTRA
-      ? await assignmentStore.remove(props.entry.id)
-      : await timeStore.remove(props.entry.id)
+    //props.entry.kind === EntryState.EXTRA
+    //  ? await assignmentStore.remove(props.entry.id)
+    //  : await timeStore.remove(props.entry.id)
   }
 
   return {

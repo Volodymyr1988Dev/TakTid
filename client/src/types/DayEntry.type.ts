@@ -1,5 +1,5 @@
 //import type { TimeEntry } from './TimeEntry.type'
-//import type { TimeKind } from './timeKind.enum'
+import type { TimeKind } from './timeKind.enum'
 import type { Project } from './Project.dto'
 /*
 export type DayEntry =
@@ -41,8 +41,9 @@ interface BaseDayEntry {
 export interface WorkDayEntry extends BaseDayEntry//, TimeEntry 
 {
   kind: 'WORK'
-  //type: TimeKind
-  type: 'WORK' | 'MEETING'
+  type: TimeKind
+  //type: 'WORK'
+
 
   startTime: string
   endTime: string
