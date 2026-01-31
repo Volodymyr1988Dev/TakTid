@@ -265,6 +265,13 @@ export function useTimeEntryForm(props: {
     if (!props.entry) return
     if (!confirm('Delete this entry?')) return
 
+    if (
+      props.entry.kind === EntryState.WORK &&
+      !props.entry.projectId
+    ) {
+      await timeStore.remove(props.entry.id)
+      return
+    }
     //props.entry.kind === 'EXTRA'
     props.entry.kind === EntryState.EXTRA
       ? await assignmentStore.remove(props.entry.id)

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProjectAssignment } from '../entities/Project/ProjectAssignment';
@@ -47,6 +51,9 @@ export class ProjectAssignmentService {
       breakMinutes: dto.breakMinutes,
       hours,
     });
+    if (!dto.projectId) {
+      throw new BadRequestException('WORK entry requires projectId');
+    }
 
     return this.assignmentRepo.save(assignment);
   }

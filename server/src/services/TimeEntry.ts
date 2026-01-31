@@ -46,6 +46,9 @@ export class TimeEntryService {
       dto.endTime,
       dto.breakMinutes,
     );
+    if (dto.type === timeKind.WORK && !dto.projectId) {
+      throw new BadRequestException('WORK entry requires projectId');
+    }
     if (workedMinutes <= 0) {
       throw new BadRequestException('Break time incorrect');
     }

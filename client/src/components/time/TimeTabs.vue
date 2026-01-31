@@ -66,6 +66,23 @@ function mapToDayEntries(
     //(e.projectId ? projectStore.getById(e.projectId) : undefined)
     //console.log('project', project)
     if (e.type === TimeKind.WORK && !projectId) {
+      console.warn('BROKEN WORK ENTRY', e)
+
+      return {
+        kind: 'WORK',
+        id: e.id,
+        date: e.date,
+        type: TimeKind.WORK,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        breakMinutes: e.breakMinutes ?? 0,
+        hours: Number(e.hours),
+        projectId: '__BROKEN__',
+        project: undefined,
+        comment: e.comment ?? '',
+      }
+    }
+    if (e.type === TimeKind.WORK && !projectId) {
     console.warn('WORK entry without projectId', e)
     }
 
