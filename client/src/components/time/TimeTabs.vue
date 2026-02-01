@@ -188,7 +188,7 @@ const totals = computed<Totals>(() => {
 })
 /* ================= FETCH ================= */
 watch(
-  ()=>[ auth.isInitialized, auth.isAuthenticated, mode.value, current.value],
+  ()=>[ auth.isInitialized, auth.isAuthenticated, mode.value, current.value.format('YYYY-MM-DD')],
   //async ([isInitialized, isAuth]) => {
   async ([ready, isAuth]) => {
     if (ready && isAuth) //loadEntries()

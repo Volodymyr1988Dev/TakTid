@@ -4,6 +4,8 @@ import type { DayEntry } from '../../types/DayEntry.type'
 import { useProjectAssignmentStore } from '../../stores/projectAssignment.store'
 import { useTimeEntryImages } from './useTimeEntryImages'
 import { EntryState } from '../../types/EntryState'
+import { calculateWorkedMinutes } from '../pages/components/helpers/time'
+import type { TimeBasedForm } from '../../types/TimeBasedForm'
 
 export function useExtraEntryForm(props: {
   date: string
@@ -32,6 +34,14 @@ export function useExtraEntryForm(props: {
   const isEdit = computed(() => props.entry?.kind === EntryState.EXTRA /*!!props.entry*/)
   const isSaving = ref(false)
 
+  const calculatedHours = computed(() => {
+      const minutes = calculateWorkedMinutes(
+        start.value,
+        end.value,
+        breakMinutes.value,
+      )
+      return (minutes / 60).toFixed(2)
+    })
   /** PREFILL */
   watch(
     () => props.entry,
@@ -44,7 +54,7 @@ export function useExtraEntryForm(props: {
       breakMinutes.value = e.breakMinutes ?? 0
       comment.value = e.comment ?? ''
 
-      projectId.value = e.project?.id ?? null
+      projectId.value = e.projectId ?? e.project?.id ?? null
     },
     { immediate: true },
   )
@@ -55,7 +65,7 @@ export function useExtraEntryForm(props: {
       return
     }
 
-    isSaving.value = true
+    //isSaving.value = true
     try {
       const saved = isEdit.value //props.entry
         ? await assignmentStore.update(props.entry!.id, {
@@ -103,11 +113,12 @@ export function useExtraEntryForm(props: {
     end,
     breakMinutes,
     comment,
-    projectId,
-    images,
+    //projectId,
+    images,//: useTimeEntryImages(),
     isEdit,
     isSaving,
+    calculatedHours,
     save,
     remove,
-  }
+  } satisfies TimeBasedForm
 }

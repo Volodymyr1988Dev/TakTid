@@ -4,6 +4,10 @@ import type { Project } from '../types/Project.dto'
 import { getProjects } from '../api/project.api'
 
 export const useProjectStore = defineStore('projects', () => {
+  const selectedProject = ref<Project | null>(null)
+
+  const projectId = computed(() => selectedProject.value?.id ?? null)
+
   const projects = ref<Project[]>([])
   const isLoaded = ref(false)
 
@@ -12,6 +16,14 @@ export const useProjectStore = defineStore('projects', () => {
     projects.value.forEach(p => map.set(p.id, p))
     return map
   })
+
+  function select(project: Project) {
+    selectedProject.value = project
+  }
+
+  function clear() {
+    selectedProject.value = null
+  }
 
   async function load() {
     if (isLoaded.value) return
@@ -26,9 +38,13 @@ export const useProjectStore = defineStore('projects', () => {
 
   return {
     projects,
+    selectedProject,
+    projectId,
     projectsMap,
     load,
     getById,
     isLoaded,
+    clear,
+    select
   }
 })

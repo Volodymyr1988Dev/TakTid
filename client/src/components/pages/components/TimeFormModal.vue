@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { useTimeEntryForm } from '../../composables/useTimeEntryForm'
+import { computed, ref } from 'vue'
+//import { useTimeEntryForm } from '../../composables/useTimeEntryForm'
+import { useProjectSelector } from '../../composables/useProjectSelector'
+//import { useTimeEntryForm } from '../../composables/useTimeEntryForm'
+import { useExtraEntryForm } from '../../composables/useExtraEntryForm'
+import { useAbsenceEntryForm} from '../../composables/useAbsenceEntryForm'
+import { useWorkEntryForm } from '../../composables/useWorkEntryForm'
 //import { TimeKind } from '../../../types/timeKind.enum'
 import type { DayEntry } from '../../../types/DayEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
+import { EntryState } from '../../../types/EntryState';
+import type { TimeBasedForm } from '../../../types/TimeBasedForm'
 //import { loadProjects } from '../../composables/useProjectLoader'
 //import { EntryState } from '../../../types/EntryState';
 //import { computed } from 'vue'
@@ -12,6 +20,7 @@ const props = defineProps<{
   entry?: DayEntry  | null
   preset?: TimeSuggestion | null
 }>()
+/*
 const {
   comment,
   isSaving,
@@ -33,7 +42,7 @@ const {
   previews,
   //onSelect
 } = images
-
+*/
 //const form = useTimeEntryForm(props)
 //const emit = defineEmits(['saved', 'cancel'])
 const emit = defineEmits<{
@@ -41,14 +50,142 @@ const emit = defineEmits<{
   (e: 'cancel'): void
   (e: 'deleted'): void
 }>()
+const projectSelector = useProjectSelector()
 
+//const timeForm = useTimeEntryForm({
+//  ...props,
+//  projectId: projectSelector.projectId,
+//})
+
+const workForm = useWorkEntryForm({
+  date: props.date,
+  entry: props.entry?.kind === EntryState.WORK ? props.entry : null,
+  projectId: projectSelector.projectId,
+})
+
+const absenceForm = useAbsenceEntryForm({
+  date: props.date,
+  entry: props.entry?.kind === EntryState.ABSENCE ? props.entry : null,
+})
+
+const extraForm = useExtraEntryForm({
+  date: props.date,
+  //entry: props.entry,
+  entry: props.entry?.kind === EntryState.EXTRA ? props.entry : null,
+  projectId: projectSelector.projectId,
+})
+
+const mode = ref<'WORK' | 'EXTRA'>(
+  props.entry?.kind === EntryState.EXTRA ? 'EXTRA' : 'WORK',
+)
+
+const state = computed(() => {
+  if (absenceForm.isActive.value ) return EntryState.ABSENCE
+  if (mode.value === 'EXTRA') return EntryState.EXTRA
+  return EntryState.WORK
+})
+
+const projectMissing = computed(
+  () => state.value === EntryState.EXTRA && !projectSelector.projectId.value,
+)
+const activeForm = computed(() => {
+  switch (state.value) {
+    case EntryState.WORK:
+      return workForm
+    case EntryState.EXTRA:
+      return extraForm
+    case EntryState.ABSENCE:
+      return absenceForm
+      default:
+        return workForm
+  }
+})
+
+const activeTimeForm = computed<TimeBasedForm>(() => {
+  //if (state.value === EntryState.EXTRA) return extraForm
+  return state.value === EntryState.EXTRA
+  ? extraForm
+  : workForm
+  //return workForm
+})
+/*
+const isTimeBased = computed(
+  () => state.value !== EntryState.ABSENCE,
+)
+
+const start = computed({
+  get: () =>
+    isTimeBased.value ? activeForm.value.start : '',
+  set: v => {
+    if (isTimeBased.value) activeForm.value.start = v
+  },
+})
+
+const end = computed({
+  get: () =>
+    isTimeBased.value ? activeForm.value.end : '',
+  set: v => {
+    if (isTimeBased.value) activeForm.value.end = v
+  },
+})
+
+const breakMinutes = computed({
+  get: () =>
+    isTimeBased.value ? activeForm.value.breakMinutes : 0,
+  set: v => {
+    if (isTimeBased.value) activeForm.value.breakMinutes = v
+  },
+})
+
+const images = computed(() =>
+  isTimeBased.value ? activeForm.value.images : null,
+)
+
+
+const calculatedHours = computed(() =>
+  isTimeBased.value ? activeForm.value.calculatedHours : '8',
+)
+  */
 async function onSave() {
-  const entry = await save()
-  if (entry) emit('saved', entry)
+  if (projectMissing.value) return
+  //const entry = await save()
+  //if (entry) emit('saved', entry)
+  // let entry
+  
+  //if (state.value === EntryState.EXTRA && !projectId.value) {
+  //      throw new Error('EXTRA entry requires projectId')
+  //  }
+  const entry = //await activeForm.value.save()
+  state.value === EntryState.ABSENCE
+      ? await absenceForm.save()
+      : await activeTimeForm.value.save()
+  if (!entry) return
+  //state.value === EntryState.EXTRA
+  //? await extraForm.save()
+  //: await timeForm.save()
+  //if (state.value === EntryState.EXTRA) {
+  //  entry = await extraForm.save()
+  //} else {
+  //  entry = await timeForm.save()
+  //}
+
+  //if (entry) emit('saved', entry)
+  emit ('saved', entry)
 }
 async function onDelete() {
-  await remove()
-    emit('deleted')
+  //if (state.value === EntryState.WORK) {
+  //  await workForm.remove()
+  //} else if (state.value === EntryState.ABSENCE) {
+  //  await absenceForm.remove()
+  if (state.value === EntryState.ABSENCE) {
+    await absenceForm.remove()
+  } else {
+    await activeTimeForm.value.remove()
+  }
+  //await activeForm.value.remove()
+  //}
+
+  emit('deleted')
 }
 //const form = useTimeEntryForm(props)
 </script>
@@ -65,17 +202,23 @@ async function onDelete() {
         </button>
       </header>
 
-      <h3>{{ isEdit ? 'Edit time' : 'Register time' }}</h3>
+      <h3>{{ activeForm.isEdit ? 'Edit time' : 'Register time' }}</h3>
       <p><strong>Date:</strong> {{ date }}</p>
       <div
-        v-if="project"
+        v-if="projectSelector.project?.value"
         class="project-pill"
       >
-        <strong>{{ project.city }}  </strong>
-        <small>{{ project.address }}</small>
+        <p
+          v-if="projectMissing"
+          class="error"
+        >
+          Please select a project for extra work
+        </p>
+        <strong>{{ projectSelector.project.value.city }}  </strong>
+        <small>{{ projectSelector.project.value.address }}</small>
       </div>
       <select 
-        v-if="!isAbsence" 
+        v-if="state !== EntryState.ABSENCE" 
         v-model="mode"
       >
         <option value="WORK">
@@ -85,18 +228,17 @@ async function onDelete() {
           Extra work
         </option>
       </select>
-
-      <div v-if="!isAbsence">
+      <div v-if="state !== EntryState.ABSENCE">
         <input 
-          v-model="start" 
+          v-model="activeTimeForm.start" 
           type="time" 
         >
         <input 
-          v-model="end" 
+          v-model="activeTimeForm.end" 
           type="time" 
         >
         <input 
-          v-model.number="breakMinutes" 
+          v-model.number="activeTimeForm.breakMinutes" 
           type="number" 
           min="0" 
         >
@@ -105,31 +247,33 @@ async function onDelete() {
           type="file" 
           multiple 
           accept="image/*" 
-          @change="images.onSelect" 
+          @change="activeTimeForm.images.onSelect" 
         >
-        <div class="previews">
+        <div
+          class="previews"
+        >
           <img
-            v-for="(src, i) in previews"
+            v-for="(src, i) in activeTimeForm.images.onSelect"
             :key="i"
             :src="src"
           >
         </div>
 
-        <p>{{ calculatedHours }} h</p>
+        <p>{{ activeTimeForm.calculatedHours }} h</p>
       </div>
 
       <p v-else>
-        Absence: {{ kind }}
+        Absence: {{ absenceForm.kind }}
       </p>
 
       <textarea 
-        v-model="comment" 
+        v-model="activeForm.comment.value" 
         placeholder="Comment" 
       />
 
       <div class="actions">
         <button 
-          v-if="isEdit" 
+          v-if="activeForm.isEdit" 
           class="danger" 
           @click="onDelete"
         >
@@ -137,7 +281,7 @@ async function onDelete() {
         </button>
         <button 
           class="primary" 
-          :disabled="isSaving" 
+          :disabled="activeForm.isSaving.value" 
           @click="onSave"
         >
           Save
@@ -148,6 +292,13 @@ async function onDelete() {
 </template>
 
 <style scoped>
+.error {
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 8px 0;
+}
 .project-pill {
   background: #f1f5f9;
   padding: 8px 12px;

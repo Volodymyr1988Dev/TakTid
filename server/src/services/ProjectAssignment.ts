@@ -34,6 +34,7 @@ export class ProjectAssignmentService {
 
     const project = await this.projectRepo.findOne({
       where: { id: dto.projectId },
+      relations: ['project'],
     });
     if (!project) throw new NotFoundException('Project not found');
     const hours = this.calculateHours(
