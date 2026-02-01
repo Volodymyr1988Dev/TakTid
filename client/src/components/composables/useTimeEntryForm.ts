@@ -16,15 +16,16 @@ export function useTimeEntryForm(props: {
   entry?: DayEntry | null
   preset?: TimeSuggestion | null
 }) {
+  const projectId = ref<string | null>(null)
   const timeStore = useTimeEntryStore()
   //const assignmentStore = useProjectAssignmentStore()
   const images = useTimeEntryImages()
   const projectStore = useProjectStore()
   const extraForm = useExtraEntryForm({
-  date: props.date,
-  entry: props.entry,
+    date: props.date,
+    entry: props.entry,
+    projectId,
   })
-
   
   /* STATE */
   const state = computed<EntryState>(() => {
@@ -46,7 +47,6 @@ export function useTimeEntryForm(props: {
   const breakMinutes = ref(60)
   const kind = ref<TimeKind>(TimeKind.WORK)
   const comment = ref('')
-  const projectId = ref<string | null>(null)
   const mode = ref<'WORK' | 'EXTRA'>('WORK')
 
   const isSaving = ref(false)
@@ -168,7 +168,9 @@ export function useTimeEntryForm(props: {
   /* SAVE */
   async function save(): Promise<DayEntry | undefined> {
     //let saved
-
+    //if (props.entry && !isExtra.value) {
+    //  throw new Error('useExtraEntryForm used with non-EXTRA entry')
+    //}
     if (isSaving.value) return
     isSaving.value = true
 

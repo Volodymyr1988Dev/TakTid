@@ -1,4 +1,5 @@
 import { ref, computed, watch } from 'vue'
+import type { Ref } from 'vue'
 import type { DayEntry } from '../../types/DayEntry.type'
 import { useProjectAssignmentStore } from '../../stores/projectAssignment.store'
 import { useTimeEntryImages } from './useTimeEntryImages'
@@ -7,25 +8,36 @@ import { EntryState } from '../../types/EntryState'
 export function useExtraEntryForm(props: {
   date: string
   entry?: DayEntry | null
+  projectId: Ref<string | null>
 }) {
   const assignmentStore = useProjectAssignmentStore()
   const images = useTimeEntryImages()
-
+/*
+  const isExtra = computed(
+    (): props.entry is ExtraDayEntry =>
+      !!props.entry && props.entry.kind === EntryState.EXTRA,
+  )
+  const extraForm = useExtraEntryForm({
+    date: props.date,
+    entry: props.entry,
+    projectId,
+  })
+*/
   const start = ref('08:00')
   const end = ref('17:00')
   const breakMinutes = ref(0)
   const comment = ref('')
   const projectId = ref<string | null>(null)
 
-  const isEdit = computed(() => !!props.entry)
+  const isEdit = computed(() => props.entry?.kind === EntryState.EXTRA /*!!props.entry*/)
   const isSaving = ref(false)
 
   /** PREFILL */
   watch(
     () => props.entry,
     e => {
-      if (!e) return
-      if (e.kind !== EntryState.EXTRA) return
+      if (!e || e.kind !== EntryState.EXTRA) return
+      //if (e.kind !== EntryState.EXTRA) return
 
       start.value = e.startTime
       end.value = e.endTime
@@ -45,8 +57,8 @@ export function useExtraEntryForm(props: {
 
     isSaving.value = true
     try {
-      const saved = props.entry
-        ? await assignmentStore.update(props.entry.id, {
+      const saved = isEdit.value //props.entry
+        ? await assignmentStore.update(props.entry!.id, {
             comment: comment.value,
             startTime: start.value,
             endTime: end.value,
@@ -81,9 +93,9 @@ export function useExtraEntryForm(props: {
   }
 
   async function remove() {
-    if (!props.entry) return
+    if (!isEdit.value/*!props.entry*/) return
     if (!confirm('Delete extra work?')) return
-    await assignmentStore.remove(props.entry.id)
+    await assignmentStore.remove(props.entry!.id)
   }
 
   return {
