@@ -136,7 +136,7 @@ function mapToDayEntries(
       hours: a.hours,
       project: a.project,
       projectId: a.project.id,
-      
+
       comment: a.comment ?? '',
       startTime: a.startTime,
       endTime: a.endTime,
@@ -220,13 +220,27 @@ function isPaidWork(e: DayEntry) {
 function isAbsence(e: DayEntry, kind: TimeKind) {
   return e.kind === 'ABSENCE' && e.type === kind
 }
-
+/*
 function inCurrentPeriod(e: DayEntry): boolean {
   return mode.value === 'week'
     ? dayjs(e.date).isSame(current.value, 'week')
     : dayjs(e.date).isSame(current.value, 'month')
 }
+*/
+function inCurrentPeriod(e: DayEntry): boolean {
+  const date = dayjs(e.date)
 
+  if (mode.value === 'week') {
+    return date.isSame(current.value, 'week')
+  }
+
+  return date.isBetween(
+    current.value.startOf('month'),
+    current.value.endOf('month'),
+    'day',
+    '[]',
+  )
+}
 function sumHours(list: DayEntry[]) {
   return list.reduce((s, e) => s + Number(e.hours), 0)
 }

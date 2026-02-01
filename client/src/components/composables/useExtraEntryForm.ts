@@ -27,8 +27,8 @@ export function useExtraEntryForm(props: {
   const end = ref('17:00')
   const breakMinutes = ref(0)
   const comment = ref('')
-  const projectId = ref<string | null>(null)
-
+  //const projectId = ref<string | null>(null)
+  const projectId = props.projectId
   const isEdit = computed(() => props.entry?.kind === EntryState.EXTRA /*!!props.entry*/)
   const isSaving = ref(false)
 
