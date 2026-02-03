@@ -86,7 +86,7 @@ export function useWorkEntryForm(props: {
     breakMinutes,
     comment,
     calculatedHours,
-    images: useTimeEntryImages(),
+    images,
     isEdit,
     isSaving,
     save,

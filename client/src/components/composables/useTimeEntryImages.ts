@@ -44,7 +44,7 @@ export function useTimeEntryImages() {
     input.value = ''
   }
   async function upload(projectId?: string) {
-    if (!projectId || files.value.length === 0) return
+    if (!projectId || !files.value.length) return
     await store.upload(projectId, files.value)
     files.value = []
   }

@@ -235,8 +235,8 @@ function inCurrentPeriod(e: DayEntry): boolean {
   }
 
   return date.isBetween(
-    current.value.startOf('month'),
-    current.value.endOf('month'),
+    current.value.clone().startOf('month'),
+    current.value.clone().endOf('month'),
     'day',
     '[]',
   )
@@ -264,6 +264,7 @@ const monthTotal = computed(() => {
   if (mode.value !== 'month') return 0
   return entries.value
     .filter(isWork)
+    .filter(inCurrentPeriod)
     .reduce((sum, e) => sum + Number(e.hours), 0)
 })
 

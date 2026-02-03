@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 //import { useTimeEntryForm } from '../../composables/useTimeEntryForm'
 import { useProjectSelector } from '../../composables/useProjectSelector'
 //import { useTimeEntryForm } from '../../composables/useTimeEntryForm'
@@ -79,19 +79,30 @@ const mode = ref<'WORK' | 'EXTRA'>(
   props.entry?.kind === EntryState.EXTRA ? 'EXTRA' : 'WORK',
 )
 
-const state = computed(() => {
-  if (absenceForm.isActive.value ) return EntryState.ABSENCE
-  if (mode.value === 'EXTRA') return EntryState.EXTRA
-  return EntryState.WORK
+//const state = computed(() => {
+//  if (absenceForm.isActive.value ) return EntryState.ABSENCE
+//  if (mode.value === 'EXTRA') return EntryState.EXTRA
+//  return EntryState.WORK
+//})
+const state = ref<EntryState>(
+  props.entry?.kind ?? EntryState.WORK,
+)
+watch(mode, v => {
+  state.value = v === 'EXTRA'
+    ? EntryState.EXTRA
+    : EntryState.WORK
 })
+//function activateAbsence() {
+//  state.value = EntryState.ABSENCE
+//}
 
 const projectMissing = computed(
   () => state.value === EntryState.EXTRA && !projectSelector.projectId.value,
 )
 const activeForm = computed(() => {
   switch (state.value) {
-    case EntryState.WORK:
-      return workForm
+    //case EntryState.WORK:
+    //  return workForm
     case EntryState.EXTRA:
       return extraForm
     case EntryState.ABSENCE:
@@ -101,13 +112,15 @@ const activeForm = computed(() => {
   }
 })
 
-const activeTimeForm = computed<TimeBasedForm>(() => {
-  //if (state.value === EntryState.EXTRA) return extraForm
-  return state.value === EntryState.EXTRA
-  ? extraForm
-  : workForm
-  //return workForm
+const activeTimeForm = computed<TimeBasedForm | null>(() => {
+  if (state.value === EntryState.ABSENCE) return null
+  if (state.value === EntryState.EXTRA) return extraForm
+  return workForm
 })
+
+const imagePreviews = computed(() =>
+  activeTimeForm.value?.images.previews.value ?? []
+)
 /*
 const isTimeBased = computed(
   () => state.value !== EntryState.ABSENCE,
@@ -158,8 +171,8 @@ async function onSave() {
   const entry = //await activeForm.value.save()
   state.value === EntryState.ABSENCE
       ? await absenceForm.save()
-      : await activeTimeForm.value.save()
-  if (!entry) return
+      : await activeTimeForm.value!.save()
+  if (entry) //return
   //state.value === EntryState.EXTRA
   //? await extraForm.save()
   //: await timeForm.save()
@@ -180,7 +193,7 @@ async function onDelete() {
   if (state.value === EntryState.ABSENCE) {
     await absenceForm.remove()
   } else {
-    await activeTimeForm.value.remove()
+    await activeForm.value.remove()
   }
   //await activeForm.value.remove()
   //}
@@ -188,6 +201,7 @@ async function onDelete() {
   emit('deleted')
 }
 //const form = useTimeEntryForm(props)
+//activeTimeForm.images.previews[i] ?? undefined
 </script>
 
 <template>
@@ -228,7 +242,7 @@ async function onDelete() {
           Extra work
         </option>
       </select>
-      <div v-if="state !== EntryState.ABSENCE">
+      <div v-if="activeTimeForm">
         <input 
           v-model="activeTimeForm.start" 
           type="time" 
@@ -250,10 +264,11 @@ async function onDelete() {
           @change="activeTimeForm.images.onSelect" 
         >
         <div
+          v-if="imagePreviews.length"
           class="previews"
         >
           <img
-            v-for="(src, i) in activeTimeForm.images.onSelect"
+            v-for="(src, i) in imagePreviews"
             :key="i"
             :src="src"
           >
