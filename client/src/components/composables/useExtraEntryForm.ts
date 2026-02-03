@@ -36,12 +36,15 @@ export function useExtraEntryForm(props: {
 
   const calculatedHours = computed(() => {
       const minutes = calculateWorkedMinutes(
-        start.value,
-        end.value,
+        normalizeTime(start.value),
+        normalizeTime(end.value),
         breakMinutes.value,
       )
       return (minutes / 60).toFixed(2)
     })
+    function normalizeTime(t: string) {
+    return t.slice(0, 5)
+    }
   /** PREFILL */
   watch(
     () => props.entry,
@@ -49,8 +52,8 @@ export function useExtraEntryForm(props: {
       if (!e || e.kind !== EntryState.EXTRA) return
       //if (e.kind !== EntryState.EXTRA) return
 
-      start.value = e.startTime
-      end.value = e.endTime
+      start.value = normalizeTime(e.startTime)
+      end.value = normalizeTime(e.endTime)
       breakMinutes.value = e.breakMinutes ?? 0
       comment.value = e.comment ?? ''
 
@@ -70,17 +73,17 @@ export function useExtraEntryForm(props: {
       const saved = isEdit.value //props.entry
         ? await assignmentStore.update(props.entry!.id, {
             comment: comment.value,
-            startTime: start.value,
-            endTime: end.value,
+            startTime: normalizeTime(start.value),
+            endTime: normalizeTime(end.value),
             breakMinutes: breakMinutes.value,
           })
         : await assignmentStore.create({
             projectId: projectId.value,
             date: props.date,
             comment: comment.value,
-            startTime: start.value,
-            endTime: end.value,
-            breakMinutes: breakMinutes.value,
+            startTime: normalizeTime(start.value),
+            endTime: normalizeTime(end.value),
+            breakMinutes: breakMinutes.value ?? 0,
           })
 
       await images.upload(projectId.value)
@@ -90,8 +93,8 @@ export function useExtraEntryForm(props: {
         id: saved.id,
         date: saved.date,
         hours: saved.hours,
-        startTime: saved.startTime,
-        endTime: saved.endTime,
+        startTime: normalizeTime(saved.startTime),
+        endTime: normalizeTime(saved.endTime),
         breakMinutes: saved.breakMinutes ?? 0,
         comment: saved.comment ?? '',
         project: saved.project,

@@ -160,7 +160,11 @@ const calculatedHours = computed(() =>
 )
   */
 async function onSave() {
-  if (projectMissing.value) return
+  if (projectMissing.value) {
+    alert('Please select a project')
+    return
+  }
+  let entry
   //const entry = await save()
   //if (entry) emit('saved', entry)
   // let entry
@@ -168,10 +172,18 @@ async function onSave() {
   //if (state.value === EntryState.EXTRA && !projectId.value) {
   //      throw new Error('EXTRA entry requires projectId')
   //  }
-  const entry = //await activeForm.value.save()
-  state.value === EntryState.ABSENCE
-      ? await absenceForm.save()
-      : await activeTimeForm.value!.save()
+  //const entry = //await activeForm.value.save()
+  //state.value === EntryState.ABSENCE
+  //    ? await absenceForm.save()
+  //    : await activeTimeForm.value!.save()
+
+  if (state.value === EntryState.ABSENCE) {
+    entry = await absenceForm.save()
+  } else {
+    if (!activeTimeForm.value) return
+    entry = await activeTimeForm.value.save()
+  }
+
   if (entry) //return
   //state.value === EntryState.EXTRA
   //? await extraForm.save()

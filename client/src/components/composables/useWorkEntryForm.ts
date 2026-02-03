@@ -18,16 +18,20 @@ export function useWorkEntryForm(props: {
 
   const start = ref('08:00')
   const end = ref('17:00')
-  const breakMinutes = ref(60)
+  const breakMinutes = ref(30)
   const comment = ref('')
   const isSaving = ref(false)
 
   const isEdit = computed(() => !!props.entry)
 
+  function normalizeTime(t: string) {
+    return t.slice(0, 5)
+  }
+
   const calculatedHours = computed(() => {
     const minutes = calculateWorkedMinutes(
-      start.value,
-      end.value,
+      normalizeTime(start.value),
+      normalizeTime(end.value),
       breakMinutes.value,
     )
     return (minutes / 60).toFixed(2)
