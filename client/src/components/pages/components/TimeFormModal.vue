@@ -56,11 +56,12 @@ const projectSelector = useProjectSelector()
 //  ...props,
 //  projectId: projectSelector.projectId,
 //})
+const projectId = computed(() => projectSelector.projectId.value)
 
 const workForm = useWorkEntryForm({
   date: props.date,
   entry: props.entry?.kind === EntryState.WORK ? props.entry : null,
-  projectId: projectSelector.projectId,
+  projectId,//: projectSelector.projectId,
 })
 
 const absenceForm = useAbsenceEntryForm({
@@ -72,7 +73,7 @@ const extraForm = useExtraEntryForm({
   date: props.date,
   //entry: props.entry,
   entry: props.entry?.kind === EntryState.EXTRA ? props.entry : null,
-  projectId: projectSelector.projectId,
+  projectId,//: projectSelector.projectId,
 })
 
 const mode = ref<'WORK' | 'EXTRA'>(
@@ -93,6 +94,13 @@ const state = ref<EntryState>(
 //function hasProjectId(e: DayEntry): e is DayEntry & { projectId: string } {
 //  return e.kind === 'WORK' || e.kind === 'EXTRA'
 //}
+watch(
+  () => projectSelector.projectId.value,
+  v => {
+    console.log('[Modal] projectId changed:', v)
+  },
+  { immediate: true }
+)
 
 watch(mode, v => {
   if (state.value === EntryState.ABSENCE) return
@@ -186,7 +194,7 @@ watch(
 )
 const projectMissing = computed(() =>
   (state.value === EntryState.WORK || state.value === EntryState.EXTRA)
-  && !projectSelector.projectId.value
+  && !projectId.value //!projectSelector.projectId.value
 )
 const activeForm = computed(() => {
   switch (state.value) {
@@ -259,8 +267,7 @@ const calculatedHours = computed(() =>
   */
 async function onSave() {
   if (projectMissing.value) {
-    alert('Please select a project')
-    return
+    throw new Error('requires projectId')
   }
   //let entry
   //const entry = await save()

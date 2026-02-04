@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useTimeEntryStore } from '../../stores/timeEntry.store'
 import { calculateWorkedMinutes } from '../pages/components/helpers/time'
 import type { WorkDayEntry } from '../../types/DayEntry.type'
@@ -36,6 +36,14 @@ export function useWorkEntryForm(props: {
     )
     return (minutes / 60).toFixed(2)
   })
+
+  watch(
+    () => props.projectId.value,
+    v => {
+        console.log('[WorkForm] projectId:', v)
+    },
+    { immediate: true }
+    )
 
   async function save(): Promise<WorkDayEntry> {
     const projectId = props.projectId.value ?? undefined
