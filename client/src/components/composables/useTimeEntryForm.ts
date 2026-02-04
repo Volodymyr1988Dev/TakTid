@@ -113,9 +113,9 @@ export function useTimeEntryForm(props: {
         //kind.value = e.type
         kind.value = work.type
         //start.value = e.startTime.slice(0, 5)
-        start.value = work.startTime.slice(0,5)
-        end.value = work.endTime.slice(0, 5)
-        breakMinutes.value = work.breakMinutes
+        start.value = work.startTime.slice(0,5) ?? '08:00'
+        end.value = work.endTime.slice(0, 5) ?? '17:00'
+        breakMinutes.value = work.breakMinutes ?? 30
         props.projectId.value = work.projectId ?? null
         //mode.value = 'WORK'
         //mode.value = e.kind === EntryState.EXTRA ? 'EXTRA' : 'WORK'

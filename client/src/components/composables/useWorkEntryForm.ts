@@ -38,18 +38,19 @@ export function useWorkEntryForm(props: {
   })
 
   async function save(): Promise<WorkDayEntry> {
+    const projectId = props.projectId.value ?? undefined
     if (!props.projectId.value) {
-      throw new Error('WORK requires projectId')
+      alert('WORK requires projectId')
     }
 
     isSaving.value = true
     try {
       const payload: TimeEntryUpdatePayload = {
-        startTime: start.value,
-        endTime: end.value,
+        startTime: normalizeTime(start.value),
+        endTime: normalizeTime(end.value),
         breakMinutes: breakMinutes.value,
         comment: comment.value,
-        projectId: props.projectId.value,
+        projectId, //:props.projectId.value,
       }
 
       const saved = props.entry
@@ -60,7 +61,7 @@ export function useWorkEntryForm(props: {
         ...payload,
         })
 
-      await images.upload(props.projectId.value)
+      await images.upload(projectId /*props.projectId.value*/)
 
       return {
         kind: EntryState.WORK,
@@ -68,8 +69,8 @@ export function useWorkEntryForm(props: {
         date: saved.date,
         hours: Number(saved.hours),
         type: saved.type,
-        startTime: saved.startTime,
-        endTime: saved.endTime,
+        startTime: normalizeTime(saved.startTime),
+        endTime: normalizeTime(saved.endTime),
         breakMinutes: saved.breakMinutes,
         projectId: saved.projectId,
         comment: saved.comment ?? '',

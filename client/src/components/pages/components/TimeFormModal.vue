@@ -79,6 +79,9 @@ const mode = ref<'WORK' | 'EXTRA'>(
   props.entry?.kind === EntryState.EXTRA ? 'EXTRA' : 'WORK',
 )
 
+//const isDirty = ref(false)
+//const isHydrating = ref(false)
+
 //const state = computed(() => {
 //  if (absenceForm.isActive.value ) return EntryState.ABSENCE
 //  if (mode.value === 'EXTRA') return EntryState.EXTRA
@@ -87,15 +90,100 @@ const mode = ref<'WORK' | 'EXTRA'>(
 const state = ref<EntryState>(
   props.entry?.kind ?? EntryState.WORK,
 )
+//function hasProjectId(e: DayEntry): e is DayEntry & { projectId: string } {
+//  return e.kind === 'WORK' || e.kind === 'EXTRA'
+//}
+
 watch(mode, v => {
+  if (state.value === EntryState.ABSENCE) return
   state.value = v === 'EXTRA'
     ? EntryState.EXTRA
     : EntryState.WORK
 })
+/*
+watch(
+  [start, end, breakMinutes],
+  () => {
+    if (isHydrating.value) return
+    if (!props.entry) return
+
+    //const same =
+    //  normalizeTime(start.value) === normalizeTime(props.entry.startTime) &&
+    //  normalizeTime(end.value) === normalizeTime(props.entry.endTime) &&
+    //  normalizedBreakMinutes.value === props.entry.breakMinutes
+
+    //isDirty.value = !same
+    isDirty.value = true
+  }
+)
+watch(
+  () => props.entry,
+  async (e) => {
+    isHydrating.value = true
+    isDirty.value = false
+    if (!e) {
+      isHydrating.value = false
+      return
+    }
+    //if (e.kind === 'WORK') {
+    //if (isWorkEntry(e)) {
+    //isInitialized.value = false
+    if (e.kind === 'WORK') {
+      mode.value = 'WORK'
+      kind.value = e.type
+      //start.value = e.startTime
+      start.value = normalizeTime(e.startTime)
+      //end.value = e.endTime
+      end.value = normalizeTime(e.endTime)
+      breakMinutes.value = e.breakMinutes ?? 0
+      projectId.value = e.projectId
+      comment.value = e.comment ?? ''
+      //if (e.projectId) {
+      //  await imageStore.load(e.projectId)
+      //}
+      if (hasProjectId(e)) {
+        projectId.value = e.projectId
+        //await imageStore.load(e.projectId)
+      }
+    } //else {
+    //if (isExtraEntry(e)) {
+    else if (e.kind === 'EXTRA') {
+      mode.value = 'EXTRA'
+      //start.value = e.startTime ?? '08:00'
+      start.value = normalizeTime(e.startTime) ?? '08:00'
+      //end.value = e.endTime ?? '17:00'
+      end.value = normalizeTime(e.endTime) ?? '17:00'
+      breakMinutes.value = e.breakMinutes ?? 60
+      projectId.value = e.projectId
+      comment.value = e.comment ?? ''
+      if (hasProjectId(e)) {
+        projectId.value = e.projectId
+        //await imageStore.load(e.projectId)
+      }
+    }
+    else if (e.kind === 'ABSENCE') {
+      mode.value = 'WORK'
+      kind.value = e.type
+      comment.value = e.comment ?? ''
+    }
+    else {
+      console.warn('Unknown entry kind', e)
+    }
+    isHydrating.value = false
+    //isInitialized.value = true
+  },
+  { immediate: true },
+)
 //function activateAbsence() {
 //  state.value = EntryState.ABSENCE
 //}
-
+*/
+watch(
+  () => absenceForm.kind.value,
+  () => {
+    state.value = EntryState.ABSENCE
+  }
+)
 const projectMissing = computed(
   () => state.value === EntryState.EXTRA && !projectSelector.projectId.value,
 )
@@ -113,14 +201,23 @@ const activeForm = computed(() => {
 })
 
 const activeTimeForm = computed<TimeBasedForm | null>(() => {
-  if (state.value === EntryState.ABSENCE) return null
-  if (state.value === EntryState.EXTRA) return extraForm
-  return workForm
+   return state.value === EntryState.ABSENCE
+    ? null
+    : state.value === EntryState.EXTRA
+      ? extraForm
+      : workForm
 })
 
 const imagePreviews = computed(() =>
   activeTimeForm.value?.images.previews.value ?? []
 )
+
+const commentModel = computed({
+  get: () => activeForm.value.comment.value,
+  set: v => {
+    activeForm.value.comment.value = v
+  },
+})
 /*
 const isTimeBased = computed(
   () => state.value !== EntryState.ABSENCE,
@@ -164,7 +261,7 @@ async function onSave() {
     alert('Please select a project')
     return
   }
-  let entry
+  //let entry
   //const entry = await save()
   //if (entry) emit('saved', entry)
   // let entry
@@ -177,14 +274,11 @@ async function onSave() {
   //    ? await absenceForm.save()
   //    : await activeTimeForm.value!.save()
 
-  if (state.value === EntryState.ABSENCE) {
-    entry = await absenceForm.save()
-  } else {
-    if (!activeTimeForm.value) return
-    entry = await activeTimeForm.value.save()
-  }
+  const entry = state.value === EntryState.ABSENCE
+    ? await absenceForm.save()
+    : await activeTimeForm.value!.save()
 
-  if (entry) //return
+  if (entry) emit('saved', entry)//return
   //state.value === EntryState.EXTRA
   //? await extraForm.save()
   //: await timeForm.save()
@@ -195,18 +289,14 @@ async function onSave() {
   //}
 
   //if (entry) emit('saved', entry)
-  emit ('saved', entry)
+  //emit ('saved', entry)
 }
 async function onDelete() {
   //if (state.value === EntryState.WORK) {
   //  await workForm.remove()
   //} else if (state.value === EntryState.ABSENCE) {
   //  await absenceForm.remove()
-  if (state.value === EntryState.ABSENCE) {
-    await absenceForm.remove()
-  } else {
-    await activeForm.value.remove()
-  }
+  await activeForm.value.remove()
   //await activeForm.value.remove()
   //}
 
@@ -231,7 +321,7 @@ async function onDelete() {
       <h3>{{ activeForm.isEdit ? 'Edit time' : 'Register time' }}</h3>
       <p><strong>Date:</strong> {{ date }}</p>
       <div
-        v-if="projectSelector.project?.value"
+        v-if="projectSelector.project.value"
         class="project-pill"
       >
         <p
@@ -294,7 +384,7 @@ async function onDelete() {
       </p>
 
       <textarea 
-        v-model="activeForm.comment.value" 
+        v-model="commentModel" 
         placeholder="Comment" 
       />
 

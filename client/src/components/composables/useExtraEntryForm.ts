@@ -52,9 +52,9 @@ export function useExtraEntryForm(props: {
       if (!e || e.kind !== EntryState.EXTRA) return
       //if (e.kind !== EntryState.EXTRA) return
 
-      start.value = normalizeTime(e.startTime)
-      end.value = normalizeTime(e.endTime)
-      breakMinutes.value = e.breakMinutes ?? 0
+      start.value = normalizeTime(e.startTime) ?? '08:00'
+      end.value = normalizeTime(e.endTime) ?? '17:00'
+      breakMinutes.value = e.breakMinutes ?? 30
       comment.value = e.comment ?? ''
 
       projectId.value = e.projectId ?? e.project?.id ?? null
