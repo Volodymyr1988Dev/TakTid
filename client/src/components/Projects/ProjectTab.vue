@@ -12,6 +12,7 @@ import type { TimeSuggestion } from '../../types/Suggestion.type'
 //import type { ProjectImages } from '../../types/ProjectImages'
 import { TimeKind } from '../../types/timeKind.enum'
 import { useProjectNavigationStore } from '../../stores/projectNavigation.store'
+import { useProjectStore } from '../../stores/project.store'
 
 const auth = useAuthStore()
 //const isAdmin = auth.user?.isAdmin === true
@@ -32,7 +33,7 @@ const createModalOpen = ref(false) // ✅ ADD
 //const activeProject = ref<Project | null>(null) // ✅ ADD
 const selectedProject = ref<Project | null>(null)
 const photoModalOpen = ref(false)
-
+const projectStore = useProjectStore()
 const projectNav = useProjectNavigationStore()
 /* ================= LOAD ================= */
 //onMounted(loadProjects)
@@ -56,6 +57,7 @@ function openPhotoModal(project: Project) {
 }
 
 function onProjectClick(project: Project) {
+  projectStore.select(project)
   if (props.mode === 'select') {
     emit('select', {
       type: TimeKind.WORK,
