@@ -184,8 +184,9 @@ watch(
     state.value = EntryState.ABSENCE
   }
 )
-const projectMissing = computed(
-  () => state.value === EntryState.EXTRA && !projectSelector.projectId.value,
+const projectMissing = computed(() =>
+  (state.value === EntryState.WORK || state.value === EntryState.EXTRA)
+  && !projectSelector.projectId.value
 )
 const activeForm = computed(() => {
   switch (state.value) {
@@ -328,7 +329,7 @@ async function onDelete() {
           v-if="projectMissing"
           class="error"
         >
-          Please select a project for extra work
+          Please select a project
         </p>
         <strong>{{ projectSelector.project.value.city }}  </strong>
         <small>{{ projectSelector.project.value.address }}</small>

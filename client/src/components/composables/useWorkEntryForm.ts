@@ -39,8 +39,8 @@ export function useWorkEntryForm(props: {
 
   async function save(): Promise<WorkDayEntry> {
     const projectId = props.projectId.value ?? undefined
-    if (!props.projectId.value) {
-      alert('WORK requires projectId')
+    if (!projectId) {
+        throw new Error('WORK requires projectId')
     }
 
     isSaving.value = true
