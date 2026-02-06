@@ -1,19 +1,22 @@
 import { ref, computed, watch } from 'vue'
-import type { Ref } from 'vue'
+//import type { Ref } from 'vue'
 import type { DayEntry } from '../../types/DayEntry.type'
 import { useProjectAssignmentStore } from '../../stores/projectAssignment.store'
 import { useTimeEntryImages } from './useTimeEntryImages'
 import { EntryState } from '../../types/EntryState'
 import { calculateWorkedMinutes } from '../pages/components/helpers/time'
 import type { TimeBasedForm } from '../../types/TimeBasedForm'
+import { useProjectStore } from '../../stores/project.store'
 
 export function useExtraEntryForm(props: {
   date: string
   entry?: DayEntry | null
-  projectId: Ref<string | null>
+  //projectId: Ref<string | null>
 }) {
   const assignmentStore = useProjectAssignmentStore()
   const images = useTimeEntryImages()
+  const projectStore = useProjectStore()
+
 /*
   const isExtra = computed(
     (): props.entry is ExtraDayEntry =>
@@ -25,12 +28,13 @@ export function useExtraEntryForm(props: {
     projectId,
   })
 */
+  const projectId = computed(() => projectStore.projectId)
   const start = ref('08:00')
   const end = ref('17:00')
   const breakMinutes = ref(0)
   const comment = ref('')
   //const projectId = ref<string | null>(null)
-  const projectId = props.projectId
+  //const projectId = props.projectId
   const isEdit = computed(() => props.entry?.kind === EntryState.EXTRA /*!!props.entry*/)
   const isSaving = ref(false)
 
@@ -42,12 +46,13 @@ export function useExtraEntryForm(props: {
       )
       return (minutes / 60).toFixed(2)
     })
-    function normalizeTime(t: string) {
-    return t.slice(0, 5)
-    }
+  function normalizeTime(t: string) {
+  return t.slice(0, 5)
+  }
   /** PREFILL */
   watch(
     () => props.entry,
+    //projectId,
     e => {
       if (!e || e.kind !== EntryState.EXTRA) return
       //if (e.kind !== EntryState.EXTRA) return
@@ -56,8 +61,8 @@ export function useExtraEntryForm(props: {
       end.value = normalizeTime(e.endTime) ?? '17:00'
       breakMinutes.value = e.breakMinutes ?? 30
       comment.value = e.comment ?? ''
-
-      projectId.value = e.projectId ?? e.project?.id ?? null
+        
+      //projectId.value = e.projectId ?? e.project?.id ?? null
     },
     { immediate: true },
   )

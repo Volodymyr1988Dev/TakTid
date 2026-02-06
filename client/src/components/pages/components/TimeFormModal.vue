@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 //import { useTimeEntryForm } from '../../composables/useTimeEntryForm'
-import { useProjectSelector } from '../../composables/useProjectSelector'
+//import { useProjectSelector } from '../../composables/useProjectSelector'
 //import { useTimeEntryForm } from '../../composables/useTimeEntryForm'
 import { useExtraEntryForm } from '../../composables/useExtraEntryForm'
 import { useAbsenceEntryForm} from '../../composables/useAbsenceEntryForm'
@@ -11,6 +11,7 @@ import type { DayEntry } from '../../../types/DayEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
 import { EntryState } from '../../../types/EntryState';
 import type { TimeBasedForm } from '../../../types/TimeBasedForm'
+import { useProjectStore } from '../../../stores/project.store'
 //import { loadProjects } from '../../composables/useProjectLoader'
 //import { EntryState } from '../../../types/EntryState';
 //import { computed } from 'vue'
@@ -50,18 +51,20 @@ const emit = defineEmits<{
   (e: 'cancel'): void
   (e: 'deleted'): void
 }>()
-const projectSelector = useProjectSelector()
+//const projectSelector = useProjectSelector()
+const projectStore = useProjectStore() 
 
 //const timeForm = useTimeEntryForm({
 //  ...props,
 //  projectId: projectSelector.projectId,
 //})
-const projectId = computed(() => projectSelector.projectId.value)
+const projectId = computed(() => projectStore.projectId)
+const project = computed(() => projectStore.selectedProject)
 
 const workForm = useWorkEntryForm({
   date: props.date,
   entry: props.entry?.kind === EntryState.WORK ? props.entry : null,
-  projectId,//: projectSelector.projectId,
+  //projectId,//: projectSelector.projectId,
 })
 
 const absenceForm = useAbsenceEntryForm({
@@ -73,7 +76,7 @@ const extraForm = useExtraEntryForm({
   date: props.date,
   //entry: props.entry,
   entry: props.entry?.kind === EntryState.EXTRA ? props.entry : null,
-  projectId,//: projectSelector.projectId,
+  //projectId,//: projectSelector.projectId,
 })
 
 const mode = ref<'WORK' | 'EXTRA'>(
@@ -83,32 +86,32 @@ const mode = ref<'WORK' | 'EXTRA'>(
 //const isDirty = ref(false)
 //const isHydrating = ref(false)
 
-//const state = computed(() => {
-//  if (absenceForm.isActive.value ) return EntryState.ABSENCE
-//  if (mode.value === 'EXTRA') return EntryState.EXTRA
-//  return EntryState.WORK
-//})
-const state = ref<EntryState>(
-  props.entry?.kind ?? EntryState.WORK,
-)
+const state = computed<EntryState>(() => {
+  if (absenceForm.kind.value) return EntryState.ABSENCE
+  if (mode.value === 'EXTRA') return EntryState.EXTRA
+  return EntryState.WORK
+})
+//const state = ref<EntryState>(
+//  props.entry?.kind ?? EntryState.WORK,
+//)
 //function hasProjectId(e: DayEntry): e is DayEntry & { projectId: string } {
 //  return e.kind === 'WORK' || e.kind === 'EXTRA'
 //}
 watch(
-  () => projectSelector.projectId.value,
+  () => projectId.value,
   v => {
     console.log('[Modal] projectId changed:', v)
   },
   { immediate: true }
 )
-
+/*
 watch(mode, v => {
   if (state.value === EntryState.ABSENCE) return
   state.value = v === 'EXTRA'
     ? EntryState.EXTRA
     : EntryState.WORK
 })
-/*
+
 watch(
   [start, end, breakMinutes],
   () => {
@@ -185,36 +188,41 @@ watch(
 //function activateAbsence() {
 //  state.value = EntryState.ABSENCE
 //}
-*/
+
 watch(
   () => absenceForm.kind.value,
   () => {
     state.value = EntryState.ABSENCE
   }
 )
+  */
 const projectMissing = computed(() =>
   (state.value === EntryState.WORK || state.value === EntryState.EXTRA)
   && !projectId.value //!projectSelector.projectId.value
 )
-const activeForm = computed(() => {
+const activeForm = computed(() => //{
+  /*
   switch (state.value) {
     //case EntryState.WORK:
     //  return workForm
-    case EntryState.EXTRA:
-      return extraForm
     case EntryState.ABSENCE:
       return absenceForm
+    case EntryState.EXTRA:
+      return extraForm
       default:
         return workForm
   }
-})
+  */
+  state.value === EntryState.ABSENCE
+    ? absenceForm
+    : activeTimeForm.value!
+//}
+)
 
 const activeTimeForm = computed<TimeBasedForm | null>(() => {
-   return state.value === EntryState.ABSENCE
-    ? null
-    : state.value === EntryState.EXTRA
-      ? extraForm
-      : workForm
+  if (state.value === EntryState.WORK) return workForm
+  if (state.value === EntryState.EXTRA) return extraForm
+  return null
 })
 
 const imagePreviews = computed(() =>
@@ -329,7 +337,7 @@ async function onDelete() {
       <h3>{{ activeForm.isEdit ? 'Edit time' : 'Register time' }}</h3>
       <p><strong>Date:</strong> {{ date }}</p>
       <div
-        v-if="projectSelector.project.value"
+        v-if="project"
         class="project-pill"
       >
         <p
@@ -338,8 +346,8 @@ async function onDelete() {
         >
           Please select a project
         </p>
-        <strong>{{ projectSelector.project.value.city }}  </strong>
-        <small>{{ projectSelector.project.value.address }}</small>
+        <strong>{{ project.city }}  </strong>
+        <small>{{ project.address }}</small>
       </div>
       <select 
         v-if="state !== EntryState.ABSENCE" 

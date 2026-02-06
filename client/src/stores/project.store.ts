@@ -1,16 +1,18 @@
 import { defineStore } from 'pinia'
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import type { Project } from '../types/Project.dto'
 import { getProjects } from '../api/project.api'
 
 export const useProjectStore = defineStore('projects', () => {
-  const selectedProject = ref<Project | undefined>(undefined)
+  const selectedProject = ref<Project | null>(null)
 
   //const projectId = computed(() => selectedProject.value?.id ?? undefined)
-  const projectId = ref<string | null>(null)
-  watch(selectedProject, p => {
-    projectId.value = p?.id ?? null
-  })
+  //const projectId = ref<string | null>(null)
+  const projectId = computed(() => selectedProject.value?.id ?? null)
+
+  //watch(selectedProject, p => {
+  //  projectId.value = p?.id ?? null
+  //})
   const projects = ref<Project[]>([])
   const isLoaded = ref(false)
 
@@ -25,7 +27,7 @@ export const useProjectStore = defineStore('projects', () => {
   }
 
   function clear() {
-    selectedProject.value = undefined
+    selectedProject.value = null
   }
 
   async function load() {

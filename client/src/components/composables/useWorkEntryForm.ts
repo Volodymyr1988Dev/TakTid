@@ -1,5 +1,7 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed,watch } from 'vue'
+//import type { Ref } from 'vue'
 import { useTimeEntryStore } from '../../stores/timeEntry.store'
+import { useProjectStore } from '../../stores/project.store'
 import { calculateWorkedMinutes } from '../pages/components/helpers/time'
 import type { WorkDayEntry } from '../../types/DayEntry.type'
 import type { TimeEntryUpdatePayload } from '../../types/TimeEntryUpdatePayload.type'
@@ -11,11 +13,14 @@ import type { TimeBasedForm } from '../../types/TimeBasedForm'
 export function useWorkEntryForm(props: {
   date: string
   entry?: WorkDayEntry | null
-  projectId: { value: string | null }
+  //projectId: { value: string | null }
+  //projectId: Ref <string | null>
 }) {
   const store = useTimeEntryStore()
   const images = useTimeEntryImages()
+  const projectStore = useProjectStore()
 
+  const projectId = computed(() => projectStore.projectId)
   const start = ref('08:00')
   const end = ref('17:00')
   const breakMinutes = ref(30)
@@ -38,7 +43,7 @@ export function useWorkEntryForm(props: {
   })
 
   watch(
-    () => props.projectId.value,
+    projectId,
     v => {
         console.log('[WorkForm] projectId:', v)
     },
@@ -46,8 +51,8 @@ export function useWorkEntryForm(props: {
     )
 
   async function save(): Promise<WorkDayEntry> {
-    const projectId = props.projectId.value ?? undefined
-    if (!projectId) {
+    //const projectId = props.projectId.value ?? undefined
+    if (!projectId.value) {
         throw new Error('WORK requires projectId')
     }
 
@@ -58,7 +63,7 @@ export function useWorkEntryForm(props: {
         endTime: normalizeTime(end.value),
         breakMinutes: breakMinutes.value,
         comment: comment.value,
-        projectId, //:props.projectId.value,
+        projectId: projectId.value, //:props.projectId.value,
       }
 
       const saved = props.entry
@@ -69,7 +74,7 @@ export function useWorkEntryForm(props: {
         ...payload,
         })
 
-      await images.upload(projectId /*props.projectId.value*/)
+      await images.upload(projectId.value /*props.projectId.value*/)
 
       return {
         kind: EntryState.WORK,

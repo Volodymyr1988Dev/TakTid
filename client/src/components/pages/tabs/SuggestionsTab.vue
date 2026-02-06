@@ -1,21 +1,23 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
 import { useSuggestionsStore } from '../../../stores/suggestions.store'
+import { useProjectStore } from '../../../stores/project.store';
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
 
-const emit = defineEmits<{
-  (e: 'select', s: TimeSuggestion): void
-}>()
-
-const store = useSuggestionsStore()
-
-onMounted(store.load)
+//const emit = defineEmits<{
+//  (e: 'select', s: TimeSuggestion): void
+//}>()
+const suggestionsStore = useSuggestionsStore()
+//const store = useSuggestionsStore()
+const projectStore = useProjectStore()
+//onMounted(store.load)
+onMounted(suggestionsStore.load)
 
 
 const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
   const map = new Map<string, TimeSuggestion>()
 
-  for (const s of store.items) {
+  for (const s of suggestionsStore.items) {
     const key = s.projectId ?? s.type
     if (!map.has(key)) {
       map.set(key, s)
@@ -24,6 +26,17 @@ const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
 
   return [...map.values()]
 })
+function selectSuggestion(s: TimeSuggestion) {
+  if (s.projectId) {
+
+    const project = projectStore.getById(s.projectId)
+    if (project) {
+      projectStore.select(project)
+    }
+  }
+  //suggestionsStore.add(s)
+}
+//@click="emit('select', s)"
 </script>
 
 <template>
@@ -32,7 +45,7 @@ const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
       v-for="s in uniqueSuggestions"
       :key="s.projectId ?? s.type"
       class="card"
-      @click="emit('select', s)"
+      @click="selectSuggestion(s)"
     >
       <strong>{{ s.title }}</strong>
       <span>{{ s.type }}</span>
