@@ -59,7 +59,14 @@ const projectStore = useProjectStore()
 //  projectId: projectSelector.projectId,
 //})
 //const projectId = computed(() => projectStore.projectId)
-const projectId = ref<string | null>(projectStore.projectId)
+//const projectId = ref<string | null>(projectStore.projectId)
+const projectId = computed({
+  get: () => projectStore.selectedProject?.id ?? null,
+  set: (v: string | null) => {
+    const project = projectStore.getById(v ?? undefined)
+    projectStore.select(project ?? null)
+  },
+})
 const project = computed(() => projectStore.selectedProject)
 
 const workForm = useWorkEntryForm({
@@ -136,6 +143,10 @@ watch(
 )
 watch(mode, v => {
   if (state.value === EntryState.ABSENCE) return
+  if (!projectId.value) {
+    console.warn('No project selected for current mode')
+    return
+  }
   state.value = v === 'EXTRA' ? EntryState.EXTRA : EntryState.WORK
 })
 /*
@@ -226,14 +237,20 @@ watch(
 const projectMissing = computed(() =>
   (state.value === EntryState.WORK || state.value === EntryState.EXTRA)
   && !projectId.value //!projectSelector.projectId.value
-)
+)/*
 const activeForm = computed(() =>
   state.value === EntryState.ABSENCE
     ? absenceForm
     : activeTimeForm.value!
 //}
 )
-
+*/
+const activeForm = computed<TimeBasedForm | typeof absenceForm>(() => {
+  if (state.value === EntryState.ABSENCE) return absenceForm
+  if (state.value === EntryState.WORK) return workForm
+  if (state.value === EntryState.EXTRA) return extraForm
+  throw new Error('Unknown state for activeForm')
+})
 /*
 const activeTimeForm = computed<TimeBasedForm | null>(() => {
   if (state.value === EntryState.WORK) return workForm
@@ -244,12 +261,14 @@ const activeTimeForm = computed<TimeBasedForm | null>(() => {
 //const activeTimeForm = ref<TimeBasedForm | null>(
 //  state.value === EntryState.WORK ? workForm : extraForm
 //)
-
-const activeTimeForm = computed<TimeBasedForm | null>(() => {
-  if (state.value === EntryState.WORK) return workForm
-  if (state.value === EntryState.EXTRA) return extraForm
-  return null
-})
+const activeTimeForm = computed<TimeBasedForm | null>(() =>
+  state.value === EntryState.ABSENCE ? null : activeForm.value as TimeBasedForm
+)
+//const activeTimeForm = computed<TimeBasedForm | null>(() => {
+//  if (state.value === EntryState.WORK) return workForm
+//  if (state.value === EntryState.EXTRA) return extraForm
+//  return null
+//})
 //watch(state, (v) => {
 //  if (v === EntryState.WORK) activeTimeForm.value = workForm
 //  else if (v === EntryState.EXTRA) activeTimeForm.value = extraForm
@@ -348,7 +367,7 @@ const calculatedHours = computed(() =>
 )
   */
 async function onSave() {
-  if (projectMissing.value) {
+  if (projectMissing.value && state.value !== EntryState.ABSENCE) {
     throw new Error('requires projectId')
   }
   //let entry
@@ -364,10 +383,10 @@ async function onSave() {
   //    ? await absenceForm.save()
   //    : await activeTimeForm.value!.save()
 
-  const entry = state.value === EntryState.ABSENCE
-    ? await absenceForm.save()
-    : await activeTimeForm.value!.save()
-
+  //const entry = state.value === EntryState.ABSENCE
+  //  ? await absenceForm.save()
+  //  : await activeTimeForm.value!.save()
+  const entry = await activeForm.value.save()
   if (entry) emit('saved', entry)//return
   //state.value === EntryState.EXTRA
   //? await extraForm.save()

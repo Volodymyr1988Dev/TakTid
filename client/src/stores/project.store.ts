@@ -22,7 +22,7 @@ export const useProjectStore = defineStore('projects', () => {
     return map
   })
 
-  function select(project: Project) {
+  function select(project: Project | null) {
     selectedProject.value = project
   }
 
