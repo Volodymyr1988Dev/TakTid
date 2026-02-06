@@ -367,15 +367,15 @@ async function onDelete() {
       </select>
       <div v-if="activeTimeForm">
         <input 
-          v-model="activeTimeForm.start" 
+          v-model="activeTimeForm.start.value" 
           type="time" 
         >
         <input 
-          v-model="activeTimeForm.end" 
+          v-model="activeTimeForm.end.value" 
           type="time" 
         >
         <input 
-          v-model.number="activeTimeForm.breakMinutes" 
+          v-model.number="activeTimeForm.breakMinutes.value" 
           type="number" 
           min="0" 
         >

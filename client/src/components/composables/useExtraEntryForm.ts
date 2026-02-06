@@ -57,8 +57,8 @@ export function useExtraEntryForm(props: {
       if (!e || e.kind !== EntryState.EXTRA) return
       //if (e.kind !== EntryState.EXTRA) return
 
-      start.value = normalizeTime(e.startTime) ?? '08:00'
-      end.value = normalizeTime(e.endTime) ?? '17:00'
+      start.value = normalizeTime(e.startTime ?? '08:00')
+      end.value = normalizeTime(e.endTime ?? '17:00')
       breakMinutes.value = e.breakMinutes ?? 30
       comment.value = e.comment ?? ''
         
@@ -73,23 +73,19 @@ export function useExtraEntryForm(props: {
       return
     }
 
-    //isSaving.value = true
+    isSaving.value = true
     try {
+        const payload = {
+        projectId: projectId.value,
+        date: props.date,
+        startTime: normalizeTime(start.value),
+        endTime: normalizeTime(end.value),
+        breakMinutes: breakMinutes.value,
+        comment: comment.value,
+      }
       const saved = isEdit.value //props.entry
-        ? await assignmentStore.update(props.entry!.id, {
-            comment: comment.value,
-            startTime: normalizeTime(start.value),
-            endTime: normalizeTime(end.value),
-            breakMinutes: breakMinutes.value,
-          })
-        : await assignmentStore.create({
-            projectId: projectId.value,
-            date: props.date,
-            comment: comment.value,
-            startTime: normalizeTime(start.value),
-            endTime: normalizeTime(end.value),
-            breakMinutes: breakMinutes.value ?? 0,
-          })
+        ? await assignmentStore.update(props.entry!.id, payload)
+        : await assignmentStore.create(payload)
 
       await images.upload(projectId.value)
 
@@ -104,6 +100,7 @@ export function useExtraEntryForm(props: {
         comment: saved.comment ?? '',
         project: saved.project,
         projectId: saved.project.id,
+        //...saved,
       }
     } finally {
       isSaving.value = false
