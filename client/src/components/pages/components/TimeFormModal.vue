@@ -86,14 +86,14 @@ const mode = ref<'WORK' | 'EXTRA'>(
 //const isDirty = ref(false)
 //const isHydrating = ref(false)
 
-const state = computed<EntryState>(() => {
-  if (absenceForm.kind.value) return EntryState.ABSENCE
-  if (mode.value === 'EXTRA') return EntryState.EXTRA
-  return EntryState.WORK
-})
-//const state = ref<EntryState>(
-//  props.entry?.kind ?? EntryState.WORK,
-//)
+//const state = computed<EntryState>(() => {
+//  if (absenceForm.kind.value) return EntryState.ABSENCE
+//  if (mode.value === 'EXTRA') return EntryState.EXTRA
+//  return EntryState.WORK
+//})
+const state = ref<EntryState>(
+  props.entry?.kind ?? EntryState.WORK,
+)
 //function hasProjectId(e: DayEntry): e is DayEntry & { projectId: string } {
 //  return e.kind === 'WORK' || e.kind === 'EXTRA'
 //}
@@ -104,14 +104,19 @@ watch(
   },
   { immediate: true }
 )
-/*
+watch(
+    () => absenceForm.kind.value,
+    v => {
+        if (v) state.value = EntryState.ABSENCE
+    }
+    )
 watch(mode, v => {
   if (state.value === EntryState.ABSENCE) return
   state.value = v === 'EXTRA'
     ? EntryState.EXTRA
     : EntryState.WORK
 })
-
+/*
 watch(
   [start, end, breakMinutes],
   () => {

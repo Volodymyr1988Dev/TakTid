@@ -16,7 +16,6 @@ export function useAbsenceEntryForm(props: {
 
   const isEdit = computed(() => !!props.entry)
   const isActive = computed(() => true)
-
   async function save(): Promise<AbsenceDayEntry> {
     isSaving.value = true
     try {
