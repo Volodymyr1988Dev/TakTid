@@ -1,21 +1,21 @@
 import { ref, computed, watch } from 'vue'
-//import type { Ref } from 'vue'
+import type { Ref } from 'vue'
 import type { DayEntry } from '../../types/DayEntry.type'
 import { useProjectAssignmentStore } from '../../stores/projectAssignment.store'
 import { useTimeEntryImages } from './useTimeEntryImages'
 import { EntryState } from '../../types/EntryState'
 import { calculateWorkedMinutes } from '../pages/components/helpers/time'
 import type { TimeBasedForm } from '../../types/TimeBasedForm'
-import { useProjectStore } from '../../stores/project.store'
+//import { useProjectStore } from '../../stores/project.store'
 
 export function useExtraEntryForm(props: {
   date: string
   entry?: DayEntry | null
-  //projectId: Ref<string | null>
+  projectId: Ref<string | null>
 }) {
   const assignmentStore = useProjectAssignmentStore()
   const images = useTimeEntryImages()
-  const projectStore = useProjectStore()
+  //const projectStore = useProjectStore()
 
 /*
   const isExtra = computed(
@@ -28,10 +28,10 @@ export function useExtraEntryForm(props: {
     projectId,
   })
 */
-  const projectId = computed(() => projectStore.projectId)
+  //const projectId = computed(() => projectStore.projectId)
   const start = ref('08:00')
   const end = ref('17:00')
-  const breakMinutes = ref(0)
+  const breakMinutes = ref(30)
   const comment = ref('')
   //const projectId = ref<string | null>(null)
   //const projectId = props.projectId
@@ -68,7 +68,7 @@ export function useExtraEntryForm(props: {
   )
 
   async function save(): Promise<DayEntry | undefined> {
-    if (!projectId.value) {
+    if (!props.projectId.value) {
       alert('Project missing')
       return
     }
@@ -76,7 +76,7 @@ export function useExtraEntryForm(props: {
     isSaving.value = true
     try {
         const payload = {
-        projectId: projectId.value,
+        projectId: props.projectId.value,
         date: props.date,
         startTime: normalizeTime(start.value),
         endTime: normalizeTime(end.value),
@@ -87,10 +87,11 @@ export function useExtraEntryForm(props: {
         ? await assignmentStore.update(props.entry!.id, payload)
         : await assignmentStore.create(payload)
 
-      await images.upload(projectId.value)
+      await images.upload(props.projectId.value)
 
       return {
         kind: EntryState.EXTRA,
+        //type: 'Extra',
         id: saved.id,
         date: saved.date,
         hours: saved.hours,

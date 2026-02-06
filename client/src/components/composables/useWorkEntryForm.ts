@@ -1,7 +1,7 @@
 import { ref, computed,watch } from 'vue'
-//import type { Ref } from 'vue'
+import type { Ref } from 'vue'
 import { useTimeEntryStore } from '../../stores/timeEntry.store'
-import { useProjectStore } from '../../stores/project.store'
+//import { useProjectStore } from '../../stores/project.store'
 import { calculateWorkedMinutes } from '../pages/components/helpers/time'
 import type { WorkDayEntry } from '../../types/DayEntry.type'
 import type { TimeEntryUpdatePayload } from '../../types/TimeEntryUpdatePayload.type'
@@ -14,13 +14,13 @@ export function useWorkEntryForm(props: {
   date: string
   entry?: WorkDayEntry | null
   //projectId: { value: string | null }
-  //projectId: Ref <string | null>
+  projectId: Ref <string | null>
 }) {
   const store = useTimeEntryStore()
   const images = useTimeEntryImages()
-  const projectStore = useProjectStore()
+  //const projectStore = useProjectStore()
 
-  const projectId = computed(() => projectStore.projectId)
+  //const projectId = computed(() => projectStore.projectId)
   const start = ref('08:00')
   const end = ref('17:00')
   const breakMinutes = ref(30)
@@ -43,27 +43,40 @@ export function useWorkEntryForm(props: {
   })
 
   watch(
-    projectId,
+    props.projectId,
     v => {
         console.log('[WorkForm] projectId:', v)
     },
     { immediate: true }
     )
+watch(
+  () => props.entry,
+  e => {
+    if (!e) return
+
+    start.value = normalizeTime(e.startTime ?? '08:00')
+    end.value = normalizeTime(e.endTime ?? '17:00')
+    breakMinutes.value = e.breakMinutes ?? 30
+    comment.value = e.comment ?? ''
+  },
+  { immediate: true }
+)
 
   async function save(): Promise<WorkDayEntry> {
+    //const pid = props.projectId.value
     //const projectId = props.projectId.value ?? undefined
-    if (!projectId.value) {
+    if (!props.projectId.value) {
         throw new Error('WORK requires projectId')
     }
-
-    isSaving.value = true
+    //if (!pid) throw new Error('WORK requires projectId')
+    //isSaving.value = true
     try {
       const payload: TimeEntryUpdatePayload = {
         startTime: normalizeTime(start.value),
         endTime: normalizeTime(end.value),
         breakMinutes: breakMinutes.value,
         comment: comment.value,
-        projectId: projectId.value, //:props.projectId.value,
+        projectId: props.projectId.value, //:props.projectId.value,
       }
 
       const saved = props.entry
@@ -74,7 +87,7 @@ export function useWorkEntryForm(props: {
         ...payload,
         })
 
-      await images.upload(projectId.value /*props.projectId.value*/)
+      await images.upload(props.projectId.value /*props.projectId.value*/)
 
       return {
         kind: EntryState.WORK,

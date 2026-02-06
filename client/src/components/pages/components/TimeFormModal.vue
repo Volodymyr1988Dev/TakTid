@@ -58,13 +58,14 @@ const projectStore = useProjectStore()
 //  ...props,
 //  projectId: projectSelector.projectId,
 //})
-const projectId = computed(() => projectStore.projectId)
+//const projectId = computed(() => projectStore.projectId)
+const projectId = ref<string | null>(projectStore.projectId)
 const project = computed(() => projectStore.selectedProject)
 
 const workForm = useWorkEntryForm({
   date: props.date,
   entry: props.entry?.kind === EntryState.WORK ? props.entry : null,
-  //projectId,//: projectSelector.projectId,
+  projectId,//: projectSelector.projectId,
 })
 
 const absenceForm = useAbsenceEntryForm({
@@ -76,7 +77,7 @@ const extraForm = useExtraEntryForm({
   date: props.date,
   //entry: props.entry,
   entry: props.entry?.kind === EntryState.EXTRA ? props.entry : null,
-  //projectId,//: projectSelector.projectId,
+  projectId,//: projectSelector.projectId,
 })
 
 const mode = ref<'WORK' | 'EXTRA'>(
@@ -91,14 +92,32 @@ const mode = ref<'WORK' | 'EXTRA'>(
 //  if (mode.value === 'EXTRA') return EntryState.EXTRA
 //  return EntryState.WORK
 //})
-const state = ref<EntryState>(
-  props.entry?.kind ?? EntryState.WORK,
+const isAbsence = computed(() =>
+  ['SICK', 'VAB', 'VACATION'].includes(absenceForm.kind.value)
 )
+
+//const state = computed<EntryState>(() => {
+  //if (isAbsence.value) return EntryState.ABSENCE
+  //if (mode.value === 'EXTRA') return EntryState.EXTRA
+  //return EntryState.WORK
+//})
+const state = ref<EntryState>(
+  isAbsence.value
+    ? EntryState.ABSENCE
+    : mode.value === 'EXTRA'
+      ? EntryState.EXTRA
+      : EntryState.WORK,
+)
+const isSaving = computed<boolean>(() => Boolean(activeForm.value?.isSaving) ?? false)
+
+//const state = ref<EntryState>(
+//  props.entry?.kind ?? EntryState.WORK,
+//)
 //function hasProjectId(e: DayEntry): e is DayEntry & { projectId: string } {
 //  return e.kind === 'WORK' || e.kind === 'EXTRA'
 //}
 watch(
-  () => projectId.value,
+  () => projectStore.projectId,
   v => {
     console.log('[Modal] projectId changed:', v)
   },
@@ -112,9 +131,7 @@ watch(
     )
 watch(mode, v => {
   if (state.value === EntryState.ABSENCE) return
-  state.value = v === 'EXTRA'
-    ? EntryState.EXTRA
-    : EntryState.WORK
+  state.value = v === 'EXTRA' ? EntryState.EXTRA : EntryState.WORK
 })
 /*
 watch(
@@ -205,39 +222,63 @@ const projectMissing = computed(() =>
   (state.value === EntryState.WORK || state.value === EntryState.EXTRA)
   && !projectId.value //!projectSelector.projectId.value
 )
-const activeForm = computed(() => //{
-  /*
-  switch (state.value) {
-    //case EntryState.WORK:
-    //  return workForm
-    case EntryState.ABSENCE:
-      return absenceForm
-    case EntryState.EXTRA:
-      return extraForm
-      default:
-        return workForm
-  }
-  */
+const activeForm = computed(() =>
   state.value === EntryState.ABSENCE
     ? absenceForm
     : activeTimeForm.value!
 //}
 )
 
+/*
 const activeTimeForm = computed<TimeBasedForm | null>(() => {
   if (state.value === EntryState.WORK) return workForm
   if (state.value === EntryState.EXTRA) return extraForm
   return null
 })
-
+*/
+const activeTimeForm = ref<TimeBasedForm | null>(
+  state.value === EntryState.WORK ? workForm : extraForm
+)
+//watch(state, (v) => {
+//  if (v === EntryState.WORK) activeTimeForm.value = workForm
+//  else if (v === EntryState.EXTRA) activeTimeForm.value = extraForm
+//  else activeTimeForm.value = null
+//})
 const imagePreviews = computed(() =>
-  activeTimeForm.value?.images.previews.value ?? []
+  activeTimeForm.value?.images?.previews ?? []
 )
 
-const commentModel = computed({
-  get: () => activeForm.value.comment.value,
-  set: v => {
-    activeForm.value.comment.value = v
+const startModel = computed({
+  get: () => activeTimeForm.value?.start ?? '',
+  //set: v => { if (activeTimeForm.value) activeTimeForm.value.start = v }
+  set: v => activeTimeForm.value && (activeTimeForm.value.start = v),
+})
+
+const endModel = computed({
+  get: () => activeTimeForm.value?.end ?? '',
+  //set: v => { if (activeTimeForm.value) activeTimeForm.value.end = v }
+  set: v => activeTimeForm.value && (activeTimeForm.value.end = v),
+})
+
+const breakMinutesModel = computed({
+  get: () => activeTimeForm.value?.breakMinutes ?? 0,
+  //set: v => { if (activeTimeForm.value) activeTimeForm.value.breakMinutes = v }
+  set: v => activeTimeForm.value && (activeTimeForm.value.breakMinutes = v),
+})
+
+const commentModel = computed<string>({
+  get: () => {
+    if (state.value === EntryState.ABSENCE) {
+      return absenceForm.comment.value
+    }
+    return activeTimeForm.value?.comment ?? ''
+  },
+  set: (v: string) => {
+    if (state.value === EntryState.ABSENCE) {
+      absenceForm.comment.value = v
+    } else if (activeTimeForm.value) {
+      activeTimeForm.value.comment = v
+    }
   },
 })
 /*
@@ -317,7 +358,7 @@ async function onDelete() {
   //  await workForm.remove()
   //} else if (state.value === EntryState.ABSENCE) {
   //  await absenceForm.remove()
-  await activeForm.value.remove()
+  await activeForm.value?.remove()
   //await activeForm.value.remove()
   //}
 
@@ -367,15 +408,15 @@ async function onDelete() {
       </select>
       <div v-if="activeTimeForm">
         <input 
-          v-model="activeTimeForm.start.value" 
+          v-model="startModel" 
           type="time" 
         >
         <input 
-          v-model="activeTimeForm.end.value" 
+          v-model="endModel" 
           type="time" 
         >
         <input 
-          v-model.number="activeTimeForm.breakMinutes.value" 
+          v-model.number="breakMinutesModel" 
           type="number" 
           min="0" 
         >
@@ -411,7 +452,7 @@ async function onDelete() {
 
       <div class="actions">
         <button 
-          v-if="activeForm.isEdit" 
+          v-if="activeForm?.isEdit || state === EntryState.ABSENCE" 
           class="danger" 
           @click="onDelete"
         >
@@ -419,7 +460,7 @@ async function onDelete() {
         </button>
         <button 
           class="primary" 
-          :disabled="activeForm.isSaving.value" 
+          :disabled="isSaving" 
           @click="onSave"
         >
           Save
