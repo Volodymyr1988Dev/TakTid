@@ -92,9 +92,10 @@ const mode = ref<'WORK' | 'EXTRA'>(
 //  if (mode.value === 'EXTRA') return EntryState.EXTRA
 //  return EntryState.WORK
 //})
-const isAbsence = computed(() =>
-  ['SICK', 'VAB', 'VACATION'].includes(absenceForm.kind.value)
-)
+//const isAbsence = computed(() =>
+  //['SICK', 'VAB', 'VACATION'].includes(absenceForm.kind.value)
+//  () => state.value === EntryState.ABSENCE
+//)
 
 //const state = computed<EntryState>(() => {
   //if (isAbsence.value) return EntryState.ABSENCE
@@ -102,11 +103,13 @@ const isAbsence = computed(() =>
   //return EntryState.WORK
 //})
 const state = ref<EntryState>(
-  isAbsence.value
-    ? EntryState.ABSENCE
-    : mode.value === 'EXTRA'
+  //isAbsence.value
+    //? EntryState.ABSENCE
+    //: mode.value === 'EXTRA'
+    props.entry?.kind ??
+    (mode.value === 'EXTRA'
       ? EntryState.EXTRA
-      : EntryState.WORK,
+      : EntryState.WORK),
 )
 const isSaving = computed<boolean>(() => Boolean(activeForm.value?.isSaving) ?? false)
 
@@ -124,11 +127,13 @@ watch(
   { immediate: true }
 )
 watch(
-    () => absenceForm.kind.value,
-    v => {
-        if (v) state.value = EntryState.ABSENCE
+  () => absenceForm.kind.value,
+  () => {
+    if (props.entry?.kind === EntryState.ABSENCE) {
+      state.value = EntryState.ABSENCE
     }
-    )
+  }
+)
 watch(mode, v => {
   if (state.value === EntryState.ABSENCE) return
   state.value = v === 'EXTRA' ? EntryState.EXTRA : EntryState.WORK
