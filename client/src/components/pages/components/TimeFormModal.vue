@@ -236,36 +236,45 @@ const activeTimeForm = computed<TimeBasedForm | null>(() => {
   return null
 })
 */
-const activeTimeForm = ref<TimeBasedForm | null>(
-  state.value === EntryState.WORK ? workForm : extraForm
-)
+//const activeTimeForm = ref<TimeBasedForm | null>(
+//  state.value === EntryState.WORK ? workForm : extraForm
+//)
+
+const activeTimeForm = computed<TimeBasedForm | null>(() => {
+  if (state.value === EntryState.WORK) return workForm
+  if (state.value === EntryState.EXTRA) return extraForm
+  return null
+})
 //watch(state, (v) => {
 //  if (v === EntryState.WORK) activeTimeForm.value = workForm
 //  else if (v === EntryState.EXTRA) activeTimeForm.value = extraForm
 //  else activeTimeForm.value = null
 //})
-const imagePreviews = computed(() =>
-  activeTimeForm.value?.images?.previews ?? []
+const imagePreviews = computed<string[]>(() =>
+  activeTimeForm.value?.images?.previews.value ?? []
 )
 
-const startModel = computed({
-  get: () => activeTimeForm.value?.start ?? '',
-  //set: v => { if (activeTimeForm.value) activeTimeForm.value.start = v }
-  set: v => activeTimeForm.value && (activeTimeForm.value.start = v),
+const startModel = computed<string>({
+  get: () => activeTimeForm.value?.start.value ?? '',
+  set: v => {
+    if (activeTimeForm.value) {
+      activeTimeForm.value.start.value = v
+    }
+  },
 })
 
-const endModel = computed({
-  get: () => activeTimeForm.value?.end ?? '',
-  //set: v => { if (activeTimeForm.value) activeTimeForm.value.end = v }
-  set: v => activeTimeForm.value && (activeTimeForm.value.end = v),
+const endModel = computed<string>({
+  get: () => activeTimeForm.value?.end.value ?? '',
+  set: v => { if (activeTimeForm.value) activeTimeForm.value.end.value = v }
+  //set: v => activeTimeForm.value && (activeTimeForm.value.end = v),
 })
 
-const breakMinutesModel = computed({
-  get: () => activeTimeForm.value?.breakMinutes ?? 0,
-  //set: v => { if (activeTimeForm.value) activeTimeForm.value.breakMinutes = v }
-  set: v => activeTimeForm.value && (activeTimeForm.value.breakMinutes = v),
+const breakMinutesModel = computed<number>({
+  get: () => activeTimeForm.value?.breakMinutes.value ?? 0,
+  set: v => { if (activeTimeForm.value) activeTimeForm.value.breakMinutes.value = v }
+  //set: v => activeTimeForm.value && (activeTimeForm.value.breakMinutes = v),
 })
-
+/*
 const commentModel = computed<string>({
   get: () => {
     if (state.value === EntryState.ABSENCE) {
@@ -278,6 +287,20 @@ const commentModel = computed<string>({
       absenceForm.comment.value = v
     } else if (activeTimeForm.value) {
       activeTimeForm.value.comment = v
+    }
+  },
+})
+  */
+ const commentModel = computed<string>({
+  get: () =>
+    state.value === EntryState.ABSENCE
+      ? absenceForm.comment.value
+      : activeTimeForm.value?.comment.value ?? '',
+  set: v => {
+    if (state.value === EntryState.ABSENCE) {
+      absenceForm.comment.value = v
+    } else if (activeTimeForm.value) {
+      activeTimeForm.value.comment.value = v
     }
   },
 })

@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useProjectImageStore } from '../../stores/projectImage.store'
 //import { RefSymbol } from '@vue/reactivity'
 //import type { Ref } from 'vue'
@@ -11,15 +11,17 @@ export function useTimeEntryImages() {
   const files = ref<File[]>([])
   //const previews = ref<string[]>([])
   //const rawPreviews = ref<string[]>([])
-  const previews = ref<string[]>([])
+  const previewsRef = ref<string[]>([])
   // const previews = computed<string[]>(() =>
   //  files.value.map(file => URL.createObjectURL(file)),
   //)
 
   watch(files, () => {
-    previews.value.forEach(URL.revokeObjectURL)
-    previews.value = files.value.map(f => URL.createObjectURL(f))
+    previewsRef.value.forEach(URL.revokeObjectURL)
+    previewsRef.value = files.value.map(f => URL.createObjectURL(f))
   })
+
+  const previews = computed<string[]>(() => previewsRef.value)
 
   function onSelect(e: Event) {
     const input = e.target as HTMLInputElement

@@ -10,19 +10,31 @@ export function useAbsenceEntryForm(props: {
 }) {
   const store = useTimeEntryStore()
 
-  const kind = ref<TimeKind>(props.entry?.type ?? TimeKind.SICK)
-  const comment = ref(props.entry?.comment ?? '')
-  const isSaving = ref(false)
+  const kindRef = ref<TimeKind>(props.entry?.type ?? TimeKind.SICK)
+  const commentRef = ref(props.entry?.comment ?? '')
+  const isSavingRef = ref(false)
+
+     const kind = computed({
+    get: () => kindRef.value,
+    set: v => (kindRef.value = v),
+  })
+
+  const comment = computed({
+    get: () => commentRef.value,
+    set: v => (commentRef.value = v),
+  })
+
+  const isSaving = computed(() => isSavingRef.value)
 
   const isEdit = computed(() => !!props.entry)
   const isActive = computed(() => true)
   async function save(): Promise<AbsenceDayEntry> {
-    isSaving.value = true
+    isSavingRef.value = true
     try {
         const payload ={
             date: props.date,
-            type: kind.value,
-            comment: comment.value
+            type: kindRef.value,
+            comment: commentRef.value
         }
       const saved = props.entry
         ? await store.update(props.entry.id, payload)
@@ -37,7 +49,7 @@ export function useAbsenceEntryForm(props: {
         comment: saved.comment ?? '',
       }
     } finally {
-      isSaving.value = false
+      isSavingRef.value = false
     }
   }
 

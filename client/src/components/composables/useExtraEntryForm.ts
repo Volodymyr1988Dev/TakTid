@@ -29,20 +29,38 @@ export function useExtraEntryForm(props: {
   })
 */
   //const projectId = computed(() => projectStore.projectId)
-  const start = ref('08:00')
-  const end = ref('17:00')
-  const breakMinutes = ref(30)
-  const comment = ref('')
+  const startRef = ref('08:00')
+  const endRef = ref('17:00')
+  const breakMinutesRef = ref(30)
+  const commentRef = ref('')
   //const projectId = ref<string | null>(null)
   //const projectId = props.projectId
   const isEdit = computed(() => props.entry?.kind === EntryState.EXTRA /*!!props.entry*/)
-  const isSaving = ref(false)
+  const isSavingRef = ref(false)
+
+  const start = computed({
+    get: () => startRef.value,
+    set: v => (startRef.value = v),
+  })
+  const end = computed({
+    get: () => endRef.value,
+    set: v => (endRef.value = v),
+  })
+  const breakMinutes = computed({
+    get: () => breakMinutesRef.value,
+    set: v => (breakMinutesRef.value = v),
+  })
+  const comment = computed({
+    get: () => commentRef.value,
+    set: v => (commentRef.value = v),
+  })
+  const isSaving = computed(() => isSavingRef.value)
 
   const calculatedHours = computed(() => {
       const minutes = calculateWorkedMinutes(
-        normalizeTime(start.value),
-        normalizeTime(end.value),
-        breakMinutes.value,
+        normalizeTime(startRef.value),
+        normalizeTime(endRef.value),
+        breakMinutesRef.value,
       )
       return (minutes / 60).toFixed(2)
     })
@@ -57,10 +75,10 @@ export function useExtraEntryForm(props: {
       if (!e || e.kind !== EntryState.EXTRA) return
       //if (e.kind !== EntryState.EXTRA) return
 
-      start.value = normalizeTime(e.startTime ?? '08:00')
-      end.value = normalizeTime(e.endTime ?? '17:00')
-      breakMinutes.value = e.breakMinutes ?? 30
-      comment.value = e.comment ?? ''
+      startRef.value = normalizeTime(e.startTime ?? '08:00')
+      endRef.value = normalizeTime(e.endTime ?? '17:00')
+      breakMinutesRef.value = e.breakMinutes ?? 30
+      commentRef.value = e.comment ?? ''
         
       //projectId.value = e.projectId ?? e.project?.id ?? null
     },
@@ -73,15 +91,15 @@ export function useExtraEntryForm(props: {
       return
     }
 
-    isSaving.value = true
+    isSavingRef.value = true
     try {
         const payload = {
         projectId: props.projectId.value,
         date: props.date,
-        startTime: normalizeTime(start.value),
-        endTime: normalizeTime(end.value),
-        breakMinutes: breakMinutes.value,
-        comment: comment.value,
+        startTime: normalizeTime(startRef.value),
+        endTime: normalizeTime(endRef.value),
+        breakMinutes: breakMinutesRef.value,
+        comment: commentRef.value,
       }
       const saved = isEdit.value //props.entry
         ? await assignmentStore.update(props.entry!.id, payload)
@@ -104,7 +122,7 @@ export function useExtraEntryForm(props: {
         //...saved,
       }
     } finally {
-      isSaving.value = false
+      isSavingRef.value = false
     }
   }
 

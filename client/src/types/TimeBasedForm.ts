@@ -16,7 +16,21 @@ export interface TimeBasedForm {
   comment: Ref<string>
   isEdit: ComputedRef<boolean>
   isSaving: Ref<boolean>
-
+  //save: () => Promise<DayEntry | null>
   save: () => Promise<DayEntry | undefined>
   remove: () => Promise<void>
-}
+} /*
+import type { BaseEntryForm } from './BaseEntryForm'
+
+export interface TimeBasedForm extends BaseEntryForm {
+  start: string
+  end: string
+  breakMinutes: number
+
+  calculatedHours: string
+
+  images: {
+    previews: string[]
+    onSelect(e: Event): void
+  }
+}*/
