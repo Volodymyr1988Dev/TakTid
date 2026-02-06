@@ -386,8 +386,12 @@ async function onSave() {
   //const entry = state.value === EntryState.ABSENCE
   //  ? await absenceForm.save()
   //  : await activeTimeForm.value!.save()
+   console.log('[Modal] saving with state:', state.value)
+  console.log('[Modal] projectId:', projectId.value)
+  console.log('[Modal] activeForm:', activeForm.value)
   const entry = await activeForm.value.save()
   if (entry) emit('saved', entry)//return
+  console.log('[Modal] save result:', entry)
   //state.value === EntryState.EXTRA
   //? await extraForm.save()
   //: await timeForm.save()

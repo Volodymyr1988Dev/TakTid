@@ -85,6 +85,7 @@ watch(
   const isSaving = computed(() => isSavingRef.value)
 
   async function save(): Promise<WorkDayEntry> {
+    console.log('[WorkForm.save] projectId:', props.projectId.value)
     //const pid = props.projectId.value
     //const projectId = props.projectId.value ?? undefined
     if (!props.projectId.value) {
