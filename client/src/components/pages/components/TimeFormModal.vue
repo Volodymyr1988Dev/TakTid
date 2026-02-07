@@ -202,6 +202,21 @@ watch(
   },
   { immediate: true },
 )
+watch(
+  () => props.preset,
+  preset => {
+    if (!preset) return
+
+    console.log('[Modal] preset received:', preset)
+
+    if ('type' in preset) {
+      state.value = EntryState.ABSENCE
+      absenceForm.kind.value = preset.type
+    }
+  },
+  { immediate: true },
+)
+
 /* =======================
    ACTIONS
 ======================= */
@@ -249,7 +264,10 @@ async function onDelete() {
   <div class="modal-backdrop">
     <div class="modal">
       <header class="modal-header">
-        <button class="back-btn" @click="emit('cancel')">
+        <button 
+          class="back-btn" 
+          @click="emit('cancel')"
+        >
           ← Back
         </button>
       </header>
@@ -264,8 +282,14 @@ async function onDelete() {
 
       <p><strong>Date:</strong> {{ date }}</p>
 
-      <div v-if="project" class="project-pill">
-        <p v-if="projectMissing" class="error">
+      <div 
+        v-if="project" 
+        class="project-pill"
+      >
+        <p 
+          v-if="projectMissing" 
+          class="error"
+        >
           Please select a project
         </p>
         <strong>{{ project.city }}</strong>
@@ -276,28 +300,45 @@ async function onDelete() {
         v-if="state !== EntryState.ABSENCE"
         v-model="mode"
       >
-        <option value="WORK">Work</option>
-        <option value="EXTRA">Extra work</option>
+        <option value="WORK">
+          Work
+        </option>
+        <option value="EXTRA">
+          Extra work
+        </option>
       </select>
 
       <div v-if="activeTimeForm">
-        <input v-model="startModel" type="time" />
-        <input v-model="endModel" type="time" />
-        <input v-model.number="breakMinutesModel" type="number" min="0" />
+        <input 
+          v-model="startModel" 
+          type="time" 
+        >
+        <input 
+          v-model="endModel" 
+          type="time" 
+        >
+        <input 
+          v-model.number="breakMinutesModel" 
+          type="number" 
+          min="0" 
+        >
 
         <input
           type="file"
           multiple
           accept="image/*"
           @change="activeTimeForm.images.onSelect"
-        />
+        >
 
-        <div v-if="imagePreviews.length" class="previews">
+        <div 
+          v-if="imagePreviews.length" 
+          class="previews"
+        >
           <img
             v-for="(src, i) in imagePreviews"
             :key="i"
             :src="src"
-          />
+          >
         </div>
 
         <p>{{ activeTimeForm.calculatedHours }} h</p>

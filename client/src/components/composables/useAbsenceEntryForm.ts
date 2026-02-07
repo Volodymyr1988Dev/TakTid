@@ -10,7 +10,9 @@ export function useAbsenceEntryForm(props: {
 }) {
   const store = useTimeEntryStore()
 
-  const kindRef = ref<TimeKind>(props.entry?.type ?? TimeKind.SICK)
+  const kindRef = ref<TimeKind>(
+    props.entry?.type ?? TimeKind.SICK
+  )
   const commentRef = ref(props.entry?.comment ?? '')
   const isSavingRef = ref(false)
 
