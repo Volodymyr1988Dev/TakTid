@@ -8,7 +8,7 @@ export class CreateProjectAssignmentDto {
 
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
-  projectId: string;
+  projectId!: string;
 
   @ApiProperty({ required: false })
   @IsString()
@@ -16,17 +16,17 @@ export class CreateProjectAssignmentDto {
 
   @ApiProperty({ example: '09:00' })
   @IsString()
-  startTime: string;
+  startTime!: string;
 
   @ApiProperty({ example: '17:30' })
   @IsString()
-  endTime: string;
+  endTime!: string;
 
   @ApiProperty({ example: 30 })
   @IsInt()
-  breakMinutes: number;
+  breakMinutes!: number;
 
   @ApiProperty({ example: '2025-01-15' })
   @IsDateString()
-  date: string;
+  date!: string;
 }

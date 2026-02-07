@@ -31,6 +31,8 @@ export class ProjectAssignmentService {
   ): Promise<ProjectAssignment> {
     //const user = await this.userRepo.findOne({ where: { id: dto.userId } });
     //if (!user) throw new NotFoundException('User not found');
+    console.log('[CREATE ASSIGNMENT DTO]', dto);
+    console.log('[USER]', user.id);
 
     const project = await this.projectRepo.findOne({
       where: { id: dto.projectId },
@@ -56,7 +58,13 @@ export class ProjectAssignmentService {
       throw new BadRequestException('WORK entry requires projectId');
     }
 
-    return this.assignmentRepo.save(assignment);
+    //return this.assignmentRepo.save(assignment);
+    try {
+      return await this.assignmentRepo.save(assignment);
+    } catch (e) {
+      console.error('[ASSIGNMENT SAVE FAILED]', e);
+      throw e;
+    }
   }
 
   async update(

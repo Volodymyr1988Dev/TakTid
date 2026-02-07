@@ -2,8 +2,8 @@ import { IsDateString } from 'class-validator';
 
 export class QueryProjectAssignmentDto {
   @IsDateString()
-  from: string;
+  from!: string;
 
   @IsDateString()
-  to: string;
+  to!: string;
 }
