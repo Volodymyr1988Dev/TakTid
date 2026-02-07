@@ -105,8 +105,13 @@ export function useExtraEntryForm(props: {
         ? await assignmentStore.update(props.entry!.id, payload)
         : await assignmentStore.create(payload)
 
-      await images.upload(props.projectId.value)
-
+      //await images.upload(props.projectId.value)
+      try {
+        await images.upload(props.projectId.value)
+      } catch (e) {
+        console.error('[Images] upload failed', e)
+        // НЕ ламаємо save
+      }
       return {
         kind: EntryState.EXTRA,
         //type: 'Extra',

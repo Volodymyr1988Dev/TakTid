@@ -110,8 +110,13 @@ watch(
         ...payload,
         })
 
-      await images.upload(props.projectId.value /*props.projectId.value*/)
-
+      //await images.upload(props.projectId.value /*props.projectId.value*/)
+        try {
+          await images.upload(props.projectId.value)
+        } catch (e) {
+          console.error('[Images] upload failed', e)
+          // НЕ ламаємо save
+        }
       return {
         kind: EntryState.WORK,
         id: saved.id,

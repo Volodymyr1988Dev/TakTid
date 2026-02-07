@@ -126,7 +126,7 @@ const projectMissing = computed(() => {
 })
 
 const isSaving = computed(() => {
-  const saving = Boolean(activeForm.value?.isSaving)
+  const saving = Boolean(activeForm.value?.isSaving?.value)
   console.log('[Modal] isSaving:', saving)
   return saving
 })
@@ -204,11 +204,13 @@ async function onSave() {
 
   try {
     if (!activeForm.value) {
-      console.warn('[Modal] no activeForm')
+      console.error('[Modal] activeForm is NULL, state:', state.value)
+      alert('Internal error: no active form')
       return
     }
 
     if (projectMissing.value && state.value !== EntryState.ABSENCE) {
+      alert('Please select a project before saving')
       console.warn('[Modal] project missing, abort save')
       return
     }
