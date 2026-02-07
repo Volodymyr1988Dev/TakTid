@@ -274,9 +274,11 @@ async function onDelete() {
 
       <h3>
         {{
-          state === EntryState.ABSENCE || activeTimeForm?.isEdit
-            ? 'Edit time'
-            : 'Register time'
+          state === EntryState.ABSENCE
+            ? `Register absence (${absenceForm.kind})`
+            : activeTimeForm?.isEdit
+              ? 'Edit time'
+              : 'Register time'
         }}
       </h3>
 

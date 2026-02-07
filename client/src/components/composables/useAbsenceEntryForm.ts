@@ -36,7 +36,10 @@ export function useAbsenceEntryForm(props: {
         const payload ={
             date: props.date,
             type: kindRef.value,
-            comment: commentRef.value
+            comment: commentRef.value,
+            startTime: '08:00',
+            endTime: '17:00',
+            breakMinutes: 60,
         }
       const saved = props.entry
         ? await store.update(props.entry.id, payload)
