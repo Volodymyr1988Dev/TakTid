@@ -60,13 +60,9 @@ const projectStore = useProjectStore()
 //})
 //const projectId = computed(() => projectStore.projectId)
 //const projectId = ref<string | null>(projectStore.projectId)
-const projectId = computed({
-  get: () => projectStore.selectedProject?.id ?? null,
-  set: (v: string | null) => {
-    const project = projectStore.getById(v ?? undefined)
-    projectStore.select(project ?? null)
-  },
-})
+const projectId = computed<string | null>(
+  () => projectStore.selectedProject?.id ?? null
+)
 const project = computed(() => projectStore.selectedProject)
 
 const workForm = useWorkEntryForm({
@@ -86,10 +82,17 @@ const extraForm = useExtraEntryForm({
   entry: props.entry?.kind === EntryState.EXTRA ? props.entry : null,
   projectId,//: projectSelector.projectId,
 })
-
-const mode = ref<'WORK' | 'EXTRA'>(
-  props.entry?.kind === EntryState.EXTRA ? 'EXTRA' : 'WORK',
-)
+const mode = computed<'WORK' | 'EXTRA'>({
+  get: () => state.value === EntryState.EXTRA ? 'EXTRA' : 'WORK',
+  set: v => {
+    state.value = v === 'EXTRA'
+      ? EntryState.EXTRA
+      : EntryState.WORK
+  },
+})
+//const mode = ref<'WORK' | 'EXTRA'>(
+//  props.entry?.kind === EntryState.EXTRA ? 'EXTRA' : 'WORK',
+//)
 
 //const isDirty = ref(false)
 //const isHydrating = ref(false)
@@ -103,21 +106,23 @@ const mode = ref<'WORK' | 'EXTRA'>(
   //['SICK', 'VAB', 'VACATION'].includes(absenceForm.kind.value)
 //  () => state.value === EntryState.ABSENCE
 //)
-
+const state = ref<EntryState>(
+  props.entry?.kind ?? EntryState.WORK
+)
 //const state = computed<EntryState>(() => {
   //if (isAbsence.value) return EntryState.ABSENCE
   //if (mode.value === 'EXTRA') return EntryState.EXTRA
   //return EntryState.WORK
 //})
-const state = ref<EntryState>(
+//const state = ref<EntryState>(
   //isAbsence.value
     //? EntryState.ABSENCE
     //: mode.value === 'EXTRA'
-    props.entry?.kind ??
-    (mode.value === 'EXTRA'
-      ? EntryState.EXTRA
-      : EntryState.WORK),
-)
+    //props.entry?.kind ??
+    //(mode.value === 'EXTRA'
+      //? EntryState.EXTRA
+      //: EntryState.WORK),
+//)
 const isSaving = computed<boolean>(() => Boolean(activeForm.value?.isSaving) ?? false)
 
 //const state = ref<EntryState>(
@@ -141,13 +146,11 @@ watch(
     }
   }
 )
-watch(mode, v => {
-  if (state.value === EntryState.ABSENCE) return
-  if (!projectId.value) {
-    console.warn('No project selected for current mode')
-    return
-  }
-  state.value = v === 'EXTRA' ? EntryState.EXTRA : EntryState.WORK
+watch([mode, projectId], ([m, pid]) => {
+  if (!pid) return console.error('no pid')
+  state.value = m === 'EXTRA'
+    ? EntryState.EXTRA
+    : EntryState.WORK
 })
 /*
 watch(
@@ -367,42 +370,17 @@ const calculatedHours = computed(() =>
 )
   */
 async function onSave() {
-  if (projectMissing.value && state.value !== EntryState.ABSENCE) {
-    throw new Error('requires projectId')
+  try {
+    if (projectMissing.value && state.value !== EntryState.ABSENCE) {
+      console.warn('[Modal] project missing')
+      return
+    }
+
+    const entry = await activeForm.value.save()
+    if (entry) emit('saved', entry)
+  } catch (e) {
+    console.error('[Modal] save failed', e)
   }
-  //let entry
-  //const entry = await save()
-  //if (entry) emit('saved', entry)
-  // let entry
-  
-  //if (state.value === EntryState.EXTRA && !projectId.value) {
-  //      throw new Error('EXTRA entry requires projectId')
-  //  }
-  //const entry = //await activeForm.value.save()
-  //state.value === EntryState.ABSENCE
-  //    ? await absenceForm.save()
-  //    : await activeTimeForm.value!.save()
-
-  //const entry = state.value === EntryState.ABSENCE
-  //  ? await absenceForm.save()
-  //  : await activeTimeForm.value!.save()
-   console.log('[Modal] saving with state:', state.value)
-  console.log('[Modal] projectId:', projectId.value)
-  console.log('[Modal] activeForm:', activeForm.value)
-  const entry = await activeForm.value.save()
-  if (entry) emit('saved', entry)//return
-  console.log('[Modal] save result:', entry)
-  //state.value === EntryState.EXTRA
-  //? await extraForm.save()
-  //: await timeForm.save()
-  //if (state.value === EntryState.EXTRA) {
-  //  entry = await extraForm.save()
-  //} else {
-  //  entry = await timeForm.save()
-  //}
-
-  //if (entry) emit('saved', entry)
-  //emit ('saved', entry)
 }
 async function onDelete() {
   //if (state.value === EntryState.WORK) {

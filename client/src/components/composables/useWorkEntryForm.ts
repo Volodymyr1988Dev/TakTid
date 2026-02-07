@@ -19,7 +19,7 @@ export function useWorkEntryForm(props: {
   const store = useTimeEntryStore()
   const images = useTimeEntryImages()
   //const projectStore = useProjectStore()
-
+  //const projectId = props.projectId
   //const projectId = computed(() => projectStore.projectId)
   const startRef = ref('08:00')
   const endRef = ref('17:00')
