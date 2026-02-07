@@ -71,7 +71,10 @@ export class ProjectAssignmentService {
     id: string,
     dto: UpdateProjectAssignmentDto,
   ): Promise<ProjectAssignment> {
-    const assignment = await this.assignmentRepo.findOne({ where: { id } });
+    const assignment = await this.assignmentRepo.findOne({
+      where: { id },
+      relations: ['project'],
+    });
     if (!assignment) throw new NotFoundException('Assignment not found');
 
     const start = dto.startTime ?? assignment.startTime;
@@ -81,7 +84,19 @@ export class ProjectAssignmentService {
     assignment.hours = this.calculateHours(start, end, breakMinutes);
     Object.assign(assignment, dto);
 
-    return this.assignmentRepo.save(assignment);
+    //return this.assignmentRepo.save(assignment);
+    await this.assignmentRepo.save(assignment);
+
+    const updated = await this.assignmentRepo.findOne({
+      where: { id },
+      relations: ['project'],
+    });
+
+    if (!updated) {
+      throw new NotFoundException('Assignment disappeared after update');
+    }
+
+    return updated;
   }
 
   async updateExtraWork(
