@@ -23,11 +23,9 @@ async function bootstrap() {
       'https://tidtak.vercel.app',
       'https://tak-tid.vercel.app',
       'https://tak-tid-el9s.vercel.app',
-      'https://taktiddev.vercel.app/',
+      'https://taktiddev.vercel.app',
     ],
     credentials: true,
-    //methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    //allowedHeaders: ['Content-Type', 'Authorization'],
   });
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   app.use(cookieParser());
@@ -52,9 +50,6 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  //const uploaded = await cloudinary.uploader.upload(file.path, {
-  //folder: `projects/${projectId}`,
-  //})
   const port = process.env.PORT ? Number(process.env.PORT) : 8080;
   await app.listen(port, '0.0.0.0');
   //await app.listen(port);
