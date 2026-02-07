@@ -10,23 +10,23 @@ import { Projects } from './Project';
 @Entity('project_images')
 export class ProjectImage {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  url: string;
+  url!: string;
 
   @Column()
-  publicId: string;
+  publicId!: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @Column()
-  projectId: string;
+  projectId!: string;
 
   @ManyToOne(() => Projects, (project) => project.images, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'projectId' })
-  project: Projects;
+  project!: Projects;
 }

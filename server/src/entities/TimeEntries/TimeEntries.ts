@@ -21,14 +21,14 @@ export class TimeEntry {
     example: 'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6',
   })
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @ManyToOne(() => User, { nullable: false })
-  user: User;
+  user!: User;
 
   @ManyToOne(() => Projects, { nullable: true })
   @JoinColumn({ name: 'projectId' })
-  project: Projects | null;
+  project!: Projects | null;
 
   @ApiProperty({
     description: 'Project ID',
@@ -42,13 +42,13 @@ export class TimeEntry {
     example: '2025-01-15',
   })
   @Column({ type: 'date' })
-  date: string;
+  date!: string;
   @ApiProperty({
     description: 'Number of hours logged',
     example: 8.5,
   })
   @Column({ type: 'decimal', precision: 5, scale: 2 })
-  hours: number;
+  hours!: number;
 
   @ApiProperty({
     description: 'Type of the time entry',
@@ -62,24 +62,24 @@ export class TimeEntry {
     type: 'enum',
     enum: timeKind,
   })
-  type: timeKind;
+  type!: timeKind;
   @ApiProperty({
     description: 'Number of break minutes taken',
     example: 30,
   })
   @Column({ type: 'int', default: 0 })
-  breakMinutes: number;
+  breakMinutes!: number;
 
   @ApiProperty({
     description: 'Additional comments for the time entry',
     example: 'Worked on project documentation',
   })
   @Column({ type: 'text', nullable: true })
-  comment: string;
+  comment!: string;
 
   @Column({ type: 'time', nullable: true })
-  startTime: string;
+  startTime!: string;
 
   @Column({ type: 'time', nullable: true })
-  endTime: string;
+  endTime!: string;
 }

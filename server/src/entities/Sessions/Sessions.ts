@@ -9,11 +9,11 @@ export class Session {
     example: 'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6',
   })
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
   @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
-  token: string;
+  token!: string;
 
   @Column({ nullable: true })
   @ApiProperty({ example: 'refresh-token-value', nullable: true })
@@ -24,15 +24,15 @@ export class Session {
     description: 'Користувач, якому належить сесія',
     type: () => User,
   })
-  user: User;
+  user!: User;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   @ApiProperty({ example: '2025-02-01T12:00:00.000Z' })
-  created_at: Date;
+  created_at!: Date;
 
   @Column({ type: 'timestamp', nullable: true })
   @ApiProperty({ example: '2025-02-01T12:10:00.000Z', nullable: true })
-  lastActivityAt: Date;
+  lastActivityAt!: Date;
 
   @Column({
     type: 'timestamp',
@@ -40,5 +40,5 @@ export class Session {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   @ApiProperty({ example: '2025-02-01T13:00:00.000Z' })
-  expires_at: Date;
+  expires_at!: Date;
 }
