@@ -40,6 +40,14 @@ const projectStore = useProjectStore()
 
 type EntryMode = 'WORK' | 'EXTRA' | 'ABSENCE'
 
+const mode = ref<EntryMode>(
+  props.entry?.kind === EntryState.EXTRA
+    ? 'EXTRA'
+    : props.entry?.kind === EntryState.ABSENCE
+      ? 'ABSENCE'
+      : 'WORK'
+)
+
 const isTimeMode = computed(
   () => mode.value === 'WORK' || mode.value === 'EXTRA'
 )
@@ -106,13 +114,6 @@ const mode = computed<'WORK' | 'EXTRA'>({
 //const mode = ref<EntryMode>(
 //  props.entry?.kind ?? 'WORK'
 //)
-const mode = ref<EntryMode>(
-  props.entry?.kind === EntryState.EXTRA
-    ? 'EXTRA'
-    : props.entry?.kind === EntryState.ABSENCE
-      ? 'ABSENCE'
-      : 'WORK'
-)
 /* =======================
    ACTIVE TIME FORM (SAFE)
 ======================= */
