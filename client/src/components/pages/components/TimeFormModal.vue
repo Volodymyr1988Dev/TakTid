@@ -209,7 +209,11 @@ watch(
 
     console.log('[Modal] preset received:', preset)
 
-    if ('type' in preset) {
+    if (
+      preset.type === 'SICK' ||
+      preset.type === 'VAB' ||
+      preset.type === 'VACATION'
+    ) {
       state.value = EntryState.ABSENCE
       absenceForm.kind.value = preset.type
     }
