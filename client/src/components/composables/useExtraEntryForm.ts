@@ -85,7 +85,7 @@ export function useExtraEntryForm(props: {
     },
     { immediate: true },
   )
-
+/*
   async function save(): Promise<DayEntry | undefined> {
     if (!props.projectId.value) {
       alert('Project missing')
@@ -133,7 +133,63 @@ export function useExtraEntryForm(props: {
       isSavingRef.value = false
     }
   }
+*/
+async function save(): Promise<DayEntry | undefined> {
+  if (!props.projectId.value) {
+    alert('Project missing')
+    return
+  }
 
+  isSavingRef.value = true
+  try {
+    let saved
+
+    if (isEdit.value) {
+      // ✅ UPDATE — БЕЗ projectId і date
+      saved = await assignmentStore.update(props.entry!.id, {
+        startTime: normalizeTime(startRef.value),
+        endTime: normalizeTime(endRef.value),
+        breakMinutes: breakMinutesRef.value,
+        comment: commentRef.value,
+      })
+    } else {
+      // ✅ CREATE — З projectId і date
+      saved = await assignmentStore.create({
+        projectId: props.projectId.value,
+        date: props.date,
+        startTime: normalizeTime(startRef.value),
+        endTime: normalizeTime(endRef.value),
+        breakMinutes: breakMinutesRef.value,
+        comment: commentRef.value,
+      })
+    }
+
+    if (!saved.project) {
+      throw new Error('Saved assignment has no project')
+    }
+
+    try {
+      await images.upload(props.projectId.value)
+    } catch (e) {
+      console.error('[Images] upload failed', e)
+    }
+
+    return {
+      kind: EntryState.EXTRA,
+      id: saved.id,
+      date: saved.date,
+      hours: saved.hours,
+      startTime: normalizeTime(saved.startTime),
+      endTime: normalizeTime(saved.endTime),
+      breakMinutes: saved.breakMinutes ?? 0,
+      comment: saved.comment ?? '',
+      project: saved.project,
+      projectId: saved.project.id,
+    }
+  } finally {
+    isSavingRef.value = false
+  }
+}
   async function remove() {
     if (!isEdit.value/*!props.entry*/) return
     if (!confirm('Delete extra work?')) return
