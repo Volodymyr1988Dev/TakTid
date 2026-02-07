@@ -38,6 +38,11 @@ onMounted(() => {
 ======================= */
 const projectStore = useProjectStore()
 
+type EntryMode = 'WORK' | 'EXTRA' | 'ABSENCE'
+
+const isTimeMode = computed(
+  () => mode.value === 'WORK' || mode.value === 'EXTRA'
+)
 //const projectId = computed<string | null>(() => {
 //  const id = projectStore.selectedProject?.id ?? null
 //  console.log('[Modal] projectId computed:', id)
@@ -146,10 +151,7 @@ const activeForm = computed(() => {
 /* =======================
    DERIVED STATE
 ======================= */
-type EntryMode = 'WORK' | 'EXTRA' | 'ABSENCE'
-const isTimeMode = computed(
-  () => mode.value === 'WORK' || mode.value === 'EXTRA'
-)
+
 /*
 const projectMissing = computed(() => {
   const missing =
