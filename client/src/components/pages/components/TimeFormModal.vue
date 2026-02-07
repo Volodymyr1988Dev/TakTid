@@ -146,12 +146,14 @@ watch(
     }
   }
 )
+/*
 watch([mode, projectId], ([m, pid]) => {
   if (!pid) return console.error('no pid')
   state.value = m === 'EXTRA'
     ? EntryState.EXTRA
     : EntryState.WORK
 })
+    */
 /*
 watch(
   [start, end, breakMinutes],
@@ -248,8 +250,8 @@ const activeForm = computed(() =>
 //}
 )
 */
-const activeForm = computed<TimeBasedForm | typeof absenceForm>(() => {
-  if (state.value === EntryState.ABSENCE) return absenceForm
+const activeForm = computed<TimeBasedForm /* | typeof absenceForm*/>(() => {
+  //if (state.value === EntryState.ABSENCE) return absenceForm
   if (state.value === EntryState.WORK) return workForm
   if (state.value === EntryState.EXTRA) return extraForm
   throw new Error('Unknown state for activeForm')
@@ -370,6 +372,10 @@ const calculatedHours = computed(() =>
 )
   */
 async function onSave() {
+  console.log('[Modal] onSave click')
+  console.log('[Modal] state:', state.value)
+  console.log('[Modal] activeForm:', activeForm.value)
+  console.log('[Modal] has save:', 'save' in activeForm.value)
   try {
     if (projectMissing.value && state.value !== EntryState.ABSENCE) {
       console.warn('[Modal] project missing')
@@ -377,6 +383,7 @@ async function onSave() {
     }
 
     const entry = await activeForm.value.save()
+    console.log('[Modal] save result:', entry)
     if (entry) emit('saved', entry)
   } catch (e) {
     console.error('[Modal] save failed', e)
