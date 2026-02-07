@@ -6,6 +6,7 @@ import { useTimeEntryImages } from './useTimeEntryImages'
 import { EntryState } from '../../types/EntryState'
 import { calculateWorkedMinutes } from '../pages/components/helpers/time'
 import type { TimeBasedForm } from '../../types/TimeBasedForm'
+//import { TimeKind } from '../../types/timeKind.enum'
 //import { useProjectStore } from '../../stores/project.store'
 
 export function useExtraEntryForm(props: {
@@ -96,6 +97,7 @@ export function useExtraEntryForm(props: {
         const payload = {
         projectId: props.projectId.value,
         date: props.date,
+        //type: TimeKind.EXTRA,
         startTime: normalizeTime(startRef.value),
         endTime: normalizeTime(endRef.value),
         breakMinutes: breakMinutesRef.value,
@@ -104,13 +106,14 @@ export function useExtraEntryForm(props: {
       const saved = isEdit.value //props.entry
         ? await assignmentStore.update(props.entry!.id, payload)
         : await assignmentStore.create(payload)
-
+      if (!saved.project) {
+        throw new Error('Saved assignment has no project')
+      }
       //await images.upload(props.projectId.value)
       try {
         await images.upload(props.projectId.value)
       } catch (e) {
         console.error('[Images] upload failed', e)
-        // НЕ ламаємо save
       }
       return {
         kind: EntryState.EXTRA,
@@ -123,7 +126,7 @@ export function useExtraEntryForm(props: {
         breakMinutes: saved.breakMinutes ?? 0,
         comment: saved.comment ?? '',
         project: saved.project,
-        projectId: saved.project.id,
+        projectId: saved.project.id ?? props.projectId.value,
         //...saved,
       }
     } finally {

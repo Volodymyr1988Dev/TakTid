@@ -190,10 +190,18 @@ watch(state, v => {
   console.log('[Modal] state changed:', v)
 })
 
-watch(() => props.entry, v => {
-  console.log('[Modal] props.entry changed:', v)
-})
-
+//watch(() => props.entry, v => {
+//  console.log('[Modal] props.entry changed:', v)
+//})
+watch(
+  () => props.entry,
+  e => {
+    if (e?.kind === EntryState.EXTRA && e.projectId) {
+      projectStore.getById(e.projectId)
+    }
+  },
+  { immediate: true },
+)
 /* =======================
    ACTIONS
 ======================= */
@@ -201,6 +209,7 @@ async function onSave() {
   console.log('[Modal] SAVE CLICK')
   console.log('[Modal] state:', state.value)
   console.log('[Modal] activeForm:', activeForm.value)
+  console.log('[ExtraForm] projectId:', projectId.value)
 
   try {
     if (!activeForm.value) {
