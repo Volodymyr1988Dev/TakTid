@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useWorkEntryForm } from '../../composables/useWorkEntryForm'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useExtraEntryForm } from '../../composables/useExtraEntryForm'
 import { useAbsenceEntryForm } from '../../composables/useAbsenceEntryForm'
-import { useProjectStore } from '../../../stores/project.store'
-
+import { useWorkEntryForm } from '../../composables/useWorkEntryForm'
 import type { DayEntry } from '../../../types/DayEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
 import { EntryState } from '../../../types/EntryState'
 import type { TimeBasedForm } from '../../../types/TimeBasedForm'
+import { useProjectStore } from '../../../stores/project.store'
 
-/* ───── props / emits ───── */
-
+/* =======================
+   PROPS + EMITS
+======================= */
 const props = defineProps<{
   date: string
   entry?: DayEntry | null
@@ -24,23 +24,40 @@ const emit = defineEmits<{
   (e: 'deleted'): void
 }>()
 
-/* ───── store ───── */
+/* =======================
+   DEBUG LIFECYCLE
+======================= */
+console.log('[Modal] setup start')
 
+onMounted(() => {
+  console.log('[Modal] mounted')
+})
+
+/* =======================
+   PROJECT STORE
+======================= */
 const projectStore = useProjectStore()
 
+const projectId = computed<string | null>(() => {
+  const id = projectStore.selectedProject?.id ?? null
+  console.log('[Modal] projectId computed:', id)
+  return id
+})
+
 const project = computed(() => projectStore.selectedProject)
-const projectId = computed<string | null>(
-  () => projectStore.selectedProject?.id ?? null
-)
 
-/* ───── state ───── */
-
+/* =======================
+   STATE
+======================= */
 const state = ref<EntryState>(
   props.entry?.kind ?? EntryState.WORK
 )
 
-/* ───── forms ───── */
+console.log('[Modal] initial state:', state.value)
 
+/* =======================
+   FORMS
+======================= */
 const workForm = useWorkEntryForm({
   date: props.date,
   entry: props.entry?.kind === EntryState.WORK ? props.entry : null,
@@ -58,54 +75,93 @@ const absenceForm = useAbsenceEntryForm({
   entry: props.entry?.kind === EntryState.ABSENCE ? props.entry : null,
 })
 
-/* ───── mode (WORK / EXTRA) ───── */
-
+/* =======================
+   MODE (WORK / EXTRA)
+======================= */
 const mode = computed<'WORK' | 'EXTRA'>({
-  get: () =>
-    state.value === EntryState.EXTRA ? 'EXTRA' : 'WORK',
+  get: () => {
+    const m = state.value === EntryState.EXTRA ? 'EXTRA' : 'WORK'
+    console.log('[Modal] mode get:', m)
+    return m
+  },
   set: v => {
-    state.value =
-      v === 'EXTRA'
-        ? EntryState.EXTRA
-        : EntryState.WORK
+    console.log('[Modal] mode set:', v)
+    state.value = v === 'EXTRA'
+      ? EntryState.EXTRA
+      : EntryState.WORK
   },
 })
 
-/* ───── active time form ───── */
-
+/* =======================
+   ACTIVE TIME FORM (SAFE)
+======================= */
 const activeTimeForm = computed<TimeBasedForm | null>(() => {
+  console.log('[Modal] compute activeTimeForm, state:', state.value)
+
   if (state.value === EntryState.WORK) return workForm
   if (state.value === EntryState.EXTRA) return extraForm
   return null
 })
 
-/* ───── ui helpers ───── */
+/* =======================
+   ACTIVE FORM (FOR SAVE / DELETE)
+======================= */
+const activeForm = computed(() => {
+  console.log('[Modal] compute activeForm, state:', state.value)
 
-const isSaving = computed(
-  () => Boolean(activeTimeForm.value?.isSaving)
-)
+  if (state.value === EntryState.ABSENCE) return absenceForm
+  return activeTimeForm.value
+})
 
-const projectMissing = computed(() =>
-  (state.value === EntryState.WORK ||
-   state.value === EntryState.EXTRA) &&
-  !projectId.value
-)
+/* =======================
+   DERIVED STATE
+======================= */
+const projectMissing = computed(() => {
+  const missing =
+    (state.value === EntryState.WORK || state.value === EntryState.EXTRA) &&
+    !projectId.value
 
-/* ───── models ───── */
+  console.log('[Modal] projectMissing:', missing)
+  return missing
+})
 
-const startModel = computed({
+const isSaving = computed(() => {
+  const saving = Boolean(activeForm.value?.isSaving)
+  console.log('[Modal] isSaving:', saving)
+  return saving
+})
+
+/* =======================
+   MODELS
+======================= */
+const startModel = computed<string>({
   get: () => activeTimeForm.value?.start.value ?? '',
-  set: v => activeTimeForm.value && (activeTimeForm.value.start.value = v),
+  set: v => {
+    if (activeTimeForm.value) {
+      console.log('[Modal] start set:', v)
+      activeTimeForm.value.start.value = v
+    }
+  },
 })
 
-const endModel = computed({
+const endModel = computed<string>({
   get: () => activeTimeForm.value?.end.value ?? '',
-  set: v => activeTimeForm.value && (activeTimeForm.value.end.value = v),
+  set: v => {
+    if (activeTimeForm.value) {
+      console.log('[Modal] end set:', v)
+      activeTimeForm.value.end.value = v
+    }
+  },
 })
 
-const breakMinutesModel = computed({
+const breakMinutesModel = computed<number>({
   get: () => activeTimeForm.value?.breakMinutes.value ?? 0,
-  set: v => activeTimeForm.value && (activeTimeForm.value.breakMinutes.value = v),
+  set: v => {
+    if (activeTimeForm.value) {
+      console.log('[Modal] breakMinutes set:', v)
+      activeTimeForm.value.breakMinutes.value = v
+    }
+  },
 })
 
 const commentModel = computed<string>({
@@ -114,6 +170,7 @@ const commentModel = computed<string>({
       ? absenceForm.comment.value
       : activeTimeForm.value?.comment.value ?? '',
   set: v => {
+    console.log('[Modal] comment set:', v)
     if (state.value === EntryState.ABSENCE) {
       absenceForm.comment.value = v
     } else if (activeTimeForm.value) {
@@ -122,36 +179,58 @@ const commentModel = computed<string>({
   },
 })
 
-const imagePreviews = computed(
-  () => activeTimeForm.value?.images.previews.value ?? []
+const imagePreviews = computed<string[]>(() =>
+  activeTimeForm.value?.images?.previews.value ?? []
 )
 
-/* ───── actions ───── */
+/* =======================
+   WATCHERS (DEBUG)
+======================= */
+watch(state, v => {
+  console.log('[Modal] state changed:', v)
+})
 
+watch(() => props.entry, v => {
+  console.log('[Modal] props.entry changed:', v)
+})
+
+/* =======================
+   ACTIONS
+======================= */
 async function onSave() {
-  console.log('[Modal] Save click', state.value)
+  console.log('[Modal] SAVE CLICK')
+  console.log('[Modal] state:', state.value)
+  console.log('[Modal] activeForm:', activeForm.value)
 
-  if (state.value === EntryState.ABSENCE) {
-    const entry = await absenceForm.save()
-    entry && emit('saved', entry)
-    return
+  try {
+    if (!activeForm.value) {
+      console.warn('[Modal] no activeForm')
+      return
+    }
+
+    if (projectMissing.value && state.value !== EntryState.ABSENCE) {
+      console.warn('[Modal] project missing, abort save')
+      return
+    }
+
+    const entry = await activeForm.value.save()
+    console.log('[Modal] save result:', entry)
+
+    if (entry) emit('saved', entry)
+  } catch (e) {
+    console.error('[Modal] SAVE FAILED', e)
   }
-
-  if (!activeTimeForm.value) return
-  if (projectMissing.value) return
-
-  const entry = await activeTimeForm.value.save()
-  entry && emit('saved', entry)
 }
 
 async function onDelete() {
-  if (state.value === EntryState.ABSENCE) {
-    await absenceForm.remove()
-  } else {
-    await activeTimeForm.value?.remove()
-  }
+  console.log('[Modal] DELETE CLICK')
 
-  emit('deleted')
+  try {
+    await activeForm.value?.remove()
+    emit('deleted')
+  } catch (e) {
+    console.error('[Modal] DELETE FAILED', e)
+  }
 }
 </script>
 
@@ -166,8 +245,7 @@ async function onDelete() {
 
       <h3>
         {{
-          (state === EntryState.ABSENCE ||
-            activeTimeForm?.isEdit)
+          state === EntryState.ABSENCE || activeTimeForm?.isEdit
             ? 'Edit time'
             : 'Register time'
         }}
@@ -204,7 +282,11 @@ async function onDelete() {
         />
 
         <div v-if="imagePreviews.length" class="previews">
-          <img v-for="(src, i) in imagePreviews" :key="i" :src="src" />
+          <img
+            v-for="(src, i) in imagePreviews"
+            :key="i"
+            :src="src"
+          />
         </div>
 
         <p>{{ activeTimeForm.calculatedHours }} h</p>
@@ -214,11 +296,14 @@ async function onDelete() {
         Absence: {{ absenceForm.kind }}
       </p>
 
-      <textarea v-model="commentModel" placeholder="Comment" />
+      <textarea
+        v-model="commentModel"
+        placeholder="Comment"
+      />
 
       <div class="actions">
         <button
-          v-if="activeTimeForm?.isEdit || state === EntryState.ABSENCE"
+          v-if="activeForm?.isEdit || state === EntryState.ABSENCE"
           class="danger"
           @click="onDelete"
         >
