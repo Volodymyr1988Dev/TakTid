@@ -38,11 +38,16 @@ onMounted(() => {
 ======================= */
 const projectStore = useProjectStore()
 
-const projectId = computed<string | null>(() => {
-  const id = projectStore.selectedProject?.id ?? null
-  console.log('[Modal] projectId computed:', id)
-  return id
-})
+//const projectId = computed<string | null>(() => {
+//  const id = projectStore.selectedProject?.id ?? null
+//  console.log('[Modal] projectId computed:', id)
+//  return id
+//})
+const projectId = computed<string | null>(() =>
+  isTimeMode.value
+    ? projectStore.selectedProject?.id ?? null
+    : null
+)
 
 const project = computed(() => projectStore.selectedProject)
 
@@ -78,6 +83,7 @@ const absenceForm = useAbsenceEntryForm({
 /* =======================
    MODE (WORK / EXTRA)
 ======================= */
+/*
 const mode = computed<'WORK' | 'EXTRA'>({
   get: () => {
     const m = state.value === EntryState.EXTRA ? 'EXTRA' : 'WORK'
@@ -91,10 +97,21 @@ const mode = computed<'WORK' | 'EXTRA'>({
       : EntryState.WORK
   },
 })
-
+  */
+//const mode = ref<EntryMode>(
+//  props.entry?.kind ?? 'WORK'
+//)
+const mode = ref<EntryMode>(
+  props.entry?.kind === EntryState.EXTRA
+    ? 'EXTRA'
+    : props.entry?.kind === EntryState.ABSENCE
+      ? 'ABSENCE'
+      : 'WORK'
+)
 /* =======================
    ACTIVE TIME FORM (SAFE)
 ======================= */
+/*
 const activeTimeForm = computed<TimeBasedForm | null>(() => {
   console.log('[Modal] compute activeTimeForm, state:', state.value)
 
@@ -102,20 +119,38 @@ const activeTimeForm = computed<TimeBasedForm | null>(() => {
   if (state.value === EntryState.EXTRA) return extraForm
   return null
 })
-
+*/
 /* =======================
    ACTIVE FORM (FOR SAVE / DELETE)
 ======================= */
+/*
 const activeForm = computed(() => {
   console.log('[Modal] compute activeForm, state:', state.value)
 
   if (state.value === EntryState.ABSENCE) return absenceForm
   return activeTimeForm.value
 })
-
+*/
+const activeForm = computed(() => {
+  switch (mode.value) {
+    case 'WORK':
+      return workForm
+    case 'EXTRA':
+      return extraForm
+    case 'ABSENCE':
+      return absenceForm
+    default:
+      return null
+  }
+})
 /* =======================
    DERIVED STATE
 ======================= */
+type EntryMode = 'WORK' | 'EXTRA' | 'ABSENCE'
+const isTimeMode = computed(
+  () => mode.value === 'WORK' || mode.value === 'EXTRA'
+)
+/*
 const projectMissing = computed(() => {
   const missing =
     (state.value === EntryState.WORK || state.value === EntryState.EXTRA) &&
@@ -124,7 +159,10 @@ const projectMissing = computed(() => {
   console.log('[Modal] projectMissing:', missing)
   return missing
 })
-
+*/
+const projectMissing = computed(() =>
+  isTimeMode.value && !projectId.value
+)
 const isSaving = computed(() => {
   const saving = Boolean(activeForm.value?.isSaving?.value)
   console.log('[Modal] isSaving:', saving)
@@ -134,6 +172,7 @@ const isSaving = computed(() => {
 /* =======================
    MODELS
 ======================= */
+/*
 const startModel = computed<string>({
   get: () => activeTimeForm.value?.start.value ?? '',
   set: v => {
@@ -163,24 +202,56 @@ const breakMinutesModel = computed<number>({
     }
   },
 })
-
+*/
+const startModel = computed({
+  get: () =>
+    isTimeMode.value ? (activeForm.value as TimeBasedForm).start.value : '',
+  set: v => {
+    if (isTimeMode.value) {
+      (activeForm.value as TimeBasedForm).start.value = v
+    }
+  },
+})
+const endModel = computed({
+  get: () =>
+    isTimeMode.value ? (activeForm.value as TimeBasedForm).end.value : '',
+  set: v => {
+    if (isTimeMode.value) {
+      (activeForm.value as TimeBasedForm).end.value = v
+    }
+  },
+})
+const breakMinutesModel = computed({
+  get: () =>
+    isTimeMode.value ? (activeForm.value as TimeBasedForm).breakMinutes.value : 0,
+  set: v => {
+    if (isTimeMode.value) {
+      (activeForm.value as TimeBasedForm).breakMinutes.value = v
+    }
+  },
+})
 const commentModel = computed<string>({
   get: () =>
-    state.value === EntryState.ABSENCE
+    //state.value === EntryState.ABSENCE
+    mode.value === 'ABSENCE'
       ? absenceForm.comment.value
-      : activeTimeForm.value?.comment.value ?? '',
+      //: activeTimeForm.value?.comment.value ?? '',
+      : (activeForm.value as TimeBasedForm)?.comment.value ?? '',
   set: v => {
-    console.log('[Modal] comment set:', v)
-    if (state.value === EntryState.ABSENCE) {
+    if (mode.value === 'ABSENCE') {
       absenceForm.comment.value = v
-    } else if (activeTimeForm.value) {
-      activeTimeForm.value.comment.value = v
+    } else {
+      ;(activeForm.value as TimeBasedForm).comment.value = v
     }
   },
 })
 
+
 const imagePreviews = computed<string[]>(() =>
-  activeTimeForm.value?.images?.previews.value ?? []
+  //activeTimeForm.value?.images?.previews.value ?? []
+  isTimeMode.value
+    ? (activeForm.value as TimeBasedForm).images.previews.value
+    : []
 )
 
 /* =======================
@@ -196,7 +267,9 @@ watch(state, v => {
 watch(
   () => props.entry,
   e => {
-    if (e?.kind === EntryState.EXTRA && e.projectId) {
+    if (!e) return
+    //if (e?.kind === EntryState.EXTRA && e.projectId) {
+    if ((e.kind === 'WORK' || e.kind === 'EXTRA') && e.projectId) {
       projectStore.getById(e.projectId)
     }
   },
@@ -214,7 +287,8 @@ watch(
       preset.type === 'VAB' ||
       preset.type === 'VACATION'
     ) {
-      state.value = EntryState.ABSENCE
+      //state.value = EntryState.ABSENCE
+      mode.value = 'ABSENCE'
       absenceForm.kind.value = preset.type
     }
   },
@@ -229,7 +303,7 @@ async function onSave() {
   console.log('[Modal] state:', state.value)
   console.log('[Modal] activeForm:', activeForm.value)
   console.log('[ExtraForm] projectId:', projectId.value)
-
+  
   try {
     if (!activeForm.value) {
       console.error('[Modal] activeForm is NULL, state:', state.value)
@@ -237,7 +311,12 @@ async function onSave() {
       return
     }
 
-    if (projectMissing.value && state.value !== EntryState.ABSENCE) {
+    if (isTimeMode.value && !projectId.value) {
+      alert('Please select a project')
+      return
+    }
+
+    if (projectMissing.value /*&& state.value !== EntryState.ABSENCE*/) {
       alert('Please select a project before saving')
       console.warn('[Modal] project missing, abort save')
       return
@@ -297,9 +376,9 @@ async function onDelete() {
 
       <h3>
         {{
-          state === EntryState.ABSENCE
+          mode === 'ABSENCE'
             ? `Register absence (${absenceForm.kind})`
-            : activeTimeForm?.isEdit
+            : activeForm?.isEdit
               ? 'Edit time'
               : 'Register time'
         }}
@@ -322,7 +401,7 @@ async function onDelete() {
       </div>
 
       <select
-        v-if="state !== EntryState.ABSENCE"
+        v-if="isTimeMode"
         v-model="mode"
       >
         <option value="WORK">
@@ -333,7 +412,7 @@ async function onDelete() {
         </option>
       </select>
 
-      <div v-if="activeTimeForm">
+      <div v-if="isTimeMode">
         <input 
           v-model="startModel" 
           type="time" 
@@ -352,7 +431,7 @@ async function onDelete() {
           type="file"
           multiple
           accept="image/*"
-          @change="activeTimeForm.images.onSelect"
+          @change="(activeForm as TimeBasedForm).images.onSelect"
         >
 
         <div 
@@ -366,7 +445,7 @@ async function onDelete() {
           >
         </div>
 
-        <p>{{ activeTimeForm.calculatedHours }} h</p>
+        <p>{{ (activeForm as TimeBasedForm).calculatedHours }} h</p>
       </div>
 
       <p v-else>
@@ -380,7 +459,7 @@ async function onDelete() {
 
       <div class="actions">
         <button
-          v-if="activeForm?.isEdit || state === EntryState.ABSENCE"
+          v-if="activeForm?.isEdit || mode === 'ABSENCE'"
           class="danger"
           @click="onDelete"
         >
