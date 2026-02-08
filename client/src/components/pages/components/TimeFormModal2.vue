@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useWorkEntryForm } from '../../composables/useWorkEntryForm'
 import { useExtraEntryForm } from '../../composables/useExtraEntryForm'
 import { useAbsenceEntryForm } from '../../composables/useAbsenceEntryForm'
-import { useEntryFormSelector } from '../../composables/useEntryFormSelector'
-
+import { useWorkEntryForm } from '../../composables/useWorkEntryForm'
 import type { DayEntry } from '../../../types/DayEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
 import { EntryState } from '../../../types/EntryState'
-import type { EntryMode } from '../../../types/Form.types'
-
+import type { TimeBasedForm } from '../../../types/TimeBasedForm'
 import { useProjectStore } from '../../../stores/project.store'
-
-/* ================= props / emits ================= */
 
 const props = defineProps<{
   date: string
@@ -22,37 +17,37 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'saved', entry: DayEntry): void
-  (e: 'deleted'): void
   (e: 'cancel'): void
+  (e: 'deleted'): void
 }>()
 
-/* ================= mode ================= */
+
+const projectStore = useProjectStore()
+
+type EntryMode = 'WORK' | 'EXTRA' | 'ABSENCE'
 
 const mode = ref<EntryMode>(
   props.entry?.kind === EntryState.EXTRA
     ? 'EXTRA'
     : props.entry?.kind === EntryState.ABSENCE
       ? 'ABSENCE'
-      : 'WORK',
+      : 'WORK'
 )
 
-/* ================= project ================= */
-
-const projectStore = useProjectStore()
-
-const isTimeMode = computed(() => mode.value !== 'ABSENCE')
-
-const projectId = computed(() =>
+const isTimeMode = computed(
+  () => mode.value === 'WORK' || mode.value === 'EXTRA'
+)
+const projectId = computed<string | null>(() =>
   isTimeMode.value
     ? projectStore.selectedProject?.id ?? null
-    : null,
+    : null
 )
 
-const projectMissing = computed(
-  () => isTimeMode.value && !projectId.value,
+const project = computed(() => projectStore.selectedProject)
+const deleting = ref(false)
+const state = ref<EntryState>(
+  props.entry?.kind ?? EntryState.WORK
 )
-
-/* ================= forms ================= */
 
 const workForm = useWorkEntryForm({
   date: props.date,
@@ -71,126 +66,145 @@ const absenceForm = useAbsenceEntryForm({
   entry: props.entry?.kind === EntryState.ABSENCE ? props.entry : null,
 })
 
-const active = useEntryFormSelector(mode, {
-  work: { ...workForm, kind: 'WORK' },
-  extra: { ...extraForm, kind: 'EXTRA' },
-  absence: { ...absenceForm, kind: 'ABSENCE' },
+const activeForm = computed(() => {
+  switch (mode.value) {
+    case 'WORK':
+      return workForm
+    case 'EXTRA':
+      return extraForm
+    case 'ABSENCE':
+      return absenceForm
+    default:
+      return null
+  }
 })
 
-/* ================= derived ================= */
-
-const isSaving = computed(() => active.value.form.isSaving.value)
-const deleting = ref(false)
-
-/* ================= models ================= */
+const projectMissing = computed(() =>
+  isTimeMode.value && !projectId.value
+)
+const isSaving = computed(() => {
+  const saving = Boolean(activeForm.value?.isSaving?.value)
+  return saving
+})
 
 const startModel = computed({
   get: () =>
-    active.value.mode === 'ABSENCE'
-      ? ''
-      : active.value.form.start.value,
+    isTimeMode.value ? (activeForm.value as TimeBasedForm).start.value : '',
   set: v => {
-    if (active.value.mode !== 'ABSENCE') {
-      active.value.form.start.value = v
+    if (isTimeMode.value) {
+      (activeForm.value as TimeBasedForm).start.value = v
     }
   },
 })
-
 const endModel = computed({
   get: () =>
-    active.value.mode === 'ABSENCE'
-      ? ''
-      : active.value.form.end.value,
+    isTimeMode.value ? (activeForm.value as TimeBasedForm).end.value : '',
   set: v => {
-    if (active.value.mode !== 'ABSENCE') {
-      active.value.form.end.value = v
+    if (isTimeMode.value) {
+      (activeForm.value as TimeBasedForm).end.value = v
     }
   },
 })
-
 const breakMinutesModel = computed({
   get: () =>
-    active.value.mode === 'ABSENCE'
-      ? 0
-      : active.value.form.breakMinutes.value,
+    isTimeMode.value ? (activeForm.value as TimeBasedForm).breakMinutes.value : 0,
   set: v => {
-    if (active.value.mode !== 'ABSENCE') {
-      active.value.form.breakMinutes.value = v
+    if (isTimeMode.value) {
+      (activeForm.value as TimeBasedForm).breakMinutes.value = v
+    }
+  },
+})
+const commentModel = computed<string>({
+  get: () =>
+    mode.value === 'ABSENCE'
+      ? absenceForm.comment.value
+      : (activeForm.value as TimeBasedForm)?.comment.value ?? '',
+  set: v => {
+    if (mode.value === 'ABSENCE') {
+      absenceForm.comment.value = v
+    } else {
+      ;(activeForm.value as TimeBasedForm).comment.value = v
     }
   },
 })
 
-const commentModel = computed({
-  get: () => active.value.form.comment.value,
-  set: v => {
-    active.value.form.comment.value = v
-  },
-})
 
-const imagePreviews = computed(() =>
-  active.value.mode === 'ABSENCE'
-    ? []
-    : active.value.form.images.previews.value,
+const imagePreviews = computed<string[]>(() =>
+  isTimeMode.value
+    ? (activeForm.value as TimeBasedForm).images.previews.value
+    : []
 )
 
-const calculatedHours = computed(() =>
-  active.value.mode === 'ABSENCE'
-    ? ''
-    : active.value.form.calculatedHours,
-)
-
-/* ================= text ================= */
-
-const savingText = computed(() =>
-  deleting.value
+const savingText = computed(() => {
+  if (!isSaving.value) return ''
+  return deleting.value
     ? 'Please wait, removing entry…'
-    : 'Please wait, saving entry…',
-)
-const images = computed(() => {
-  if (active.value.mode === 'ABSENCE') return null
-  return active.value.form.images
+    : 'Please wait, saving entry…'
 })
-
-/* ================= effects ================= */
 
 watch(
   () => props.entry,
   e => {
-    if ((e?.kind === 'WORK' || e?.kind === 'EXTRA') && e.projectId) {
+    if (!e) return
+    if ((e.kind === 'WORK' || e.kind === 'EXTRA') && e.projectId) {
       projectStore.getById(e.projectId)
     }
   },
   { immediate: true },
 )
-
 watch(
   () => props.preset,
   preset => {
     if (!preset) return
-    mode.value = 'ABSENCE'
-    absenceForm.kind.value = preset.type
+
+    if (
+      preset.type === 'SICK' ||
+      preset.type === 'VAB' ||
+      preset.type === 'VACATION'
+    ) {
+      mode.value = 'ABSENCE'
+      absenceForm.kind.value = preset.type
+    }
   },
   { immediate: true },
 )
-
-/* ================= actions ================= */
-
 async function onSave() {
-  if (projectMissing.value) {
-    alert('Please select a project')
-    return
-  }
+  
+  try {
+    if (!activeForm.value) {
+      console.error('[Modal] activeForm is NULL, state:', state.value)
+      alert('Internal error: no active form')
+      return
+    }
 
-  const entry = await active.value.form.save()
-  if (entry) emit('saved', entry)
+    if (isTimeMode.value && !projectId.value) {
+      alert('Please select a project')
+      return
+    }
+
+    if (projectMissing.value /*&& state.value !== EntryState.ABSENCE*/) {
+      alert('Please select a project before saving')
+      console.warn('[Modal] project missing, abort save')
+      return
+    }
+
+    const entry = await activeForm.value.save()
+
+    if (entry) emit('saved', entry)
+  } catch (e) {
+    console.error('[Modal] SAVE FAILED', e)
+  }
 }
 
 async function onDelete() {
   deleting.value = true
   try {
-    await active.value.form.remove()
+    await activeForm.value?.remove()
     emit('deleted')
-  } finally {
+  } catch (e) {
+    console.error('[Modal] DELETE FAILED', e)
+  }
+  finally {
     deleting.value = false
   }
 }
@@ -212,7 +226,7 @@ async function onDelete() {
         {{
           mode === 'ABSENCE'
             ? `Register absence (${absenceForm.kind})`
-            : active.form.isEdit.value
+            : activeForm?.isEdit
               ? 'Edit time'
               : 'Register time'
         }}
@@ -220,22 +234,22 @@ async function onDelete() {
 
       <p><strong>Date:</strong> {{ date }}</p>
 
-      <div
-        v-if="isTimeMode && projectStore.selectedProject"
+      <div 
+        v-if="isTimeMode && project" 
         class="project-pill"
       >
-        <p  
+        <p 
           v-if="projectMissing" 
           class="error"
         >
           Please select a project
         </p>
-        <strong>{{ projectStore.selectedProject.city }}</strong>
-        <small>{{ projectStore.selectedProject.address }}</small>
+        <strong>{{ project.city }}  </strong>
+        <small>{{ project.address }}</small>
       </div>
 
-      <select 
-        v-if="isTimeMode" 
+      <select
+        v-if="isTimeMode"
         v-model="mode"
       >
         <option value="WORK">
@@ -261,35 +275,34 @@ async function onDelete() {
           min="0" 
         >
 
-        <div v-if="images">
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            @change="images.onSelect"
-          >
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          @change="(activeForm as TimeBasedForm).images.onSelect"
+        >
 
-          <div
-            v-if="imagePreviews.length"
-            class="previews"
+        <div 
+          v-if="imagePreviews.length" 
+          class="previews"
+        >
+          <img
+            v-for="(src, i) in imagePreviews"
+            :key="i"
+            :src="src"
           >
-            <img
-              v-for="(src, i) in imagePreviews"
-              :key="i"
-              :src="src"
-            >
-          </div>
         </div>
-        <p>{{ calculatedHours }} h</p>
+
+        <p>{{ (activeForm as TimeBasedForm).calculatedHours }} h</p>
       </div>
 
       <p v-else>
         Absence: {{ absenceForm.kind }}
       </p>
 
-      <textarea 
-        v-model="commentModel" 
-        placeholder="Comment" 
+      <textarea
+        v-model="commentModel"
+        placeholder="Comment"
       />
 
       <div class="actions">
@@ -299,9 +312,8 @@ async function onDelete() {
         >
           {{ savingText }}
         </span>
-
         <button
-          v-if="active.form.isEdit.value"
+          v-if="activeForm?.isEdit?.value"
           class="danger"
           :disabled="isSaving"
           @click="onDelete"
@@ -333,6 +345,7 @@ async function onDelete() {
   background: #f1f5f9;
   padding: 8px 12px;
   border-radius: 10px;
+  cursor: pointer;
   margin-bottom: 12px;
 }
 .modal-backdrop {
@@ -343,28 +356,37 @@ async function onDelete() {
   align-items: center;
   justify-content: center;
 }
+
 .modal {
   background: white;
   padding: 16px;
   border-radius: 12px;
   width: 420px;
 }
+
+.modal-header {
+  margin-bottom: 8px;
+}
+
 .back-btn {
   background: none;
   border: none;
   cursor: pointer;
 }
+
 .actions {
   display: flex;
   justify-content: space-between;
   margin-top: 16px;
 }
+
 .primary {
   background: #2563eb;
   color: white;
   padding: 8px 16px;
   border-radius: 8px;
 }
+
 .danger {
   background: #dc2626;
   color: white;
