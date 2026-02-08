@@ -37,6 +37,11 @@ const router = createRouter({
     {
       path: '/projects/:id',
       component: ProjectInfo,
+    },
+    {
+      path: '/account',
+      component: () => import('../views/AccountView.vue'),
+      meta: { requiresAuth: true },
     }
   ],
 })
