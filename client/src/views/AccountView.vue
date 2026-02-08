@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import api from '../api/axios'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.store'
 import axios from 'axios'
 
 const auth = useAuthStore()
+const router = useRouter()
 
 const name = ref(auth.user?.name ?? '')
 const email = ref(auth.user?.email ?? '')
@@ -27,11 +29,19 @@ async function saveName() {
     await api.put(`/users/${auth.user!.id}`, { name: name.value })
     await auth.fetchMe()
     success.value = 'Name updated'
+    redirectAfterSuccess()
   } catch (e: unknown) {
     handleError(e)
   }
 }
-
+function redirectAfterSuccess() {
+  setTimeout(() => {
+    router.push('/dashboard')
+  }, 700)
+}
+function goToDashboard() {
+  router.push('/dashboard')
+}
 /* ---------- EMAIL ---------- */
 async function saveEmail() {
   clearMessages()
@@ -40,6 +50,7 @@ async function saveEmail() {
     await api.put(`/users/${auth.user!.id}`, { email: email.value })
     await auth.fetchMe()
     success.value = 'Email updated'
+    redirectAfterSuccess()
   } catch (e: unknown) {
     handleError(e)
   }
@@ -67,6 +78,7 @@ async function savePassword() {
     password.value = ''
     confirmPassword.value = ''
     success.value = 'Password updated'
+    redirectAfterSuccess()
   } catch (e: unknown) {
     handleError(e)
   }
@@ -85,7 +97,6 @@ function handleError(e: unknown) {
 <template>
   <div class="account">
     <h1>Account settings</h1>
-
     <!-- NAME -->
     <div class="block">
       <input 
@@ -137,6 +148,12 @@ function handleError(e: unknown) {
     >
       {{ success }}
     </p>
+    <button 
+      class="cancel" 
+      @click="goToDashboard"
+    >
+      Cancel
+    </button>
   </div>
 </template>
 
@@ -155,5 +172,12 @@ function handleError(e: unknown) {
 
 .success {
   color: green;
+}
+.cancel {
+  margin-top: 16px;
+  background: transparent;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  cursor: pointer;
 }
 </style>
