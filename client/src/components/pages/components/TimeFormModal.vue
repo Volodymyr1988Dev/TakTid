@@ -167,10 +167,11 @@ watch(
   () => props.preset,
   preset => {
     if (!preset) return
+    if (props.entry) return
     mode.value = 'ABSENCE'
     absenceForm.kind.value = preset.type
   },
-  { immediate: true },
+  //{ immediate: true },
 )
 
 /* ================= actions ================= */
