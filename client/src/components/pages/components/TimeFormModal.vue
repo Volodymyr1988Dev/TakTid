@@ -123,11 +123,15 @@ watch(
     }
 
     if (preset) {
-      mode.value = 'ABSENCE'
-      //absenceForm.kind = 'ABSENCE'
-      absenceForm.absenceType.value = preset.type
+      if (preset.type === 'WORK' || preset.type === 'EXTRA') {
+        mode.value = preset.type
+        console.log('time preset detected:', preset)
+      } else {
+        mode.value = 'ABSENCE'
+        absenceForm.absenceType.value = preset.type
+        console.log('absence preset detected:', preset)
+      }
 
-      console.log('preset detected:', preset)
       console.groupEnd()
       return
     }
@@ -190,7 +194,7 @@ async function onDelete() {
       <!-- TITLE -->
       <h3>
         <template v-if="mode === 'ABSENCE'">
-          Register absence ({{ absenceForm.kind }})
+          Register absence ({{ absence?.absenceType.value }})
         </template>
         <template v-else>
           {{ activeForm.isEdit.value ? 'Edit time' : 'Register time' }}
