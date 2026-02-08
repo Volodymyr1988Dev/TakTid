@@ -155,9 +155,18 @@ const images = computed(() => {
 
 watch(
   () => props.entry,
-  e => {
-    if ((e?.kind === 'WORK' || e?.kind === 'EXTRA') && e.projectId) {
-      projectStore.getById(e.projectId)
+  entry => {
+    //if ((e?.kind === 'WORK' || e?.kind === 'EXTRA') && e.projectId) {
+    //  projectStore.getById(e.projectId)
+    //}
+    if (!entry) return
+
+    if (entry.kind === EntryState.WORK) {
+      mode.value = 'WORK'
+    } else if (entry.kind === EntryState.EXTRA) {
+      mode.value = 'EXTRA'
+    } else if (entry.kind === EntryState.ABSENCE) {
+      mode.value = 'ABSENCE'
     }
   },
   { immediate: true },
