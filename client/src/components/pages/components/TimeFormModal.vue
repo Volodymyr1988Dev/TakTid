@@ -44,7 +44,7 @@ const projectId = computed<string | null>(() =>
 )
 
 const project = computed(() => projectStore.selectedProject)
-
+const deleting = ref(false)
 const state = ref<EntryState>(
   props.entry?.kind ?? EntryState.WORK
 )
@@ -135,6 +135,13 @@ const imagePreviews = computed<string[]>(() =>
     : []
 )
 
+const savingText = computed(() => {
+  if (!isSaving.value) return ''
+  return deleting.value
+    ? 'Please wait, removing entry…'
+    : 'Please wait, saving entry…'
+})
+
 watch(
   () => props.entry,
   e => {
@@ -190,13 +197,15 @@ async function onSave() {
 }
 
 async function onDelete() {
-  console.log('[Modal] DELETE CLICK')
-
+  deleting.value = true
   try {
     await activeForm.value?.remove()
     emit('deleted')
   } catch (e) {
     console.error('[Modal] DELETE FAILED', e)
+  }
+  finally {
+    deleting.value = false
   }
 }
 </script>
@@ -297,9 +306,16 @@ async function onDelete() {
       />
 
       <div class="actions">
+        <span 
+          v-if="isSaving" 
+          class="loading"
+        >
+          {{ savingText }}
+        </span>
         <button
-          v-if="activeForm?.isEdit"
+          v-if="activeForm?.isEdit?.value"
           class="danger"
+          :disabled="isSaving"
           @click="onDelete"
         >
           Delete
@@ -320,7 +336,7 @@ async function onDelete() {
 <style scoped>
 .error {
   color: #dc2626;
-  background: #fee2e2;
+  background: #c89191;
   padding: 8px 12px;
   border-radius: 8px;
   margin: 8px 0;
@@ -387,5 +403,9 @@ async function onDelete() {
   height: 64px;
   object-fit: cover;
   border-radius: 6px;
+}
+.loading {
+  font-size: 14px;
+  color: #475569;
 }
 </style>

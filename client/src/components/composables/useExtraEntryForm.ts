@@ -6,8 +6,6 @@ import { useTimeEntryImages } from './useTimeEntryImages'
 import { EntryState } from '../../types/EntryState'
 import { calculateWorkedMinutes } from '../pages/components/helpers/time'
 import type { TimeBasedForm } from '../../types/TimeBasedForm'
-//import { TimeKind } from '../../types/timeKind.enum'
-//import { useProjectStore } from '../../stores/project.store'
 
 export function useExtraEntryForm(props: {
   date: string
@@ -16,27 +14,11 @@ export function useExtraEntryForm(props: {
 }) {
   const assignmentStore = useProjectAssignmentStore()
   const images = useTimeEntryImages()
-  //const projectStore = useProjectStore()
-
-/*
-  const isExtra = computed(
-    (): props.entry is ExtraDayEntry =>
-      !!props.entry && props.entry.kind === EntryState.EXTRA,
-  )
-  const extraForm = useExtraEntryForm({
-    date: props.date,
-    entry: props.entry,
-    projectId,
-  })
-*/
-  //const projectId = computed(() => projectStore.projectId)
   const startRef = ref('08:00')
   const endRef = ref('17:00')
   const breakMinutesRef = ref(30)
   const commentRef = ref('')
-  //const projectId = ref<string | null>(null)
-  //const projectId = props.projectId
-  const isEdit = computed(() => props.entry?.kind === EntryState.EXTRA /*!!props.entry*/)
+  const isEdit = computed(() => props.entry?.kind === EntryState.EXTRA)
   const isSavingRef = ref(false)
 
   const start = computed({
@@ -68,72 +50,19 @@ export function useExtraEntryForm(props: {
   function normalizeTime(t: string) {
   return t.slice(0, 5)
   }
-  /** PREFILL */
   watch(
     () => props.entry,
-    //projectId,
     e => {
       if (!e || e.kind !== EntryState.EXTRA) return
-      //if (e.kind !== EntryState.EXTRA) return
 
       startRef.value = normalizeTime(e.startTime ?? '08:00')
       endRef.value = normalizeTime(e.endTime ?? '17:00')
       breakMinutesRef.value = e.breakMinutes ?? 30
       commentRef.value = e.comment ?? ''
-        
-      //projectId.value = e.projectId ?? e.project?.id ?? null
     },
     { immediate: true },
   )
-/*
-  async function save(): Promise<DayEntry | undefined> {
-    if (!props.projectId.value) {
-      alert('Project missing')
-      return
-    }
 
-    isSavingRef.value = true
-    try {
-        const payload = {
-        projectId: props.projectId.value,
-        date: props.date,
-        //type: TimeKind.EXTRA,
-        startTime: normalizeTime(startRef.value),
-        endTime: normalizeTime(endRef.value),
-        breakMinutes: breakMinutesRef.value,
-        comment: commentRef.value,
-      }
-      const saved = isEdit.value //props.entry
-        ? await assignmentStore.update(props.entry!.id, payload)
-        : await assignmentStore.create(payload)
-      if (!saved.project) {
-        throw new Error('Saved assignment has no project')
-      }
-      //await images.upload(props.projectId.value)
-      try {
-        await images.upload(props.projectId.value)
-      } catch (e) {
-        console.error('[Images] upload failed', e)
-      }
-      return {
-        kind: EntryState.EXTRA,
-        //type: 'Extra',
-        id: saved.id,
-        date: saved.date,
-        hours: saved.hours,
-        startTime: normalizeTime(saved.startTime),
-        endTime: normalizeTime(saved.endTime),
-        breakMinutes: saved.breakMinutes ?? 0,
-        comment: saved.comment ?? '',
-        project: saved.project,
-        projectId: saved.project.id ?? props.projectId.value,
-        //...saved,
-      }
-    } finally {
-      isSavingRef.value = false
-    }
-  }
-*/
 async function save(): Promise<DayEntry | undefined> {
   if (!props.projectId.value) {
     alert('Project missing')
@@ -145,7 +74,6 @@ async function save(): Promise<DayEntry | undefined> {
     let saved
 
     if (isEdit.value) {
-      // ✅ UPDATE — БЕЗ projectId і date
       saved = await assignmentStore.update(props.entry!.id, {
         startTime: normalizeTime(startRef.value),
         endTime: normalizeTime(endRef.value),
@@ -153,7 +81,6 @@ async function save(): Promise<DayEntry | undefined> {
         comment: commentRef.value,
       })
     } else {
-      // ✅ CREATE — З projectId і date
       saved = await assignmentStore.create({
         projectId: props.projectId.value,
         date: props.date,
@@ -191,7 +118,7 @@ async function save(): Promise<DayEntry | undefined> {
   }
 }
   async function remove() {
-    if (!isEdit.value/*!props.entry*/) return
+    if (!isEdit.value) return
     if (!confirm('Delete extra work?')) return
     await assignmentStore.remove(props.entry!.id)
   }
@@ -201,8 +128,7 @@ async function save(): Promise<DayEntry | undefined> {
     end,
     breakMinutes,
     comment,
-    //projectId,
-    images,//: useTimeEntryImages(),
+    images,
     isEdit,
     isSaving,
     calculatedHours,

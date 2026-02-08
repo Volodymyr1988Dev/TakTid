@@ -50,7 +50,7 @@ export function useAbsenceEntryForm(props: {
         id: saved.id,
         date: saved.date,
         hours: Number(saved.hours),
-        type: saved.type, //as 'SICK' | 'VAB' | 'VACATION',
+        type: saved.type,
         comment: saved.comment ?? '',
       }
     } finally {

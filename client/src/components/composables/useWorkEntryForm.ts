@@ -42,13 +42,6 @@ export function useWorkEntryForm(props: {
     return (minutes / 60).toFixed(2)
   })
 
-  watch(
-    props.projectId,
-    v => {
-        console.log('[WorkForm] projectId:', v)
-    },
-    { immediate: true }
-    )
 watch(
   () => props.entry,
   e => {
@@ -85,13 +78,9 @@ watch(
   const isSaving = computed(() => isSavingRef.value)
 
   async function save(): Promise<WorkDayEntry> {
-    console.log('[WorkForm.save] projectId:', props.projectId.value)
-    //const pid = props.projectId.value
-    //const projectId = props.projectId.value ?? undefined
     if (!props.projectId.value) {
         throw new Error('WORK requires projectId')
     }
-    //if (!pid) throw new Error('WORK requires projectId')
     isSavingRef.value = true
     try {
       const payload: TimeEntryUpdatePayload = {
@@ -99,7 +88,7 @@ watch(
         endTime: normalizeTime(endRef.value),
         breakMinutes: breakMinutesRef.value,
         comment: commentRef.value,
-        projectId: props.projectId.value, //:props.projectId.value,
+        projectId: props.projectId.value,
       }
 
       const saved = props.entry
@@ -110,7 +99,6 @@ watch(
         ...payload,
         })
 
-      //await images.upload(props.projectId.value /*props.projectId.value*/)
         try {
           await images.upload(props.projectId.value)
         } catch (e) {
