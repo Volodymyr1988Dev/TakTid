@@ -5,7 +5,9 @@ import { useProjectAssignmentStore } from '../../stores/projectAssignment.store'
 import { useTimeEntryImages } from './useTimeEntryImages'
 import { EntryState } from '../../types/EntryState'
 import { calculateWorkedMinutes } from '../pages/components/helpers/time'
-import type { TimeBasedForm } from '../../types/TimeBasedForm'
+//import type { TimeBasedForm } from '../../types/TimeBasedForm'
+import { TimeKind } from '../../types/timeKind.enum'
+import type { ExtraForm } from '../../types/Form.types'
 
 export function useExtraEntryForm(props: {
   date: string
@@ -39,13 +41,13 @@ export function useExtraEntryForm(props: {
   })
   const isSaving = computed(() => isSavingRef.value)
 
-  const calculatedHours = computed(() => {
+  const calculatedHours = computed<number>(() => {
       const minutes = calculateWorkedMinutes(
         normalizeTime(startRef.value),
         normalizeTime(endRef.value),
         breakMinutesRef.value,
       )
-      return (minutes / 60).toFixed(2)
+      return Number((minutes / 60).toFixed(2))
     })
   function normalizeTime(t: string) {
   return t.slice(0, 5)
@@ -63,10 +65,10 @@ export function useExtraEntryForm(props: {
     { immediate: true },
   )
 
-async function save(): Promise<DayEntry | undefined> {
+async function save(): Promise<DayEntry | null> {
   if (!props.projectId.value) {
     alert('Project missing')
-    return
+    return null
   }
 
   isSavingRef.value = true
@@ -102,7 +104,7 @@ async function save(): Promise<DayEntry | undefined> {
     }
 
     return {
-      kind: EntryState.EXTRA,
+      kind: TimeKind.EXTRA,
       id: saved.id,
       date: saved.date,
       hours: saved.hours,
@@ -124,9 +126,13 @@ async function save(): Promise<DayEntry | undefined> {
   }
 
   return {
+    kind: 'EXTRA',
     start,
     end,
-    breakMinutes,
+    //breakMinutes,
+    form: {
+      breakMinutes
+    },
     comment,
     images,
     isEdit,
@@ -134,5 +140,5 @@ async function save(): Promise<DayEntry | undefined> {
     calculatedHours,
     save,
     remove,
-  } satisfies TimeBasedForm
+  } satisfies ExtraForm
 }

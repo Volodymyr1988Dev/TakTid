@@ -8,7 +8,8 @@ import type { TimeEntryUpdatePayload } from '../../types/TimeEntryUpdatePayload.
 import { EntryState } from '../../types/EntryState'
 import { useTimeEntryImages } from './useTimeEntryImages'
 import { TimeKind } from '../../types/timeKind.enum'
-import type { TimeBasedForm } from '../../types/TimeBasedForm'
+//import type { TimeBasedForm } from '../../types/TimeBasedForm'
+import type { WorkForm } from '../../types/Form.types'
 
 export function useWorkEntryForm(props: {
   date: string
@@ -33,13 +34,13 @@ export function useWorkEntryForm(props: {
     return t.slice(0, 5)
   }
 
-  const calculatedHours = computed(() => {
+  const calculatedHours = computed<number>(() => {
     const minutes = calculateWorkedMinutes(
       normalizeTime(startRef.value),
       normalizeTime(endRef.value),
       breakMinutesRef.value,
     )
-    return (minutes / 60).toFixed(2)
+    return Number((minutes / 60).toFixed(2))
   })
 
 watch(
@@ -127,9 +128,13 @@ watch(
   }
 
   return {
+    kind: 'WORK',
     start,
     end,
-    breakMinutes,
+    //breakMinutes,
+    form: {
+      breakMinutes
+    },
     comment,
     calculatedHours,
     images,
@@ -137,5 +142,5 @@ watch(
     isSaving,
     save,
     remove,
-  } satisfies TimeBasedForm
+  } satisfies WorkForm
 }

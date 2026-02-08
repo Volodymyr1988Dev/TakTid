@@ -1,8 +1,9 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useTimeEntryStore } from '../../stores/timeEntry.store'
 import type { AbsenceDayEntry } from '../../types/DayEntry.type'
 import { TimeKind } from '../../types/timeKind.enum'
 import { EntryState } from '../../types/EntryState'
+import type { AbsenceForm } from '../../types/Form.types'
 
 export function useAbsenceEntryForm(props: {
   date: string
@@ -15,12 +16,12 @@ export function useAbsenceEntryForm(props: {
   )
   const commentRef = ref(props.entry?.comment ?? '')
   const isSavingRef = ref(false)
-
+/*
      const kind = computed({
     get: () => kindRef.value,
     set: v => (kindRef.value = v),
   })
-
+*/
   const comment = computed({
     get: () => commentRef.value,
     set: v => (commentRef.value = v),
@@ -29,7 +30,8 @@ export function useAbsenceEntryForm(props: {
   const isSaving = computed(() => isSavingRef.value)
 
   const isEdit = computed(() => !!props.entry)
-  const isActive = computed(() => true)
+  //const isActive = computed(() => true)
+  /*
   watch(
   () => props.entry,
   entry => {
@@ -40,6 +42,11 @@ export function useAbsenceEntryForm(props: {
   },
   { immediate: true },
 )
+  */
+ const absenceType = computed({
+  get: () => kindRef.value,
+  set: v => (kindRef.value = v),
+})
   async function save(): Promise<AbsenceDayEntry> {
     isSavingRef.value = true
     try {
@@ -74,12 +81,13 @@ export function useAbsenceEntryForm(props: {
   }
 
   return {
-    kind,
+    kind: 'ABSENCE',
+    absenceType,
     comment,
     isSaving,
     isEdit,
-    isActive,
+    //isActive,
     save,
     remove,
-  }
+  } satisfies AbsenceForm
 }

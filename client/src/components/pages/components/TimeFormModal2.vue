@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts">/*
 import { computed, ref, watch } from 'vue'
 import { useExtraEntryForm } from '../../composables/useExtraEntryForm'
 import { useAbsenceEntryForm } from '../../composables/useAbsenceEntryForm'
@@ -182,7 +182,7 @@ async function onSave() {
       return
     }
 
-    if (projectMissing.value /*&& state.value !== EntryState.ABSENCE*/) {
+    if (projectMissing.value /*&& state.value !== EntryState.ABSENCE*//*) {
       alert('Please select a project before saving')
       console.warn('[Modal] project missing, abort save')
       return
@@ -208,7 +208,6 @@ async function onDelete() {
     deleting.value = false
   }
 }
-</script>
 
 <template>
   <div class="modal-backdrop">
@@ -409,3 +408,6 @@ async function onDelete() {
   color: #475569;
 }
 </style>
+*/
+</script>
+

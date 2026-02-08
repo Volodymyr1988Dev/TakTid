@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useProjectStore } from '../../../stores/project.store'
+
 import { useWorkEntryForm } from '../../composables/useWorkEntryForm'
 import { useExtraEntryForm } from '../../composables/useExtraEntryForm'
 import { useAbsenceEntryForm } from '../../composables/useAbsenceEntryForm'
@@ -8,9 +10,8 @@ import { useEntryFormSelector } from '../../composables/useEntryFormSelector'
 import type { DayEntry } from '../../../types/DayEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
 import { EntryState } from '../../../types/EntryState'
-import type { EntryMode } from '../../../types/Form.types'
-
-import { useProjectStore } from '../../../stores/project.store'
+import type { AbsenceForm, EntryMode, TimeForm } from '../../../types/Form.types'
+//import type { WorkForm, ExtraForm } from '../../../types/Form.types'
 
 /* ================= props / emits ================= */
 
@@ -28,13 +29,7 @@ const emit = defineEmits<{
 
 /* ================= mode ================= */
 
-const mode = ref<EntryMode>(
-  props.entry?.kind === EntryState.EXTRA
-    ? 'EXTRA'
-    : props.entry?.kind === EntryState.ABSENCE
-      ? 'ABSENCE'
-      : 'WORK',
-)
+const mode = ref<EntryMode>('WORK')
 
 /* ================= project ================= */
 
@@ -71,137 +66,110 @@ const absenceForm = useAbsenceEntryForm({
   entry: props.entry?.kind === EntryState.ABSENCE ? props.entry : null,
 })
 
-const active = useEntryFormSelector(mode, {
-  work: { ...workForm, kind: 'WORK' },
-  extra: { ...extraForm, kind: 'EXTRA' },
-  absence: { ...absenceForm, kind: 'ABSENCE' },
+const activeForm = useEntryFormSelector(mode, {
+  work: workForm,
+  extra: extraForm,
+  absence: absenceForm,
 })
 
+const timeForm = computed<TimeForm | null>(() => {
+  return activeForm.value.kind === 'ABSENCE'
+    ? null
+    : activeForm.value
+})
+
+const absence = computed<AbsenceForm | null>(() => {
+  return activeForm.value.kind === 'ABSENCE'
+    ? activeForm.value
+    : null
+})
 /* ================= derived ================= */
 
-const isSaving = computed(() => active.value.form.isSaving.value)
+const isSaving = computed(() => activeForm.value.isSaving.value)
 const deleting = ref(false)
 
-/* ================= models ================= */
-
-const startModel = computed({
-  get: () =>
-    active.value.mode === 'ABSENCE'
-      ? ''
-      : active.value.form.start.value,
-  set: v => {
-    if (active.value.mode !== 'ABSENCE') {
-      active.value.form.start.value = v
-    }
-  },
-})
-
-const endModel = computed({
-  get: () =>
-    active.value.mode === 'ABSENCE'
-      ? ''
-      : active.value.form.end.value,
-  set: v => {
-    if (active.value.mode !== 'ABSENCE') {
-      active.value.form.end.value = v
-    }
-  },
-})
-
-const breakMinutesModel = computed({
-  get: () =>
-    active.value.mode === 'ABSENCE'
-      ? 0
-      : active.value.form.breakMinutes.value,
-  set: v => {
-    if (active.value.mode !== 'ABSENCE') {
-      active.value.form.breakMinutes.value = v
-    }
-  },
-})
-
-const commentModel = computed({
-  get: () => active.value.form.comment.value,
-  set: v => {
-    active.value.form.comment.value = v
-  },
-})
-
-const imagePreviews = computed(() =>
-  active.value.mode === 'ABSENCE'
-    ? []
-    : active.value.form.images.previews.value,
-)
-
-const calculatedHours = computed(() =>
-  active.value.mode === 'ABSENCE'
-    ? ''
-    : active.value.form.calculatedHours,
-)
-
-/* ================= text ================= */
-
-const savingText = computed(() =>
-  deleting.value
-    ? 'Please wait, removing entry…'
-    : 'Please wait, saving entry…',
-)
-const images = computed(() => {
-  if (active.value.mode === 'ABSENCE') return null
-  return active.value.form.images
-})
-
-/* ================= effects ================= */
+/* ================= debug ================= */
 
 watch(
-  () => props.entry,
-  entry => {
-    //if ((e?.kind === 'WORK' || e?.kind === 'EXTRA') && e.projectId) {
-    //  projectStore.getById(e.projectId)
-    //}
-    if (!entry) return
-
-    if (entry.kind === EntryState.WORK) {
-      mode.value = 'WORK'
-    } else if (entry.kind === EntryState.EXTRA) {
-      mode.value = 'EXTRA'
-    } else if (entry.kind === EntryState.ABSENCE) {
-      mode.value = 'ABSENCE'
-    }
+  () => mode.value,
+  (m) => {
+    console.group('[TimeFormModal] MODE CHANGED')
+    console.log('mode:', m)
+    console.log('activeForm:', activeForm.value)
+    console.groupEnd()
   },
   { immediate: true },
 )
 
+/* ================= effects ================= */
+
 watch(
-  () => props.preset,
-  preset => {
-    if (!preset) return
-    if (props.entry) return
-    mode.value = 'ABSENCE'
-    absenceForm.kind.value = preset.type
+  () => ({ entry: props.entry, preset: props.preset }),
+  ({ entry, preset }) => {
+    console.group('[TimeFormModal] INIT')
+
+    if (entry) {
+      mode.value =
+        entry.kind === EntryState.WORK
+          ? 'WORK'
+          : entry.kind === EntryState.EXTRA
+            ? 'EXTRA'
+            : 'ABSENCE'
+
+      console.log('edit entry detected:', entry)
+      console.log('resolved mode:', mode.value)
+      console.groupEnd()
+      return
+    }
+
+    if (preset) {
+      mode.value = 'ABSENCE'
+      //absenceForm.kind = 'ABSENCE'
+      absenceForm.absenceType.value = preset.type
+
+      console.log('preset detected:', preset)
+      console.groupEnd()
+      return
+    }
+
+    mode.value = 'WORK'
+    console.log('default mode WORK')
+    console.groupEnd()
   },
-  //{ immediate: true },
+  { immediate: true },
 )
 
 /* ================= actions ================= */
 
 async function onSave() {
+  console.group('[TimeFormModal] SAVE')
+
   if (projectMissing.value) {
+    console.warn('project missing')
     alert('Please select a project')
+    console.groupEnd()
     return
   }
 
-  const entry = await active.value.form.save()
+  const entry = await activeForm.value.save()
+  console.log('saved entry:', entry)
+
   if (entry) emit('saved', entry)
+
+  console.groupEnd()
 }
 
 async function onDelete() {
+  console.group('[TimeFormModal] DELETE')
+
   deleting.value = true
   try {
-    await active.value.form.remove()
+    await activeForm.value.remove()
     emit('deleted')
+    console.log('entry deleted')
   } finally {
     deleting.value = false
+    console.groupEnd()
   }
 }
 </script>
@@ -209,43 +177,50 @@ async function onDelete() {
 <template>
   <div class="modal-backdrop">
     <div class="modal">
+      <!-- HEADER -->
       <header class="modal-header">
-        <button 
-          class="back-btn" 
+        <button
+          class="back-btn"
           @click="emit('cancel')"
         >
           ← Back
         </button>
       </header>
 
+      <!-- TITLE -->
       <h3>
-        {{
-          mode === 'ABSENCE'
-            ? `Register absence (${absenceForm.kind})`
-            : active.form.isEdit.value
-              ? 'Edit time'
-              : 'Register time'
-        }}
+        <template v-if="mode === 'ABSENCE'">
+          Register absence ({{ absenceForm.kind }})
+        </template>
+        <template v-else>
+          {{ activeForm.isEdit.value ? 'Edit time' : 'Register time' }}
+        </template>
       </h3>
 
-      <p><strong>Date:</strong> {{ date }}</p>
+      <p>
+        <strong>Date:</strong>
+        {{ date }}
+      </p>
 
+      <!-- PROJECT -->
       <div
         v-if="isTimeMode && projectStore.selectedProject"
         class="project-pill"
       >
-        <p  
-          v-if="projectMissing" 
+        <p
+          v-if="projectMissing"
           class="error"
         >
           Please select a project
         </p>
+
         <strong>{{ projectStore.selectedProject.city }}</strong>
         <small>{{ projectStore.selectedProject.address }}</small>
       </div>
 
-      <select 
-        v-if="isTimeMode" 
+      <!-- MODE SELECT -->
+      <select
+        v-if="isTimeMode"
         v-model="mode"
       >
         <option value="WORK">
@@ -256,62 +231,76 @@ async function onDelete() {
         </option>
       </select>
 
-      <div v-if="isTimeMode">
-        <input 
-          v-model="startModel" 
-          type="time" 
-        >
-        <input 
-          v-model="endModel" 
-          type="time" 
-        >
-        <input 
-          v-model.number="breakMinutesModel" 
-          type="number" 
-          min="0" 
+      <!-- TIME FORM -->
+      <div v-if="timeForm">
+        <input
+          v-model="timeForm.start.value"
+          type="time"
         >
 
-        <div v-if="images">
+        <input
+          v-model="timeForm.end.value"
+          type="time"
+        >
+
+        <input
+          v-model.number="timeForm.form.breakMinutes.value"
+          type="number"
+          min="0"
+        >
+
+        <!-- IMAGES -->
+        <div v-if="timeForm.images">
           <input
             type="file"
             multiple
             accept="image/*"
-            @change="images.onSelect"
+            @change="timeForm.images.onSelect"
           >
 
           <div
-            v-if="imagePreviews.length"
+            v-if="timeForm.images.previews.value.length"
             class="previews"
           >
             <img
-              v-for="(src, i) in imagePreviews"
+              v-for="(src, i) in timeForm.images.previews.value"
               :key="i"
               :src="src"
+              alt="preview"
             >
           </div>
         </div>
-        <p>{{ calculatedHours }} h</p>
+
+        <p>
+          {{ timeForm.calculatedHours }} h
+        </p>
       </div>
 
-      <p v-else>
-        Absence: {{ absenceForm.kind }}
-      </p>
+      <!-- ABSENCE FORM -->
+      <div v-else-if="absence">
+        <p>
+          Absence type:
+          <strong>{{ absence.kind }}</strong>
+        </p>
+      </div>
 
-      <textarea 
-        v-model="commentModel" 
-        placeholder="Comment" 
+      <!-- COMMENT -->
+      <textarea
+        v-model="activeForm.comment.value"
+        placeholder="Comment"
       />
 
+      <!-- ACTIONS -->
       <div class="actions">
-        <span 
-          v-if="isSaving" 
+        <span
+          v-if="isSaving"
           class="loading"
         >
-          {{ savingText }}
+          {{ deleting ? 'Removing…' : 'Saving…' }}
         </span>
 
         <button
-          v-if="active.form.isEdit.value"
+          v-if="activeForm.isEdit.value"
           class="danger"
           :disabled="isSaving"
           @click="onDelete"
@@ -332,66 +321,84 @@ async function onDelete() {
 </template>
 
 <style scoped>
-.error {
-  color: #dc2626;
-  background: #c89191;
-  padding: 8px 12px;
-  border-radius: 8px;
-  margin: 8px 0;
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.modal {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  width: 420px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
 .project-pill {
   background: #f1f5f9;
   padding: 8px 12px;
   border-radius: 10px;
   margin-bottom: 12px;
 }
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+.error {
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin-bottom: 6px;
 }
-.modal {
-  background: white;
-  padding: 16px;
-  border-radius: 12px;
-  width: 420px;
-}
-.back-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
+
 .actions {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-top: 16px;
 }
+
 .primary {
   background: #2563eb;
-  color: white;
+  color: #ffffff;
   padding: 8px 16px;
   border-radius: 8px;
 }
+
 .danger {
   background: #dc2626;
-  color: white;
+  color: #ffffff;
   padding: 8px 16px;
   border-radius: 8px;
 }
+
 .previews {
   display: flex;
   gap: 8px;
   margin-top: 8px;
 }
+
 .previews img {
   width: 64px;
   height: 64px;
   object-fit: cover;
   border-radius: 6px;
 }
+
 .loading {
   font-size: 14px;
   color: #475569;

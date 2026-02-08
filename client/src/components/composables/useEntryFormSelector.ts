@@ -1,11 +1,13 @@
-import { computed, type Ref } from 'vue'
+import { computed, type Ref, type ComputedRef } from 'vue'
 import type {
-  ActiveForm,
   EntryMode,
   WorkForm,
   ExtraForm,
   AbsenceForm,
+  ActiveForm,
 } from '../../types/Form.types'
+
+//export type ActiveForm = WorkForm | ExtraForm | AbsenceForm
 
 export function useEntryFormSelector(
   mode: Ref<EntryMode>,
@@ -14,17 +16,16 @@ export function useEntryFormSelector(
     extra: ExtraForm
     absence: AbsenceForm
   },
-) {
-  return computed<ActiveForm>(() => {
-    if (mode.value === 'WORK') {
-      return { mode: 'WORK', form: forms.work }
+): ComputedRef<ActiveForm> {
+  return computed(() => {
+    switch (mode.value) {
+      case 'WORK':
+        return forms.work
+      case 'EXTRA':
+        return forms.extra
+      case 'ABSENCE':
+      default:
+        return forms.absence
     }
-
-    if (mode.value === 'EXTRA') {
-      return { mode: 'EXTRA', form: forms.extra }
-    }
-
-    // fallback — ABSENCE
-    return { mode: 'ABSENCE', form: forms.absence }
   })
 }
