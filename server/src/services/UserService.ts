@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from '../types/index';
@@ -29,6 +29,14 @@ export class UserService {
   async update(id: string, updateData: UpdateUserDto) {
     const user = await this.findOne(id);
     if (!user) throw new Error('User not found');
+    if (updateData.email) {
+      const existing = await this.findByEmail(updateData.email);
+
+      if (existing && existing.id !== id) {
+        throw new HttpException('Email already in use', HttpStatus.CONFLICT);
+      }
+    }
+
     Object.assign(user, updateData);
     return this.userRepository.save(user);
   }

@@ -14,7 +14,13 @@ async function onLogout() {
 <template>
   <header class="app-header">
     <div class="spacer" />
-
+    <button
+      v-if="auth.isAuthenticated"
+      class="settings"
+      @click="router.push('/account')"
+    >
+      ⚙️
+    </button>
     <button
       v-if="auth.isAuthenticated"
       class="logout"
@@ -51,5 +57,12 @@ async function onLogout() {
   border: none;
   cursor: pointer;
   font-weight: 600;
+}
+.settings {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  margin-right: 12px;
 }
 </style>

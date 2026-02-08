@@ -7,7 +7,7 @@ export class BaseUserDto {
     description: 'User email',
   })
   @IsEmail()
-  email: string;
+  email!: string;
 
   @ApiProperty({
     example: 'securePassword123',

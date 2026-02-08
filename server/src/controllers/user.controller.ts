@@ -14,7 +14,6 @@ import { UpdateUserDto } from '../types';
 import type { AuthRequest } from '../types';
 import { User } from '../entities';
 import { UserService } from '../services/UserService';
-
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
