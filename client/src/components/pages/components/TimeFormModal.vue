@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useExtraEntryForm } from '../../composables/useExtraEntryForm'
 import { useAbsenceEntryForm } from '../../composables/useAbsenceEntryForm'
 import { useWorkEntryForm } from '../../composables/useWorkEntryForm'
@@ -9,9 +9,6 @@ import { EntryState } from '../../../types/EntryState'
 import type { TimeBasedForm } from '../../../types/TimeBasedForm'
 import { useProjectStore } from '../../../stores/project.store'
 
-/* =======================
-   PROPS + EMITS
-======================= */
 const props = defineProps<{
   date: string
   entry?: DayEntry | null
@@ -24,18 +21,7 @@ const emit = defineEmits<{
   (e: 'deleted'): void
 }>()
 
-/* =======================
-   DEBUG LIFECYCLE
-======================= */
-console.log('[Modal] setup start')
 
-onMounted(() => {
-  console.log('[Modal] mounted')
-})
-
-/* =======================
-   PROJECT STORE
-======================= */
 const projectStore = useProjectStore()
 
 type EntryMode = 'WORK' | 'EXTRA' | 'ABSENCE'
@@ -51,11 +37,6 @@ const mode = ref<EntryMode>(
 const isTimeMode = computed(
   () => mode.value === 'WORK' || mode.value === 'EXTRA'
 )
-//const projectId = computed<string | null>(() => {
-//  const id = projectStore.selectedProject?.id ?? null
-//  console.log('[Modal] projectId computed:', id)
-//  return id
-//})
 const projectId = computed<string | null>(() =>
   isTimeMode.value
     ? projectStore.selectedProject?.id ?? null
@@ -64,18 +45,10 @@ const projectId = computed<string | null>(() =>
 
 const project = computed(() => projectStore.selectedProject)
 
-/* =======================
-   STATE
-======================= */
 const state = ref<EntryState>(
   props.entry?.kind ?? EntryState.WORK
 )
 
-console.log('[Modal] initial state:', state.value)
-
-/* =======================
-   FORMS
-======================= */
 const workForm = useWorkEntryForm({
   date: props.date,
   entry: props.entry?.kind === EntryState.WORK ? props.entry : null,
@@ -93,50 +66,6 @@ const absenceForm = useAbsenceEntryForm({
   entry: props.entry?.kind === EntryState.ABSENCE ? props.entry : null,
 })
 
-/* =======================
-   MODE (WORK / EXTRA)
-======================= */
-/*
-const mode = computed<'WORK' | 'EXTRA'>({
-  get: () => {
-    const m = state.value === EntryState.EXTRA ? 'EXTRA' : 'WORK'
-    console.log('[Modal] mode get:', m)
-    return m
-  },
-  set: v => {
-    console.log('[Modal] mode set:', v)
-    state.value = v === 'EXTRA'
-      ? EntryState.EXTRA
-      : EntryState.WORK
-  },
-})
-  */
-//const mode = ref<EntryMode>(
-//  props.entry?.kind ?? 'WORK'
-//)
-/* =======================
-   ACTIVE TIME FORM (SAFE)
-======================= */
-/*
-const activeTimeForm = computed<TimeBasedForm | null>(() => {
-  console.log('[Modal] compute activeTimeForm, state:', state.value)
-
-  if (state.value === EntryState.WORK) return workForm
-  if (state.value === EntryState.EXTRA) return extraForm
-  return null
-})
-*/
-/* =======================
-   ACTIVE FORM (FOR SAVE / DELETE)
-======================= */
-/*
-const activeForm = computed(() => {
-  console.log('[Modal] compute activeForm, state:', state.value)
-
-  if (state.value === EntryState.ABSENCE) return absenceForm
-  return activeTimeForm.value
-})
-*/
 const activeForm = computed(() => {
   switch (mode.value) {
     case 'WORK':
@@ -149,63 +78,15 @@ const activeForm = computed(() => {
       return null
   }
 })
-/* =======================
-   DERIVED STATE
-======================= */
 
-/*
-const projectMissing = computed(() => {
-  const missing =
-    (state.value === EntryState.WORK || state.value === EntryState.EXTRA) &&
-    !projectId.value
-
-  console.log('[Modal] projectMissing:', missing)
-  return missing
-})
-*/
 const projectMissing = computed(() =>
   isTimeMode.value && !projectId.value
 )
 const isSaving = computed(() => {
   const saving = Boolean(activeForm.value?.isSaving?.value)
-  console.log('[Modal] isSaving:', saving)
   return saving
 })
 
-/* =======================
-   MODELS
-======================= */
-/*
-const startModel = computed<string>({
-  get: () => activeTimeForm.value?.start.value ?? '',
-  set: v => {
-    if (activeTimeForm.value) {
-      console.log('[Modal] start set:', v)
-      activeTimeForm.value.start.value = v
-    }
-  },
-})
-
-const endModel = computed<string>({
-  get: () => activeTimeForm.value?.end.value ?? '',
-  set: v => {
-    if (activeTimeForm.value) {
-      console.log('[Modal] end set:', v)
-      activeTimeForm.value.end.value = v
-    }
-  },
-})
-
-const breakMinutesModel = computed<number>({
-  get: () => activeTimeForm.value?.breakMinutes.value ?? 0,
-  set: v => {
-    if (activeTimeForm.value) {
-      console.log('[Modal] breakMinutes set:', v)
-      activeTimeForm.value.breakMinutes.value = v
-    }
-  },
-})
-*/
 const startModel = computed({
   get: () =>
     isTimeMode.value ? (activeForm.value as TimeBasedForm).start.value : '',
@@ -235,10 +116,8 @@ const breakMinutesModel = computed({
 })
 const commentModel = computed<string>({
   get: () =>
-    //state.value === EntryState.ABSENCE
     mode.value === 'ABSENCE'
       ? absenceForm.comment.value
-      //: activeTimeForm.value?.comment.value ?? '',
       : (activeForm.value as TimeBasedForm)?.comment.value ?? '',
   set: v => {
     if (mode.value === 'ABSENCE') {
@@ -251,27 +130,15 @@ const commentModel = computed<string>({
 
 
 const imagePreviews = computed<string[]>(() =>
-  //activeTimeForm.value?.images?.previews.value ?? []
   isTimeMode.value
     ? (activeForm.value as TimeBasedForm).images.previews.value
     : []
 )
 
-/* =======================
-   WATCHERS (DEBUG)
-======================= */
-watch(state, v => {
-  console.log('[Modal] state changed:', v)
-})
-
-//watch(() => props.entry, v => {
-//  console.log('[Modal] props.entry changed:', v)
-//})
 watch(
   () => props.entry,
   e => {
     if (!e) return
-    //if (e?.kind === EntryState.EXTRA && e.projectId) {
     if ((e.kind === 'WORK' || e.kind === 'EXTRA') && e.projectId) {
       projectStore.getById(e.projectId)
     }
@@ -283,29 +150,18 @@ watch(
   preset => {
     if (!preset) return
 
-    console.log('[Modal] preset received:', preset)
-
     if (
       preset.type === 'SICK' ||
       preset.type === 'VAB' ||
       preset.type === 'VACATION'
     ) {
-      //state.value = EntryState.ABSENCE
       mode.value = 'ABSENCE'
       absenceForm.kind.value = preset.type
     }
   },
   { immediate: true },
 )
-
-/* =======================
-   ACTIONS
-======================= */
 async function onSave() {
-  console.log('[Modal] SAVE CLICK')
-  console.log('[Modal] state:', state.value)
-  console.log('[Modal] activeForm:', activeForm.value)
-  console.log('[ExtraForm] projectId:', projectId.value)
   
   try {
     if (!activeForm.value) {
@@ -326,7 +182,6 @@ async function onSave() {
     }
 
     const entry = await activeForm.value.save()
-    console.log('[Modal] save result:', entry)
 
     if (entry) emit('saved', entry)
   } catch (e) {
@@ -344,25 +199,6 @@ async function onDelete() {
     console.error('[Modal] DELETE FAILED', e)
   }
 }
-/*
-<h3>
-  {{
-    state === EntryState.ABSENCE
-      ? `Register absence (${absenceForm.kind})`
-      : activeTimeForm?.isEdit
-        ? 'Edit time'
-        : 'Register time'
-  }}
-</h3>
-
-<h3>
-        {{
-          state === EntryState.ABSENCE || activeTimeForm?.isEdit
-            ? 'Edit time'
-            : 'Register time'
-        }}
-      </h3>
-*/
 </script>
 
 <template>
@@ -390,7 +226,7 @@ async function onDelete() {
       <p><strong>Date:</strong> {{ date }}</p>
 
       <div 
-        v-if="project" 
+        v-if="isTimeMode && project" 
         class="project-pill"
       >
         <p 
@@ -399,7 +235,7 @@ async function onDelete() {
         >
           Please select a project
         </p>
-        <strong>{{ project.city }}</strong>
+        <strong>{{ project.city }}  </strong>
         <small>{{ project.address }}</small>
       </div>
 
@@ -462,7 +298,7 @@ async function onDelete() {
 
       <div class="actions">
         <button
-          v-if="activeForm?.isEdit || mode === 'ABSENCE'"
+          v-if="activeForm?.isEdit"
           class="danger"
           @click="onDelete"
         >
