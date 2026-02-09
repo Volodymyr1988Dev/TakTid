@@ -24,6 +24,7 @@ interface TimeBaseForm extends BaseForm {
   images?: {
     previews: Ref<string[]>
     onSelect(e: Event): void
+    removeAt(index: number): void
   }
 }
 export type EntryMode = 'WORK' | 'EXTRA' | 'ABSENCE'

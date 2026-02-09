@@ -6,7 +6,15 @@ import { getSuggestions } from '../api/TimeSuggestion.api'
 export const useSuggestionsStore = defineStore('suggestions', () => {
   const items = ref<TimeSuggestion[]>([])
   const loading = ref(false)
+  const selected = ref<TimeSuggestion | null>(null)
 
+  function select(s: TimeSuggestion) {
+    selected.value = s
+  }
+
+  function clear() {
+    selected.value = null
+  }
   async function load() {
     loading.value = true
     try {
@@ -16,5 +24,5 @@ export const useSuggestionsStore = defineStore('suggestions', () => {
     }
   }
 
-  return { items, loading, load }
+  return { items, loading, load, select, clear, selected }
 })

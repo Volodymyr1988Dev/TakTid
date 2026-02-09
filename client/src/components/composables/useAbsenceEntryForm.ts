@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useTimeEntryStore } from '../../stores/timeEntry.store'
 import type { AbsenceDayEntry } from '../../types/DayEntry.type'
 import { TimeKind } from '../../types/timeKind.enum'
@@ -31,7 +31,7 @@ export function useAbsenceEntryForm(props: {
 
   const isEdit = computed(() => !!props.entry)
   //const isActive = computed(() => true)
-  /*
+  
   watch(
   () => props.entry,
   entry => {
@@ -42,7 +42,7 @@ export function useAbsenceEntryForm(props: {
   },
   { immediate: true },
 )
-  */
+  
  const absenceType = computed({
   get: () => kindRef.value,
   set: v => (kindRef.value = v),
@@ -51,7 +51,7 @@ export function useAbsenceEntryForm(props: {
     isSavingRef.value = true
     try {
         const payload ={
-            date: props.date,
+            //date: props.date,
             type: kindRef.value,
             comment: commentRef.value,
             startTime: '08:00',
@@ -60,7 +60,7 @@ export function useAbsenceEntryForm(props: {
         }
       const saved = props.entry
         ? await store.update(props.entry.id, payload)
-        : await store.add(payload)
+        : await store.add({...payload, date: props.date})
 
       return {
         kind: EntryState.ABSENCE,

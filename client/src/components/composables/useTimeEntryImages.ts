@@ -25,8 +25,19 @@ export function useTimeEntryImages() {
   }
   async function upload(projectId?: string) {
     if (!projectId || !files.value.length) return
+    //if (!files.value.length) return
     await store.upload(projectId, files.value)
     files.value = []
+  }
+
+  function removeAt(index: number) {
+    const url = previewsRef.value[index]
+
+    if (!url) return
+    URL.revokeObjectURL(url)
+    files.value.splice(index, 1)
+    //const [file] = files.value.splice(index, 1)
+    //if (file) URL.revokeObjectURL(previewsRef.value[index])
   }
 
   function clear() {
@@ -40,5 +51,6 @@ export function useTimeEntryImages() {
     onSelect,
     upload,
     clear,
+    removeAt,
   }
 }

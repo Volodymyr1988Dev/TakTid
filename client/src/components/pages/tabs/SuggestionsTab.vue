@@ -18,7 +18,10 @@ const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
   const map = new Map<string, TimeSuggestion>()
 
   for (const s of suggestionsStore.items) {
-    const key = s.projectId ?? s.type
+    const key =
+    s.type === 'WORK' || s.type === 'EXTRA'
+      ? s.projectId
+      : s.type
     if (!map.has(key)) {
       map.set(key, s)
     }
@@ -26,15 +29,20 @@ const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
 
   return [...map.values()]
 })
+function suggestionKey(s: TimeSuggestion): string {
+  return s.type === 'WORK' || s.type === 'EXTRA'
+    ? s.projectId
+    : s.type
+}
 function selectSuggestion(s: TimeSuggestion) {
-  if (s.projectId) {
+  suggestionsStore.select(s)
 
+  if (s.type === 'WORK' || s.type === 'EXTRA') {
     const project = projectStore.getById(s.projectId)
     if (project) {
       projectStore.select(project)
     }
   }
-  //suggestionsStore.add(s)
 }
 //@click="emit('select', s)"
 </script>
@@ -43,7 +51,7 @@ function selectSuggestion(s: TimeSuggestion) {
   <div class="suggestions">
     <div
       v-for="s in uniqueSuggestions"
-      :key="s.projectId ?? s.type"
+      :key="suggestionKey(s)"
       class="card"
       @click="selectSuggestion(s)"
     >

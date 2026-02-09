@@ -34,7 +34,7 @@ const mode = ref<EntryMode>('WORK')
 /* ================= project ================= */
 
 const projectStore = useProjectStore()
-
+const isBlocking = computed(() => isSaving.value)
 const isTimeMode = computed(() => mode.value !== 'ABSENCE')
 
 const projectId = computed(() =>
@@ -142,7 +142,13 @@ watch(
   },
   { immediate: true },
 )
-
+/*
+function isWorkSuggestion(
+  s: TimeSuggestion
+): s is Extract<TimeSuggestion, { type: 'WORK' | 'EXTRA' }> {
+  return s.type === 'WORK' || s.type === 'EXTRA'
+}
+  */
 /* ================= actions ================= */
 
 async function onSave() {
@@ -176,9 +182,32 @@ async function onDelete() {
     console.groupEnd()
   }
 }
+
+/*
+<div
+            v-if="timeForm.images.previews.value.length"
+            class="previews"
+          >
+            <img
+              v-for="(src, i) in timeForm.images.previews.value"
+              :key="i"
+              :src="src"
+              alt="preview"
+              class="preview"
+            >
+          </div>
+*/
 </script>
 
 <template>
+  <div 
+    v-if="isBlocking" 
+    class="overlay"
+  >
+    <div class="spinner">
+      Please wait, saving…
+    </div>
+  </div>
   <div class="modal-backdrop">
     <div class="modal">
       <!-- HEADER -->
@@ -262,16 +291,20 @@ async function onDelete() {
             @change="timeForm.images.onSelect"
           >
 
-          <div
-            v-if="timeForm.images.previews.value.length"
-            class="previews"
-          >
-            <img
+          <div class="previews">
+            <div
               v-for="(src, i) in timeForm.images.previews.value"
               :key="i"
-              :src="src"
-              alt="preview"
+              class="preview"
             >
+              <img :src="src">
+              <button
+                class="remove"
+                @click="timeForm.images.removeAt(i)"
+              >
+                ✕
+              </button>
+            </div>
           </div>
         </div>
 
@@ -395,16 +428,46 @@ async function onDelete() {
   gap: 8px;
   margin-top: 8px;
 }
-
+.preview {
+  position: relative;
+}
 .previews img {
   width: 64px;
   height: 64px;
   object-fit: cover;
   border-radius: 6px;
 }
-
+.preview .remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #dc2626;
+  color: white;
+  border-radius: 50%;
+  border: none;
+  width: 18px;
+  height: 18px;
+  font-size: 12px;
+  cursor: pointer;
+}
 .loading {
   font-size: 14px;
   color: #475569;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.spinner {
+  background: white;
+  padding: 20px 32px;
+  border-radius: 12px;
+  font-weight: 600;
 }
 </style>

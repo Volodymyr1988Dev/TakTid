@@ -23,6 +23,7 @@ import { useAuthStore } from '../../stores/auth.store'
 import { useProjectStore } from '../../stores/project.store'
 import type { Totals } from '../../types/totals'
 import { EntryState } from '../../types/EntryState'
+import { useSuggestionsStore } from '../../stores/suggestions.store'
 
 /* ================= STATE ================= */
 type ViewState = 'calendar' | 'tabs' |'dayEntries' | 'modal'
@@ -39,6 +40,8 @@ const editEntry = ref<DayEntry | null>(null)
 
 const auth = useAuthStore()
 const projectStore = useProjectStore()
+
+const suggestionsStore = useSuggestionsStore()
 //const selectedDayEntries = ref<TimeEntry[]>([])
 //const editEntry = ref<TimeEntry | null>(null)
 const selectedSuggestion = ref<TimeSuggestion | null>(null)
@@ -313,7 +316,8 @@ async function onSaved(/*entry: DayEntry*/) {
 
   entries.value = [...entries.value]
   */
-
+  suggestionsStore.clear()
+  
   await loadEntries()
   view.value = 'calendar'
   //await loadEntries()
@@ -349,6 +353,17 @@ async function reloadCalendar () {
   await loadEntries()
   view.value = 'calendar'
 }
+
+/*
+<TimeFormModal
+    v-else-if="view === 'modal' && selectedDay"
+    :date="selectedDay.format('YYYY-MM-DD')"
+    :preset="selectedSuggestion"
+    :entry="editEntry"
+    @cancel="cancelModal"
+    @deleted="reloadCalendar"
+    @saved="onSaved"
+  />*/
 </script>
 
 <template>
@@ -422,7 +437,7 @@ async function reloadCalendar () {
   <TimeFormModal
     v-else-if="view === 'modal' && selectedDay"
     :date="selectedDay.format('YYYY-MM-DD')"
-    :preset="selectedSuggestion"
+    :preset="suggestionsStore.selected"
     :entry="editEntry"
     @cancel="cancelModal"
     @deleted="reloadCalendar"
