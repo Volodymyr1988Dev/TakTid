@@ -5,12 +5,13 @@ import type { TimeSuggestion } from '../../../types/Suggestion.type'
 const emit = defineEmits<{
   (e: 'select', s: TimeSuggestion): void
 }>()
+type AbsenceKind = Exclude<TimeKind, 'WORK' | 'EXTRA'>
 
-function select(type: TimeKind, title: string) {
+function select(type: AbsenceKind, title: string) {
   emit('select', {
     type,
     title,
-    breakMinutes: 0,
+    //breakMinutes: 0,
   })
 }
 </script>
