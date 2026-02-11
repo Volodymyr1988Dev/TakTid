@@ -9,9 +9,10 @@ import { useEntryFormSelector } from '../../composables/useEntryFormSelector'
 
 import type { DayEntry } from '../../../types/DayEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
-import { EntryState } from '../../../types/EntryState'
+//import { EntryState } from '../../../types/EntryState'
 import type { AbsenceForm, EntryMode, TimeForm } from '../../../types/Form.types'
 //import type { WorkForm, ExtraForm } from '../../../types/Form.types'
+import { isWorkSuggestion  } from '../../../types/suggestion.guard'
 
 /* ================= props / emits ================= */
 
@@ -34,7 +35,6 @@ const mode = ref<EntryMode>('WORK')
 /* ================= project ================= */
 
 const projectStore = useProjectStore()
-const isBlocking = computed(() => isSaving.value)
 const isTimeMode = computed(() => mode.value !== 'ABSENCE')
 
 const projectId = computed(() =>
@@ -51,19 +51,23 @@ const projectMissing = computed(
 
 const workForm = useWorkEntryForm({
   date: props.date,
-  entry: props.entry?.kind === EntryState.WORK ? props.entry : null,
+  //entry: props.entry?.kind === EntryState.WORK ? props.entry : null,
+  entry: props.entry && props.entry.kind === 'WORK' ? props.entry : null,
   projectId,
 })
 
 const extraForm = useExtraEntryForm({
   date: props.date,
-  entry: props.entry?.kind === EntryState.EXTRA ? props.entry : null,
+  entry: props.entry?.kind === 'EXTRA' ? props.entry : null, //EntryState.EXTRA ? props.entry : null,
   projectId,
 })
 
 const absenceForm = useAbsenceEntryForm({
   date: props.date,
-  entry: props.entry?.kind === EntryState.ABSENCE ? props.entry : null,
+  //entry: props.entry?.kind === EntryState.ABSENCE ? props.entry : null,
+   entry: props.entry && props.entry.kind === 'ABSENCE'
+    ? props.entry
+    : null,
 })
 
 const activeForm = useEntryFormSelector(mode, {
@@ -87,7 +91,7 @@ const absence = computed<AbsenceForm | null>(() => {
 
 const isSaving = computed(() => activeForm.value.isSaving.value)
 const deleting = ref(false)
-
+const isBlocking = computed(() => isSaving.value)
 /* ================= debug ================= */
 
 watch(
@@ -110,9 +114,9 @@ watch(
 
     if (entry) {
       mode.value =
-        entry.kind === EntryState.WORK
+        entry.kind === 'WORK' //EntryState.WORK
           ? 'WORK'
-          : entry.kind === EntryState.EXTRA
+          : entry.kind === 'EXTRA' //EntryState.EXTRA
             ? 'EXTRA'
             : 'ABSENCE'
 
@@ -123,8 +127,10 @@ watch(
     }
 
     if (preset) {
-      if (preset.type === 'WORK' || preset.type === 'EXTRA') {
-        mode.value = preset.type
+      //if (preset.type === 'WORK' || preset.type === 'EXTRA') {
+      if (isWorkSuggestion(preset)) {
+      //if (preset.kind === 'TIME')
+        mode.value = preset.kind, //type
         console.log('time preset detected:', preset)
       } else {
         mode.value = 'ABSENCE'
@@ -317,7 +323,7 @@ async function onDelete() {
       <div v-else-if="absence">
         <p>
           Absence type:
-          <strong>{{ absence.kind }}</strong>
+          <strong>{{ absence.absenceType.value }}</strong>
         </p>
       </div>
 

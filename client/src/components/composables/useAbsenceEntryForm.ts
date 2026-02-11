@@ -2,7 +2,7 @@ import { ref, computed, watch } from 'vue'
 import { useTimeEntryStore } from '../../stores/timeEntry.store'
 import type { AbsenceDayEntry } from '../../types/DayEntry.type'
 import { TimeKind } from '../../types/timeKind.enum'
-import { EntryState } from '../../types/EntryState'
+//import { EntryState } from '../../types/EntryState'
 import type { AbsenceForm } from '../../types/Form.types'
 
 export function useAbsenceEntryForm(props: {
@@ -63,11 +63,12 @@ export function useAbsenceEntryForm(props: {
         : await store.add({...payload, date: props.date})
 
       return {
-        kind: EntryState.ABSENCE,
+        //kind: EntryState.ABSENCE,
+        kind: 'ABSENCE',
         id: saved.id,
         date: saved.date,
         hours: Number(saved.hours),
-        type: saved.type,
+        type: saved.type as | typeof TimeKind.SICK | typeof TimeKind.VAB | typeof TimeKind.VACATION,
         comment: saved.comment ?? '',
       }
     } finally {

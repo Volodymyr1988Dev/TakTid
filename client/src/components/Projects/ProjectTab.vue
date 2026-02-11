@@ -55,16 +55,26 @@ function openPhotoModal(project: Project) {
   selectedProject.value = project
   photoModalOpen.value = true
 }
-
+function createWorkSuggestion(project: Project): TimeSuggestion {
+  return {
+    kind: 'WORK',
+    type: TimeKind.WORK,
+    title: `${project.city} – ${project.address}`,
+    projectId: project.id,
+    breakMinutes: 60,
+  }
+}
 function onProjectClick(project: Project) {
   projectStore.select(project)
   if (props.mode === 'select') {
-    emit('select', {
+    
+    emit('select',createWorkSuggestion(project)/* {
+      kind: 'WORK',
       type: TimeKind.WORK,
       title: `${project.city} – ${project.address}`,
       projectId: project.id,
       breakMinutes: 60,
-    })
+    }*/)
   }
   else {
     //emit('open-details', project.id)

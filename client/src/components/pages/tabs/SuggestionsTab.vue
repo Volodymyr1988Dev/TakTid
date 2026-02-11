@@ -3,6 +3,9 @@ import { onMounted, computed } from 'vue'
 import { useSuggestionsStore } from '../../../stores/suggestions.store'
 import { useProjectStore } from '../../../stores/project.store';
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
+import { isWorkSuggestion } from '../../../types/suggestion.guard';
+//import { createWorkSuggestion } from '../../composables/suggestion.factory';
+//import { createWorkSuggestion } from '../../composables/suggestion.factory';
 
 //const emit = defineEmits<{
 //  (e: 'select', s: TimeSuggestion): void
@@ -18,30 +21,27 @@ const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
   const map = new Map<string, TimeSuggestion>()
 
   for (const s of suggestionsStore.items) {
-    const key =
-    s.type === 'WORK' || s.type === 'EXTRA'
-      ? s.projectId
-      : s.type
-    if (!map.has(key)) {
-      map.set(key, s)
-    }
+    const key = isWorkSuggestion(s) ? s.projectId : s.type
+    //s.type === 'WORK' || s.type === 'EXTRA'
+      //? s.projectId
+      //: s.type
+    if (!map.has(key)) {map.set(key, s)}
   }
 
   return [...map.values()]
 })
 function suggestionKey(s: TimeSuggestion): string {
-  return s.type === 'WORK' || s.type === 'EXTRA'
-    ? s.projectId
-    : s.type
+  return isWorkSuggestion(s) ? s.projectId : s.type
+  //return s.type === 'WORK' || s.type === 'EXTRA'
+  //  ? s.projectId
+  //  : s.type
 }
 function selectSuggestion(s: TimeSuggestion) {
   suggestionsStore.select(s)
 
-  if (s.type === 'WORK' || s.type === 'EXTRA') {
+  if (isWorkSuggestion(s)) {
     const project = projectStore.getById(s.projectId)
-    if (project) {
-      projectStore.select(project)
-    }
+    if (project) projectStore.select(project)
   }
 }
 //@click="emit('select', s)"

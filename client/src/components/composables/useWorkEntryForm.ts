@@ -5,7 +5,7 @@ import { useTimeEntryStore } from '../../stores/timeEntry.store'
 import { calculateWorkedMinutes } from '../pages/components/helpers/time'
 import type { WorkDayEntry } from '../../types/DayEntry.type'
 import type { TimeEntryUpdatePayload } from '../../types/TimeEntryUpdatePayload.type'
-import { EntryState } from '../../types/EntryState'
+//import { EntryState } from '../../types/EntryState'
 import { useTimeEntryImages } from './useTimeEntryImages'
 import { TimeKind } from '../../types/timeKind.enum'
 //import type { TimeBasedForm } from '../../types/TimeBasedForm'
@@ -106,11 +106,12 @@ watch(
           console.error('[Images] upload failed', e)
         }
       return {
-        kind: EntryState.WORK,
+        //kind: EntryState.WORK,
+        kind: 'WORK',
         id: saved.id,
         date: saved.date,
         hours: Number(saved.hours),
-        type: saved.type,
+        type: TimeKind.WORK,//saved.type,
         startTime: normalizeTime(saved.startTime),
         endTime: normalizeTime(saved.endTime),
         breakMinutes: saved.breakMinutes,

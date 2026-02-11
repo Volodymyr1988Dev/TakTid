@@ -1,27 +1,55 @@
-/*import type { DayEntry } from './DayEntry.type'
-import type { EntryState } from './EntryState'
+import type { Project } from './Project.dto'
+import { TimeKind } from './timeKind.enum'
 
-export interface BaseEntryForm {
-  kind: EntryState
+/* ================= COMMON ================= */
 
-  comment: string
-  isSaving: boolean
-  isEdit: boolean
+interface BaseEntry {
+  id: string
+  date: string
+  hours: number
+  comment?: string
+}
 
-  save(): Promise<DayEntry | null>
-  remove(): Promise<void>
-}*/ 
-import type { Ref, ComputedRef } from 'vue'
-import type { DayEntry } from './DayEntry.type'
-import type { EntryState } from './EntryState'
+/* ================= TIME ================= */
 
-export interface BaseEntryForm {
-  kind?: EntryState
+export interface TimeDayEntry extends BaseEntry {
+  kind: 'TIME'
+  type: typeof TimeKind.WORK
+       | typeof TimeKind.EXTRA
 
-  comment: Ref<string>
-  isSaving: Ref<boolean>
-  isEdit: ComputedRef<boolean>
+  startTime: string
+  endTime: string
+  breakMinutes: number
 
-  save(): Promise<DayEntry | null>
-  remove(): Promise<void>
+  projectId: string
+  project?: Project
+}
+
+/* ================= ABSENCE ================= */
+
+export interface AbsenceDayEntry extends BaseEntry {
+  kind: 'ABSENCE'
+  type: typeof TimeKind.SICK
+       | typeof TimeKind.VAB
+       | typeof TimeKind.VACATION
+}
+
+/* ================= UNION ================= */
+
+export type DayEntry =
+  | TimeDayEntry
+  | AbsenceDayEntry
+
+/* ================= GUARDS ================= */
+
+export function isTimeEntry(
+  e: DayEntry
+): e is TimeDayEntry {
+  return e.kind === 'TIME'
+}
+
+export function isAbsenceEntry(
+  e: DayEntry
+): e is AbsenceDayEntry {
+  return e.kind === 'ABSENCE'
 }

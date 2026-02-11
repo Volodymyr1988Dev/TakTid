@@ -22,7 +22,7 @@ import { TimeKind } from '../../types/timeKind.enum'
 import { useAuthStore } from '../../stores/auth.store'
 import { useProjectStore } from '../../stores/project.store'
 import type { Totals } from '../../types/totals'
-import { EntryState } from '../../types/EntryState'
+//import { EntryState } from '../../types/EntryState'
 import { useSuggestionsStore } from '../../stores/suggestions.store'
 
 /* ================= STATE ================= */
@@ -44,8 +44,8 @@ const projectStore = useProjectStore()
 const suggestionsStore = useSuggestionsStore()
 //const selectedDayEntries = ref<TimeEntry[]>([])
 //const editEntry = ref<TimeEntry | null>(null)
-const selectedSuggestion = ref<TimeSuggestion | null>(null)
-
+//const selectedSuggestion = ref<TimeSuggestion | null>(null)
+/*
 function mapToDayEntries(
   timeEntries: TimeEntry[],
   assignments: ProjectAssignment[],
@@ -74,6 +74,7 @@ function mapToDayEntries(
 
       return {
         kind: 'WORK',
+        //kind: 'TIME',
         id: e.id,
         date: e.date,
         type: TimeKind.WORK,
@@ -89,11 +90,11 @@ function mapToDayEntries(
     if (e.type === TimeKind.WORK && !projectId) {
     console.warn('WORK entry without projectId', e)
     }
-
+    /*
     if (isAbsence) {
     return {
-      //kind: 'ABSENCE',
-      kind: EntryState.ABSENCE,
+      kind: 'ABSENCE',
+      //kind: EntryState.ABSENCE,
       id: e.id,
       date: e.date,
       hours: Number(e.hours),
@@ -103,8 +104,9 @@ function mapToDayEntries(
     }
     return {
       //...e,
-      //kind: 'WORK',
-      kind: EntryState.WORK,
+      kind: 'WORK',
+      //kind: EntryState.WORK,
+      //kind: 'TIME',
       id: e.id,
       date: e.date,
       //type: e.type,
@@ -122,6 +124,29 @@ function mapToDayEntries(
       project: e.project,
       comment: e.comment ?? '',
     }
+      */ /*
+     if (!isAbsence) {
+      const projectId = e.projectId ?? e.project?.id
+
+      if (!projectId) {
+        console.error('WORK entry without projectId', e)
+        return null
+      }
+
+      return {
+        kind: 'WORK',
+        id: e.id,
+        date: e.date,
+        type: TimeKind.WORK,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        breakMinutes: e.breakMinutes ?? 0,
+        hours: Number(e.hours),
+        projectId,
+        project: e.project,
+        comment: e.comment ?? '',
+      }
+    }
   })
 
   const extraEntries: DayEntry[] = assignments.map(a => {
@@ -132,8 +157,8 @@ function mapToDayEntries(
     }
 
     return {
-      //kind: 'EXTRA',
-      kind: EntryState.EXTRA,
+      kind: 'EXTRA',
+      //kind: EntryState.EXTRA,
       id: a.id,
       date: a.date,
       hours: a.hours,
@@ -148,6 +173,90 @@ function mapToDayEntries(
   })
 
   return [...workEntries, ...extraEntries]
+}
+*/
+function mapToDayEntries(
+  timeEntries: TimeEntry[],
+  assignments: ProjectAssignment[],
+): DayEntry[] {
+
+  const result: DayEntry[] = []
+
+  /* ================= TIME ENTRIES ================= */
+
+  for (const e of timeEntries) {
+
+    /* ========= ABSENCE ========= */
+
+    if (
+      e.type === TimeKind.SICK ||
+      e.type === TimeKind.VAB ||
+      e.type === TimeKind.VACATION
+    ) {
+      result.push({
+        kind: 'ABSENCE',
+        id: e.id,
+        date: e.date,
+        hours: Number(e.hours),
+        type: e.type,
+        comment: e.comment ?? '',
+      })
+
+      continue
+    }
+
+    /* ========= WORK ========= */
+
+    const projectId = e.projectId ?? e.project?.id
+
+    if (!projectId) {
+      console.error(
+        '[mapToDayEntries] WORK entry without projectId:',
+        e,
+      )
+      continue
+    }
+
+    result.push({
+      kind: 'WORK',
+      id: e.id,
+      date: e.date,
+      type: TimeKind.WORK,
+      startTime: e.startTime,
+      endTime: e.endTime,
+      breakMinutes: e.breakMinutes ?? 0,
+      hours: Number(e.hours),
+      projectId,
+      project: e.project,
+      comment: e.comment ?? '',
+    })
+  }
+
+  /* ================= EXTRA ================= */
+
+  for (const a of assignments) {
+    if (!a.project) {
+      console.error(
+        `[mapToDayEntries] Project missing in assignment ${a.id}`,
+      )
+      continue
+    }
+
+    result.push({
+      kind: 'EXTRA',
+      id: a.id,
+      date: a.date,
+      hours: Number(a.hours),
+      projectId: a.project.id,
+      project: a.project,
+      comment: a.comment ?? '',
+      startTime: a.startTime,
+      endTime: a.endTime,
+      breakMinutes: a.breakMinutes ?? 0,
+    })
+  }
+
+  return result
 }
 
 async function loadEntries() {
@@ -212,12 +321,8 @@ function isWork(e: DayEntry) {
 }
 
 function isPaidWork(e: DayEntry) {
-  return (
-    e.kind === 'EXTRA' ||
-    (e.kind === 'WORK' &&
-      (e.type === TimeKind.WORK ||
-       e.type === TimeKind.MEETING))
-  )
+  return e.kind === 'EXTRA'
+    || (e.kind === 'WORK' && e.type === TimeKind.WORK)
 }
 
 function isAbsence(e: DayEntry, kind: TimeKind) {
@@ -285,12 +390,15 @@ function openDay(day: Dayjs) {
 
 function editFromList(entry: DayEntry) {
   editEntry.value = entry
-  selectedSuggestion.value = null
+  suggestionsStore.clear()
+  //selectedSuggestion.value = null
   view.value = 'modal'
 }
 
 function selectSuggestion(s: TimeSuggestion) {
-  selectedSuggestion.value = s
+  suggestionsStore.select(s)
+  editEntry.value = null
+  //selectedSuggestion.value = s
   view.value = 'modal'
 }
 
@@ -302,7 +410,7 @@ function cancelModal() {
 
 async function onSaved(/*entry: DayEntry*/) {
   editEntry.value = null
-  selectedSuggestion.value = null
+  //selectedSuggestion.value = null
   /*
    const index = entries.value.findIndex(e => e.id === entry.id)
 
@@ -340,15 +448,20 @@ function next() {
 
 function addWork() {
   editEntry.value = null
-  selectedSuggestion.value = {
+  suggestionsStore.clear()
+  //selectedSuggestion.value = {
+  /*
+  suggestionsStore.select({
     type: TimeKind.WORK,
-  } as TimeSuggestion
+    title: 'Work',
+    projectId: projectStore.selectedProject.id
+  })*/
   view.value = 'tabs'
 }
 
 async function reloadCalendar () {
   editEntry.value = null
-  selectedSuggestion.value = null
+  //selectedSuggestion.value = null
 
   await loadEntries()
   view.value = 'calendar'

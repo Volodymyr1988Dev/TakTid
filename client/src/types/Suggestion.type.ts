@@ -9,12 +9,24 @@ export interface TimeSuggestion {
 import { TimeKind } from "./timeKind.enum"
 export type TimeSuggestion =
   | {
-      type: 'WORK' | 'EXTRA'
+      kind: 'WORK'
+      type: typeof TimeKind.WORK
       title: string
       projectId: string
       breakMinutes?: number
     }
   | {
-      type: Exclude<TimeKind, 'WORK' | 'EXTRA'>
+      kind: 'EXTRA'
+      type: typeof TimeKind.EXTRA
+      title: string
+      projectId: string
+      breakMinutes?: number
+    }
+  | {
+      kind: 'ABSENCE'
+      type:
+        | typeof TimeKind.SICK
+        | typeof TimeKind.VAB
+        | typeof TimeKind.VACATION
       title: string
     }

@@ -1,17 +1,18 @@
 import { ref, computed, watch } from 'vue'
 import type { Ref } from 'vue'
-import type { DayEntry } from '../../types/DayEntry.type'
+import type { DayEntry, ExtraDayEntry } from '../../types/DayEntry.type'
 import { useProjectAssignmentStore } from '../../stores/projectAssignment.store'
 import { useTimeEntryImages } from './useTimeEntryImages'
-import { EntryState } from '../../types/EntryState'
+//import { EntryState } from '../../types/EntryState'
 import { calculateWorkedMinutes } from '../pages/components/helpers/time'
 //import type { TimeBasedForm } from '../../types/TimeBasedForm'
-import { TimeKind } from '../../types/timeKind.enum'
+//import { TimeKind } from '../../types/timeKind.enum'
 import type { ExtraForm } from '../../types/Form.types'
 
 export function useExtraEntryForm(props: {
   date: string
-  entry?: DayEntry | null
+  //entry?: DayEntry | null
+  entry?: ExtraDayEntry | null,
   projectId: Ref<string | null>
 }) {
   const assignmentStore = useProjectAssignmentStore()
@@ -20,7 +21,7 @@ export function useExtraEntryForm(props: {
   const endRef = ref('17:00')
   const breakMinutesRef = ref(30)
   const commentRef = ref('')
-  const isEdit = computed(() => props.entry?.kind === EntryState.EXTRA)
+  const isEdit = computed(() => props.entry?.kind === 'EXTRA') //EntryState.EXTRA)
   const isSavingRef = ref(false)
 
   const start = computed({
@@ -55,7 +56,7 @@ export function useExtraEntryForm(props: {
   watch(
     () => props.entry,
     e => {
-      if (!e || e.kind !== EntryState.EXTRA) return
+      if (!e || e.kind !== 'EXTRA') return //EntryState.EXTRA) return
 
       startRef.value = normalizeTime(e.startTime ?? '08:00')
       endRef.value = normalizeTime(e.endTime ?? '17:00')
@@ -104,7 +105,8 @@ async function save(): Promise<DayEntry | null> {
     }
 
     return {
-      kind: TimeKind.EXTRA,
+      //kind: TimeKind.EXTRA,
+      kind: 'EXTRA',
       id: saved.id,
       date: saved.date,
       hours: saved.hours,

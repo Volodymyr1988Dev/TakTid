@@ -1,10 +1,11 @@
 export const TimeKind = {
   WORK: 'WORK',
+  EXTRA: 'EXTRA',
+  
   SICK: 'SICK',
   VAB: 'VAB',
   VACATION: 'VACATION',
-  EXTRA: 'EXTRA',
-  MEETING: 'MEETING',
+  //MEETING: 'MEETING',
 } as const
 
 export type TimeKind = typeof TimeKind[keyof typeof TimeKind]
