@@ -7,9 +7,10 @@ import { isWorkSuggestion } from '../../../types/suggestion.guard';
 //import { createWorkSuggestion } from '../../composables/suggestion.factory';
 //import { createWorkSuggestion } from '../../composables/suggestion.factory';
 
-//const emit = defineEmits<{
-//  (e: 'select', s: TimeSuggestion): void
-//}>()
+const emit = defineEmits<{
+  (e: 'select', s: TimeSuggestion): void
+}>()
+
 const suggestionsStore = useSuggestionsStore()
 //const store = useSuggestionsStore()
 const projectStore = useProjectStore()
@@ -37,11 +38,12 @@ function suggestionKey(s: TimeSuggestion): string {
   //  : s.type
 }
 function selectSuggestion(s: TimeSuggestion) {
-  suggestionsStore.select(s)
+  //suggestionsStore.select(s)
 
   if (isWorkSuggestion(s)) {
     const project = projectStore.getById(s.projectId)
     if (project) projectStore.select(project)
+    emit('select', s)
   }
 }
 //@click="emit('select', s)"
