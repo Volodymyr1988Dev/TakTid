@@ -52,23 +52,18 @@ const projectMissing = computed(
 
 const workForm = useWorkEntryForm({
   date: props.date,
-  //entry: props.entry?.kind === EntryState.WORK ? props.entry : null,
-  //entry: props.entry && props.entry.kind === 'WORK' ? props.entry : null,
   entry: props.entry && props.entry.type === TimeKind.WORK ? props.entry : null,
   projectId,
 })
 
 const extraForm = useExtraEntryForm({
   date: props.date,
-  //entry: props.entry?.kind === 'EXTRA' ? props.entry : null, //EntryState.EXTRA ? props.entry : null,
   entry: props.entry?.type === TimeKind.EXTRA ? props.entry : null,
   projectId,
 })
 
 const absenceForm = useAbsenceEntryForm({
   date: props.date,
-  //entry: props.entry?.kind === EntryState.ABSENCE ? props.entry : null,
-   //entry: props.entry && props.entry.kind === 'ABSENCE'
    entry: props.entry && (
     props.entry.type === TimeKind.SICK ||
     props.entry.type === TimeKind.VAB ||
@@ -101,27 +96,10 @@ const absence = computed<AbsenceForm | null>(() => {
 const isSaving = computed(() => activeForm.value.isSaving.value)
 const deleting = ref(false)
 const isBlocking = computed(() => isSaving.value)
-/* ================= debug ================= */
-
-watch(
-  () => mode.value,
-  (m) => {
-    console.group('[TimeFormModal] MODE CHANGED')
-    console.log('mode:', m)
-    console.log('activeForm:', activeForm.value)
-    console.groupEnd()
-  },
-  { immediate: true },
-)
-
-/* ================= effects ================= */
 
 watch(
   () => [props.entry, props.preset] as const,
   ([entry, preset]) => {
-    console.group('[TimeFormModal] INIT')
-
-    /* ================= EDIT MODE ================= */
     if (entry) {
       if (entry.type === TimeKind.WORK) {
         mode.value = 'WORK'
@@ -130,90 +108,46 @@ watch(
       } else {
         mode.value = 'ABSENCE'
       }
-
-      console.log('edit entry detected:', entry)
-      console.log('resolved mode:', mode.value)
-      console.groupEnd()
       return
     }
-
-    /* ================= PRESET MODE ================= */
     if (preset) {
       if (isWorkSuggestion(preset)) {
         mode.value = preset.type
-        console.log('time preset detected:', preset)
       } else {
         mode.value = 'ABSENCE'
         absenceForm.absenceType.value = preset.type
-        console.log('absence preset detected:', preset)
       }
-
-      console.groupEnd()
       return
     }
-
-    /* ================= DEFAULT ================= */
     mode.value = 'WORK'
-    console.log('default mode WORK')
-    console.groupEnd()
   },
   { immediate: true },
 )
-/*
-function isWorkSuggestion(
-  s: TimeSuggestion
-): s is Extract<TimeSuggestion, { type: 'WORK' | 'EXTRA' }> {
-  return s.type === 'WORK' || s.type === 'EXTRA'
-}
-  */
-/* ================= actions ================= */
 
 async function onSave() {
-  console.group('[TimeFormModal] SAVE')
 
   if (projectMissing.value) {
     console.warn('project missing')
     alert('Please select a project')
-    console.groupEnd()
     return
   }
 
   const entry = await activeForm.value.save()
-  console.log('saved entry:', entry)
 
   if (entry) emit('saved', entry)
 
-  console.groupEnd()
 }
 
 async function onDelete() {
-  console.group('[TimeFormModal] DELETE')
 
   deleting.value = true
   try {
     await activeForm.value.remove()
     emit('deleted')
-    console.log('entry deleted')
   } finally {
     deleting.value = false
-    console.groupEnd()
   }
 }
-
-/*
-<div
-            v-if="timeForm.images.previews.value.length"
-            class="previews"
-          >
-            <img
-              v-for="(src, i) in timeForm.images.previews.value"
-              :key="i"
-              :src="src"
-              alt="preview"
-              class="preview"
-            >
-          </div>
-*/
 </script>
 
 <template>

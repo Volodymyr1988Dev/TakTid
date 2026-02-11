@@ -1,27 +1,20 @@
 import { ref, computed,watch } from 'vue'
 import type { Ref } from 'vue'
 import { useTimeEntryStore } from '../../stores/timeEntry.store'
-//import { useProjectStore } from '../../stores/project.store'
 import { calculateWorkedMinutes } from '../pages/components/helpers/time'
 import type { WorkDayEntry } from '../../types/DayEntry.type'
 import type { TimeEntryUpdatePayload } from '../../types/TimeEntryUpdatePayload.type'
-//import { EntryState } from '../../types/EntryState'
 import { useTimeEntryImages } from './useTimeEntryImages'
 import { TimeKind } from '../../types/timeKind.enum'
-//import type { TimeBasedForm } from '../../types/TimeBasedForm'
 import type { WorkForm } from '../../types/Form.types'
 
 export function useWorkEntryForm(props: {
   date: string
   entry?: WorkDayEntry | null
-  //projectId: { value: string | null }
   projectId: Ref <string | null>
 }) {
   const store = useTimeEntryStore()
   const images = useTimeEntryImages()
-  //const projectStore = useProjectStore()
-  //const projectId = props.projectId
-  //const projectId = computed(() => projectStore.projectId)
   const startRef = ref('08:00')
   const endRef = ref('17:00')
   const breakMinutesRef = ref(30)
@@ -106,8 +99,6 @@ watch(
           console.error('[Images] upload failed', e)
         }
       return {
-        //kind: EntryState.WORK,
-        //kind: 'WORK',
         id: saved.id,
         date: saved.date,
         hours: Number(saved.hours),
@@ -129,8 +120,6 @@ watch(
   }
 
   return {
-    //kind: 'WORK',
-    //type: TimeKind.WORK,
     mode: 'WORK',
     start,
     end,

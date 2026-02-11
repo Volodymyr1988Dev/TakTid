@@ -2,7 +2,6 @@ import { ref, computed, watch } from 'vue'
 import { useTimeEntryStore } from '../../stores/timeEntry.store'
 import type { AbsenceDayEntry } from '../../types/DayEntry.type'
 import { TimeKind } from '../../types/timeKind.enum'
-//import { EntryState } from '../../types/EntryState'
 import type { AbsenceForm,AbsenceKind } from '../../types/Form.types'
 
 export function useAbsenceEntryForm(props: {
@@ -10,19 +9,11 @@ export function useAbsenceEntryForm(props: {
   entry?: AbsenceDayEntry | null
 }) {
   const store = useTimeEntryStore()
-
-  //const kindRef = ref<TimeKind>(
   const kindRef = ref<AbsenceKind>(
     props.entry?.type ?? TimeKind.SICK
   )
   const commentRef = ref(props.entry?.comment ?? '')
   const isSavingRef = ref(false)
-/*
-     const kind = computed({
-    get: () => kindRef.value,
-    set: v => (kindRef.value = v),
-  })
-*/
   const comment = computed({
     get: () => commentRef.value,
     set: v => (commentRef.value = v),
@@ -31,7 +22,6 @@ export function useAbsenceEntryForm(props: {
   const isSaving = computed(() => isSavingRef.value)
 
   const isEdit = computed(() => !!props.entry)
-  //const isActive = computed(() => true)
   
   watch(
   () => props.entry,
@@ -52,7 +42,6 @@ export function useAbsenceEntryForm(props: {
     isSavingRef.value = true
     try {
         const payload ={
-            //date: props.date,
             type: kindRef.value,
             comment: commentRef.value,
             startTime: '08:00',
@@ -64,8 +53,6 @@ export function useAbsenceEntryForm(props: {
         : await store.add({...payload, date: props.date})
 
       return {
-        //kind: EntryState.ABSENCE,
-        //kind: 'ABSENCE',
         id: saved.id,
         date: saved.date,
         hours: Number(saved.hours),
@@ -83,14 +70,11 @@ export function useAbsenceEntryForm(props: {
   }
 
   return {
-    //kind: 'ABSENCE',
-    //type: 'ABSENCE',
     mode: 'ABSENCE',
     absenceType,
     comment,
     isSaving,
     isEdit,
-    //isActive,
     save,
     remove,
   } satisfies AbsenceForm
