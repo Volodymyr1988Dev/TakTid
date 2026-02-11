@@ -3,7 +3,7 @@ import { useTimeEntryStore } from '../../stores/timeEntry.store'
 import type { AbsenceDayEntry } from '../../types/DayEntry.type'
 import { TimeKind } from '../../types/timeKind.enum'
 //import { EntryState } from '../../types/EntryState'
-import type { AbsenceForm } from '../../types/Form.types'
+import type { AbsenceForm,AbsenceKind } from '../../types/Form.types'
 
 export function useAbsenceEntryForm(props: {
   date: string
@@ -11,7 +11,8 @@ export function useAbsenceEntryForm(props: {
 }) {
   const store = useTimeEntryStore()
 
-  const kindRef = ref<TimeKind>(
+  //const kindRef = ref<TimeKind>(
+  const kindRef = ref<AbsenceKind>(
     props.entry?.type ?? TimeKind.SICK
   )
   const commentRef = ref(props.entry?.comment ?? '')
@@ -64,11 +65,11 @@ export function useAbsenceEntryForm(props: {
 
       return {
         //kind: EntryState.ABSENCE,
-        kind: 'ABSENCE',
+        //kind: 'ABSENCE',
         id: saved.id,
         date: saved.date,
         hours: Number(saved.hours),
-        type: saved.type as | typeof TimeKind.SICK | typeof TimeKind.VAB | typeof TimeKind.VACATION,
+        type: saved.type as AbsenceKind, //| typeof TimeKind.SICK | typeof TimeKind.VAB | typeof TimeKind.VACATION,
         comment: saved.comment ?? '',
       }
     } finally {
@@ -82,7 +83,9 @@ export function useAbsenceEntryForm(props: {
   }
 
   return {
-    kind: 'ABSENCE',
+    //kind: 'ABSENCE',
+    //type: 'ABSENCE',
+    mode: 'ABSENCE',
     absenceType,
     comment,
     isSaving,

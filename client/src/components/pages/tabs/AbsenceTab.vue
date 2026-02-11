@@ -9,7 +9,7 @@ type AbsenceKind = Exclude<TimeKind, 'WORK' | 'EXTRA'>
 
 function select(type: AbsenceKind, title: string) {
   emit('select', {
-    kind: 'ABSENCE',
+    //kind: 'ABSENCE',
     type,
     title,
     //breakMinutes: 0,

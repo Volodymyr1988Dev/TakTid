@@ -57,7 +57,7 @@ function openPhotoModal(project: Project) {
 }
 function createWorkSuggestion(project: Project): TimeSuggestion {
   return {
-    kind: 'WORK',
+    //kind: 'WORK',
     type: TimeKind.WORK,
     title: `${project.city} – ${project.address}`,
     projectId: project.id,

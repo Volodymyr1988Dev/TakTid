@@ -13,6 +13,7 @@ import type { TimeSuggestion } from '../../../types/Suggestion.type'
 import type { AbsenceForm, EntryMode, TimeForm } from '../../../types/Form.types'
 //import type { WorkForm, ExtraForm } from '../../../types/Form.types'
 import { isWorkSuggestion  } from '../../../types/suggestion.guard'
+import { TimeKind } from '../../../types/timeKind.enum'
 
 /* ================= props / emits ================= */
 
@@ -52,20 +53,27 @@ const projectMissing = computed(
 const workForm = useWorkEntryForm({
   date: props.date,
   //entry: props.entry?.kind === EntryState.WORK ? props.entry : null,
-  entry: props.entry && props.entry.kind === 'WORK' ? props.entry : null,
+  //entry: props.entry && props.entry.kind === 'WORK' ? props.entry : null,
+  entry: props.entry && props.entry.type === TimeKind.WORK ? props.entry : null,
   projectId,
 })
 
 const extraForm = useExtraEntryForm({
   date: props.date,
-  entry: props.entry?.kind === 'EXTRA' ? props.entry : null, //EntryState.EXTRA ? props.entry : null,
+  //entry: props.entry?.kind === 'EXTRA' ? props.entry : null, //EntryState.EXTRA ? props.entry : null,
+  entry: props.entry?.type === TimeKind.EXTRA ? props.entry : null,
   projectId,
 })
 
 const absenceForm = useAbsenceEntryForm({
   date: props.date,
   //entry: props.entry?.kind === EntryState.ABSENCE ? props.entry : null,
-   entry: props.entry && props.entry.kind === 'ABSENCE'
+   //entry: props.entry && props.entry.kind === 'ABSENCE'
+   entry: props.entry && (
+    props.entry.type === TimeKind.SICK ||
+    props.entry.type === TimeKind.VAB ||
+    props.entry.type === TimeKind.VACATION
+  )
     ? props.entry
     : null,
 })
@@ -77,13 +85,14 @@ const activeForm = useEntryFormSelector(mode, {
 })
 
 const timeForm = computed<TimeForm | null>(() => {
-  return activeForm.value.kind === 'ABSENCE'
+  //return activeForm.value.kind === 'ABSENCE'
+  return activeForm.value.mode === 'ABSENCE'
     ? null
     : activeForm.value
 })
 
 const absence = computed<AbsenceForm | null>(() => {
-  return activeForm.value.kind === 'ABSENCE'
+  return activeForm.value.mode === 'ABSENCE'
     ? activeForm.value
     : null
 })
@@ -108,17 +117,19 @@ watch(
 /* ================= effects ================= */
 
 watch(
-  () => ({ entry: props.entry, preset: props.preset }),
-  ({ entry, preset }) => {
+  () => [props.entry, props.preset] as const,
+  ([entry, preset]) => {
     console.group('[TimeFormModal] INIT')
 
+    /* ================= EDIT MODE ================= */
     if (entry) {
-      mode.value =
-        entry.kind === 'WORK' //EntryState.WORK
-          ? 'WORK'
-          : entry.kind === 'EXTRA' //EntryState.EXTRA
-            ? 'EXTRA'
-            : 'ABSENCE'
+      if (entry.type === TimeKind.WORK) {
+        mode.value = 'WORK'
+      } else if (entry.type === TimeKind.EXTRA) {
+        mode.value = 'EXTRA'
+      } else {
+        mode.value = 'ABSENCE'
+      }
 
       console.log('edit entry detected:', entry)
       console.log('resolved mode:', mode.value)
@@ -126,11 +137,10 @@ watch(
       return
     }
 
+    /* ================= PRESET MODE ================= */
     if (preset) {
-      //if (preset.type === 'WORK' || preset.type === 'EXTRA') {
       if (isWorkSuggestion(preset)) {
-      //if (preset.kind === 'TIME')
-        mode.value = preset.kind, //type
+        mode.value = preset.type
         console.log('time preset detected:', preset)
       } else {
         mode.value = 'ABSENCE'
@@ -142,6 +152,7 @@ watch(
       return
     }
 
+    /* ================= DEFAULT ================= */
     mode.value = 'WORK'
     console.log('default mode WORK')
     console.groupEnd()

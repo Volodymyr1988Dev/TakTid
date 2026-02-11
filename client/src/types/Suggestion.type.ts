@@ -6,27 +6,20 @@ export interface TimeSuggestion {
   title: string
   breakMinutes?: number
 }*/
-import { TimeKind } from "./timeKind.enum"
+import type { WorkKind, AbsenceKind } from './timeKind.enum'
+
+export type WorkSuggestion = {
+  type: WorkKind
+  title: string
+  projectId: string
+  breakMinutes?: number
+}
+
+export type AbsenceSuggestion = {
+  type: AbsenceKind
+  title: string
+}
+
 export type TimeSuggestion =
-  | {
-      kind: 'WORK'
-      type: typeof TimeKind.WORK
-      title: string
-      projectId: string
-      breakMinutes?: number
-    }
-  | {
-      kind: 'EXTRA'
-      type: typeof TimeKind.EXTRA
-      title: string
-      projectId: string
-      breakMinutes?: number
-    }
-  | {
-      kind: 'ABSENCE'
-      type:
-        | typeof TimeKind.SICK
-        | typeof TimeKind.VAB
-        | typeof TimeKind.VACATION
-      title: string
-    }
+  | WorkSuggestion
+  | AbsenceSuggestion

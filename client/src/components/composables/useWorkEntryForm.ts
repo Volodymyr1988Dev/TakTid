@@ -107,7 +107,7 @@ watch(
         }
       return {
         //kind: EntryState.WORK,
-        kind: 'WORK',
+        //kind: 'WORK',
         id: saved.id,
         date: saved.date,
         hours: Number(saved.hours),
@@ -129,7 +129,9 @@ watch(
   }
 
   return {
-    kind: 'WORK',
+    //kind: 'WORK',
+    //type: TimeKind.WORK,
+    mode: 'WORK',
     start,
     end,
     //breakMinutes,

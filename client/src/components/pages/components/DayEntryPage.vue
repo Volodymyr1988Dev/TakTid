@@ -18,7 +18,8 @@ const emit = defineEmits<{
 
 //function getTitle(entry: TimeEntry) {
 function getTitle(entry: DayEntry) {
-  if (entry.kind === 'EXTRA') return 'Extra work'
+  //if (entry.kind === 'EXTRA') return 'Extra work'
+  if (entry.type === 'EXTRA') return 'Extra work'
   if (
     entry.type === TimeKind.SICK ||
     entry.type === TimeKind.VAB ||
@@ -67,7 +68,7 @@ function getProjectSubtitle(e: DayEntry) {
       <div>
         <strong>{{ getTitle(e) }}</strong>
       </div>
-      <small v-if="e.kind === 'WORK' || e.kind === 'EXTRA'">
+      <small v-if="e.type === 'WORK' || e.type === 'EXTRA'">
         {{ getProjectSubtitle(e) }}
       </small>
     </div>

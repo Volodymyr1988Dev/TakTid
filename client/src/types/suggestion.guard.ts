@@ -1,21 +1,26 @@
-//import { TimeKind } from './timeKind.enum'
-import type { TimeSuggestion } from './Suggestion.type'
-
+import { TimeKind } from './timeKind.enum'
+//import type { WorkKind, AbsenceKind } from './timeKind.enum'
+import type {
+  TimeSuggestion,
+  WorkSuggestion,
+  AbsenceSuggestion,
+} from './Suggestion.type'
 
 export function isWorkSuggestion(
   s: TimeSuggestion
-): s is Extract<TimeSuggestion, { kind: 'WORK' }> {
-  return s.kind === 'WORK'
-}
-
-export function isExtraSuggestion(
-  s: TimeSuggestion
-): s is Extract<TimeSuggestion, { kind: 'EXTRA' }> {
-  return s.kind === 'EXTRA'
+): s is WorkSuggestion {
+  return (
+    s.type === TimeKind.WORK ||
+    s.type === TimeKind.EXTRA
+  )
 }
 
 export function isAbsenceSuggestion(
   s: TimeSuggestion
-): s is Extract<TimeSuggestion, { kind: 'ABSENCE' }> {
-  return s.kind === 'ABSENCE'
+): s is AbsenceSuggestion {
+  return (
+    s.type === TimeKind.SICK ||
+    s.type === TimeKind.VAB ||
+    s.type === TimeKind.VACATION
+  )
 }

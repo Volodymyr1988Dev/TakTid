@@ -1,5 +1,6 @@
 import type { Ref, ComputedRef } from 'vue'
 import type { DayEntry } from './DayEntry.type'
+import { TimeKind } from './timeKind.enum'
 //import type { TimeBasedForm } from './TimeBasedForm'
 
 interface BaseForm {
@@ -27,19 +28,26 @@ interface TimeBaseForm extends BaseForm {
     removeAt(index: number): void
   }
 }
+export type AbsenceKind =
+  | typeof TimeKind.SICK
+  | typeof TimeKind.VAB
+  | typeof TimeKind.VACATION
 export type EntryMode = 'WORK' | 'EXTRA' | 'ABSENCE'
 
 export interface WorkForm extends TimeBaseForm {
-  kind: 'WORK'
+  mode: 'WORK'
+  //type: typeof TimeKind.WORK
 }
 
 export interface ExtraForm extends TimeBaseForm {
-  kind: 'EXTRA'
+  mode: 'EXTRA'
+  //type: typeof TimeKind.EXTRA
 }
 
 export interface AbsenceForm extends BaseForm {
-  kind: 'ABSENCE'
-  absenceType: Ref<string>
+  mode: 'ABSENCE'
+  //type: 'ABSENCE'
+  absenceType: Ref<AbsenceKind> //Ref<string>
   //comment: { value: string }
   //isEdit: { value: boolean }
   //isSaving: { value: boolean }

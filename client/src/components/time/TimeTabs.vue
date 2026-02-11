@@ -13,7 +13,7 @@ import DayEntryPage from '../pages/components/DayEntryPage.vue'
 import { getTimeEntries } from '../../api/TimeEntry.api'
 //import type { TimeEntry } from '../../types/TimeEntry.type'
 import type { TimeSuggestion } from '../../types/Suggestion.type'
-import type { DayEntry } from '../../types/DayEntry.type'
+import type { DayEntry, WorkDayEntry, AbsenceDayEntry, ExtraDayEntry } from '../../types/DayEntry.type'
 import type { TimeEntry } from '../../types/TimeEntry.type'
 import { getProjectAssignments } from '../../api/projectAssignment.api'
 import type { ProjectAssignment } from '../../types/ProjectAssignment.type'
@@ -24,6 +24,7 @@ import { useProjectStore } from '../../stores/project.store'
 import type { Totals } from '../../types/totals'
 //import { EntryState } from '../../types/EntryState'
 import { useSuggestionsStore } from '../../stores/suggestions.store'
+//import { isWorkSuggestion } from '../../types/suggestion.guard'
 
 /* ================= STATE ================= */
 type ViewState = 'calendar' | 'tabs' |'dayEntries' | 'modal'
@@ -175,85 +176,70 @@ function mapToDayEntries(
   return [...workEntries, ...extraEntries]
 }
 */
-function mapToDayEntries(
-  timeEntries: TimeEntry[],
-  assignments: ProjectAssignment[],
-): DayEntry[] {
 
+ function mapToDayEntries(
+  timeEntries: TimeEntry[],
+  assignments: ProjectAssignment[]
+): DayEntry[] {
   const result: DayEntry[] = []
 
-  /* ================= TIME ENTRIES ================= */
-
   for (const e of timeEntries) {
+    const hours = Number(e.hours)
 
-    /* ========= ABSENCE ========= */
+    if (e.type === TimeKind.WORK) {
+      if (!e.projectId && !e.project?.id) continue
+
+      const work: WorkDayEntry = {
+        id: e.id,
+        date: e.date,
+        hours,
+        type: TimeKind.WORK,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        breakMinutes: e.breakMinutes ?? 0,
+        projectId: e.projectId ?? e.project!.id,
+        project: e.project,
+        comment: e.comment ?? '',
+      }
+
+      result.push(work)
+      continue
+    }
 
     if (
       e.type === TimeKind.SICK ||
       e.type === TimeKind.VAB ||
       e.type === TimeKind.VACATION
     ) {
-      result.push({
-        kind: 'ABSENCE',
+      const absence: AbsenceDayEntry = {
         id: e.id,
         date: e.date,
-        hours: Number(e.hours),
+        hours,
         type: e.type,
         comment: e.comment ?? '',
-      })
+      }
 
-      continue
+      result.push(absence)
     }
-
-    /* ========= WORK ========= */
-
-    const projectId = e.projectId ?? e.project?.id
-
-    if (!projectId) {
-      console.error(
-        '[mapToDayEntries] WORK entry without projectId:',
-        e,
-      )
-      continue
-    }
-
-    result.push({
-      kind: 'WORK',
-      id: e.id,
-      date: e.date,
-      type: TimeKind.WORK,
-      startTime: e.startTime,
-      endTime: e.endTime,
-      breakMinutes: e.breakMinutes ?? 0,
-      hours: Number(e.hours),
-      projectId,
-      project: e.project,
-      comment: e.comment ?? '',
-    })
   }
 
-  /* ================= EXTRA ================= */
-
   for (const a of assignments) {
-    if (!a.project) {
-      console.error(
-        `[mapToDayEntries] Project missing in assignment ${a.id}`,
-      )
-      continue
-    }
+    if (!a.project) continue
 
-    result.push({
-      kind: 'EXTRA',
+    const extra: ExtraDayEntry = {
       id: a.id,
       date: a.date,
-      hours: Number(a.hours),
+      hours: a.hours,
+      type: TimeKind.EXTRA,
       projectId: a.project.id,
       project: a.project,
-      comment: a.comment ?? '',
       startTime: a.startTime,
       endTime: a.endTime,
       breakMinutes: a.breakMinutes ?? 0,
-    })
+      comment: a.comment ?? '',
+    }
+
+    result.push(extra)
   }
 
   return result
@@ -317,16 +303,18 @@ watch(
 
 /* ================= HELPERS ================= */
 function isWork(e: DayEntry) {
-  return e.kind === 'WORK' || e.kind === 'EXTRA'
+  //return e.kind === 'WORK' || e.kind === 'EXTRA'
+   return e.type === TimeKind.WORK || e.type === TimeKind.EXTRA
 }
 
 function isPaidWork(e: DayEntry) {
-  return e.kind === 'EXTRA'
-    || (e.kind === 'WORK' && e.type === TimeKind.WORK)
+  //return e.kind === 'EXTRA' || (e.kind === 'WORK' && e.type === TimeKind.WORK)
+  return e.type === TimeKind.EXTRA || e.type === TimeKind.WORK
 }
 
-function isAbsence(e: DayEntry, kind: TimeKind) {
-  return e.kind === 'ABSENCE' && e.type === kind
+function isAbsence(e: DayEntry, type: TimeKind){ // kind: TimeKind) {
+  //return e.kind === 'ABSENCE' && e.type === kind
+  return e.type === type
 }
 /*
 function inCurrentPeriod(e: DayEntry): boolean {

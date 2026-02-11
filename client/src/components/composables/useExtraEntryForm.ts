@@ -8,6 +8,7 @@ import { calculateWorkedMinutes } from '../pages/components/helpers/time'
 //import type { TimeBasedForm } from '../../types/TimeBasedForm'
 //import { TimeKind } from '../../types/timeKind.enum'
 import type { ExtraForm } from '../../types/Form.types'
+import { TimeKind } from '../../types/timeKind.enum'
 
 export function useExtraEntryForm(props: {
   date: string
@@ -21,7 +22,8 @@ export function useExtraEntryForm(props: {
   const endRef = ref('17:00')
   const breakMinutesRef = ref(30)
   const commentRef = ref('')
-  const isEdit = computed(() => props.entry?.kind === 'EXTRA') //EntryState.EXTRA)
+  //const isEdit = computed(() => props.entry?.kind === 'EXTRA') //EntryState.EXTRA)
+  const isEdit = computed(() => props.entry?.type === TimeKind.EXTRA)
   const isSavingRef = ref(false)
 
   const start = computed({
@@ -56,8 +58,8 @@ export function useExtraEntryForm(props: {
   watch(
     () => props.entry,
     e => {
-      if (!e || e.kind !== 'EXTRA') return //EntryState.EXTRA) return
-
+      //if (!e || e.kind !== 'EXTRA') return //EntryState.EXTRA) return
+      if (!e || e.type !== TimeKind.EXTRA) return 
       startRef.value = normalizeTime(e.startTime ?? '08:00')
       endRef.value = normalizeTime(e.endTime ?? '17:00')
       breakMinutesRef.value = e.breakMinutes ?? 30
@@ -106,7 +108,8 @@ async function save(): Promise<DayEntry | null> {
 
     return {
       //kind: TimeKind.EXTRA,
-      kind: 'EXTRA',
+      //kind: 'EXTRA',
+      type: TimeKind.EXTRA,
       id: saved.id,
       date: saved.date,
       hours: saved.hours,
@@ -128,7 +131,9 @@ async function save(): Promise<DayEntry | null> {
   }
 
   return {
-    kind: 'EXTRA',
+    //kind: 'EXTRA',
+    //type: TimeKind.EXTRA,
+    mode: 'EXTRA',
     start,
     end,
     //breakMinutes,

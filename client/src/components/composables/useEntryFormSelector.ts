@@ -6,6 +6,7 @@ import type {
   AbsenceForm,
   ActiveForm,
 } from '../../types/Form.types'
+import { TimeKind } from '../../types/timeKind.enum'
 
 //export type ActiveForm = WorkForm | ExtraForm | AbsenceForm
 
@@ -19,9 +20,9 @@ export function useEntryFormSelector(
 ): ComputedRef<ActiveForm> {
   return computed(() => {
     switch (mode.value) {
-      case 'WORK':
+      case TimeKind.WORK:
         return forms.work
-      case 'EXTRA':
+      case TimeKind.EXTRA:
         return forms.extra
       case 'ABSENCE':
       default:
