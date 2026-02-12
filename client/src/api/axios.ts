@@ -6,18 +6,47 @@ const api = axios.create({
   withCredentials: true,
 });
 
-let isRefreshing = false
+//let isRefreshing = false
 //let refreshPromise: Promise<void> | null = null
-let refreshPromise: Promise<unknown> | null = null
+//let refreshPromise: Promise<unknown> | null = null
 
+api.interceptors.response.use(
+  response => response,
+  async error => {
+    const originalRequest = error.config
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes('/auth/refresh')
+    ) {
+      originalRequest._retry = true
+
+      try {
+        await api.post('/auth/refresh')
+        return api(originalRequest)
+      } catch (refreshError) {
+        const authStore = useAuthStore()
+        authStore.clearAuth()
+
+        window.location.href = '/login'
+
+        return Promise.reject(refreshError)
+      }
+    }
+
+    return Promise.reject(error)
+  }
+)
+/*
 api.interceptors.response.use(
   res => res,
   async error => {
     const authStore = useAuthStore()
     const originalRequest = error.config
-    if (!authStore.isAuthenticated) {
-      return Promise.reject(error)
-    }
+    //if (!authStore.isAuthenticated) {
+    //  return Promise.reject(error)
+    //}
 
     if (
       error.response?.status === 401 &&
@@ -48,7 +77,7 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-
+*/
 /*
 api.interceptors.request.use((config) => {
   const authStore = useAuthStore()

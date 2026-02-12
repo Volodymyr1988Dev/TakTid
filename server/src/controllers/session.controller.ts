@@ -69,7 +69,9 @@ export class SessionController {
   async validateToken(
     @Body() body: ValidateTokenDto,
   ): Promise<ValidateTokenResult> {
-    const result = await this.sessionService.validateToken(body.token);
+    const result = await this.sessionService
+      .validateToken(body.token)
+      .catch(() => null);
     if (!result)
       throw new HttpException(
         'Invalid or expired token',
