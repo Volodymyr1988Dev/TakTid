@@ -8,6 +8,7 @@ import AppHeader from './AppHeader.vue'
 import ProjectInfo from '../components/Projects/ProjectInfo.vue'
 import { useAuthStore } from '../stores/auth.store'
 import { useProjectNavigationStore } from '../stores/projectNavigation.store'
+import StatsPage from '../components/pages/components/StatsPage.vue'
 
 const auth = useAuthStore()
 const projectNav = useProjectNavigationStore()
@@ -42,6 +43,7 @@ const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
       :project-id="projectNav.selectedProjectId!"
       @back="projectNav.closeProject"
     />
+    <StatsPage v-else-if="bottomTab === 'stats' && isAdmin" />
     <BottomTabs
       v-model="bottomTab"
       :is-admin="isAdmin"

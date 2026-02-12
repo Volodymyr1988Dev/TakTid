@@ -16,6 +16,8 @@ import { TimeEntryModule } from './modules/timeEntry.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ProjectImagesModule } from './modules/projectImage.module';
 import { ProjectStatsModule } from './modules/projectStats.module';
+import { StatsModule } from './modules/stat.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -29,6 +31,7 @@ import { ProjectStatsModule } from './modules/projectStats.module';
     TimeEntryModule,
     ProjectImagesModule,
     ProjectStatsModule,
+    StatsModule,
   ],
 
   controllers: [AppController],
