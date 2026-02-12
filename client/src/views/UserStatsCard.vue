@@ -24,10 +24,6 @@ const open = ref(false)
         :value="stats.extraHours + ' h'"
       />
       <StatsRow
-        label="Meeting"
-        :value="stats.meetingHours + ' h'"
-      />
-      <StatsRow
         label="Sick days"
         :value="stats.sickDays"
       />

@@ -33,10 +33,6 @@ function toggle(userId: string) {
         title="Extra" 
         :value="u.extraHours + ' h'" 
       />
-      <StatsCard 
-        title="Meetings" 
-        :value="u.meetingHours + ' h'" 
-      />
 
       <StatsCard 
         title="Sick days" 
