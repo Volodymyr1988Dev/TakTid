@@ -1,33 +1,57 @@
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useStatsStore } from '../../../stores/stats.store'
 import ExcelJS from 'exceljs'
 import { saveAs } from 'file-saver'
 import jsPDF from 'jspdf'
-import html2canvas from 'html2canvas'
+import autoTable from 'jspdf-autotable'
+
+/* ================= TYPES ================= */
 
 interface Entry {
   id: string
   date: string
   type: string
   hours: number
-  startTime?: string
-  endTime?: string
-  breakMinutes?: number
   project?: { city: string; address: string }
   comment?: string
 }
 
+interface UserInfo {
+  id: string
+  name?: string   // ✅ FIX (було string)
+  email?: string
+}
+
+interface UserStats {
+  user: UserInfo
+  workHours: number
+  extraHours: number
+  sickHours: number
+  vacationHours: number
+  vabHours?: number
+  totalHours: number
+}
+
+/* ================= STATE ================= */
+
 const stats = useStatsStore()
 const expanded = ref<Record<string, boolean>>({})
 const detailsOpen = ref<Record<string, boolean>>({})
+const selectedDay = ref<Record<string, number | null>>({})
 
 const now = new Date()
 const year = ref(now.getFullYear())
 const month = ref(now.getMonth() + 1)
 
-function getDaysInMonth(year: number, month: number) {
-  return new Date(year, month, 0).getDate()
+/* ================= HELPERS ================= */
+
+function getDaysInMonth(y: number, m: number) {
+  return new Date(y, m, 0).getDate()
+}
+
+function getUserName(user: UserInfo) {
+  return user.name || user.email || 'Unknown User'
 }
 
 function buildCalendar(userId: string) {
@@ -36,40 +60,15 @@ function buildCalendar(userId: string) {
   const map: Record<number, Entry[]> = {}
 
   entries.forEach(e => {
-    const day = new Date(e.date).getDate()
-    if (!map[day]) map[day] = []
-    map[day].push(e)
+    const d = new Date(e.date).getDate()
+    if (!map[d]) map[d] = []
+    map[d].push(e)
   })
 
   return Array.from({ length: days }, (_, i) => ({
     day: i + 1,
     entries: map[i + 1] || []
   }))
-}
-
-function monthSummary(user: any) {
-  return {
-    work: user.workHours,
-    extra: user.extraHours,
-    paid: user.workHours + user.extraHours,
-    sick: user.sickHours,
-    vacation: user.vacationHours,
-    vab: user.vabHours || 0,
-    total: user.totalHours
-  }
-}
-
-async function load() {
-  await stats.loadMonth(year.value, month.value)
-  expanded.value = {}
-  detailsOpen.value = {}
-}
-
-async function loadDetails(userId: string) {
-  if (!stats.details[userId]) {
-    await stats.loadUserDetails(userId, year.value, month.value)
-  }
-  detailsOpen.value[userId] = !detailsOpen.value[userId]
 }
 
 function typeClass(type: string) {
@@ -88,27 +87,51 @@ function typeLabel(type: string) {
   return type
 }
 
+function summary(u: UserStats) {
+  return {
+    paid: u.workHours + u.extraHours,
+    work: u.workHours,
+    extra: u.extraHours,
+    sick: u.sickHours,
+    vacation: u.vacationHours,
+    vab: u.vabHours || 0,
+    total: u.totalHours
+  }
+}
+
+async function load() {
+  await stats.loadMonth(year.value, month.value)
+  expanded.value = {}
+  detailsOpen.value = {}
+}
+
 /* ================= EXCEL ================= */
 
-async function exportExcelSingle(user: any) {
+async function exportExcelSingle(user: UserStats) {
+  if (!stats.details[user.user.id]) {
+    await stats.loadUserDetails(user.user.id, year.value, month.value)
+  }
+
   const workbook = new ExcelJS.Workbook()
-  const sheet = workbook.addWorksheet(user.user.name)
+  const sheet = workbook.addWorksheet(getUserName(user.user))
+  const sum = summary(user)
 
-  const summary = monthSummary(user)
-
-  sheet.addRow([`User: ${user.user.name}`])
+  sheet.addRow([`Monthly Report`])
+  sheet.addRow([`User: ${getUserName(user.user)}`])
   sheet.addRow([`Period: ${month.value}/${year.value}`])
   sheet.addRow([])
-  sheet.addRow(['Work (Paid)', summary.paid])
-  sheet.addRow(['VAB', summary.vab])
-  sheet.addRow(['Sick', summary.sick])
-  sheet.addRow(['Vacation', summary.vacation])
-  sheet.addRow(['Total', summary.total])
+
+  sheet.addRow(['Work', sum.work])
+  sheet.addRow(['Extra Work', sum.extra])
+  sheet.addRow(['Sick', sum.sick])
+  sheet.addRow(['Vacation', sum.vacation])
+  sheet.addRow(['VAB', sum.vab])
+  sheet.addRow(['Total', sum.total])
   sheet.addRow([])
 
   sheet.addRow(['Date','Type','Hours','Project','Comment'])
 
-  stats.details[user.user.id]?.entries.forEach((e: Entry) => {
+  stats.details[user.user.id].entries.forEach((e: Entry) => {
     sheet.addRow([
       e.date,
       typeLabel(e.type),
@@ -118,89 +141,71 @@ async function exportExcelSingle(user: any) {
     ])
   })
 
-  const buffer = await workbook.xlsx.writeBuffer()
-  saveAs(new Blob([buffer]), `${user.user.name}_${month.value}_${year.value}.xlsx`)
-}
-
-async function exportExcelAll() {
-  const workbook = new ExcelJS.Workbook()
-
-  for (const user of stats.users) {
-    if (!stats.details[user.user.id]) {
-      await stats.loadUserDetails(user.user.id, year.value, month.value)
-    }
-
-    const sheet = workbook.addWorksheet(user.user.name)
-    const summary = monthSummary(user)
-
-    sheet.addRow([`User: ${user.user.name}`])
-    sheet.addRow([`Period: ${month.value}/${year.value}`])
-    sheet.addRow([])
-    sheet.addRow(['Work (Paid)', summary.paid])
-    sheet.addRow(['VAB', summary.vab])
-    sheet.addRow(['Sick', summary.sick])
-    sheet.addRow(['Vacation', summary.vacation])
-    sheet.addRow(['Total', summary.total])
-    sheet.addRow([])
-
-    sheet.addRow(['Date','Type','Hours','Project','Comment'])
-
-    stats.details[user.user.id]?.entries.forEach((e: Entry) => {
-      sheet.addRow([
-        e.date,
-        typeLabel(e.type),
-        e.hours,
-        e.project ? `${e.project.city} - ${e.project.address}` : '',
-        e.comment || ''
-      ])
+  // ✅ AUTO WIDTH
+  sheet.columns.forEach(column => {
+    let max = 12
+    column.eachCell?.({ includeEmpty: true }, cell => {
+      const len = String(cell.value ?? '').length
+      if (len > max) max = len
     })
-  }
+    column.width = max + 2
+  })
 
   const buffer = await workbook.xlsx.writeBuffer()
-  saveAs(new Blob([buffer]), `All_Users_${month.value}_${year.value}.xlsx`)
+  saveAs(new Blob([buffer]), `${getUserName(user.user)}_${month.value}_${year.value}.xlsx`)
 }
 
 /* ================= PDF ================= */
 
-async function exportPDFSingle(user: any) {
-  await nextTick()
-  const element = document.getElementById(`calendar-${user.user.id}`)
-  if (!element) return
-
-  const canvas = await html2canvas(element)
-  const imgData = canvas.toDataURL('image/png')
-  const pdf = new jsPDF()
-  pdf.text(`User: ${user.user.name}`, 10, 10)
-  pdf.addImage(imgData, 'PNG', 10, 20, 190, 0)
-
-  const summary = monthSummary(user)
-  pdf.text(`Work (Paid): ${summary.paid}`, 10, 280)
-  pdf.text(`VAB: ${summary.vab}`, 70, 280)
-  pdf.text(`Sick: ${summary.sick}`, 110, 280)
-  pdf.text(`Vacation: ${summary.vacation}`, 150, 280)
-
-  pdf.save(`${user.user.name}_${month.value}_${year.value}.pdf`)
-}
-
-async function exportPDFAll() {
-  const pdf = new jsPDF()
-
-  for (const user of stats.users) {
-    if (!stats.details[user.user.id]) {
-      await stats.loadUserDetails(user.user.id, year.value, month.value)
-    }
-
-    pdf.addPage()
-    pdf.text(`User: ${user.user.name}`, 10, 10)
-
-    const summary = monthSummary(user)
-    pdf.text(`Work (Paid): ${summary.paid}`, 10, 20)
-    pdf.text(`VAB: ${summary.vab}`, 10, 30)
-    pdf.text(`Sick: ${summary.sick}`, 10, 40)
-    pdf.text(`Vacation: ${summary.vacation}`, 10, 50)
+async function exportPDFSingle(user: UserStats) {
+  if (!stats.details[user.user.id]) {
+    await stats.loadUserDetails(user.user.id, year.value, month.value)
   }
 
-  pdf.save(`All_Users_${month.value}_${year.value}.pdf`)
+  const doc = new jsPDF()
+  const sum = summary(user)
+
+  doc.setFontSize(16)
+  doc.text('Monthly Financial Report', 14, 18)
+
+  doc.setFontSize(11)
+  doc.text(`User: ${getUserName(user.user)}`, 14, 28)
+  doc.text(`Period: ${month.value}/${year.value}`, 14, 35)
+
+  autoTable(doc, {
+    startY: 42,
+    head: [['Category', 'Hours']],
+    body: [
+      ['Work', sum.work],
+      ['Extra Work', sum.extra],
+      ['Sick', sum.sick],
+      ['Vacation', sum.vacation],
+      ['VAB', sum.vab],
+      ['TOTAL', sum.total]
+    ],
+    theme: 'grid',
+    headStyles: { fillColor: [40, 40, 40] }
+  })
+
+  const finalY =
+    (doc as jsPDF & { lastAutoTable?: { finalY: number } })
+      .lastAutoTable?.finalY || 60
+
+  autoTable(doc, {
+    startY: finalY + 10,
+    head: [['Date','Type','Hours','Project','Comment']],
+    body: stats.details[user.user.id].entries.map((e: Entry) => [
+      e.date,
+      typeLabel(e.type),
+      e.hours,
+      e.project ? `${e.project.city} - ${e.project.address}` : '',
+      e.comment || ''
+    ]),
+    theme: 'striped',
+    styles: { fontSize: 8 }
+  })
+
+  doc.save(`${getUserName(user.user)}_${month.value}_${year.value}.pdf`)
 }
 
 onMounted(load)
@@ -213,36 +218,38 @@ onMounted(load)
     <input v-model="year" type="number" />
     <input v-model="month" type="number" min="1" max="12" />
     <button @click="load">Load</button>
-    <button @click="exportExcelAll">Export All Excel</button>
-    <button @click="exportPDFAll">Export All PDF</button>
   </div>
 
   <div v-for="u in stats.users" :key="u.user.id" class="user-card">
+
     <div class="header" @click="expanded[u.user.id] = !expanded[u.user.id]">
       <div>
-        <strong>{{ u.user.name }}</strong><br/>
-        Work: {{ u.workHours }} h |
-        Extra: {{ u.extraHours }} h |
-        Paid Work: {{ u.workHours + u.extraHours }} h |
-        Sick: {{ u.sickHours }} h |
-        Vacation: {{ u.vacationHours }} h |
-        VAB: {{ u.vabHours || 0 }} h
+        <strong>{{ getUserName(u.user) }}</strong><br/>
+        Work: {{ u.workHours }}h |
+        Extra: {{ u.extraHours }}h |
+        Sick: {{ u.sickHours }}h |
+        Vacation: {{ u.vacationHours }}h |
+        VAB: {{ u.vabHours || 0 }}h
       </div>
       <div>{{ u.totalHours }} h</div>
     </div>
 
-    <div v-if="expanded[u.user.id]" class="details">
-      <button @click.stop="loadDetails(u.user.id)">
-        {{ detailsOpen[u.user.id] ? 'Hide details' : 'More details' }}
+    <div v-if="expanded[u.user.id]">
+
+      <button @click="detailsOpen[u.user.id] = !detailsOpen[u.user.id]">
+        Details
       </button>
 
-      <div
-        v-if="detailsOpen[u.user.id] && stats.details[u.user.id]"
-        class="calendar-grid-wrapper"
-        :id="`calendar-${u.user.id}`"
-      >
+      <div v-if="detailsOpen[u.user.id] && stats.details[u.user.id]">
+
+        <!-- CALENDAR -->
         <div class="calendar-grid">
-          <div v-for="day in buildCalendar(u.user.id)" :key="day.day" class="calendar-cell">
+          <div
+            v-for="day in buildCalendar(u.user.id)"
+            :key="day.day"
+            class="calendar-cell"
+            @click="selectedDay[u.user.id] = day.day"
+          >
             <div class="day-number">{{ day.day }}</div>
 
             <div
@@ -254,7 +261,33 @@ onMounted(load)
             >
               {{ typeLabel(e.type) }} ({{ e.hours }}h)
             </div>
+          </div>
+        </div>
 
+        <!-- MOBILE TAP INFO -->
+        <div v-if="selectedDay[u.user.id]" class="mobile-info">
+          <div
+            v-for="e in buildCalendar(u.user.id)
+              .find(d => d.day === selectedDay[u.user.id])?.entries"
+            :key="e.id"
+          >
+            <strong>{{ e.date }}</strong> —
+            {{ e.project?.city }} {{ e.project?.address }} —
+            {{ e.comment }}
+          </div>
+        </div>
+
+        <!-- LIST BELOW CALENDAR -->
+        <div class="details-list">
+          <div
+            v-for="e in stats.details[u.user.id].entries"
+            :key="e.id"
+          >
+            {{ e.date }} —
+            {{ typeLabel(e.type) }} —
+            {{ e.hours }}h —
+            {{ e.project?.city }} {{ e.project?.address }} —
+            {{ e.comment }}
           </div>
         </div>
 
@@ -272,15 +305,15 @@ onMounted(load)
 <style scoped>
 .stats-page { padding:24px; max-width:1200px; margin:auto; }
 .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
-.calendar-cell { border:1px solid #eee; border-radius:8px; padding:6px; min-height:90px; }
+.calendar-cell { border:1px solid #eee; border-radius:8px; padding:6px; min-height:90px; cursor:pointer; }
 .day-number { font-weight:bold; margin-bottom:4px; }
 
 .entry-badge {
   font-size:11px;
   padding:4px 6px;
   border-radius:50px;
-  color:white;
   margin-bottom:4px;
+  color:white;
 }
 
 .badge.work { background:#2ecc71; }
@@ -288,6 +321,22 @@ onMounted(load)
 .badge.sick { background:#e74c3c; }
 .badge.vacation { background:#3498db; }
 .badge.vab { background:#9b59b6; }
+
+.mobile-info {
+  margin-top:10px;
+  padding:10px;
+  background:#f8f8f8;
+  border-radius:8px;
+}
+
+.details-list {
+  margin-top:15px;
+  font-size:13px;
+  border-top:1px solid #eee;
+  padding-top:10px;
+}
+
+.export-buttons { margin-top:15px; display:flex; gap:10px; }
 
 .user-card {
   border:1px solid #eee;
