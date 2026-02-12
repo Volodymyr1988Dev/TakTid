@@ -6,7 +6,7 @@ import { saveAs } from 'file-saver'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 
-// Тип для entry
+// Тип для одного запису
 interface Entry {
   id: string
   date: string
@@ -31,16 +31,18 @@ const now = new Date()
 const year = ref(now.getFullYear())
 const month = ref(now.getMonth() + 1)
 
-function getDaysInMonth(year: number, month: number): number {
+// Повертає кількість днів у місяці
+function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate()
 }
 
+// Формує календар із записами по днях
 function buildCalendar(userId: string) {
   const days = getDaysInMonth(year.value, month.value)
   const entries: Entry[] = stats.details[userId]?.entries || []
   const map: Record<number, Entry[]> = {}
 
-  entries.forEach((e: Entry) => {
+  entries.forEach((e) => {
     const day = new Date(e.date).getDate()
     if (!map[day]) map[day] = []
     map[day].push(e)
@@ -66,7 +68,14 @@ async function loadDetails(userId: string) {
 }
 
 function typeClass(type: string) {
-  return `badge ${type.toLowerCase()}`
+  switch (type) {
+    case 'WORK': return 'badge work'
+    case 'EXTRA_WORK': return 'badge extra'
+    case 'SICK': return 'badge sick'
+    case 'VACATION': return 'badge vacation'
+    case 'VAB': return 'badge vab'
+    default: return 'badge'
+  }
 }
 
 /* =======================
@@ -89,7 +98,7 @@ async function exportExcel(userId: string) {
     { header: 'Comment', key: 'comment', width: 30 }
   ]
 
-  entries.forEach((e: Entry) => {
+  entries.forEach((e) => {
     worksheet.addRow({
       date: e.date,
       type: e.type,
@@ -103,10 +112,7 @@ async function exportExcel(userId: string) {
   })
 
   const buffer = await workbook.xlsx.writeBuffer()
-  saveAs(
-    new Blob([buffer]),
-    `stats_${userId}_${year.value}_${month.value}.xlsx`
-  )
+  saveAs(new Blob([buffer]), `stats_${userId}_${year.value}_${month.value}.xlsx`)
 }
 
 /* =======================
@@ -114,7 +120,6 @@ async function exportExcel(userId: string) {
 ======================= */
 async function exportPDF(userId: string) {
   await nextTick()
-
   const element = document.getElementById(`calendar-${userId}`)
   if (!element) return
 
@@ -135,26 +140,16 @@ onMounted(load)
 <template>
   <div class="stats-page">
     <div class="controls">
-      <input
-        v-model="year"
-        type="number"
-      >
-      <input
-        v-model="month"
-        type="number"
-        min="1"
-        max="12"
-      >
+      <input v-model="year" type="number" />
+      <input v-model="month" type="number" min="1" max="12" />
       <button @click="load">Load</button>
     </div>
 
-    <div v-if="stats.loading">Loading...</div>
+    <div v-if="stats.loading" class="loading">Loading...</div>
 
-    <div
-      v-for="u in stats.users"
-      :key="u.user.id"
-      class="user-card"
-    >
+    <div v-for="u in stats.users" :key="u.user.id" class="user-card">
+
+      <!-- HEADER -->
       <div class="header" @click="expanded[u.user.id] = !expanded[u.user.id]">
         <div>
           <strong>{{ u.user.name }}</strong>
@@ -163,6 +158,7 @@ onMounted(load)
         <div class="total">{{ u.totalHours }} h</div>
       </div>
 
+      <!-- SUMMARY -->
       <div v-if="expanded[u.user.id]" class="details">
         <div class="summary-grid">
           <div>Work: {{ u.workHours }} h</div>
@@ -171,17 +167,15 @@ onMounted(load)
           <div>Vacation: {{ u.vacationHours }} h</div>
         </div>
 
-        <button
-          class="more-btn"
-          @click.stop="loadDetails(u.user.id)"
-        >
+        <button class="more-btn" @click.stop="loadDetails(u.user.id)">
           {{ detailsOpen[u.user.id] ? 'Hide details' : 'More details' }}
         </button>
 
+        <!-- CALENDAR DETAILS -->
         <div
           v-if="detailsOpen[u.user.id] && stats.details[u.user.id]"
-          :id="`calendar-${u.user.id}`"
           class="calendar-grid-wrapper"
+          :id="`calendar-${u.user.id}`"
         >
           <div class="calendar-grid">
             <div
@@ -194,16 +188,30 @@ onMounted(load)
               <div
                 v-for="e in day.entries"
                 :key="e.id"
-                :class="typeClass(e.type)"
-                class="entry-badge"
+                class="entry-block"
               >
-                {{ e.type }} ({{ e.hours }}h)
+                <div :class="typeClass(e.type)">
+                  {{ e.type }} ({{ e.hours }}h)
+                </div>
+
+                <div class="entry-details">
+                  <div v-if="e.startTime && e.endTime">
+                    {{ e.startTime }} - {{ e.endTime }}
+                    (break: {{ e.breakMinutes ?? 0 }}m)
+                  </div>
+                  <div v-if="e.project">
+                    {{ e.project.city }} – {{ e.project.address }}
+                  </div>
+                  <div v-if="e.comment" class="comment">
+                    "{{ e.comment }}"
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <div v-if="!stats.details[u.user.id].entries.length" class="empty">
-            No entries
+            No entries for this period
           </div>
 
           <div class="export-buttons">
@@ -211,6 +219,7 @@ onMounted(load)
             <button @click="exportPDF(u.user.id)">Export PDF</button>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -256,11 +265,20 @@ onMounted(load)
 
 .day-number { font-weight: bold; margin-bottom: 6px; }
 
-.entry-badge {
-  font-size: 11px;
+.entry-block { margin-bottom: 6px; }
+
+.entry-details { margin-left: 6px; font-size: 12px; color: #444; }
+
+.comment { font-style: italic; color: #666; }
+
+.empty { margin-top: 12px; color: #999; }
+
+.badge {
+  display: inline-block;
   padding: 2px 6px;
-  margin-bottom: 4px;
   border-radius: 6px;
+  font-size: 11px;
+  margin-bottom: 2px;
   color: white;
 }
 
@@ -282,6 +300,4 @@ button {
 }
 
 button:hover { opacity: 0.9; }
-
-.empty { margin-top: 12px; color: #999; }
 </style>
