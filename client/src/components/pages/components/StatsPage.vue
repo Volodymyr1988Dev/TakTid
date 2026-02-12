@@ -128,8 +128,8 @@ async function exportAllExcel() {
     sheet.addRow([`Period: ${month.value}/${year.value}`])
     sheet.addRow([])
 
-    sheet.addRow(['Work', sum.work])
-    sheet.addRow(['Extra Work', sum.extra])
+    sheet.addRow(['Work', sum.work + sum.extra])
+    //sheet.addRow(['Extra Work', sum.extra])
     sheet.addRow(['Sick', sum.sick])
     sheet.addRow(['Vacation', sum.vacation])
     sheet.addRow(['VAB', sum.vab])
@@ -167,8 +167,8 @@ async function exportExcelSingle(user: UserStats) {
   sheet.addRow([`Period: ${month.value}/${year.value}`])
   sheet.addRow([])
 
-  sheet.addRow(['Work', sum.work])
-  sheet.addRow(['Extra Work', sum.extra])
+  sheet.addRow(['Work', sum.work + sum.extra])
+  //sheet.addRow(['Extra Work', sum.extra])
   sheet.addRow(['Sick', sum.sick])
   sheet.addRow(['Vacation', sum.vacation])
   sheet.addRow(['VAB', sum.vab])
