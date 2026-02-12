@@ -278,9 +278,16 @@ async function exportAllPDF() {
         ['Total', sum.total]
       ]
     })
-
+    const finalY =
+        (doc as jsPDF & { lastAutoTable?: { finalY: number } })
+            .lastAutoTable?.finalY ?? 30
     autoTable(doc, {
-      startY: (doc as any).lastAutoTable.finalY + 10,
+      //startY: (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY + 10,
+      //const finalY =
+      //  (doc as jsPDF & { lastAutoTable?: { finalY: number } })
+      //      .lastAutoTable?.finalY ?? 30
+
+      startY: finalY + 10,
       head: [['Date','Type','Hours','Project','Comment']],
       body: stats.details[user.user.id].entries.map((e: Entry) => [
         e.date,
@@ -300,96 +307,130 @@ onMounted(load)
 </script>
 
 <template>
-<div class="stats-page">
-
-  <div class="controls">
-    <input v-model="year" type="number" />
-    <input v-model="month" type="number" min="1" max="12" />
-    <button @click="load">Load</button>
-    <button @click="exportAllExcel">Export Excel</button>
-    <button @click="exportAllPDF">Export PDF</button>
-  </div>
-
-  <div v-for="u in stats.users" :key="u.user.id" class="user-card">
-
-    <div class="header" @click="expanded[u.user.id] = !expanded[u.user.id]">
-      <div>
-        <strong>{{ getUserName(u.user) }}</strong><br/>
-        Work: {{ u.workHours }}h |
-        Extra: {{ u.extraHours }}h |
-        Sick: {{ u.sickHours }}h |
-        Vacation: {{ u.vacationHours }}h |
-        VAB: {{ u.vabHours || 0 }}h
-      </div>
-      <div>{{ u.totalHours }} h</div>
+  <div class="stats-page">
+    <div class="controls">
+      <input 
+        v-model="year" 
+        type="number" 
+      >
+      <input 
+        v-model="month" 
+        type="number" 
+        min="1" 
+        max="12" 
+      >
+      <button @click="load">
+        Load
+      </button>
+      <button @click="exportAllExcel">
+        Export Excel
+      </button>
+      <button @click="exportAllPDF">
+        Export PDF
+      </button>
     </div>
 
-    <div v-if="expanded[u.user.id]">
+    <div 
+      v-for="u in stats.users" 
+      :key="u.user.id" 
+      class="user-card"
+    >
+      <div 
+        class="header" 
+        @click="expanded[u.user.id] = !expanded[u.user.id]"
+      >
+        <div>
+          <strong>{{ getUserName(u.user) }}
+          </strong>
+          <br>
+          Work: {{ u.workHours }}h |
+          Extra: {{ u.extraHours }}h |
+          Sick: {{ u.sickHours }}h |
+          Vacation: {{ u.vacationHours }}h |
+          VAB: {{ u.vabHours || 0 }}h
+        </div>
+        <div>{{ u.totalHours }} h</div>
+      </div>
 
-      <button @click="toggleDetails(u.user.id)">
-        {{ detailsOpen[u.user.id] ? 'Hide Details' : 'Details' }}
-      </button>
+      <div 
+        v-if="expanded[u.user.id]"
+      >
+        <button @click="toggleDetails(u.user.id)">
+          {{ detailsOpen[u.user.id] ? 'Hide Details' : 'Details' }}
+        </button>
 
-      <div v-if="detailsOpen[u.user.id] && stats.details[u.user.id]" class="details-list">
-
-        <!-- CALENDAR -->
-        <div class="calendar-grid">
-          <div
-            v-for="day in buildCalendar(u.user.id)"
-            :key="day.day"
-            class="calendar-cell"
-            @click="selectedDay[u.user.id] = day.day"
+        <div 
+          v-if="detailsOpen[u.user.id] && stats.details[u.user.id]" 
+          class="details-list"
+        >
+          <div 
+            class="calendar-grid"
           >
-            <div class="day-number">{{ day.day }}</div>
-
             <div
-              v-for="e in day.entries"
-              :key="e.id"
-              :class="typeClass(e.type)"
-              class="entry-badge"
-              :title="`${e.project?.city || ''} ${e.project?.address || ''} ${e.comment || ''}`"
+              v-for="day in buildCalendar(u.user.id)"
+              :key="day.day"
+              class="calendar-cell"
+              @click="selectedDay[u.user.id] = day.day"
             >
-              {{ typeLabel(e.type) }} ({{ e.hours }}h)
+              <div class="day-number">
+                {{ day.day }}
+              </div>
+
+              <div
+                v-for="e in day.entries"
+                :key="e.id"
+                :class="typeClass(e.type)"
+                class="entry-badge"
+                :title="`${e.project?.city || ''} ${e.project?.address || ''} ${e.comment || ''}`"
+              >
+                {{ typeLabel(e.type) }} ({{ e.hours }}h)
+              </div>
             </div>
           </div>
-        </div>
-
-        <!-- MOBILE TAP INFO -->
-        <div v-if="selectedDay[u.user.id]" class="mobile-info">
-          <div
-            v-for="e in buildCalendar(u.user.id)
-              .find(d => d.day === selectedDay[u.user.id])?.entries"
-            :key="e.id"
+          <!-- MOBILE TAP INFO -->
+          <div 
+            v-if="selectedDay[u.user.id]" 
+            class="mobile-info"
           >
-            <strong>{{ e.date }}</strong> —
-            {{ e.project?.city }} {{ e.project?.address }} —
-            {{ e.comment }}
+            <div
+              v-for="e in buildCalendar(u.user.id)
+                .find(d => d.day === selectedDay[u.user.id])?.entries"
+              :key="e.id"
+            >
+              <strong>{{ e.date }}</strong> —
+              {{ e.project?.city }} {{ e.project?.address }} —
+              {{ e.comment }}
+            </div>
+          </div>
+
+          <!-- LIST BELOW CALENDAR -->
+          <div class="details-list">
+            <div
+              v-for="e in stats.details[u.user.id].entries"
+              :key="e.id"
+            >
+              {{ e.date }} —
+              {{ typeLabel(e.type) }} —
+              {{ e.hours }}h —
+              {{ e.project?.city }} {{ e.project?.address }} —
+              {{ e.comment }}
+            </div>
+          </div>
+
+          <div class="export-buttons">
+            <button @click="exportExcelSingle(u)">
+              Excel
+            </button>
+            <button 
+              @click="exportPDFSingle(u)"
+            >
+              PDF
+            </button>
           </div>
         </div>
-
-        <!-- LIST BELOW CALENDAR -->
-        <div class="details-list">
-          <div
-            v-for="e in stats.details[u.user.id].entries"
-            :key="e.id"
-          >
-            {{ e.date }} —
-            {{ typeLabel(e.type) }} —
-            {{ e.hours }}h —
-            {{ e.project?.city }} {{ e.project?.address }} —
-            {{ e.comment }}
-          </div>
-        </div>
-
-        <div class="export-buttons">
-          <button @click="exportExcelSingle(u)">Excel</button>
-          <button @click="exportPDFSingle(u)">PDF</button>
-        </div>
-
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <style scoped>
