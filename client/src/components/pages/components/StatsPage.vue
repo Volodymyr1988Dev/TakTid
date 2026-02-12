@@ -222,8 +222,8 @@ async function exportPDFSingle(user: UserStats) {
     startY: 42,
     head: [['Category', 'Hours']],
     body: [
-      ['Work', sum.work],
-      ['Extra Work', sum.extra],
+      ['Work', sum.work + sum.extra],
+      //['Extra Work', sum.extra],
       ['Sick', sum.sick],
       ['Vacation', sum.vacation],
       ['VAB', sum.vab],
@@ -270,8 +270,8 @@ async function exportAllPDF() {
       startY: 25,
       head: [['Category','Hours']],
       body: [
-        ['Work', sum.work],
-        ['Extra Work', sum.extra],
+        ['Work', sum.work + sum.extra],
+        //['Extra Work', sum.extra],
         ['Sick', sum.sick],
         ['Vacation', sum.vacation],
         ['VAB', sum.vab],
