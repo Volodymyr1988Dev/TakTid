@@ -39,6 +39,86 @@ export class StatsService {
     return this.aggregate(timeEntries, extraEntries);
   }
 
+  async getUserMonthDetails(userId: string, year: number, month: number) {
+    const from = new Date(year, month - 1, 1);
+    const to = new Date(year, month, 0, 23, 59, 59);
+
+    const fromStr = from.toISOString().slice(0, 10);
+    const toStr = to.toISOString().slice(0, 10);
+
+    const timeEntries = await this.timeRepo.find({
+      where: {
+        user: { id: userId },
+        date: Between(fromStr, toStr),
+      },
+      relations: ['project', 'user'],
+      order: { date: 'ASC' },
+    });
+
+    const extraEntries = await this.assignmentRepo.find({
+      where: {
+        user: { id: userId },
+        date: Between(fromStr, toStr),
+      },
+      relations: ['project', 'user'],
+      order: { date: 'ASC' },
+    });
+
+    const user = timeEntries[0]?.user ?? extraEntries[0]?.user;
+
+    if (!user) {
+      return null;
+    }
+
+    const entries = [
+      ...timeEntries.map((e) => ({
+        id: e.id,
+        date: e.date,
+        type: e.type,
+        hours: e.hours,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        breakMinutes: e.breakMinutes,
+        comment: e.comment,
+        project: e.project
+          ? {
+              id: e.project.id,
+              city: e.project.city,
+              address: e.project.address,
+            }
+          : null,
+        source: 'TIME_ENTRY' as const,
+      })),
+      ...extraEntries.map((e) => ({
+        id: e.id,
+        date: e.date,
+        type: 'EXTRA_WORK',
+        hours: e.hours,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        breakMinutes: e.breakMinutes,
+        comment: e.comment,
+        project: e.project
+          ? {
+              id: e.project.id,
+              city: e.project.city,
+              address: e.project.address,
+            }
+          : null,
+        source: 'EXTRA_WORK' as const,
+      })),
+    ].sort((a, b) => a.date.localeCompare(b.date));
+
+    return {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+      entries,
+    };
+  }
+
   private aggregate(
     timeEntries: TimeEntry[],
     extraEntries: ProjectAssignment[],

@@ -13,3 +13,16 @@ export async function getMonthStats(
 
   return data
 }
+
+export async function getUserMonthDetails(
+  userId: string,
+  year: number,
+  month: number,
+) {
+  const { data } = await api.get(
+    `/stats/month/${userId}`,
+    { params: { year, month } },
+  );
+
+  return data;
+}

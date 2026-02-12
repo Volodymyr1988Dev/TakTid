@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Param } from '@nestjs/common';
 import { StatsService } from '../services/StatService';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -10,5 +10,14 @@ export class StatsController {
   @Get('month')
   getMonth(@Query('year') year: number, @Query('month') month: number) {
     return this.statsService.getMonthStats(+year, +month);
+  }
+
+  @Get('month/:userId')
+  getUserDetails(
+    @Query('year') year: number,
+    @Query('month') month: number,
+    @Param('userId') userId: string,
+  ) {
+    return this.statsService.getUserMonthDetails(userId, +year, +month);
   }
 }
