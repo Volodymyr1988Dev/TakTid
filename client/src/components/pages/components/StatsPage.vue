@@ -6,7 +6,6 @@ import { saveAs } from 'file-saver'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 
-// Тип для одного запису
 interface Entry {
   id: string
   date: string
@@ -15,15 +14,11 @@ interface Entry {
   startTime?: string
   endTime?: string
   breakMinutes?: number
-  project?: {
-    city: string
-    address: string
-  }
+  project?: { city: string; address: string }
   comment?: string
 }
 
 const stats = useStatsStore()
-
 const expanded = ref<Record<string, boolean>>({})
 const detailsOpen = ref<Record<string, boolean>>({})
 
@@ -31,18 +26,16 @@ const now = new Date()
 const year = ref(now.getFullYear())
 const month = ref(now.getMonth() + 1)
 
-// Повертає кількість днів у місяці
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate()
 }
 
-// Формує календар із записами по днях
 function buildCalendar(userId: string) {
   const days = getDaysInMonth(year.value, month.value)
   const entries: Entry[] = stats.details[userId]?.entries || []
   const map: Record<number, Entry[]> = {}
 
-  entries.forEach((e) => {
+  entries.forEach(e => {
     const day = new Date(e.date).getDate()
     if (!map[day]) map[day] = []
     map[day].push(e)
@@ -68,22 +61,14 @@ async function loadDetails(userId: string) {
 }
 
 function typeClass(type: string) {
-  switch (type) {
-    case 'WORK': return 'badge work'
-    case 'EXTRA_WORK': return 'badge extra'
-    case 'SICK': return 'badge sick'
-    case 'VACATION': return 'badge vacation'
-    case 'VAB': return 'badge vab'
-    default: return 'badge'
-  }
+  return type === 'EXTRA_WORK' || type === 'WORK'
+    ? 'badge work'
+    : `badge ${type.toLowerCase()}`
 }
 
-/* =======================
-   EXCEL EXPORT
-======================= */
+/* EXCEL EXPORT */
 async function exportExcel(userId: string) {
   const entries: Entry[] = stats.details[userId]?.entries || []
-
   const workbook = new ExcelJS.Workbook()
   const worksheet = workbook.addWorksheet('Stats')
 
@@ -98,7 +83,7 @@ async function exportExcel(userId: string) {
     { header: 'Comment', key: 'comment', width: 30 }
   ]
 
-  entries.forEach((e) => {
+  entries.forEach(e => {
     worksheet.addRow({
       date: e.date,
       type: e.type,
@@ -115,21 +100,16 @@ async function exportExcel(userId: string) {
   saveAs(new Blob([buffer]), `stats_${userId}_${year.value}_${month.value}.xlsx`)
 }
 
-/* =======================
-   PDF EXPORT
-======================= */
+/* PDF EXPORT */
 async function exportPDF(userId: string) {
   await nextTick()
   const element = document.getElementById(`calendar-${userId}`)
   if (!element) return
-
   const canvas = await html2canvas(element)
   const imgData = canvas.toDataURL('image/png')
-
   const pdf = new jsPDF('p', 'mm', 'a4')
   const imgWidth = 190
   const imgHeight = (canvas.height * imgWidth) / canvas.width
-
   pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight)
   pdf.save(`stats_${userId}_${year.value}_${month.value}.pdf`)
 }
@@ -148,8 +128,6 @@ onMounted(load)
     <div v-if="stats.loading" class="loading">Loading...</div>
 
     <div v-for="u in stats.users" :key="u.user.id" class="user-card">
-
-      <!-- HEADER -->
       <div class="header" @click="expanded[u.user.id] = !expanded[u.user.id]">
         <div>
           <strong>{{ u.user.name }}</strong>
@@ -158,7 +136,6 @@ onMounted(load)
         <div class="total">{{ u.totalHours }} h</div>
       </div>
 
-      <!-- SUMMARY -->
       <div v-if="expanded[u.user.id]" class="details">
         <div class="summary-grid">
           <div>Work: {{ u.workHours }} h</div>
@@ -171,7 +148,6 @@ onMounted(load)
           {{ detailsOpen[u.user.id] ? 'Hide details' : 'More details' }}
         </button>
 
-        <!-- CALENDAR DETAILS -->
         <div
           v-if="detailsOpen[u.user.id] && stats.details[u.user.id]"
           class="calendar-grid-wrapper"
@@ -184,34 +160,29 @@ onMounted(load)
               class="calendar-cell"
             >
               <div class="day-number">{{ day.day }}</div>
-
               <div
                 v-for="e in day.entries"
                 :key="e.id"
-                class="entry-block"
+                :class="typeClass(e.type)"
+                class="entry-badge"
+                :title="`${e.hours}h`"
               >
-                <div :class="typeClass(e.type)">
-                  {{ e.type }} ({{ e.hours }}h)
-                </div>
-
-                <div class="entry-details">
-                  <div v-if="e.startTime && e.endTime">
-                    {{ e.startTime }} - {{ e.endTime }}
-                    (break: {{ e.breakMinutes ?? 0 }}m)
-                  </div>
-                  <div v-if="e.project">
-                    {{ e.project.city }} – {{ e.project.address }}
-                  </div>
-                  <div v-if="e.comment" class="comment">
-                    "{{ e.comment }}"
-                  </div>
-                </div>
+                {{ e.type === 'EXTRA_WORK' ? 'Work' : e.type }} ({{ e.hours }}h)
               </div>
             </div>
           </div>
 
-          <div v-if="!stats.details[u.user.id].entries.length" class="empty">
-            No entries for this period
+          <!-- Деталі під календарем -->
+          <div class="entry-details-list">
+            <div
+              v-for="e in stats.details[u.user.id].entries"
+              :key="e.id"
+              class="entry-detail"
+            >
+              <div><strong>{{ e.date }}:</strong> {{ e.type }} - {{ e.hours }}h</div>
+              <div v-if="e.project">{{ e.project.city }} – {{ e.project.address }}</div>
+              <div v-if="e.comment" class="comment">"{{ e.comment }}"</div>
+            </div>
           </div>
 
           <div class="export-buttons">
@@ -219,7 +190,6 @@ onMounted(load)
             <button @click="exportPDF(u.user.id)">Export PDF</button>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -227,7 +197,6 @@ onMounted(load)
 
 <style scoped>
 .stats-page { padding: 24px; max-width: 1100px; margin: auto; }
-
 .controls { display: flex; gap: 12px; margin-bottom: 24px; }
 
 .user-card {
@@ -240,7 +209,6 @@ onMounted(load)
 }
 
 .header { display: flex; justify-content: space-between; cursor: pointer; }
-
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -265,31 +233,30 @@ onMounted(load)
 
 .day-number { font-weight: bold; margin-bottom: 6px; }
 
-.entry-block { margin-bottom: 6px; }
-
-.entry-details { margin-left: 6px; font-size: 12px; color: #444; }
-
-.comment { font-style: italic; color: #666; }
-
-.empty { margin-top: 12px; color: #999; }
-
-.badge {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 6px;
+.entry-badge {
   font-size: 11px;
-  margin-bottom: 2px;
+  padding: 2px 6px;
+  margin-bottom: 4px;
+  border-radius: 6px;
   color: white;
+  cursor: default;
 }
 
 .badge.work { background: #2ecc71; }
-.badge.extra_work { background: #f39c12; }
+.badge.extra_work { background: #2ecc71; }
 .badge.sick { background: #e74c3c; }
 .badge.vacation { background: #3498db; }
 .badge.vab { background: #9b59b6; }
 
-.export-buttons { margin-top: 16px; display: flex; gap: 12px; }
+.entry-details-list {
+  margin-top: 12px;
+  padding: 8px;
+  border-top: 1px solid #ddd;
+}
+.entry-detail { margin-bottom: 8px; font-size: 13px; }
+.comment { font-style: italic; color: #666; }
 
+.export-buttons { margin-top: 16px; display: flex; gap: 12px; }
 button {
   padding: 6px 12px;
   border-radius: 6px;
@@ -298,6 +265,5 @@ button {
   background: #2c3e50;
   color: white;
 }
-
 button:hover { opacity: 0.9; }
 </style>
