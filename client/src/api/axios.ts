@@ -15,10 +15,15 @@ api.interceptors.response.use(
   async error => {
     const originalRequest = error.config
 
+    const isAuthRoute =
+      originalRequest.url.includes('/auth/login') ||
+      originalRequest.url.includes('/auth/register') ||
+      originalRequest.url.includes('/auth/refresh')
+
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url.includes('/auth/refresh')
+      !isAuthRoute
     ) {
       originalRequest._retry = true
 
@@ -28,9 +33,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         const authStore = useAuthStore()
         authStore.clearAuth()
-
         window.location.href = '/login'
-
         return Promise.reject(refreshError)
       }
     }

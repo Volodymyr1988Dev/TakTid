@@ -39,8 +39,8 @@ export class ProjectAssignmentService {
       throw new NotFoundException('User not found');
     }
 
-    console.log('[CREATE ASSIGNMENT DTO]', dto);
-    console.log('[USER]', user.id);
+    //console.log('[CREATE ASSIGNMENT DTO]', dto);
+    //console.log('[USER]', user.id);
 
     const project = await this.projectRepo.findOne({
       where: { id: dto.projectId },
