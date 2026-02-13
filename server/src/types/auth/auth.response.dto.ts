@@ -3,11 +3,11 @@ import { User } from '../../entities/User/User';
 
 export class AuthResponseDto {
   @ApiProperty({ example: 'User registered successfully' })
-  message: string;
+  message!: string;
 
   @ApiProperty({ example: '2025-02-02T10:00:00Z' })
-  expiresAt: string;
+  expiresAt!: string;
 
   @ApiProperty({ type: () => User })
-  user: User;
+  user!: User;
 }
