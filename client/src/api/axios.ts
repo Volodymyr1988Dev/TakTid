@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '../stores/auth.store';
 
 const api = axios.create({
@@ -6,40 +6,72 @@ const api = axios.create({
   withCredentials: true,
 });
 
-//let isRefreshing = false
-//let refreshPromise: Promise<void> | null = null
+let isRefreshing = false
+let refreshPromise: Promise<void> | null = null
 //let refreshPromise: Promise<unknown> | null = null
 
 api.interceptors.response.use(
   response => response,
-  async error => {
-    const originalRequest = error.config
+  async (error: AxiosError) => {
+    const authStore = useAuthStore()
 
-    const isAuthRoute =
-      originalRequest.url.includes('/auth/login') ||
-      originalRequest.url.includes('/auth/register') ||
-      originalRequest.url.includes('/auth/refresh')
+    const originalRequest = error.config as
+      | (InternalAxiosRequestConfig & { _retry?: boolean })
+      | undefined
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      !isAuthRoute
-    ) {
-      originalRequest._retry = true
-
-      try {
-        await api.post('/auth/refresh')
-        return api(originalRequest)
-      } catch (refreshError) {
-        const authStore = useAuthStore()
-        authStore.clearAuth()
-        window.location.href = '/login'
-        return Promise.reject(refreshError)
-      }
+    if (!originalRequest) {
+      return Promise.reject(error)
     }
 
-    return Promise.reject(error)
-  }
+    const requestUrl = originalRequest.url ?? ''
+
+    const publicRoutes = [
+      '/auth/login',
+      '/auth/register',
+      '/auth/refresh',
+    ]
+
+    const isPublicRoute = publicRoutes.some(route =>
+      requestUrl.includes(route),
+    )
+
+    if (isPublicRoute) {
+      return Promise.reject(error)
+    }
+
+    if (error.response?.status !== 401) {
+      return Promise.reject(error)
+    }
+
+    if (originalRequest._retry) {
+      authStore.clearAuth()
+      window.location.href = '/login'
+      return Promise.reject(error)
+    }
+
+    originalRequest._retry = true
+
+    try {
+      if (!isRefreshing) {
+        isRefreshing = true
+        refreshPromise = api
+          .post('/auth/refresh')
+          .then(() => {})
+          .finally(() => {
+            isRefreshing = false
+            refreshPromise = null
+          })
+      }
+
+      await refreshPromise
+
+      return api(originalRequest)
+    } catch (refreshError) {
+      authStore.clearAuth()
+      window.location.href = '/login'
+      return Promise.reject(refreshError)
+    }
+  },
 )
 /*
 api.interceptors.response.use(
