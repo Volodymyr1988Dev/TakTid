@@ -27,10 +27,18 @@ export class ProjectAssignmentService {
 
   async create(
     dto: CreateProjectAssignmentDto,
-    user: User,
+    //user: User,
+    userId: string,
   ): Promise<ProjectAssignment> {
     //const user = await this.userRepo.findOne({ where: { id: dto.userId } });
     //if (!user) throw new NotFoundException('User not found');
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
     console.log('[CREATE ASSIGNMENT DTO]', dto);
     console.log('[USER]', user.id);
 
@@ -44,6 +52,9 @@ export class ProjectAssignmentService {
       dto.endTime,
       dto.breakMinutes,
     );
+    if (!dto.projectId) {
+      throw new BadRequestException('WORK entry requires projectId');
+    }
     const assignment = this.assignmentRepo.create({
       user,
       project,
@@ -54,9 +65,6 @@ export class ProjectAssignmentService {
       breakMinutes: dto.breakMinutes,
       hours,
     });
-    if (!dto.projectId) {
-      throw new BadRequestException('WORK entry requires projectId');
-    }
 
     //return this.assignmentRepo.save(assignment);
     try {

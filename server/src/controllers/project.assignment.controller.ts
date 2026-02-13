@@ -26,7 +26,7 @@ export class ProjectAssignmentController {
     if (!req.user) {
       throw new Error('Unauthorized');
     }
-    return this.assignmentService.create(dto, req.user);
+    return this.assignmentService.create(dto, req.user.id);
   }
 
   @Patch(':id')

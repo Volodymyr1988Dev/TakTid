@@ -81,6 +81,14 @@ export class SessionService {
     }
   }
 */
+
+  async findByToken(token: string): Promise<Session | null> {
+    return this.sessionRepository.findOne({
+      where: { token },
+      relations: ['user'],
+    });
+  }
+
   async refreshSession(session: Session): Promise<Session> {
     const payload = { userId: session.user.id, email: session.user.email };
     const token = this.jwtService.sign(payload, {
