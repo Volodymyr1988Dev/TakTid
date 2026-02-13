@@ -6,6 +6,7 @@ import RegisterView from '../views/RegisterView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import AdminStatsView from '../views/AdminStatsView.vue'
 import ProjectInfo from '../components/Projects/ProjectInfo.vue'
+import AccountView from '../views/AccountView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -40,7 +41,8 @@ const router = createRouter({
     },
     {
       path: '/account',
-      component: () => import('../views/AccountView.vue'),
+      //component: () => import('../views/AccountView.vue'),
+      component: AccountView.vue,
       meta: { requiresAuth: true },
     }
   ],
