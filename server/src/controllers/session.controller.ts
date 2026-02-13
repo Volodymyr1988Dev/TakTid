@@ -53,7 +53,7 @@ export class SessionController {
       );
     }
   }
-
+  /*
   @Post('validate')
   @ApiOperation({ summary: 'Перевірка дійсності access token' })
   @ApiBody({ type: ValidateTokenDto })
@@ -79,7 +79,7 @@ export class SessionController {
       );
     return result;
   }
-
+*/
   @Get()
   @ApiOperation({ summary: 'Отримати всі активні сесії' })
   @ApiResponse({

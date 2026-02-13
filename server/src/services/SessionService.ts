@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable /*, UnauthorizedException*/ } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import 'dotenv/config';
 import { LessThan, Repository } from 'typeorm';
-import { ValidateTokenResult } from '../types/index';
+//import { ValidateTokenResult } from '../types/index';
 import { User, Session } from '../entities';
 import { safeMs } from '../utils/safeMs';
 import { AuthUser } from '../types/index';
@@ -42,7 +42,7 @@ export class SessionService {
 
     return this.sessionRepository.save(session);
   }
-
+  /*
   async validateToken(token: string): Promise<ValidateTokenResult | null> {
     const now = new Date();
     try {
@@ -76,11 +76,11 @@ export class SessionService {
       }
       return null;
     }
-      */ catch {
+      */ /* catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
   }
-
+*/
   async refreshSession(session: Session): Promise<Session> {
     const payload = { userId: session.user.id, email: session.user.email };
     const token = this.jwtService.sign(payload, {
