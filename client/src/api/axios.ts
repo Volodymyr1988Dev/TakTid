@@ -8,8 +8,69 @@ const api = axios.create({
 
 let isRefreshing = false
 let refreshPromise: Promise<void> | null = null
-//let refreshPromise: Promise<unknown> | null = null
 
+api.interceptors.response.use(
+  response => response,
+  async (error: AxiosError) => {
+    const authStore = useAuthStore()
+
+    const originalRequest = error.config as
+      | (InternalAxiosRequestConfig & { _retry?: boolean })
+      | undefined
+
+    if (!originalRequest) {
+      return Promise.reject(error)
+    }
+
+    const requestUrl = originalRequest.url ?? ''
+
+    // ❗ ВАЖЛИВО — auth маршрути ніколи не refresh
+    const isAuthRoute = requestUrl.startsWith('/auth/')
+
+    if (isAuthRoute) {
+      return Promise.reject(error)
+    }
+
+    // ❗ якщо користувач не залогінений — refresh не має сенсу
+    if (!authStore.isAuthenticated) {
+      return Promise.reject(error)
+    }
+
+    if (error.response?.status !== 401) {
+      return Promise.reject(error)
+    }
+
+    if (originalRequest._retry) {
+      authStore.clearAuth()
+      return Promise.reject(error)
+    }
+
+    originalRequest._retry = true
+
+    try {
+      if (!isRefreshing) {
+        isRefreshing = true
+
+        refreshPromise = api
+          .post('/auth/refresh')
+          .then(() => {}) // 👈 робимо Promise<void>
+          .finally(() => {
+            isRefreshing = false
+            refreshPromise = null
+          })
+      }
+
+      await refreshPromise
+
+      return api(originalRequest)
+    } catch (refreshError) {
+      authStore.clearAuth()
+      return Promise.reject(refreshError)
+    }
+  },
+)
+
+/*
 api.interceptors.response.use(
   response => response,
   async (error: AxiosError) => {
@@ -72,7 +133,7 @@ api.interceptors.response.use(
       return Promise.reject(refreshError)
     }
   },
-)
+)*/
 /*
 api.interceptors.response.use(
   res => res,
