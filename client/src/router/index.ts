@@ -4,7 +4,6 @@ import { useAuthStore } from '../stores/auth.store'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import DashboardView from '../views/DashboardView.vue'
-import AdminStatsView from '../views/AdminStatsView.vue'
 import ProjectInfo from '../components/Projects/ProjectInfo.vue'
 //import AccountView from '../views/AccountView.vue'
 
@@ -29,11 +28,6 @@ const router = createRouter({
     {
       path: '/',
       redirect: '/dashboard',
-    },
-    {
-      path: '/stats',
-      component: AdminStatsView,
-      meta: { requiresAdmin: true },
     },
     {
       path: '/projects/:id',

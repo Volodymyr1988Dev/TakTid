@@ -8,7 +8,7 @@ const api = axios.create({
 
 let isRefreshing = false
 let refreshPromise: Promise<void> | null = null
-/*
+
 api.interceptors.response.use(
   response => response,
   async (error: AxiosError) => {
@@ -30,16 +30,16 @@ api.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    if (!authStore.isAuthenticated) {
-      return Promise.reject(error)
-    }
-
     if (error.response?.status !== 401) {
       return Promise.reject(error)
     }
 
     if (originalRequest._retry) {
       authStore.clearAuth()
+      return Promise.reject(error)
+    }
+
+    if (!authStore.isAuthenticated) {
       return Promise.reject(error)
     }
 
@@ -67,8 +67,8 @@ api.interceptors.response.use(
     }
   },
 )
-*/
 
+/*
 api.interceptors.response.use(
   response => response,
   async (error: AxiosError) => {
@@ -131,7 +131,7 @@ api.interceptors.response.use(
       return Promise.reject(refreshError)
     }
   },
-)
+)*/
 /*
 api.interceptors.response.use(
   res => res,
