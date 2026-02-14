@@ -138,9 +138,6 @@ watch(
   },
   { immediate: true },
 )
-watch(projectId, (val) => {
-  console.log('[ProjectId changed]', val)
-})
 function onProjectSelected(suggestion: TimeSuggestion) {
   if (isWorkSuggestion(suggestion)) {
     const project = projectStore.getById(suggestion.projectId)
@@ -153,7 +150,6 @@ function onProjectSelected(suggestion: TimeSuggestion) {
 }
 
 async function onSave() {
-console.log('[SAVE] projectId =', projectId.value)
   if (projectMissing.value) {
     console.warn('project missing')
     alert('Please select a project')
