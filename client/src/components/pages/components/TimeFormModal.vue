@@ -34,6 +34,7 @@ const emit = defineEmits<{
 
 const mode = ref<EntryMode>('WORK')
 const selectingProject = ref(false)
+//const projectSelected = computed(() => !!projectStore.selectedProject)
 /* ================= project ================= */
 
 const projectStore = useProjectStore()
@@ -102,6 +103,15 @@ watch(
   () => [props.entry, props.preset] as const,
   ([entry, preset]) => {
     if (entry) {
+      if (
+        entry.type === TimeKind.WORK ||
+        entry.type === TimeKind.EXTRA
+      ) {
+        const project = projectStore.getById(entry.projectId)
+        if (project) {
+          projectStore.select(project)
+        }
+      }
       if (entry.type === TimeKind.WORK) {
         mode.value = 'WORK'
       } else if (entry.type === TimeKind.EXTRA) {
@@ -114,6 +124,10 @@ watch(
     if (preset) {
       if (isWorkSuggestion(preset)) {
         mode.value = preset.type
+        const project = projectStore.getById(preset.projectId)
+        if (project) {
+          projectStore.select(project)
+        }
       } else {
         mode.value = 'ABSENCE'
         absenceForm.absenceType.value = preset.type
@@ -124,9 +138,11 @@ watch(
   },
   { immediate: true },
 )
-
+watch(projectId, (val) => {
+  console.log('[ProjectId changed]', val)
+})
 function onProjectSelected(suggestion: TimeSuggestion) {
-  if ('projectId' in suggestion) {
+  if (isWorkSuggestion(suggestion)) {
     const project = projectStore.getById(suggestion.projectId)
     if (project) {
       projectStore.select(project)
@@ -137,7 +153,7 @@ function onProjectSelected(suggestion: TimeSuggestion) {
 }
 
 async function onSave() {
-
+console.log('[SAVE] projectId =', projectId.value)
   if (projectMissing.value) {
     console.warn('project missing')
     alert('Please select a project')
@@ -204,13 +220,16 @@ async function onDelete() {
         class="project-pill clickable"
         @click="selectingProject = true"
       >
-        <template v-if="projectStore.selectedProject">
-          <strong>{{ projectStore.selectedProject.city }}</strong>
-          <small>{{ projectStore.selectedProject.address }}</small>
-        </template>
-        <template v-else>
+        <div 
+          v-if="projectStore.selectedProject" 
+          class="project-info"
+        >
+          <strong>{{ projectStore.selectedProject.city }}  </strong>
+          <small class="change-hint">{{ projectStore.selectedProject.address }}</small>
+        </div>
+        <div v-else>
           <span class="error">Click to select project</span>
-        </template>
+        </div>
       </div>
 
       <!-- MODE SELECT -->
@@ -360,9 +379,12 @@ async function onDelete() {
 
 .project-pill {
   background: #f1f5f9;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: 10px;
   margin-bottom: 12px;
+
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
 }
 
 .error {
@@ -372,7 +394,10 @@ async function onDelete() {
   border-radius: 8px;
   margin-bottom: 6px;
 }
-
+.project-info {
+  display: flex;
+  flex-direction: column;
+}
 .actions {
   display: flex;
   justify-content: space-between;
@@ -443,5 +468,29 @@ async function onDelete() {
 }
 .clickable {
   cursor: pointer;
+}
+.project-list-scroll {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+.project-pill:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+/* active */
+.project-pill:active {
+  transform: scale(0.98);
+}
+.project-pill .error {
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.change-hint {
+  font-size: 11px;
+  color: #64748b;
 }
 </style>
