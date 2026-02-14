@@ -86,17 +86,21 @@ const activeForm = useEntryFormSelector(mode, {
   absence: absenceForm,
 })
 
+const resolvedType = computed<TimeKind>(() => {
+  if (mode.value === 'WORK') return TimeKind.WORK
+  if (mode.value === 'EXTRA') return TimeKind.EXTRA
+  return absenceForm.absenceType.value
+})
+
 const timeForm = computed<TimeForm | null>(() => {
   //return activeForm.value.kind === 'ABSENCE'
-  return activeForm.value.mode === 'ABSENCE'
-    ? null
-    : activeForm.value
+  //return activeForm.value.mode === 'ABSENCE' ? null : activeForm.value
+ return  mode.value === 'ABSENCE' ? null : (activeForm.value as TimeForm)
 })
 
 const absence = computed<AbsenceForm | null>(() => {
-  return activeForm.value.mode === 'ABSENCE'
-    ? activeForm.value
-    : null
+  //return activeForm.value.mode === 'ABSENCE' ? activeForm.value : null
+  return mode.value === 'ABSENCE' ? (activeForm.value as AbsenceForm) : null
 })
 /* ================= derived ================= */
 
@@ -106,44 +110,46 @@ const isBlocking = computed(() => isSaving.value)
 
 watch(
   () => [props.entry, props.preset] as const,
-  ([entry, preset]) => {
+  async ([entry, preset]) => {
+
     currentEntryId.value = entry?.id ?? null
     currentType.value = entry?.type ?? null
+
     if (entry) {
-      if (
-        entry.type === TimeKind.WORK ||
-        entry.type === TimeKind.EXTRA
-      ) {
+      // 🔥 CHANGE: гарантуємо що project store готовий
+      if (!projectStore.projects.length) {
+        await projectStore.load?.()
+      }
+
+      if ('projectId' in entry && entry.projectId) {
         const project = projectStore.getById(entry.projectId)
         if (project) {
           projectStore.select(project)
         }
       }
-      if (entry.type === TimeKind.WORK) {
-        mode.value = 'WORK'
-      } else if (entry.type === TimeKind.EXTRA) {
-        mode.value = 'EXTRA'
-      } else {
-        mode.value = 'ABSENCE'
-      }
+
+      if (entry.type === TimeKind.WORK) mode.value = 'WORK'
+      else if (entry.type === TimeKind.EXTRA) mode.value = 'EXTRA'
+      else mode.value = 'ABSENCE'
+
       return
     }
+
     if (preset) {
       if (isWorkSuggestion(preset)) {
         mode.value = preset.type
         const project = projectStore.getById(preset.projectId)
-        if (project) {
-          projectStore.select(project)
-        }
+        if (project) projectStore.select(project)
       } else {
         mode.value = 'ABSENCE'
         absenceForm.absenceType.value = preset.type
       }
       return
     }
+
     mode.value = 'WORK'
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 watch(mode, (newMode, oldMode) => {
@@ -178,39 +184,28 @@ const currentEntryId = ref<string | null>(props.entry?.id ?? null)
 const currentType = ref<TimeKind | null>(props.entry?.type ?? null)
 
 async function onSave() {
+
   if (projectMissing.value) {
     alert('Please select a project')
     return
   }
 
-  const switchingBetweenTimeTypes =
+  const newType = resolvedType.value
+
+  // 🔥 CHANGE: універсальна перевірка switch
+  const isTypeSwitch =
     currentEntryId.value &&
     currentType.value &&
-    currentType.value !== mode.value &&
-    (
-      currentType.value === TimeKind.WORK ||
-      currentType.value === TimeKind.EXTRA
-    )
+    currentType.value !== newType
 
   try {
 
-    // 🔥 SWITCH WORK <-> EXTRA
-    if (switchingBetweenTimeTypes) {
-      if (!currentEntryId.value) return
+    // 🔥 якщо тип змінився — видаляємо старий
+    if (isTypeSwitch && currentEntryId.value) {
       await timeEntryStore.remove(currentEntryId.value)
-
-      const newEntry = await activeForm.value.save()
-
-      if (newEntry) {
-        currentEntryId.value = newEntry.id
-        currentType.value = newEntry.type
-        emit('saved', newEntry)
-      }
-
-      return
+      currentEntryId.value = null
     }
 
-    // 🔥 UPDATE або CREATE
     const entry = await activeForm.value.save()
 
     if (entry) {
@@ -226,10 +221,17 @@ async function onSave() {
 
 async function onDelete() {
 
+  if (!currentEntryId.value) return
+
   deleting.value = true
+
   try {
-    await activeForm.value.remove()
+    await timeEntryStore.remove(currentEntryId.value)
+    currentEntryId.value = null
+    currentType.value = null
     emit('deleted')
+  } catch (e) {
+    console.error('Delete failed', e)
   } finally {
     deleting.value = false
   }
