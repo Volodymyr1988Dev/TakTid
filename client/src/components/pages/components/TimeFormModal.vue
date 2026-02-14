@@ -138,6 +138,22 @@ watch(
   },
   { immediate: true },
 )
+
+watch(mode, (newMode, oldMode) => {
+  if (
+    (oldMode === 'WORK' && newMode === 'EXTRA') ||
+    (oldMode === 'EXTRA' && newMode === 'WORK')
+  ) {
+    const from = oldMode === 'WORK' ? workForm : extraForm
+    const to = newMode === 'WORK' ? workForm : extraForm
+
+    to.start.value = from.start.value
+    to.end.value = from.end.value
+    to.form.breakMinutes.value = from.form.breakMinutes.value
+    to.comment.value = from.comment.value
+  }
+})
+
 function onProjectSelected(suggestion: TimeSuggestion) {
   if (isWorkSuggestion(suggestion)) {
     const project = projectStore.getById(suggestion.projectId)
@@ -276,8 +292,9 @@ async function onDelete() {
             >
               <img :src="src">
               <button
+                type="button"
                 class="remove"
-                @click="timeForm.images.removeAt(i)"
+                @click.stop="timeForm.images.removeAt(i)"
               >
                 ✕
               </button>
@@ -354,6 +371,7 @@ async function onDelete() {
 </template>
 
 <style scoped>
+/*
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -427,6 +445,7 @@ async function onDelete() {
 
 .previews {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 8px;
 }
@@ -485,7 +504,6 @@ async function onDelete() {
   border-color: #cbd5e1;
 }
 
-/* active */
 .project-pill:active {
   transform: scale(0.98);
 }
@@ -525,5 +543,196 @@ async function onDelete() {
   background: #e2e8f0;
   border-radius: 8px;
   padding: 8px 12px;
+}*/
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #475569;
+}
+
+h3 {
+  margin-bottom: 12px;
+}
+
+.project-pill {
+  background: #f1f5f9;
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: 0.2s;
+}
+
+.project-pill:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.project-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.error {
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.change-hint {
+  font-size: 12px;
+  color: #64748b;
+}
+
+select,
+input,
+textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.preview {
+  position: relative;
+}
+
+.previews img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.preview .remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #dc2626;
+  color: white;
+  border-radius: 50%;
+  border: none;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.primary {
+  background: #2563eb;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+}
+
+.danger {
+  background: #dc2626;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+}
+
+.loading {
+  font-size: 14px;
+  color: #475569;
+}
+
+/* overlay saving */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.spinner {
+  background: white;
+  padding: 20px 32px;
+  border-radius: 14px;
+  font-weight: 600;
+}
+
+/* Project modal */
+.project-modal-layer {
+  z-index: 2000;
+}
+
+.project-modal {
+  background: white;
+  width: 520px;
+  max-height: 85vh;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.project-modal :deep(.projects) {
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
+.close-projects {
+  margin-top: 12px;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  background: #e2e8f0;
 }
 </style>
