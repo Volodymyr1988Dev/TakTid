@@ -77,7 +77,7 @@ button {
   height: 64px;
   padding: 6px 10px;
 
-  background: rgba(255, 255, 255, 0.9);
+  background: #e1bee7;
   backdrop-filter: blur(10px);
 
   border-top: 1px solid #e2e8f0;
