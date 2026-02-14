@@ -164,14 +164,20 @@ function onProjectSelected(suggestion: TimeSuggestion) {
 
   selectingProject.value = false
 }
-
+const originalType = computed(() => props.entry?.type ?? null)
 async function onSave() {
   if (projectMissing.value) {
     console.warn('project missing')
     alert('Please select a project')
     return
   }
-
+  if (
+    props.entry &&
+    originalType.value &&
+    originalType.value !== mode.value
+  ) {
+    await activeForm.value.remove()
+  }
   const entry = await activeForm.value.save()
 
   if (entry) emit('saved', entry)
@@ -309,10 +315,21 @@ async function onDelete() {
 
       <!-- ABSENCE FORM -->
       <div v-else-if="absence">
-        <p>
-          Absence type:
-          <strong>{{ absence.absenceType.value }}</strong>
-        </p>
+        <select v-model="absence.absenceType.value">
+          <option 
+            value="SICK"
+          >
+            Sick
+          </option>
+          <option value="VAB">
+            VAB
+          </option>
+          <option 
+            value="VACATION"
+          >
+            Vacation
+          </option>
+        </select>
       </div>
 
       <!-- COMMENT -->
@@ -371,179 +388,6 @@ async function onDelete() {
 </template>
 
 <style scoped>
-/*
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal {
-  background: #ffffff;
-  padding: 16px;
-  border-radius: 12px;
-  width: 420px;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 8px;
-}
-
-.back-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.project-pill {
-  background: #f1f5f9;
-  padding: 10px 14px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-
-  transition: all 0.15s ease;
-  border: 1px solid transparent;
-}
-
-.error {
-  color: #dc2626;
-  background: #fee2e2;
-  padding: 6px 10px;
-  border-radius: 8px;
-  margin-bottom: 6px;
-}
-.project-info {
-  display: flex;
-  flex-direction: column;
-}
-.actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-}
-
-.primary {
-  background: #2563eb;
-  color: #ffffff;
-  padding: 8px 16px;
-  border-radius: 8px;
-}
-
-.danger {
-  background: #dc2626;
-  color: #ffffff;
-  padding: 8px 16px;
-  border-radius: 8px;
-}
-
-.previews {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-.preview {
-  position: relative;
-}
-.previews img {
-  width: 64px;
-  height: 64px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-.preview .remove {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #dc2626;
-  color: white;
-  border-radius: 50%;
-  border: none;
-  width: 18px;
-  height: 18px;
-  font-size: 12px;
-  cursor: pointer;
-}
-.loading {
-  font-size: 14px;
-  color: #475569;
-}
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.spinner {
-  background: white;
-  padding: 20px 32px;
-  border-radius: 12px;
-  font-weight: 600;
-}
-.clickable {
-  cursor: pointer;
-}
-.project-list-scroll {
-  max-height: 400px;
-  overflow-y: auto;
-  padding-right: 8px;
-}
-.project-pill:hover {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
-}
-
-.project-pill:active {
-  transform: scale(0.98);
-}
-.project-pill .error {
-  color: #dc2626;
-  background: #fee2e2;
-  padding: 6px 10px;
-  border-radius: 8px;
-}
-.change-hint {
-  font-size: 11px;
-  color: #64748b;
-}
-.project-modal-layer {
-  z-index: 10000;
-}
-
-.project-modal {
-  background: white;
-  width: 500px;
-  max-height: 80vh;
-  border-radius: 14px;
-  padding: 20px;
-
-  display: flex;
-  flex-direction: column;
-
-  overflow: hidden;
-}
-
-.project-modal :deep(.projects) {
-  overflow-y: auto;
-  max-height: 65vh;
-}
-.close-projects {
-  margin-top: 12px;
-  background: #e2e8f0;
-  border-radius: 8px;
-  padding: 8px 12px;
-}*/
 .modal-backdrop {
   position: fixed;
   inset: 0;
