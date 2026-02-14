@@ -107,6 +107,8 @@ const isBlocking = computed(() => isSaving.value)
 watch(
   () => [props.entry, props.preset] as const,
   ([entry, preset]) => {
+    currentEntryId.value = entry?.id ?? null
+    currentType.value = entry?.type ?? null
     if (entry) {
       if (
         entry.type === TimeKind.WORK ||
@@ -170,8 +172,10 @@ function onProjectSelected(suggestion: TimeSuggestion) {
   selectingProject.value = false
 }
 
-const originalEntryId = computed(() => props.entry?.id ?? null)
-const originalType = computed(() => props.entry?.type ?? null)
+//const originalEntryId = computed(() => props.entry?.id ?? null)
+//const originalType = computed(() => props.entry?.type ?? null)
+const currentEntryId = ref<string | null>(props.entry?.id ?? null)
+const currentType = ref<TimeKind | null>(props.entry?.type ?? null)
 
 async function onSave() {
   if (projectMissing.value) {
@@ -180,28 +184,40 @@ async function onSave() {
   }
 
   const switchingBetweenTimeTypes =
-    originalEntryId.value &&
-    originalType.value &&
-    originalType.value !== mode.value &&
+    currentEntryId.value &&
+    currentType.value &&
+    currentType.value !== mode.value &&
     (
-      originalType.value === TimeKind.WORK ||
-      originalType.value === TimeKind.EXTRA
+      currentType.value === TimeKind.WORK ||
+      currentType.value === TimeKind.EXTRA
     )
 
   try {
+
+    // 🔥 SWITCH WORK <-> EXTRA
     if (switchingBetweenTimeTypes) {
-      await timeEntryStore.remove(originalEntryId.value)
+      if (!currentEntryId.value) return
+      await timeEntryStore.remove(currentEntryId.value)
 
       const newEntry = await activeForm.value.save()
 
-      if (newEntry) emit('saved', newEntry)
+      if (newEntry) {
+        currentEntryId.value = newEntry.id
+        currentType.value = newEntry.type
+        emit('saved', newEntry)
+      }
 
       return
     }
 
+    // 🔥 UPDATE або CREATE
     const entry = await activeForm.value.save()
 
-    if (entry) emit('saved', entry)
+    if (entry) {
+      currentEntryId.value = entry.id
+      currentType.value = entry.type
+      emit('saved', entry)
+    }
 
   } catch (e) {
     console.error('Save failed', e)
