@@ -60,10 +60,9 @@ button {
   padding-bottom: 56px;
 }*/
 .bottom-tabs-container {
-  height: 70px;
+  height: 60px;
 }
 
-/* MAIN BAR */
 .bottom-tabs {
   position: fixed;
   bottom: 0;
@@ -74,15 +73,13 @@ button {
   justify-content: space-around;
   align-items: center;
 
-  height: 64px;
-  padding: 6px 10px;
+  height: 56px;
+  padding: 4px 8px;
 
-  background: #e1bee7;
-  backdrop-filter: blur(10px);
-
+  background: #f8fafc;
   border-top: 1px solid #e2e8f0;
 
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
 
   z-index: 500;
 }
@@ -90,30 +87,31 @@ button {
 /* BUTTON */
 .bottom-tabs button {
   flex: 1;
-  height: 48px;
-  border-radius: 12px;
+  height: 40px;
+  border-radius: 10px;
   border: none;
   background: transparent;
 
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #64748b;
 
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
-/* ACTIVE TAB */
+/* ACTIVE */
 .bottom-tabs button.active {
   background: #2563eb;
   color: white;
   font-weight: 600;
 }
 
+/* HOVER */
 .bottom-tabs button:hover {
   background: #e2e8f0;
 }
 
 .bottom-tabs button:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 </style>
