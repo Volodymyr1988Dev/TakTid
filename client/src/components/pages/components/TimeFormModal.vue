@@ -14,6 +14,7 @@ import type { AbsenceForm, EntryMode, TimeForm } from '../../../types/Form.types
 //import type { WorkForm, ExtraForm } from '../../../types/Form.types'
 import { isWorkSuggestion  } from '../../../types/suggestion.guard'
 import { TimeKind } from '../../../types/timeKind.enum'
+import ProjectTab from '../../Projects/ProjectTab.vue'
 
 /* ================= props / emits ================= */
 
@@ -32,7 +33,7 @@ const emit = defineEmits<{
 /* ================= mode ================= */
 
 const mode = ref<EntryMode>('WORK')
-
+const selectingProject = ref(false)
 /* ================= project ================= */
 
 const projectStore = useProjectStore()
@@ -124,6 +125,17 @@ watch(
   { immediate: true },
 )
 
+function onProjectSelected(suggestion: TimeSuggestion) {
+  if ('projectId' in suggestion) {
+    const project = projectStore.getById(suggestion.projectId)
+    if (project) {
+      projectStore.select(project)
+    }
+  }
+
+  selectingProject.value = false
+}
+
 async function onSave() {
 
   if (projectMissing.value) {
@@ -188,18 +200,17 @@ async function onDelete() {
 
       <!-- PROJECT -->
       <div
-        v-if="isTimeMode && projectStore.selectedProject"
-        class="project-pill"
+        v-if="isTimeMode"
+        class="project-pill clickable"
+        @click="selectingProject = true"
       >
-        <p
-          v-if="projectMissing"
-          class="error"
-        >
-          Please select a project
-        </p>
-
-        <strong>{{ projectStore.selectedProject.city }}</strong>
-        <small>{{ projectStore.selectedProject.address }}</small>
+        <template v-if="projectStore.selectedProject">
+          <strong>{{ projectStore.selectedProject.city }}</strong>
+          <small>{{ projectStore.selectedProject.address }}</small>
+        </template>
+        <template v-else>
+          <span class="error">Click to select project</span>
+        </template>
       </div>
 
       <!-- MODE SELECT -->
@@ -303,6 +314,15 @@ async function onDelete() {
         >
           Save
         </button>
+      </div>
+      <div 
+        v-if="selectingProject" 
+        class="project-overlay"
+      >
+        <ProjectTab
+          mode="select"
+          @select="onProjectSelected"
+        />
       </div>
     </div>
   </div>
@@ -420,5 +440,8 @@ async function onDelete() {
   padding: 20px 32px;
   border-radius: 12px;
   font-weight: 600;
+}
+.clickable {
+  cursor: pointer;
 }
 </style>

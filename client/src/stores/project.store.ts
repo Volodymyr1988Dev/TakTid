@@ -15,6 +15,7 @@ export const useProjectStore = defineStore('projects', () => {
   //})
   const projects = ref<Project[]>([])
   const isLoaded = ref(false)
+  const isLoading = ref(false)
 
   const projectsMap = computed(() => {
     const map = new Map<string, Project>()
@@ -30,15 +31,32 @@ export const useProjectStore = defineStore('projects', () => {
     selectedProject.value = null
   }
 
-  async function load() {
-    if (isLoaded.value) return
-    projects.value = await getProjects()
-    isLoaded.value = true
+  async function load(force = false) {
+
+    if (isLoading.value) return
+    if (isLoaded.value && !force) return
+    isLoading.value = true
+    try {
+      projects.value = await getProjects()
+      isLoaded.value = true
+    } catch (e) {
+      console.error('Failed to load projects', e)
+    }
+    finally {
+      isLoading.value = false
+    }
   }
 
   function getById(id?: string) {
     if (!id) return undefined
     return projectsMap.value.get(id)
+  }
+  function addProject(project: Project) {
+    projects.value.unshift(project)
+  }
+
+  function removeProject(id: string) {
+    projects.value = projects.value.filter(p => p.id !== id)
   }
 
   return {
@@ -46,6 +64,8 @@ export const useProjectStore = defineStore('projects', () => {
     selectedProject,
     projectId,
     projectsMap,
+    addProject,
+    removeProject,
     load,
     getById,
     isLoaded,

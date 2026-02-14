@@ -1,7 +1,7 @@
 <script setup lang="ts">
 //import { ref, onMounted, computed, watch } from 'vue'
-import { ref, computed, watch } from 'vue'
-import api from '../../api/axios'
+import { ref, computed, onMounted } from 'vue'
+//import api from '../../api/axios'
 import { useAuthStore } from '../../stores/auth.store'
 import ProjectCard from './ProjectCard.vue'
 import CreateProjectModal from './CreateProjectModal.vue'
@@ -25,8 +25,7 @@ const emit = defineEmits<{
 const props = defineProps<{
   mode: 'select' | 'details'
 }>()
-const projects = ref<Project[]>([])
-
+//const projects = ref<Project[]>([])
 /* ================= MODALS ================= */
 const createModalOpen = ref(false) // ✅ ADD
 //const galleryOpen = ref(false) // ✅ ADD
@@ -35,8 +34,13 @@ const selectedProject = ref<Project | null>(null)
 const photoModalOpen = ref(false)
 const projectStore = useProjectStore()
 const projectNav = useProjectNavigationStore()
+
+const projects = computed(() => projectStore.projects)
 /* ================= LOAD ================= */
 //onMounted(loadProjects)
+onMounted(() => {
+  projectStore.load()
+})/*
 watch(
   () => auth.isInitialized,
   (ready: boolean) => {
@@ -45,10 +49,21 @@ watch(
     }
   },
   { immediate: true }
-)
+)*/
+/*
+watch(
+  () => auth.isAuthenticated,
+  async (logged) => {
+    if (logged) {
+      await projectStore.load()
+    }
+  },
+  { immediate: true }
+)*/
 /* ================= ACTIONS ================= */
 function removeProject(id: string) {
-  projects.value = projects.value.filter(p => p.id !== id)
+  //projects.value = projects.value.filter(p => p.id !== id)
+  projectStore.removeProject(id)
 }
 
 function openPhotoModal(project: Project) {
@@ -88,7 +103,8 @@ function onProjectClick(project: Project) {
 
 /* ================= ADMIN ================= */
 function onProjectCreated(project: Project) {
-  projects.value.unshift(project)
+  //projects.value.unshift(project)
+  projectStore.addProject(project)
 }
 
 //function openGallery(project: Project) {
@@ -96,10 +112,11 @@ function onProjectCreated(project: Project) {
 //  galleryOpen.value = true
 //}
 
-async function loadProjects() {
-  const { data } = await api.get<Project[]>('/projects')
-  projects.value = data
-}   
+//async function loadProjects() {
+  //const { data } = await api.get<Project[]>('/projects')
+  //projects.value = data
+//  projectStore.load()
+//}   
 </script>
 
 <template>
