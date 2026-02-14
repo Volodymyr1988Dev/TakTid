@@ -334,14 +334,24 @@ async function onDelete() {
           Save
         </button>
       </div>
-      <div 
-        v-if="selectingProject" 
-        class="project-overlay"
+      <!-- PROJECT SELECT MODAL -->
+      <div
+        v-if="selectingProject"
+        class="modal-backdrop project-modal-layer"
       >
-        <ProjectTab
-          mode="select"
-          @select="onProjectSelected"
-        />
+        <div class="project-modal">
+          <ProjectTab
+            mode="select"
+            @select="onProjectSelected"
+          />
+
+          <button
+            class="close-projects"
+            @click="selectingProject = false"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -492,5 +502,32 @@ async function onDelete() {
 .change-hint {
   font-size: 11px;
   color: #64748b;
+}
+.project-modal-layer {
+  z-index: 10000;
+}
+
+.project-modal {
+  background: white;
+  width: 500px;
+  max-height: 80vh;
+  border-radius: 14px;
+  padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+.project-modal :deep(.projects) {
+  overflow-y: auto;
+  max-height: 65vh;
+}
+.close-projects {
+  margin-top: 12px;
+  background: #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
 }
 </style>
