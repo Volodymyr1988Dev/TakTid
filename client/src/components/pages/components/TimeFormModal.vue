@@ -6,6 +6,8 @@ import { useWorkEntryForm } from '../../composables/useWorkEntryForm'
 import { useExtraEntryForm } from '../../composables/useExtraEntryForm'
 import { useAbsenceEntryForm } from '../../composables/useAbsenceEntryForm'
 import { useEntryFormSelector } from '../../composables/useEntryFormSelector'
+import { useTimeEntryStore } from '../../../stores/timeEntry.store'
+//import { useProjectAssignmentStore } from '../../../stores/projectAssignment.store'
 
 import type { DayEntry } from '../../../types/DayEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
@@ -38,6 +40,9 @@ const selectingProject = ref(false)
 /* ================= project ================= */
 
 const projectStore = useProjectStore()
+const timeEntryStore = useTimeEntryStore()
+//const projectAssignmentStore = useProjectAssignmentStore()
+
 const isTimeMode = computed(() => mode.value !== 'ABSENCE')
 
 const projectId = computed(() =>
@@ -164,24 +169,43 @@ function onProjectSelected(suggestion: TimeSuggestion) {
 
   selectingProject.value = false
 }
+
+const originalEntryId = computed(() => props.entry?.id ?? null)
 const originalType = computed(() => props.entry?.type ?? null)
+
 async function onSave() {
   if (projectMissing.value) {
-    console.warn('project missing')
     alert('Please select a project')
     return
   }
-  if (
-    props.entry &&
+
+  const switchingBetweenTimeTypes =
+    originalEntryId.value &&
     originalType.value &&
-    originalType.value !== mode.value
-  ) {
-    await activeForm.value.remove()
+    originalType.value !== mode.value &&
+    (
+      originalType.value === TimeKind.WORK ||
+      originalType.value === TimeKind.EXTRA
+    )
+
+  try {
+    if (switchingBetweenTimeTypes) {
+      await timeEntryStore.remove(originalEntryId.value)
+
+      const newEntry = await activeForm.value.save()
+
+      if (newEntry) emit('saved', newEntry)
+
+      return
+    }
+
+    const entry = await activeForm.value.save()
+
+    if (entry) emit('saved', entry)
+
+  } catch (e) {
+    console.error('Save failed', e)
   }
-  const entry = await activeForm.value.save()
-
-  if (entry) emit('saved', entry)
-
 }
 
 async function onDelete() {
