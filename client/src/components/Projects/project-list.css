@@ -57,3 +57,7 @@
 .info {
   padding: 12px;
 }
+.project-list-scroll {
+  max-height: 400px;
+  overflow-y: auto;
+}

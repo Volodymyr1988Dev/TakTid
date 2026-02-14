@@ -129,16 +129,18 @@ function onProjectCreated(project: Project) {
       + Add project
     </button>
     <!--@select="selectProject"-->
-    <div class="grid">
-      <ProjectCard
-        v-for="p in projects"
-        :key="p.id"
-        :project="p"
-        :is-admin="isAdmin"
-        @deleted="removeProject"
-        @select="onProjectClick(p)"
-        @upload="openPhotoModal"
-      />
+    <div class="project-list-scroll">
+      <div class="grid">
+        <ProjectCard
+          v-for="p in projects"
+          :key="p.id"
+          :project="p"
+          :is-admin="isAdmin"
+          @deleted="removeProject"
+          @select="onProjectClick(p)"
+          @upload="openPhotoModal"
+        />
+      </div>
     </div>
 
     <!-- @upload="openGallery" ================= MODALS ================= -->
