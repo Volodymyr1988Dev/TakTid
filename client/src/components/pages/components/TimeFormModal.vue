@@ -103,18 +103,18 @@ const absence = computed<AbsenceForm | null>(() => {
 const isSaving = computed(() => activeForm.value.isSaving.value)
 const deleting = ref(false)
 const isBlocking = computed(() => isSaving.value)
-
+/*
 const resolvedType = computed<TimeKind>(() => {
   if (mode.value === 'WORK') return TimeKind.WORK
   if (mode.value === 'EXTRA') return TimeKind.EXTRA
   return absenceForm.absenceType.value
-})
+})*/
 watch(
   () => [props.entry, props.preset] as const,
   ([entry, preset]) => {
 
-    currentEntryId.value = entry?.id ?? null
-    currentType.value = entry?.type ?? null
+    //currentEntryId.value = entry?.id ?? null
+    //currentType.value = entry?.type ?? null
 
     if (entry) {
 
@@ -173,43 +173,40 @@ function onProjectSelected(suggestion: TimeSuggestion) {
   selectingProject.value = false
 }
 
-//const originalEntryId = computed(() => props.entry?.id ?? null)
-//const originalType = computed(() => props.entry?.type ?? null)
-const currentEntryId = ref<string | null>(props.entry?.id ?? null)
-const currentType = ref<TimeKind | null>(props.entry?.type ?? null)
+const originalEntryId = computed(() => props.entry?.id ?? null)
+const originalType = computed(() => props.entry?.type ?? null)
+//const currentEntryId = ref<string | null>(props.entry?.id ?? null)
+//const currentType = ref<TimeKind | null>(props.entry?.type ?? null)
 
 async function onSave() {
-
   if (projectMissing.value) {
     alert('Please select a project')
     return
   }
 
-  const newType = resolvedType.value
-
-  const isTypeSwitch =
-    currentEntryId.value &&
-    currentType.value &&
-    currentType.value !== newType
+  const switchingBetweenTimeTypes =
+    originalEntryId.value &&
+    originalType.value &&
+    originalType.value !== mode.value &&
+    (
+      originalType.value === TimeKind.WORK ||
+      originalType.value === TimeKind.EXTRA
+    )
 
   try {
+    if (switchingBetweenTimeTypes) {
+      await timeEntryStore.remove(originalEntryId.value)
 
-    if (isTypeSwitch && currentEntryId.value) {
+      const newEntry = await activeForm.value.save()
 
-      await timeEntryStore.remove(currentEntryId.value)
+      if (newEntry) emit('saved', newEntry)
 
-      currentEntryId.value = null
-      currentType.value = null
-      activeForm.value.isEdit.value = false
+      return
     }
 
     const entry = await activeForm.value.save()
 
-    if (entry) {
-      currentEntryId.value = entry.id
-      currentType.value = entry.type
-      emit('saved', entry)
-    }
+    if (entry) emit('saved', entry)
 
   } catch (e) {
     console.error('Save failed', e)
@@ -218,17 +215,10 @@ async function onSave() {
 
 async function onDelete() {
 
-  if (!currentEntryId.value) return
-
   deleting.value = true
-
   try {
-    await timeEntryStore.remove(currentEntryId.value)
-    currentEntryId.value = null
-    currentType.value = null
+    await activeForm.value.remove()
     emit('deleted')
-  } catch (e) {
-    console.error('Delete failed', e)
   } finally {
     deleting.value = false
   }
