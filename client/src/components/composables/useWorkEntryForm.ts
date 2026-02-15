@@ -8,7 +8,9 @@ import { useTimeEntryImages } from './useTimeEntryImages'
 import { TimeKind } from '../../types/timeKind.enum'
 import type { WorkForm } from '../../types/Form.types'
 import type { DayEntry } from '../../types/DayEntry.type'
-import { getNextDefaultTime } from '../pages/components/helpers/getNextDefaultTime'
+//import { getNextDefaultTime } from '../pages/components/helpers/getNextDefaultTime'
+import { useDefaultTime } from './useDefaultTime'
+//import { normalizeTime,  } from '../pages/components/helpers/time'
 
 export function useWorkEntryForm(props: {
   date: string
@@ -25,6 +27,12 @@ export function useWorkEntryForm(props: {
   const isSavingRef = ref(false)
 
   const isEdit = computed(() => !!props.entry)
+
+
+  const { defaultTime } = useDefaultTime({
+    dayEntries: props.dayEntries,
+    durationMinutes: 90,
+  })
 
   function normalizeTime(t: string) {
     return t.slice(0, 5)
@@ -80,7 +88,7 @@ watch(
   },
   { immediate: true }
 )
-*/
+*//*
 watch(
   () => props.entry,
   (e) => {
@@ -93,7 +101,7 @@ watch(
       return
     }
 
-    // CREATE
+    /*
     const defaults = getNextDefaultTime(props.dayEntries)
 
     if (defaults) {
@@ -103,10 +111,35 @@ watch(
       startRef.value = '08:00'
       endRef.value = '17:00'
     }
+  },*//*
+  //if (defaultTime.value) {
+      startRef.value = defaultTime.value.start
+      endRef.value = defaultTime.value.end
+ //   }
   },
   { immediate: true },
 )
+*/
+watch(
+  [() => props.entry, defaultTime],
+  ([entry]) => {
+    // EDIT MODE
+    if (entry) {
+      startRef.value = normalizeTime(entry.startTime)
+      endRef.value = normalizeTime(entry.endTime)
+      breakMinutesRef.value = entry.breakMinutes ?? 30
+      commentRef.value = entry.comment ?? ''
+      return
+    }
 
+    // CREATE MODE
+    startRef.value = defaultTime.value.start
+    endRef.value = defaultTime.value.end
+    breakMinutesRef.value = 30
+    commentRef.value = ''
+  },
+  { immediate: true },
+)
   const start = computed({
     get: () => startRef.value,
     set: v => (startRef.value = v),

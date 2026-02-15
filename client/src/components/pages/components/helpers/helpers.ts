@@ -5,9 +5,9 @@ export function cleanPatch<T extends object>(obj: T): Partial<T> {
     )
   ) as Partial<T>
 }
-
+/*
 export function normalizeTime(time?: string | null): string | undefined {
   if (!time) return undefined;
     return time.slice(0, 5);
   
-}
+}*/
