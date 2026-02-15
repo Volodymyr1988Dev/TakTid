@@ -4,8 +4,8 @@ export class AdminMonthStatsQueryDto {
   @IsInt()
   @Min(1)
   @Max(12)
-  month: number;
+  month!: number;
 
   @IsInt()
-  year: number;
+  year!: number;
 }

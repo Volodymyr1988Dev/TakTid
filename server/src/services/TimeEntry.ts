@@ -280,6 +280,7 @@ export class TimeEntryService {
       timeKind.SICK,
       timeKind.VACATION,
       timeKind.VAB,
+      timeKind.DAY_OFF,
       //timeKind.MEETING,
     ];
 

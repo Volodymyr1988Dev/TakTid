@@ -1,8 +1,7 @@
 export const MINUTES_IN_DAY = 24 * 60
 
 export function normalizeTime(time?: string | null): string | undefined {
-  if (!time) return undefined
-  return time.slice(0, 5)
+  return time ? time.slice(0, 5) : '00:00'
 }
 
 export function toMinutes(t: string): number {

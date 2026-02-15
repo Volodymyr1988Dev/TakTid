@@ -58,7 +58,8 @@ export interface AbsenceDayEntry extends BaseDayEntry {
   type: 
     | typeof TimeKind.SICK //typeof TimeKind.SICK
     | typeof TimeKind.VAB //typeof TimeKind.VAB
-    | typeof TimeKind.VACATION //typeof TimeKind.VACATION
+    | typeof TimeKind.VACATION
+    | typeof TimeKind.DAY_OFF //typeof TimeKind.VACATION
    //type: 'SICK' | 'VAB' | 'VACATION'
    //type: AbsenceKind
 }
@@ -90,5 +91,11 @@ export function isAbsenceEntry(
   e: DayEntry
 ): e is AbsenceDayEntry {
   //return e.kind === 'ABSENCE'
-   return  e.type === 'SICK' || e.type === 'VAB' || e.type === 'VACATION'
-}
+   //return  e.type === 'SICK' || e.type === 'VAB' || e.type === 'VACATION' || e.type === 'DAY_OFF'
+  return (
+    e.type === TimeKind.SICK ||
+    e.type === TimeKind.VAB ||
+    e.type === TimeKind.VACATION ||
+    e.type === TimeKind.DAY_OFF
+  )
+  }

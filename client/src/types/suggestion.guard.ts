@@ -21,6 +21,7 @@ export function isAbsenceSuggestion(
   return (
     s.type === TimeKind.SICK ||
     s.type === TimeKind.VAB ||
-    s.type === TimeKind.VACATION
+    s.type === TimeKind.VACATION ||
+    s.type === TimeKind.DAY_OFF
   )
 }

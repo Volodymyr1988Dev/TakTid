@@ -5,4 +5,5 @@ export enum timeKind {
   VACATION = 'VACATION',
   //EXTRA = 'EXTRA',
   MEETING = 'MEETING',
+  DAY_OFF = 'DAY_OFF',
 }

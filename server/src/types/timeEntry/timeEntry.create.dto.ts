@@ -18,7 +18,7 @@ export class CreateTimeEntryDto {
 
   @ApiProperty({ example: '2025-01-15' })
   @IsDateString()
-  date: string;
+  date!: string;
 
   //@ApiProperty({ example: 8.5 })
   //@IsNumber()
@@ -26,26 +26,26 @@ export class CreateTimeEntryDto {
 
   @ApiProperty({ enum: timeKind })
   @IsEnum(timeKind)
-  type: timeKind;
+  type!: timeKind;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  comment: string;
+  comment!: string;
 
   @ApiProperty({ example: 30, required: false })
   @IsNumber()
-  breakMinutes: number;
+  breakMinutes!: number;
 
   @ApiProperty({ example: '09:00' })
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
     message: 'startTime must be in HH:mm format',
   })
-  startTime: string;
+  startTime!: string;
 
   @ApiProperty({ example: '17:30' })
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
     message: 'endTime must be in HH:mm format',
   })
-  endTime: string;
+  endTime!: string;
 }

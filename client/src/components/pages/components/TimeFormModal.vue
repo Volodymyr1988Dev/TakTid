@@ -75,13 +75,14 @@ const extraForm = useExtraEntryForm({
 
 const absenceForm = useAbsenceEntryForm({
   date: props.date,
-   entry: props.entry && (
+  entry: props.entry && (
     props.entry.type === TimeKind.SICK ||
     props.entry.type === TimeKind.VAB ||
     props.entry.type === TimeKind.VACATION
   )
     ? props.entry
     : null,
+  dayEntries: props.dayEntries,   
 })
 
 const activeForm = useEntryFormSelector(mode, {

@@ -3,10 +3,14 @@ import { useTimeEntryStore } from '../../stores/timeEntry.store'
 import type { AbsenceDayEntry } from '../../types/DayEntry.type'
 import { TimeKind } from '../../types/timeKind.enum'
 import type { AbsenceForm,AbsenceKind } from '../../types/Form.types'
+import type { DayEntry } from '../../types/DayEntry.type'
+import { isFullDayCovered } from '../pages/components/helpers/isFullDayCovered'
+import { getLastWorkEnd } from '../pages/components/helpers/getLastWorkEnd'
 
 export function useAbsenceEntryForm(props: {
   date: string
   entry?: AbsenceDayEntry | null
+  dayEntries?: DayEntry[]
 }) {
   const store = useTimeEntryStore()
   const kindRef = ref<AbsenceKind>(
@@ -36,18 +40,33 @@ export function useAbsenceEntryForm(props: {
   
  const absenceType = computed({
   get: () => kindRef.value,
-  set: v => (kindRef.value = v),
+  set: (v: AbsenceKind) => (kindRef.value = v),
 })
   async function save(): Promise<AbsenceDayEntry> {
     isSavingRef.value = true
+    if (!props.entry && isFullDayCovered(props.dayEntries)) {
+        throw new Error(
+          'Unavailable to create absence, because you have working time all day'
+        )
+    }
+    const lastEnd = getLastWorkEnd(props.dayEntries)
     try {
-        const payload ={
-            type: kindRef.value,
-            comment: commentRef.value,
-            startTime: '08:00',
-            endTime: '17:00',
-            breakMinutes: 60,
-        }
+      const payload =
+        kindRef.value === TimeKind.DAY_OFF
+          ? {
+              type: TimeKind.DAY_OFF,
+              comment: commentRef.value,
+              startTime: '08:00',
+              endTime: '08:00',
+              breakMinutes: 0,
+            }
+          : {
+              type: kindRef.value,
+              comment: commentRef.value,
+              startTime: lastEnd ?? '08:00',
+              endTime: '17:00',
+              breakMinutes: 60,
+            }
       const saved = props.entry
         ? await store.update(props.entry.id, payload)
         : await store.add({...payload, date: props.date})
@@ -56,7 +75,7 @@ export function useAbsenceEntryForm(props: {
         id: saved.id,
         date: saved.date,
         hours: Number(saved.hours),
-        type: saved.type as AbsenceKind, //| typeof TimeKind.SICK | typeof TimeKind.VAB | typeof TimeKind.VACATION,
+        type: saved.type as AbsenceKind,
         comment: saved.comment ?? '',
       }
     } finally {
