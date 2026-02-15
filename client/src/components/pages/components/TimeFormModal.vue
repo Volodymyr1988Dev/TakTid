@@ -103,12 +103,12 @@ const absence = computed<AbsenceForm | null>(() => {
 const isSaving = computed(() => activeForm.value.isSaving.value)
 const deleting = ref(false)
 const isBlocking = computed(() => isSaving.value)
-/*
+
 const resolvedType = computed<TimeKind>(() => {
   if (mode.value === 'WORK') return TimeKind.WORK
   if (mode.value === 'EXTRA') return TimeKind.EXTRA
   return absenceForm.absenceType.value
-})*/
+})
 watch(
   () => [props.entry, props.preset] as const,
   ([entry, preset]) => {
