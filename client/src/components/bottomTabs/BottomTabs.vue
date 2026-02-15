@@ -76,7 +76,7 @@ button {
   height: 56px;
   padding: 4px 8px;
 
-  background: #f1f5f9;
+  background: #f6f5f2;
   border-top: 1px solid #e2e8f0;
 
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
