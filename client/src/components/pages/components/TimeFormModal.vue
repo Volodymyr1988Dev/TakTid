@@ -371,7 +371,7 @@ async function onDelete() {
           <option 
             value="DAY_OFF"
           >
-            Vacation
+            Day off
           </option>
         </select>
       </div>
