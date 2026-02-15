@@ -71,11 +71,11 @@ watch(
   () => props.entry,
   e => {
     if (!e) return
+    getNextDefaultTime()
     startRef.value = normalizeTime(e.startTime ?? '08:00')
     endRef.value = normalizeTime(e.endTime ?? '17:00')
     breakMinutesRef.value = e.breakMinutes ?? 30
     commentRef.value = e.comment ?? ''
-    getNextDefaultTime()
   },
   { immediate: true }
 )
