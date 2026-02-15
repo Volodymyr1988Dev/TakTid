@@ -103,47 +103,48 @@ const absence = computed<AbsenceForm | null>(() => {
 const isSaving = computed(() => activeForm.value.isSaving.value)
 const deleting = ref(false)
 const isBlocking = computed(() => isSaving.value)
-
+/*
+const resolvedType = computed<TimeKind>(() => {
+  if (mode.value === 'WORK') return TimeKind.WORK
+  if (mode.value === 'EXTRA') return TimeKind.EXTRA
+  return absenceForm.absenceType.value
+})*/
 watch(
   () => [props.entry, props.preset] as const,
   ([entry, preset]) => {
+
     currentEntryId.value = entry?.id ?? null
     currentType.value = entry?.type ?? null
+
     if (entry) {
-      if (
-        entry.type === TimeKind.WORK ||
-        entry.type === TimeKind.EXTRA
-      ) {
+
+      if ('projectId' in entry && entry.projectId) {
         const project = projectStore.getById(entry.projectId)
-        if (project) {
-          projectStore.select(project)
-        }
+        if (project) projectStore.select(project)
       }
-      if (entry.type === TimeKind.WORK) {
-        mode.value = 'WORK'
-      } else if (entry.type === TimeKind.EXTRA) {
-        mode.value = 'EXTRA'
-      } else {
-        mode.value = 'ABSENCE'
-      }
+
+      if (entry.type === TimeKind.WORK) mode.value = 'WORK'
+      else if (entry.type === TimeKind.EXTRA) mode.value = 'EXTRA'
+      else mode.value = 'ABSENCE'
+
       return
     }
+
     if (preset) {
       if (isWorkSuggestion(preset)) {
         mode.value = preset.type
         const project = projectStore.getById(preset.projectId)
-        if (project) {
-          projectStore.select(project)
-        }
+        if (project) projectStore.select(project)
       } else {
         mode.value = 'ABSENCE'
         absenceForm.absenceType.value = preset.type
       }
       return
     }
+
     mode.value = 'WORK'
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 watch(mode, (newMode, oldMode) => {
@@ -178,39 +179,30 @@ const currentEntryId = ref<string | null>(props.entry?.id ?? null)
 const currentType = ref<TimeKind | null>(props.entry?.type ?? null)
 
 async function onSave() {
+
   if (projectMissing.value) {
     alert('Please select a project')
     return
   }
 
-  const switchingBetweenTimeTypes =
+  const newType = resolvedType.value
+
+  const isTypeSwitch =
     currentEntryId.value &&
     currentType.value &&
-    currentType.value !== mode.value &&
-    (
-      currentType.value === TimeKind.WORK ||
-      currentType.value === TimeKind.EXTRA
-    )
+    currentType.value !== newType
 
   try {
 
-    // 🔥 SWITCH WORK <-> EXTRA
-    if (switchingBetweenTimeTypes) {
-      if (!currentEntryId.value) return
+    if (isTypeSwitch && currentEntryId.value) {
+
       await timeEntryStore.remove(currentEntryId.value)
 
-      const newEntry = await activeForm.value.save()
-
-      if (newEntry) {
-        currentEntryId.value = newEntry.id
-        currentType.value = newEntry.type
-        emit('saved', newEntry)
-      }
-
-      return
+      currentEntryId.value = null
+      currentType.value = null
+      activeForm.value.isEdit.value = false
     }
 
-    // 🔥 UPDATE або CREATE
     const entry = await activeForm.value.save()
 
     if (entry) {
@@ -226,10 +218,17 @@ async function onSave() {
 
 async function onDelete() {
 
+  if (!currentEntryId.value) return
+
   deleting.value = true
+
   try {
-    await activeForm.value.remove()
+    await timeEntryStore.remove(currentEntryId.value)
+    currentEntryId.value = null
+    currentType.value = null
     emit('deleted')
+  } catch (e) {
+    console.error('Delete failed', e)
   } finally {
     deleting.value = false
   }
