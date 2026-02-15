@@ -76,7 +76,8 @@ const suggestionsStore = useSuggestionsStore()
     if (
       e.type === TimeKind.SICK ||
       e.type === TimeKind.VAB ||
-      e.type === TimeKind.VACATION
+      e.type === TimeKind.VACATION ||
+      e.type === TimeKind.DAY_OFF
     ) {
       const absence: AbsenceDayEntry = {
         id: e.id,

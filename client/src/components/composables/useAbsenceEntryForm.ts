@@ -57,7 +57,7 @@ export function useAbsenceEntryForm(props: {
               type: TimeKind.DAY_OFF,
               comment: commentRef.value,
               startTime: '08:00',
-              endTime: '08:00',
+              endTime: '08:01',
               breakMinutes: 0,
             }
           : {
