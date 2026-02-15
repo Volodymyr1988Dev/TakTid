@@ -7,7 +7,7 @@ import { useExtraEntryForm } from '../../composables/useExtraEntryForm'
 import { useAbsenceEntryForm } from '../../composables/useAbsenceEntryForm'
 import { useEntryFormSelector } from '../../composables/useEntryFormSelector'
 import { useTimeEntryStore } from '../../../stores/timeEntry.store'
-//import { useProjectAssignmentStore } from '../../../stores/projectAssignment.store'
+import { useProjectAssignmentStore } from '../../../stores/projectAssignment.store'
 
 import type { DayEntry } from '../../../types/DayEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
@@ -41,7 +41,7 @@ const selectingProject = ref(false)
 
 const projectStore = useProjectStore()
 const timeEntryStore = useTimeEntryStore()
-//const projectAssignmentStore = useProjectAssignmentStore()
+const assignmentStore = useProjectAssignmentStore()
 
 const isTimeMode = computed(() => mode.value !== 'ABSENCE')
 
@@ -194,13 +194,20 @@ async function onSave() {
     )
 
   try {
-    if (switchingBetweenTimeTypes) {
-      await timeEntryStore.remove(originalEntryId.value)
+
+    if (switchingBetweenTimeTypes && originalEntryId.value) {
+
+      if (originalType.value === TimeKind.WORK) {
+        await timeEntryStore.remove(originalEntryId.value)
+      }
+
+      if (originalType.value === TimeKind.EXTRA) {
+        await assignmentStore.remove(originalEntryId.value)
+      }
 
       const newEntry = await activeForm.value.save()
 
       if (newEntry) emit('saved', newEntry)
-
       return
     }
 
