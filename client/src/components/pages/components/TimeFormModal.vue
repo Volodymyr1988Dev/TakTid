@@ -78,7 +78,8 @@ const absenceForm = useAbsenceEntryForm({
   entry: props.entry && (
     props.entry.type === TimeKind.SICK ||
     props.entry.type === TimeKind.VAB ||
-    props.entry.type === TimeKind.VACATION
+    props.entry.type === TimeKind.VACATION ||
+    props.entry.type === TimeKind.DAY_OFF
   )
     ? props.entry
     : null,
@@ -364,6 +365,11 @@ async function onDelete() {
           </option>
           <option 
             value="VACATION"
+          >
+            Vacation
+          </option>
+          <option 
+            value="DAY_OFF"
           >
             Vacation
           </option>
