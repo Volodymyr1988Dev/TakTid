@@ -23,7 +23,8 @@ function getTitle(entry: DayEntry) {
   if (
     entry.type === TimeKind.SICK ||
     entry.type === TimeKind.VAB ||
-    entry.type === TimeKind.VACATION
+    entry.type === TimeKind.VACATION ||
+    entry.type === TimeKind.DAY_OFF
   ) {
     return `Absence (${entry.type})`
   }
