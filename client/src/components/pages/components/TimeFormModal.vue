@@ -24,6 +24,7 @@ const props = defineProps<{
   date: string
   entry?: DayEntry | null
   preset?: TimeSuggestion | null
+  dayEntries?: DayEntry[]
 }>()
 
 const emit = defineEmits<{
@@ -61,12 +62,14 @@ const workForm = useWorkEntryForm({
   date: props.date,
   entry: props.entry && props.entry.type === TimeKind.WORK ? props.entry : null,
   projectId,
+  dayEntries: props.dayEntries,
 })
 
 const extraForm = useExtraEntryForm({
   date: props.date,
   entry: props.entry?.type === TimeKind.EXTRA ? props.entry : null,
   projectId,
+  //dayEntries: props.dayEntries,
 })
 
 const absenceForm = useAbsenceEntryForm({

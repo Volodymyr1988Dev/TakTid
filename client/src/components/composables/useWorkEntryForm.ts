@@ -7,11 +7,13 @@ import type { TimeEntryUpdatePayload } from '../../types/TimeEntryUpdatePayload.
 import { useTimeEntryImages } from './useTimeEntryImages'
 import { TimeKind } from '../../types/timeKind.enum'
 import type { WorkForm } from '../../types/Form.types'
+import type { DayEntry } from '../../types/DayEntry.type'
 
 export function useWorkEntryForm(props: {
   date: string
   entry?: WorkDayEntry | null
   projectId: Ref <string | null>
+  dayEntries?: DayEntry[]
 }) {
   const store = useTimeEntryStore()
   const images = useTimeEntryImages()
@@ -36,15 +38,44 @@ export function useWorkEntryForm(props: {
     return Number((minutes / 60).toFixed(2))
   })
 
+  function getNextDefaultTime() {
+    if (!props.entry && props.dayEntries?.length) {
+
+      const workEntries = props.dayEntries
+        .filter(e => e.type === TimeKind.WORK || e.type === TimeKind.EXTRA)
+        .sort((a, b) => a.startTime.localeCompare(b.startTime))
+
+      if (!workEntries.length) return
+
+      const last = workEntries[workEntries.length - 1]
+
+      if(!last) return
+      if (!last.endTime) return
+
+      startRef.value = normalizeTime(last.endTime)
+
+      const [h, m] = startRef.value.split(':').map(Number)
+
+      const newDate = new Date()
+      newDate.setHours(Number(h))
+      newDate.setMinutes(Number(m) + 90) 
+
+      const newH = String(newDate.getHours()).padStart(2, '0')
+      const newM = String(newDate.getMinutes()).padStart(2, '0')
+
+      endRef.value = `${newH}:${newM}`
+    }
+  }
+
 watch(
   () => props.entry,
   e => {
     if (!e) return
-
     startRef.value = normalizeTime(e.startTime ?? '08:00')
     endRef.value = normalizeTime(e.endTime ?? '17:00')
     breakMinutesRef.value = e.breakMinutes ?? 30
     commentRef.value = e.comment ?? ''
+    getNextDefaultTime()
   },
   { immediate: true }
 )
