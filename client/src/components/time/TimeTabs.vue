@@ -540,7 +540,7 @@ async function reloadCalendar () {
     :date="selectedDay.format('YYYY-MM-DD')"
     :preset="suggestionsStore.selected"
     :entry="editEntry"
-    :dayEntries="selectedDayEntries"
+    :day-entries="selectedDayEntries"
     @cancel="cancelModal"
     @deleted="reloadCalendar"
     @saved="onSaved"

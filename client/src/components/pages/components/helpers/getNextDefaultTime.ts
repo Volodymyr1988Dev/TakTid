@@ -1,31 +1,47 @@
-/*
-import { TimeKind } from "../../../../types/timeKind.enum"
-//import type { DayEntry } from "../../../../types/DayEntry.type"
+import { TimeKind } from '../../../../types/timeKind.enum'
+import type { DayEntry } from '../../../../types/DayEntry.type'
 
-export function getNextDefaultTime() {
-  if (!props.entry && props.dayEntries?.length) {
+export interface DefaultTimeResult {
+  start: string
+  end: string
+}
 
-    const workEntries = props.dayEntries
-      .filter(e => e.type === TimeKind.WORK || e.type === TimeKind.EXTRA)
-      .sort((a, b) => a.startTime.localeCompare(b.startTime))
+function normalizeTime(t: string): string {
+  return t.slice(0, 5)
+}
 
-    if (!workEntries.length) return
+export function getNextDefaultTime(
+  dayEntries?: DayEntry[],
+  durationMinutes = 90,
+): DefaultTimeResult | null {
+  if (!dayEntries?.length) return null
 
-    const last = workEntries[workEntries.length - 1]
+  const workEntries = dayEntries
+    .filter(
+      (e): e is DayEntry & { startTime: string; endTime: string } =>
+        (e.type === TimeKind.WORK || e.type === TimeKind.EXTRA) &&
+        !!e.startTime &&
+        !!e.endTime,
+    )
+    .sort((a, b) => a.startTime.localeCompare(b.startTime))
 
-    if (!last.endTime) return
+  if (!workEntries.length) return null
 
-    startRef.value = normalizeTime(last.endTime)
+  const last = workEntries[workEntries.length - 1]
+  if (!last?.endTime) return null
 
-    const [h, m] = startRef.value.split(':').map(Number)
+  const start = normalizeTime(last.endTime)
 
-    const newDate = new Date()
-    newDate.setHours(h)
-    newDate.setMinutes(m + 60)
+  const [h, m] = start.split(':').map(Number)
 
-    const newH = String(newDate.getHours()).padStart(2, '0')
-    const newM = String(newDate.getMinutes()).padStart(2, '0')
+  const date = new Date()
+  date.setHours(Number(h))
+  date.setMinutes(Number(m) + durationMinutes)
 
-    endRef.value = `${newH}:${newM}`
-  }
-}*/
+  const end =
+    String(date.getHours()).padStart(2, '0') +
+    ':' +
+    String(date.getMinutes()).padStart(2, '0')
+
+  return { start, end }
+}

@@ -8,6 +8,7 @@ import { useTimeEntryImages } from './useTimeEntryImages'
 import { TimeKind } from '../../types/timeKind.enum'
 import type { WorkForm } from '../../types/Form.types'
 import type { DayEntry } from '../../types/DayEntry.type'
+import { getNextDefaultTime } from '../pages/components/helpers/getNextDefaultTime'
 
 export function useWorkEntryForm(props: {
   date: string
@@ -37,7 +38,7 @@ export function useWorkEntryForm(props: {
     )
     return Number((minutes / 60).toFixed(2))
   })
-
+/*
   function getNextDefaultTime() {
     if (!props.entry && props.dayEntries?.length) {
 
@@ -66,7 +67,7 @@ export function useWorkEntryForm(props: {
       endRef.value = `${newH}:${newM}`
     }
   }
-
+*//*
 watch(
   () => props.entry,
   e => {
@@ -78,6 +79,32 @@ watch(
     commentRef.value = e.comment ?? ''
   },
   { immediate: true }
+)
+*/
+watch(
+  () => props.entry,
+  (e) => {
+    // EDIT
+    if (e) {
+      startRef.value = normalizeTime(e.startTime ?? '08:00')
+      endRef.value = normalizeTime(e.endTime ?? '17:00')
+      breakMinutesRef.value = e.breakMinutes ?? 30
+      commentRef.value = e.comment ?? ''
+      return
+    }
+
+    // CREATE
+    const defaults = getNextDefaultTime(props.dayEntries)
+
+    if (defaults) {
+      startRef.value = defaults.start
+      endRef.value = defaults.end
+    } else {
+      startRef.value = '08:00'
+      endRef.value = '17:00'
+    }
+  },
+  { immediate: true },
 )
 
   const start = computed({

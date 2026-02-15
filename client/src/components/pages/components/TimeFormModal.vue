@@ -8,6 +8,7 @@ import { useAbsenceEntryForm } from '../../composables/useAbsenceEntryForm'
 import { useEntryFormSelector } from '../../composables/useEntryFormSelector'
 import { useTimeEntryStore } from '../../../stores/timeEntry.store'
 import { useProjectAssignmentStore } from '../../../stores/projectAssignment.store'
+import { deleteByType } from './helpers/deleteByType'
 
 import type { DayEntry } from '../../../types/DayEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
@@ -200,13 +201,10 @@ async function onSave() {
 
     if (switchingBetweenTimeTypes && originalEntryId.value) {
 
-      if (originalType.value === TimeKind.WORK) {
-        await timeEntryStore.remove(originalEntryId.value)
-      }
-
-      if (originalType.value === TimeKind.EXTRA) {
-        await assignmentStore.remove(originalEntryId.value)
-      }
+      await deleteByType(originalType.value, originalEntryId.value, {
+        timeEntryStore,
+        assignmentStore,
+      })
 
       const newEntry = await activeForm.value.save()
 
