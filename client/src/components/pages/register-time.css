@@ -124,7 +124,3 @@
   cursor: pointer;
   color: #111827;
 }
-.project-card .info{
-  display: flex;
-  justify-content: space-around;
-}
