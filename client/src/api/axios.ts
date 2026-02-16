@@ -1,5 +1,6 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '../stores/auth.store';
+import { refresh } from './auth.api';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -18,19 +19,25 @@ api.interceptors.response.use(
       | (InternalAxiosRequestConfig & { _retry?: boolean })
       | undefined
 
-    if (!originalRequest) {
-      return Promise.reject(error)
-    }
-
+    if (!originalRequest) {return Promise.reject(error)}
+    //let isRefreshing = false
     const requestUrl = originalRequest.url ?? ''
 
-    const isAuthRoute = requestUrl.startsWith('/auth/')
+    //const isAuthRoute = requestUrl.startsWith('/auth/')
 
-    if (isAuthRoute) {
+    //if (isAuthRoute) {
+    //  return Promise.reject(error)
+    //}
+    //if (originalRequest.url?.startsWith('/auth/')) {
+    //  return Promise.reject(error)
+    //}
+    if (requestUrl.startsWith('/auth/')) {
       return Promise.reject(error)
     }
-
     if (error.response?.status !== 401) {
+      return Promise.reject(error)
+    }
+    if (!authStore.isInitialized || !authStore.isAuthenticated) {
       return Promise.reject(error)
     }
 
@@ -39,22 +46,26 @@ api.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    if (!authStore.isAuthenticated) {
-      return Promise.reject(error)
-    }
+    //if (!authStore.isAuthenticated) {
+    //  return Promise.reject(error)
+    //}
 
     originalRequest._retry = true
 
     try {
       if (!isRefreshing) {
         isRefreshing = true
-
-        refreshPromise = api
-          .post('/auth/refresh')
-          .then(() => {})
-          .finally(() => {
-            isRefreshing = false
-            refreshPromise = null
+         refreshPromise = refresh()
+         .then(() => {})  
+         .finally(() => {
+          isRefreshing = false
+          refreshPromise = null
+        //refreshPromise = api
+        //  .post('/auth/refresh')
+        //  .then(() => {})
+        //  .finally(() => {
+        //    isRefreshing = false
+        //    refreshPromise = null
           })
       }
 

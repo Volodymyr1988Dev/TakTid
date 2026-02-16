@@ -47,14 +47,14 @@ router.beforeEach(async (to) => {
   if (!auth.isInitialized) {
     await auth.initAuth()
   }
-  if (to.meta.requiresAdmin && !auth.user?.isAdmin) {
-    return '/dashboard'
-  }
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return '/login'
   }
 
   if (to.meta.guestOnly && auth.isAuthenticated) {
+    return '/dashboard'
+  }
+  if (to.meta.requiresAdmin && !auth.user?.isAdmin) {
     return '/dashboard'
   }
   return true

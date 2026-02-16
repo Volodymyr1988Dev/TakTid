@@ -76,10 +76,10 @@ button {
   height: 56px;
   padding: 4px 8px;
 
-  background: #f6f5f2;
+  background: transparent; /*#f6f5f2   var(--bg)  rgb(246, 245, 242)*/
   border-top: 1px solid #e2e8f0;
 
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+  /*box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);*/
 
   z-index: 500;
 }

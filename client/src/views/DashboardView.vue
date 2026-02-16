@@ -18,6 +18,8 @@ const isAdmin = computed(() => {
 })
 const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
 //const selectedProjectId = ref<string | null>(null)
+
+//week-day.today backrond-color #ede7f6  #6d9cdecc  #78a5e2  #9baae2b5
 </script>
 
 <template>

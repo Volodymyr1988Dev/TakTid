@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import api from '../api/axios'
 import type { User } from '../types/userInterface'
+import * as authApi from '../api/auth.api'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -13,13 +13,14 @@ export const useAuthStore = defineStore('auth', () => {
 
    function clearAuth() {
     user.value = null
-    accessToken.value = null
+    //accessToken.value = null
     //localStorage.removeItem('access_token')
   }
 
   async function initAuth() {
   try {
-    const { data } = await api.get('/auth/me')
+    await authApi.refresh()
+    const {data} = await authApi.me()
     user.value = data
   } catch {
     clearAuth()
@@ -27,14 +28,25 @@ export const useAuthStore = defineStore('auth', () => {
     isInitialized.value = true
   }
 }
-
+/*
+  async function initialize() {
+    try {
+      await authApi.refresh //api.post('/auth/refresh')
+      this.isAuthenticated = true
+    } catch {
+      this.clearAuth()
+    } finally {
+      this.isInitialized = true
+    }
+  }
+ */   
   async function fetchMe() {
     //if (isInitialized.value) return
 
     try {
       isLoading.value = true
       //const { data } = await api.get<User>('/auth/me')
-      const { data } = await api.get('/auth/me')
+      const { data } = await authApi.me() //api.get('/auth/me')
       user.value = data
       console.log(data,'data from fetchMe');
     } catch {
@@ -47,8 +59,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
   async function login(payload: { email: string, password: string }) {
   //async function login() {
-    await api.post('/auth/login', payload)
-    await fetchMe()
+    await authApi.login(payload)
+    const { data } = await authApi.me()
+    user.value = data
+    //await api.post('/auth/login', payload)
+    //await fetchMe()
     //const { data } = await api.post('/auth/login', payload)
     
 
@@ -68,7 +83,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout() {
     try {
-      await api.post('/auth/logout')
+      await authApi.logout() //api.post('/auth/logout')
     } finally {
       //user.value = null
       //accessToken.value = null

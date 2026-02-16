@@ -43,8 +43,8 @@ async function onLogout() {
   align-items: center;
 
   padding: 0 16px;
-  background: #fff;
-  border-bottom: 1px solid #e5e5e5;
+  background: transparent;
+  /*border-bottom: 1px solid #e5e5e5;*/
   z-index: 100;
 }
 
