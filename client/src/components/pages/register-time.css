@@ -39,6 +39,8 @@
 /* ===== CARD ===== */
 .card,
 .project-card {
+  display: flex;
+  justify-content: space-between;
   position: relative;
   background: #fff;
   border-radius: 16px; /* ✅ radius 16px */

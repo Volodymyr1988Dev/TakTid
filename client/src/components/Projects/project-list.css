@@ -23,6 +23,8 @@
 
 /* CARD */
 .project-card {
+  display: flex;
+  justify-content: space-between;
   background: #fff;
   border-radius: 18px;
   overflow: hidden;
