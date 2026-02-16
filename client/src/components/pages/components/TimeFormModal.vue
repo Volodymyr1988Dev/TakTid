@@ -361,7 +361,8 @@ async function onDelete() {
       <textarea
         v-model="activeForm.comment.value"
         placeholder="Comment"
-      ></textarea>
+      >
+      </textarea>
       <p 
         v-if="absence?.error?.value" 
         class="warning"
