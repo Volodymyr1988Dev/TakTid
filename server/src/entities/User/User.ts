@@ -1,12 +1,14 @@
 import {
   Column,
-  //CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Index,
   OneToMany,
-  //OneToOne,
+  CreateDateColumn,
   PrimaryGeneratedColumn,
-  //UpdateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { ProjectAssignment } from '../Project/ProjectAssignment';
@@ -48,13 +50,27 @@ export class User {
     description: 'Creation date of the user record',
     example: '2023-01-01T00:00:00.000Z',
   })
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt!: Date;
 
   @ApiProperty({
     description: 'If user have admin role',
     example: false,
   })
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt!: Date;
+
+  @DeleteDateColumn({ nullable: true, type: 'timestamp' })
+  @Index()
+  deletedAt!: Date | null;
+
+  @Column({ nullable: true })
+  deletedByUserId?: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'deletedByUserId' })
+  deletedByUser?: User;
+
   @Column({ type: 'boolean', default: false })
   isAdmin!: boolean;
   @OneToMany(() => ProjectAssignment, (assignment) => assignment.user)

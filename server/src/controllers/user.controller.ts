@@ -81,9 +81,13 @@ export class UserController {
   @ApiParam({ name: 'id', type: 'string', description: 'User ID' })
   @ApiResponse({ status: 200, description: 'User deleted' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async remove(@Param('id') id: string) {
-    const result = await this.userService.remove(id);
-    if (result.affected === 0) {
+  async remove(@Param('id') id: string, @Req() req: AuthRequest) {
+    const adminId = req.user?.id;
+    if (!adminId) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+    const result = await this.userService.remove(id, adminId);
+    if (result.message.includes('not found')) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     return { message: `User ${id} deleted successfully` };

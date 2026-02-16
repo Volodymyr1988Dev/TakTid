@@ -49,6 +49,11 @@ export class AuthGuard implements CanActivate {
       if (!session) {
         throw new UnauthorizedException('Session not found');
       }
+
+      if (session.user.deletedAt) {
+        throw new UnauthorizedException('User account deleted');
+      }
+
       if (session.expires_at < new Date()) {
         throw new UnauthorizedException('Session expired');
       }

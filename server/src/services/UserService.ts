@@ -44,7 +44,25 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  async remove(id: string) {
-    return this.userRepository.delete(id);
+  //async remove(id: string) {
+  //  return this.userRepository.delete(id);
+  //}
+  async remove(id: string, deletedByUserId?: string) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (deletedByUserId) {
+      user.deletedByUserId = deletedByUserId;
+      await this.userRepository.save(user);
+    }
+
+    await this.userRepository.softDelete(id);
+
+    return { message: `User ${id} soft deleted successfully` };
   }
 }
