@@ -86,7 +86,6 @@ function onProjectCreated(project: Project) {
           @deleted="removeProject"
           @select="onProjectClick(p)"
         />
-        <!--@upload="openPhotoModal"-->>
       </div>
     </div>
 
