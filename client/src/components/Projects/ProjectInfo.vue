@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-//import api from '../../api/axios'
 import { getProjectStats } from '../../api/projectStats.api'
 import { useProjectImageStore } from '../../stores/projectImage.store'
 
@@ -79,10 +78,8 @@ function openFullscreen(url: string) {
 function closeFullscreen() {
   fullscreenUrl.value = null
 }
-//const lazyImages = ref<HTMLImageElement[]>([])
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
-//const totalAll = computed(() => stats.value?.total.all ?? 0)
 const totalAll = computed(() => {
   return (stats.value?.total.work ?? 0) + (stats.value?.total.extra ?? 0)
 })
