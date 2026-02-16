@@ -16,7 +16,7 @@ const isAdmin = computed(() => {
   if (!auth.isInitialized) return false
   return auth.user?.isAdmin === true
 })
-const globalLoading = ref(false)
+//const globalLoading = ref(false)
 const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
 //const selectedProjectId = ref<string | null>(null)
 
@@ -24,13 +24,8 @@ const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
 </script>
 
 <template>
-  <div 
-    v-if="globalLoading" 
-    class="overlay"
-  >
-    <div class="spinner">
-      Please wait, saving…
-    </div>
+  <div class="spinner">
+    Please wait, saving…
   </div>
   <AppHeader />
   <div 

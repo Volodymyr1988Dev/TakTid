@@ -57,38 +57,41 @@ const hasAbsence = props.dayEntries?.some(
   async function save(): Promise<AbsenceDayEntry> {
     isSavingRef.value = true
     errorRef.value = null
-    const existingAbsences =
-    props.dayEntries?.filter(
-      (e) =>
-        e.type === TimeKind.SICK ||
-        e.type === TimeKind.VAB ||
-        e.type === TimeKind.VACATION ||
-        e.type === TimeKind.DAY_OFF,
-    ) ?? []
-    if (!props.entry && isFullDayCovered(props.dayEntries)) {
-        throw new Error(
-          'Unavailable to create absence, because you have working time all day'
-        )
-    }
-    //const lastEnd = getLastWorkEnd(props.dayEntries)
-    const { missingMinutes, lastEnd } =
-    calculateMissingWorkTime(props.dayEntries)
-  if (!props.entry && existingAbsences.length > 0) {
-    //throw new Error('Only one absence entry is allowed per day')
-    errorRef.value =
-        'Two absence entries are not allowed in one day'
-      return Promise.reject()
-  }
-  if (!props.entry && missingMinutes <= 0) {
-    //throw new Error('Day already contains 8 hours of work')
-    errorRef.value =
-        'Day already contains 8 working hours'
-      return Promise.reject()
-  }
-
-  const start = normalizeTime(lastEnd) ?? '09:00'
-  const end = normalizeTime(addMinutes(start, missingMinutes))
+    
     try {
+      const allEntries = props.dayEntries ?? []//store.getByDate(props.date)
+      const existingAbsences =
+      //props.dayEntries?.filter(
+      allEntries.filter(
+        (e) =>
+          e.type === TimeKind.SICK ||
+          e.type === TimeKind.VAB ||
+          e.type === TimeKind.VACATION ||
+          e.type === TimeKind.DAY_OFF,
+      ) ?? []
+      if (!props.entry && isFullDayCovered(allEntries/*props.dayEntries*/)) {
+          throw new Error(
+            'Unavailable to create absence, because you have working time all day'
+          )
+      }
+      //const lastEnd = getLastWorkEnd(props.dayEntries)
+      const { missingMinutes, lastEnd } =
+      calculateMissingWorkTime(allEntries)//(props.dayEntries)
+    if (!props.entry && existingAbsences.length > 0) {
+      //throw new Error('Only one absence entry is allowed per day')
+      errorRef.value =
+          'Two absence entries are not allowed in one day'
+        return Promise.reject()
+    }
+    if (!props.entry && missingMinutes <= 0) {
+      //throw new Error('Day already contains 8 hours of work')
+      errorRef.value =
+          'Day already contains 8 working hours'
+        return Promise.reject()
+    }
+
+    const start = normalizeTime(lastEnd) ?? '09:00'
+    const end = normalizeTime(addMinutes(start, missingMinutes))
       const payload =
         kindRef.value === TimeKind.DAY_OFF
           ? {
