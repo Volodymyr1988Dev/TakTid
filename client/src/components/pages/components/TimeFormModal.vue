@@ -245,9 +245,10 @@ async function onDelete() {
           {{ activeForm.isEdit.value ? 'Edit time' : 'Register time' }}
         </template>
       </h3>
-
       <p>
-        <strong>Date:</strong>
+        <strong>
+          Date:
+        </strong>
         {{ date }}
       </p>
 
@@ -360,7 +361,7 @@ async function onDelete() {
       <textarea
         v-model="activeForm.comment.value"
         placeholder="Comment"
-      />
+      ></textarea>
       <p 
         v-if="absence?.error?.value" 
         class="warning"
