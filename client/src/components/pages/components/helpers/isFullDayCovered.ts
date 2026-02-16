@@ -23,5 +23,5 @@ export function isFullDayCovered(dayEntries?: DayEntry[]): boolean {
     )
   }, 0)
 
-  return totalMinutes >= 9 * 60
+  return totalMinutes >= 8 * 60
 }

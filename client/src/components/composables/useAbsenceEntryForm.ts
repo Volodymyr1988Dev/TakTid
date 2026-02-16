@@ -5,7 +5,9 @@ import { TimeKind } from '../../types/timeKind.enum'
 import type { AbsenceForm,AbsenceKind } from '../../types/Form.types'
 import type { DayEntry } from '../../types/DayEntry.type'
 import { isFullDayCovered } from '../pages/components/helpers/isFullDayCovered'
-import { getLastWorkEnd } from '../pages/components/helpers/getLastWorkEnd'
+//import { getLastWorkEnd } from '../pages/components/helpers/getLastWorkEnd'
+import { calculateMissingWorkTime } from '../pages/components/helpers/calculateMissingWorkTime'
+import { addMinutes, normalizeTime } from '../pages/components/helpers/time'
 
 export function useAbsenceEntryForm(props: {
   date: string
@@ -42,6 +44,13 @@ export function useAbsenceEntryForm(props: {
   get: () => kindRef.value,
   set: (v: AbsenceKind) => (kindRef.value = v),
 })
+const hasAbsence = props.dayEntries?.some(
+  (e) =>
+    e.type === TimeKind.SICK ||
+    e.type === TimeKind.VAB ||
+    e.type === TimeKind.VACATION ||
+    e.type === TimeKind.DAY_OFF,
+)
   async function save(): Promise<AbsenceDayEntry> {
     isSavingRef.value = true
     if (!props.entry && isFullDayCovered(props.dayEntries)) {
@@ -49,7 +58,18 @@ export function useAbsenceEntryForm(props: {
           'Unavailable to create absence, because you have working time all day'
         )
     }
-    const lastEnd = getLastWorkEnd(props.dayEntries)
+    //const lastEnd = getLastWorkEnd(props.dayEntries)
+    const { missingMinutes, lastEnd } =
+    calculateMissingWorkTime(props.dayEntries)
+  if (!props.entry && hasAbsence) {
+    throw new Error('Only one absence entry is allowed per day')
+  }
+  if (!props.entry && missingMinutes <= 0) {
+    throw new Error('Day already contains 8 hours of work')
+  }
+
+  const start = lastEnd ?? '09:00'
+  const end = normalizeTime(addMinutes(start, missingMinutes))
     try {
       const payload =
         kindRef.value === TimeKind.DAY_OFF
@@ -63,9 +83,11 @@ export function useAbsenceEntryForm(props: {
           : {
               type: kindRef.value,
               comment: commentRef.value,
-              startTime: lastEnd ?? '08:00',
-              endTime: '17:00',
-              breakMinutes: 60,
+              //startTime: lastEnd ?? '08:00',
+              startTime: start ?? '09:00',
+              //endTime: '17:00',
+              endTime: end ?? '17:00',
+              breakMinutes: 0,
             }
       const saved = props.entry
         ? await store.update(props.entry.id, payload)

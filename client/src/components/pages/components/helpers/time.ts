@@ -40,3 +40,12 @@ export function toTimeString(minutes: number): string {
 
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
+
+export function addMinutes(time: string, minutes: number): string {
+  const [h, m] = time.split(':').map(Number)
+  const total = Number(h) * 60 + Number(m) + minutes
+  const newH = Math.floor(total / 60)
+  const newM = total % 60
+
+  return `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`
+}

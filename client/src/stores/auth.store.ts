@@ -7,14 +7,12 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const accessToken = ref<string | null>(null)
   const isLoading = ref(false)
-  const isInitialized = ref(false) // ✅ FIX
+  const isInitialized = ref(false)
 
   const isAuthenticated = computed(() => !!user.value)
 
    function clearAuth() {
     user.value = null
-    //accessToken.value = null
-    //localStorage.removeItem('access_token')
   }
 
   async function initAuth() {
@@ -45,37 +43,19 @@ export const useAuthStore = defineStore('auth', () => {
 
     try {
       isLoading.value = true
-      //const { data } = await api.get<User>('/auth/me')
-      const { data } = await authApi.me() //api.get('/auth/me')
+      const { data } = await authApi.me()
       user.value = data
-      console.log(data,'data from fetchMe');
     } catch {
-      //user.value = null
       clearAuth()
     } finally {
       isLoading.value = false
-      isInitialized.value = true // ✅ FIX
+      isInitialized.value = true
     }
   }
   async function login(payload: { email: string, password: string }) {
-  //async function login() {
     await authApi.login(payload)
     const { data } = await authApi.me()
     user.value = data
-    //await api.post('/auth/login', payload)
-    //await fetchMe()
-    //const { data } = await api.post('/auth/login', payload)
-    
-
-    //const refreshed = await api.post('/auth/refresh')
-    //user.value = data.user
-    //accessToken.value = data.token
-    //accessToken.value = data.token
-    //user.value = data.user
-    //if (data.accessToken) {
-    //  localStorage.setItem('access_token', data.accessToken)
-    //  console.log('access_token:', localStorage.getItem(data.accessToken))
-    //}
   }
   function setUser(newUser: User) {
     user.value = newUser
@@ -83,10 +63,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout() {
     try {
-      await authApi.logout() //api.post('/auth/logout')
+      await authApi.logout()
     } finally {
-      //user.value = null
-      //accessToken.value = null
       clearAuth()
     }
   }
@@ -96,7 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken,
     isLoading,
     isAuthenticated,
-    isInitialized, // ✅
+    isInitialized,
     fetchMe,
     initAuth,
     setUser,

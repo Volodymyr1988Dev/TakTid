@@ -3,5 +3,5 @@ import { User } from '../../entities/User/User';
 
 export class CreateSessionDto {
   @ApiProperty({ type: () => User })
-  user: User;
+  user!: User;
 }
