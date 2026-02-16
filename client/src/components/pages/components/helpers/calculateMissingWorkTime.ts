@@ -1,6 +1,5 @@
 import type { DayEntry, WorkDayEntry, ExtraDayEntry } from '../../../../types/DayEntry.type'
 import { TimeKind } from '../../../../types/timeKind.enum'
-//import { toMinutes } from './time'
 import { calculateWorkedMinutes } from './time'
 
 const FULL_DAY_MINUTES = 8 * 60
@@ -18,24 +17,13 @@ export function calculateMissingWorkTime(dayEntries?: DayEntry[]) {
       e.type === TimeKind.WORK ||
       e.type === TimeKind.EXTRA,
   )
-  console.log('Work entries:', workEntries)
 
   if (!workEntries.length) {
-    console.log('No work entries, full day missing')
     return {
       missingMinutes: FULL_DAY_MINUTES,
       lastEnd: '09:00',
     }
   }
-
-/*
-  if (workEntries.length === 0) {
-    return {
-      missingMinutes: FULL_DAY_MINUTES,
-      lastEnd: '09:00',
-    }
-  }
-*/
   const workedMinutes = workEntries.reduce((sum, e) => {
     if (!e.startTime || !e.endTime) return sum
     const duration = calculateWorkedMinutes(
@@ -43,20 +31,15 @@ export function calculateMissingWorkTime(dayEntries?: DayEntry[]) {
         e.endTime,
         e.breakMinutes ?? 0
     )
-    //return sum + (toMinutes(e.endTime) - toMinutes(e.startTime))
-    console.log(duration, 'duration for entry', e)
     return sum + duration
   }, 0)
 
   const sorted = [...workEntries].sort((a, b) =>
     a.startTime.localeCompare(b.startTime),
   )
-  //const lastEnd = sorted[sorted.length - 1].endTime
   const lastEntry = sorted[sorted.length - 1]
   const lastEnd =
     lastEntry?.endTime ?? '09:00'
-  //if (!lastEnd) return null
-  console.log ('Last end time:', lastEnd)
   return {
     missingMinutes: Math.max(FULL_DAY_MINUTES - workedMinutes, 0),
     lastEnd,

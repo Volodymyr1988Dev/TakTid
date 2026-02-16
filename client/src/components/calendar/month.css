@@ -26,11 +26,11 @@
 .day-hours {
   margin-top: 4px;
   font-size: 11px;
-  color: #6a1b9a;
+  color: #6a1b9a;  /* #6a1b9a */
 }
 
 .day.today {
-  background: #e1bee7;
+  background: #a2baee; /* #e1bee7 */
 }
 
 .day.muted {

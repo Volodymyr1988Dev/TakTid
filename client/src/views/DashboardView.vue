@@ -24,9 +24,6 @@ const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
 </script>
 
 <template>
-  <div class="spinner">
-    Please wait, saving…
-  </div>
   <AppHeader />
   <div 
     v-if="!auth.isInitialized" 
@@ -36,8 +33,6 @@ const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
   </div>
   <div class="page">
     <TimeTab v-if="bottomTab === 'time'" />
-    <!--@open-details="id => projectNav.openProject(id)"
-    @open-details=" projectNav.openProject"-->
     <ProjectsTab
       v-else-if="bottomTab === 'projects' && !projectNav.selectedProjectId"
       mode="details"

@@ -9,17 +9,13 @@ import { useEntryFormSelector } from '../../composables/useEntryFormSelector'
 import { useTimeEntryStore } from '../../../stores/timeEntry.store'
 import { useProjectAssignmentStore } from '../../../stores/projectAssignment.store'
 import { deleteByType } from './helpers/deleteByType'
-
 import type { DayEntry } from '../../../types/DayEntry.type'
 import type { TimeSuggestion } from '../../../types/Suggestion.type'
-//import { EntryState } from '../../../types/EntryState'
 import type { AbsenceForm, EntryMode, TimeForm } from '../../../types/Form.types'
-//import type { WorkForm, ExtraForm } from '../../../types/Form.types'
 import { isWorkSuggestion  } from '../../../types/suggestion.guard'
 import { TimeKind } from '../../../types/timeKind.enum'
 import ProjectTab from '../../Projects/ProjectTab.vue'
 
-/* ================= props / emits ================= */
 
 const props = defineProps<{
   date: string
@@ -34,12 +30,9 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-/* ================= mode ================= */
 
 const mode = ref<EntryMode>('WORK')
 const selectingProject = ref(false)
-//const projectSelected = computed(() => !!projectStore.selectedProject)
-/* ================= project ================= */
 
 const projectStore = useProjectStore()
 const timeEntryStore = useTimeEntryStore()
@@ -57,8 +50,6 @@ const projectMissing = computed(
   () => isTimeMode.value && !projectId.value,
 )
 
-/* ================= forms ================= */
-
 const workForm = useWorkEntryForm({
   date: props.date,
   entry: props.entry && props.entry.type === TimeKind.WORK ? props.entry : null,
@@ -70,7 +61,6 @@ const extraForm = useExtraEntryForm({
   date: props.date,
   entry: props.entry?.type === TimeKind.EXTRA ? props.entry : null,
   projectId,
-  //dayEntries: props.dayEntries,
 })
 
 const absenceForm = useAbsenceEntryForm({
@@ -93,7 +83,6 @@ const activeForm = useEntryFormSelector(mode, {
 })
 
 const timeForm = computed<TimeForm | null>(() => {
-  //return activeForm.value.kind === 'ABSENCE'
   return activeForm.value.mode === 'ABSENCE'
     ? null
     : activeForm.value
@@ -104,17 +93,10 @@ const absence = computed<AbsenceForm | null>(() => {
     ? activeForm.value
     : null
 })
-/* ================= derived ================= */
 
 const isSaving = computed(() => activeForm.value.isSaving.value)
 const deleting = ref(false)
 const isBlocking = computed(() => isSaving.value || deleting.value)
-/*
-const resolvedType = computed<TimeKind>(() => {
-  if (mode.value === 'WORK') return TimeKind.WORK
-  if (mode.value === 'EXTRA') return TimeKind.EXTRA
-  return absenceForm.absenceType.value
-})*/
 watch(
   () => [props.entry, props.preset] as const,
   ([entry, preset]) => {
@@ -181,11 +163,8 @@ function onProjectSelected(suggestion: TimeSuggestion) {
 
 const originalEntryId = computed(() => props.entry?.id ?? null)
 const originalType = computed(() => props.entry?.type ?? null)
-//const currentEntryId = ref<string | null>(props.entry?.id ?? null)
-//const currentType = ref<TimeKind | null>(props.entry?.type ?? null)
 
 async function onSave() {
-  //globalLoading.value = true
   if (projectMissing.value) {
     alert('Please select a project')
     return

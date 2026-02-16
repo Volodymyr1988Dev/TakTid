@@ -19,8 +19,8 @@
 }
 
 .tabs .active {
-  background: #e1bee7;
-  color: #4a148c;
+  background: #5c86e1; /* #e1bee7 */
+  color: white; /* #4a148c */
 }
 
 .week-grid,
