@@ -476,4 +476,7 @@ onMounted(load)
   margin-bottom:20px;
   background:white;
 }
+.header {
+  background-color: #2563eb;
+}
 </style>
