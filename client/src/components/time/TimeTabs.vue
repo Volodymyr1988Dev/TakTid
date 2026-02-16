@@ -266,25 +266,10 @@ function cancelModal() {
 
 async function onSaved(/*entry: DayEntry*/) {
   editEntry.value = null
-  //selectedSuggestion.value = null
-  /*
-   const index = entries.value.findIndex(e => e.id === entry.id)
-
-  if (index === -1) {
-    // 🟢 CREATE
-    entries.value.push(entry)
-  } else {
-    // 🟡 UPDATE
-    entries.value[index] = entry
-  }
-
-  entries.value = [...entries.value]
-  */
   suggestionsStore.clear()
   
   await loadEntries()
   view.value = 'calendar'
-  //await loadEntries()
   
 }
 
@@ -305,34 +290,15 @@ function next() {
 function addWork() {
   editEntry.value = null
   suggestionsStore.clear()
-  //selectedSuggestion.value = {
-  /*
-  suggestionsStore.select({
-    type: TimeKind.WORK,
-    title: 'Work',
-    projectId: projectStore.selectedProject.id
-  })*/
   view.value = 'tabs'
 }
 
 async function reloadCalendar () {
   editEntry.value = null
-  //selectedSuggestion.value = null
 
   await loadEntries()
   view.value = 'calendar'
 }
-
-/*
-<TimeFormModal
-    v-else-if="view === 'modal' && selectedDay"
-    :date="selectedDay.format('YYYY-MM-DD')"
-    :preset="selectedSuggestion"
-    :entry="editEntry"
-    @cancel="cancelModal"
-    @deleted="reloadCalendar"
-    @saved="onSaved"
-  />*/
 </script>
 
 <template>
