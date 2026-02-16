@@ -16,11 +16,13 @@ export function isFullDayCovered(dayEntries?: DayEntry[]): boolean {
   const totalMinutes = workEntries.reduce((sum: number, e) => {
     if (!('startTime' in e) || !('endTime' in e)) return sum
     if (!e.startTime || !e.endTime) return sum
+    const duration =
+      toMinutes(e.endTime) -
+      toMinutes(e.startTime) -
+      (e.breakMinutes ?? 0)
 
-    return (
-      sum +
-      (toMinutes(e.endTime) - toMinutes(e.startTime))
-    )
+    return sum + Math.max(duration, 0)
+    //return (sum +(toMinutes(e.endTime) - toMinutes(e.startTime)))
   }, 0)
 
   return totalMinutes >= 8 * 60

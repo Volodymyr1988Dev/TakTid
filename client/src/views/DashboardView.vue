@@ -16,13 +16,22 @@ const isAdmin = computed(() => {
   if (!auth.isInitialized) return false
   return auth.user?.isAdmin === true
 })
+const globalLoading = ref(false)
 const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
 //const selectedProjectId = ref<string | null>(null)
 
-//week-day.today backrond-color #ede7f6  #6d9cdecc  #78a5e2  #9baae2b5
+//week-day.today background-color #ede7f6  #6d9cdecc  #78a5e2  #9baae2b5
 </script>
 
 <template>
+  <div 
+    v-if="globalLoading" 
+    class="overlay"
+  >
+    <div class="spinner">
+      Please wait, saving…
+    </div>
+  </div>
   <AppHeader />
   <div 
     v-if="!auth.isInitialized" 

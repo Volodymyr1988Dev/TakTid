@@ -20,6 +20,8 @@ export function useAbsenceEntryForm(props: {
   )
   const commentRef = ref(props.entry?.comment ?? '')
   const isSavingRef = ref(false)
+  const errorRef = ref<string | null>(null)
+  //const error = computed(() => errorRef.value)
   const comment = computed({
     get: () => commentRef.value,
     set: v => (commentRef.value = v),
@@ -44,15 +46,25 @@ export function useAbsenceEntryForm(props: {
   get: () => kindRef.value,
   set: (v: AbsenceKind) => (kindRef.value = v),
 })
+/*
 const hasAbsence = props.dayEntries?.some(
   (e) =>
     e.type === TimeKind.SICK ||
     e.type === TimeKind.VAB ||
     e.type === TimeKind.VACATION ||
     e.type === TimeKind.DAY_OFF,
-)
+)*/
   async function save(): Promise<AbsenceDayEntry> {
     isSavingRef.value = true
+    errorRef.value = null
+    const existingAbsences =
+    props.dayEntries?.filter(
+      (e) =>
+        e.type === TimeKind.SICK ||
+        e.type === TimeKind.VAB ||
+        e.type === TimeKind.VACATION ||
+        e.type === TimeKind.DAY_OFF,
+    ) ?? []
     if (!props.entry && isFullDayCovered(props.dayEntries)) {
         throw new Error(
           'Unavailable to create absence, because you have working time all day'
@@ -61,11 +73,17 @@ const hasAbsence = props.dayEntries?.some(
     //const lastEnd = getLastWorkEnd(props.dayEntries)
     const { missingMinutes, lastEnd } =
     calculateMissingWorkTime(props.dayEntries)
-  if (!props.entry && hasAbsence) {
-    throw new Error('Only one absence entry is allowed per day')
+  if (!props.entry && existingAbsences.length > 0) {
+    //throw new Error('Only one absence entry is allowed per day')
+    errorRef.value =
+        'Two absence entries are not allowed in one day'
+      return Promise.reject()
   }
   if (!props.entry && missingMinutes <= 0) {
-    throw new Error('Day already contains 8 hours of work')
+    //throw new Error('Day already contains 8 hours of work')
+    errorRef.value =
+        'Day already contains 8 working hours'
+      return Promise.reject()
   }
 
   const start = normalizeTime(lastEnd) ?? '09:00'
@@ -116,6 +134,7 @@ const hasAbsence = props.dayEntries?.some(
     comment,
     isSaving,
     isEdit,
+    error: errorRef,
     save,
     remove,
   } satisfies AbsenceForm

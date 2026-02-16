@@ -49,6 +49,7 @@ export interface AbsenceForm extends BaseForm {
   mode: 'ABSENCE'
   //type: 'ABSENCE'
   absenceType: Ref<AbsenceKind> //Ref<string>
+  error: Ref<string | null>
   //comment: { value: string }
   //isEdit: { value: boolean }
   //isSaving: { value: boolean }

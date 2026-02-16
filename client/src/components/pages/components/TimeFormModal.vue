@@ -108,7 +108,7 @@ const absence = computed<AbsenceForm | null>(() => {
 
 const isSaving = computed(() => activeForm.value.isSaving.value)
 const deleting = ref(false)
-const isBlocking = computed(() => isSaving.value)
+const isBlocking = computed(() => isSaving.value || deleting.value)
 /*
 const resolvedType = computed<TimeKind>(() => {
   if (mode.value === 'WORK') return TimeKind.WORK
@@ -185,6 +185,7 @@ const originalType = computed(() => props.entry?.type ?? null)
 //const currentType = ref<TimeKind | null>(props.entry?.type ?? null)
 
 async function onSave() {
+  //globalLoading.value = true
   if (projectMissing.value) {
     alert('Please select a project')
     return
@@ -381,6 +382,12 @@ async function onDelete() {
         v-model="activeForm.comment.value"
         placeholder="Comment"
       />
+      <p 
+        v-if="absence?.error?.value" 
+        class="warning"
+      >
+        {{ absence.error.value }}
+      </p>
 
       <!-- ACTIONS -->
       <div class="actions">
@@ -622,5 +629,12 @@ textarea {
   border-radius: 8px;
   border: none;
   background: #e2e8f0;
+}
+.warning {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
 }
 </style>
