@@ -92,6 +92,7 @@ const hasAbsence = props.dayEntries?.some(
 
     const start = normalizeTime(lastEnd) ?? '09:00'
     const end = normalizeTime(addMinutes(start, missingMinutes))
+    console.log('Calculated start in useAbsenceEntry:', start, 'end:', end, 'missing minutes:', missingMinutes)
       const payload =
         kindRef.value === TimeKind.DAY_OFF
           ? {
