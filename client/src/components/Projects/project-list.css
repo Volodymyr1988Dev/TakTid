@@ -58,6 +58,8 @@
 
 .info {
   padding: 12px;
+  display: flex;
+  justify-content: space-around;
 }
 .project-list-scroll {
   max-height: 400px;

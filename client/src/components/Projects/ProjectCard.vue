@@ -79,7 +79,7 @@ async function confirmDelete(e: MouseEvent) {
       class="dots"
       @click="toggleMenu"
     >
-      ⋮
+      ⚙️
     </span>
 
     <ul
@@ -92,9 +92,6 @@ async function confirmDelete(e: MouseEvent) {
         @click="confirmDelete"
       >
         Delete
-      </li>
-      <li @click.stop="emit('upload', project)">
-        Add photo
       </li>
     </ul>
   </div>
