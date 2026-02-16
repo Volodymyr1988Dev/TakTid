@@ -8,7 +8,7 @@ export function calculateMissingWorkTime(dayEntries?: DayEntry[]) {
   if (!dayEntries?.length) {
     return {
       missingMinutes: FULL_DAY_MINUTES,
-      lastEnd: '08:00',
+      lastEnd: '09:00',
     }
   }
 
@@ -29,7 +29,7 @@ export function calculateMissingWorkTime(dayEntries?: DayEntry[]) {
   if (workEntries.length === 0) {
     return {
       missingMinutes: FULL_DAY_MINUTES,
-      lastEnd: '08:00',
+      lastEnd: '09:00',
     }
   }
 
@@ -49,7 +49,7 @@ export function calculateMissingWorkTime(dayEntries?: DayEntry[]) {
   //const lastEnd = sorted[sorted.length - 1].endTime
   const lastEntry = sorted[sorted.length - 1]
   const lastEnd =
-    lastEntry?.endTime ?? '08:00'
+    lastEntry?.endTime ?? '09:00'
   //if (!lastEnd) return null
   return {
     missingMinutes: Math.max(FULL_DAY_MINUTES - workedMinutes, 0),

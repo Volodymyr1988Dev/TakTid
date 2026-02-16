@@ -68,7 +68,7 @@ const hasAbsence = props.dayEntries?.some(
     throw new Error('Day already contains 8 hours of work')
   }
 
-  const start = lastEnd ?? '09:00'
+  const start = normalizeTime(lastEnd) ?? '09:00'
   const end = normalizeTime(addMinutes(start, missingMinutes))
     try {
       const payload =
