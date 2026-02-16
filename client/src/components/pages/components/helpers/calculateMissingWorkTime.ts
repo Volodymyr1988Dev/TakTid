@@ -1,6 +1,7 @@
 import type { DayEntry, WorkDayEntry, ExtraDayEntry } from '../../../../types/DayEntry.type'
 import { TimeKind } from '../../../../types/timeKind.enum'
-import { toMinutes } from './time'
+//import { toMinutes } from './time'
+import { calculateWorkedMinutes } from './time'
 
 const FULL_DAY_MINUTES = 8 * 60
 
@@ -37,13 +38,14 @@ export function calculateMissingWorkTime(dayEntries?: DayEntry[]) {
 */
   const workedMinutes = workEntries.reduce((sum, e) => {
     if (!e.startTime || !e.endTime) return sum
-    const duration =
-      toMinutes(e.endTime) -
-      toMinutes(e.startTime) -
-      (e.breakMinutes ?? 0)
+    const duration = calculateWorkedMinutes(
+        e.startTime,
+        e.endTime,
+        e.breakMinutes ?? 0
+    )
     //return sum + (toMinutes(e.endTime) - toMinutes(e.startTime))
     console.log(duration, 'duration for entry', e)
-    return sum + Math.max(duration, 0)
+    return sum + duration
   }, 0)
 
   const sorted = [...workEntries].sort((a, b) =>

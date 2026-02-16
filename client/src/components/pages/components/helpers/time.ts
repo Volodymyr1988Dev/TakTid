@@ -18,8 +18,15 @@ export function toMinutes(t: string): number {
   */
  if (!t) return 0
 
-  const [h = '0', m = '0'] = t.split(':')
-  return parseInt(h, 10) * 60 + parseInt(m, 10)
+  const normalized = t.slice(0, 5)
+  const [h = '0', m = '0'] = normalized.split(':')
+
+  const hours = parseInt(h, 10)
+  const minutes = parseInt(m, 10)
+
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return 0
+
+  return hours * 60 + minutes
 }
 
 export function calculateWorkedMinutes(
