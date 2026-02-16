@@ -18,16 +18,8 @@ export function calculateMissingWorkTime(dayEntries?: DayEntry[]) {
       e.type === TimeKind.EXTRA,
   )
   console.log('Work entries:', workEntries)
-/*
-  if (!workEntries.length) {
-    return {
-      missingMinutes: FULL_DAY_MINUTES,
-      lastEnd: '08:00',
-    }
-  }
-*/
 
-  if (workEntries.length === 0) {
+  if (!workEntries.length) {
     console.log('No work entries, full day missing')
     return {
       missingMinutes: FULL_DAY_MINUTES,
@@ -35,6 +27,14 @@ export function calculateMissingWorkTime(dayEntries?: DayEntry[]) {
     }
   }
 
+/*
+  if (workEntries.length === 0) {
+    return {
+      missingMinutes: FULL_DAY_MINUTES,
+      lastEnd: '09:00',
+    }
+  }
+*/
   const workedMinutes = workEntries.reduce((sum, e) => {
     if (!e.startTime || !e.endTime) return sum
     const duration =

@@ -5,6 +5,7 @@ export function normalizeTime(time?: string | null): string | undefined {
 }
 
 export function toMinutes(t: string): number {
+  /*
   const parts = t.split(':')
   if (parts.length !== 2) return 0
 
@@ -14,6 +15,11 @@ export function toMinutes(t: string): number {
   if (Number.isNaN(h) || Number.isNaN(m)) return 0
 
   return h * 60 + m
+  */
+ if (!t) return 0
+
+  const [h = '0', m = '0'] = t.split(':')
+  return parseInt(h, 10) * 60 + parseInt(m, 10)
 }
 
 export function calculateWorkedMinutes(
