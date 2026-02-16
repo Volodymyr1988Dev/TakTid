@@ -361,8 +361,7 @@ async function onDelete() {
       <textarea
         v-model="activeForm.comment.value"
         placeholder="Comment"
-      >
-      </textarea>
+      />
       <p 
         v-if="absence?.error?.value" 
         class="warning"
@@ -402,11 +401,16 @@ async function onDelete() {
         class="modal-backdrop project-modal-layer"
       >
         <div class="project-modal">
+          <button
+            class="close-projects"
+            @click="selectingProject = false"
+          >
+            Cancel
+          </button>
           <ProjectTab
             mode="select"
             @select="onProjectSelected"
           />
-
           <button
             class="close-projects"
             @click="selectingProject = false"
