@@ -264,7 +264,7 @@ function cancelModal() {
     : 'tabs'
 }
 
-async function onSaved(/*entry: DayEntry*/) {
+async function onSaved() {
   navigating.value = true
 
   editEntry.value = null
@@ -297,10 +297,12 @@ function addWork() {
 }
 
 async function reloadCalendar () {
+  navigating.value = true
   editEntry.value = null
 
   await loadEntries()
   view.value = 'calendar'
+  navigating.value = false
 }
 </script>
 
