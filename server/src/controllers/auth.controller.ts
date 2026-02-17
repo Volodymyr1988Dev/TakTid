@@ -28,9 +28,7 @@ export class AuthController {
     @Req() req: Request & { cookies: { refresh_token?: string } },
     @Res({ passthrough: true }) res: Response,
   ) {
-    //const refreshToken = req.cookies?.refresh_token;
     const cookies = req.cookies as {
-      //access_token?: string;
       refresh_token?: string;
     };
     const refreshToken = cookies?.refresh_token;
@@ -53,11 +51,9 @@ export class AuthController {
     return {
       accessToken: refreshed.token,
       user: refreshed.user,
-      //ok: true
     };
   }
   @Get('me')
-  //@UseGuards(AuthGuard)
   me(@Req() req: AuthRequest) {
     return req.user;
   }
@@ -79,7 +75,6 @@ export class AuthController {
     setAuthCookies(res, {
       accessToken: result.token,
       refreshToken: result.refreshToken,
-      //userId: result.user.id,
     });
     return {
       result,
@@ -107,7 +102,6 @@ export class AuthController {
     setAuthCookies(res, {
       accessToken: result.token,
       refreshToken: result.refreshToken,
-      //userId: result.user.id,
     });
     return {
       message: 'Login successful',
@@ -120,9 +114,6 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout user and clear cookies' })
   @ApiResponse({ status: 200, description: 'Logout successful' })
   logout(@Res({ passthrough: true }) res: Response) {
-    //res.clearCookie('access_token');
-    //res.clearCookie('refresh_token');
-    //res.clearCookie('user_id');
     clearAuthCookies(res);
     return { message: 'Logout successful' };
   }

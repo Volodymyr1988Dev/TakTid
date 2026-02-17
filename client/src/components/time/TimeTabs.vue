@@ -29,7 +29,7 @@ import { useSuggestionsStore } from '../../stores/suggestions.store'
 /* ================= STATE ================= */
 type ViewState = 'calendar' | 'tabs' |'dayEntries' | 'modal'
 const view = ref<ViewState>('calendar')
-
+const navigating = ref(false)
 const mode = ref<'week' | 'month'>('week')
 const current = ref(dayjs())
 
@@ -265,12 +265,15 @@ function cancelModal() {
 }
 
 async function onSaved(/*entry: DayEntry*/) {
+  navigating.value = true
+
   editEntry.value = null
   suggestionsStore.clear()
   
   await loadEntries()
   view.value = 'calendar'
   
+  navigating.value = false
 }
 
 function prev() {
@@ -375,6 +378,7 @@ async function reloadCalendar () {
     :preset="suggestionsStore.selected"
     :entry="editEntry"
     :day-entries="selectedDayEntries"
+    :external-loading="navigating"
     @cancel="cancelModal"
     @deleted="reloadCalendar"
     @saved="onSaved"

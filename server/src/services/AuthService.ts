@@ -90,13 +90,12 @@ export class AuthService {
     if (!user) {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
-
+    if (user.deletedAt) {
+      throw new HttpException('User deleted', HttpStatus.FORBIDDEN);
+    }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
-    }
-    if (user.deletedAt) {
-      throw new HttpException('User deleted', HttpStatus.FORBIDDEN);
     }
     const session = await this.sessionService.createForUser(user);
 

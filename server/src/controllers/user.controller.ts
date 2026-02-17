@@ -15,15 +15,11 @@ import { UpdateUserDto } from '../types';
 import type { AuthRequest } from '../types';
 import { User } from '../entities';
 import { UserService } from '../services/UserService';
-//import { AuthService } from '../services/AuthService';
 import { AdminGuard } from '../types/auth/admin.guard';
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-    //private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Get('me')
   @ApiOperation({ summary: 'Get current authenticated user' })

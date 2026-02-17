@@ -93,8 +93,6 @@ export class UserService {
 
     await this.userRepository.softDelete(id);
 
-    //await this.sessionService.removeAllByUser(id);
-
     return { message: `User ${id} soft deleted successfully` };
   }
 

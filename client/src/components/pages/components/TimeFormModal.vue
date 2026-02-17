@@ -22,6 +22,7 @@ const props = defineProps<{
   entry?: DayEntry | null
   preset?: TimeSuggestion | null
   dayEntries?: DayEntry[]
+  externalLoading?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -96,7 +97,7 @@ const absence = computed<AbsenceForm | null>(() => {
 
 const isSaving = computed(() => activeForm.value.isSaving.value)
 const deleting = ref(false)
-const isBlocking = computed(() => isSaving.value || deleting.value)
+const isBlocking = computed(() => isSaving.value || deleting.value || props.externalLoading === true)
 watch(
   () => [props.entry, props.preset] as const,
   ([entry, preset]) => {
