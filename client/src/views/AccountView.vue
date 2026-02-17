@@ -1,131 +1,33 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import axios from 'axios'
-//import api from '../api/axios'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.store'
 import { useUserStore } from '../stores/user.store'
 import type { User } from '../types/userInterface'
+import { useToastStore } from '../stores/toast.store'
 
 const auth = useAuthStore()
 const userStore = useUserStore()
 const router = useRouter()
+const toast = useToastStore()
 
 const name = ref(auth.user?.name ?? '')
 const email = ref(auth.user?.email ?? '')
 const password = ref('')
 const confirmPassword = ref('')
 
-const error = ref('')
-const success = ref('')
+//const error = ref('')
+//const success = ref('')
 
 const showUsers = ref(false)
-//const showConfirm = ref(false)
 const selectedUser = ref<User | null>(null)
 const isAdmin = computed(() => auth.user?.isAdmin === true)
 
-function clearMessages() {
-  error.value = ''
-  success.value = ''
-}
-/*
-async function saveName() {
-  clearMessages()
-
-  try {
-    //await api.put(`/users/${auth.user!.id}`, { name: name.value })
-    await userStore.$patch(() => {})
-    await auth.updateUser(data)
-    success.value = 'Updated successfully'
-    setTimeout(() => router.push('/dashboard'), 700)
-
-    await auth.fetchMe()
-    success.value = 'Name updated'
-    redirectAfterSuccess()
-  } catch (e: unknown) {
-    handleError(e)
-  }
-}
-function redirectAfterSuccess() {
-  setTimeout(() => {
-    router.push('/dashboard')
-  }, 700)
-}
-function goToDashboard() {
-  router.push('/dashboard')
-}*/
-/* ---------- EMAIL ---------- 
-async function saveEmail() {
-  clearMessages()
-
-  try {
-    await saveProfile({ password: password.value })
-    password.value = ''
-    confirmPassword.value = ''
-
-    await api.put(`/users/${auth.user!.id}`, { email: email.value })
-    await auth.fetchMe()
-    success.value = 'Email updated'
-    redirectAfterSuccess()
-  } catch (e: unknown) {
-    handleError(e)
-  }
-}
-
-async function savePassword() {
-  clearMessages()
-
-  if (password.value.length < 6) {
-    error.value = 'Password must be at least 6 characters'
-    return
-  }
-
-  if (password.value !== confirmPassword.value) {
-    error.value = 'Passwords do not match'
-    return
-  }
-
-  try {
-    //await api.put(`/users/${auth.user!.id}`, { password: password.value})
-    await saveProfile({ password: password.value })
-    password.value = ''
-    confirmPassword.value = ''
-    success.value = 'Password updated'
-    redirectAfterSuccess()
-  } catch (e: unknown) {
-    handleError(e)
-  }
-}
-
-function handleError(e: unknown) {
-  if (axios.isAxiosError(e)) {
-    error.value = e.response?.data?.message ?? 'Update failed'
-  } else {
-    error.value = 'Update failed'
-  }
-}
-
-async function toggleUsers() {
-  showUsers.value = !showUsers.value
-  if (showUsers.value) {
-    await userStore.fetchUsers()
-  }
-}
-
-function confirmDelete(user: User) {
-  selectedUser.value = user
-}
-
-
-async function deleteUser() {
-  if (!selectedUser.value) return
-  await userStore.deleteUser(selectedUser.value.id)
-  selectedUser.value = null
-}
-
-async function restoreUser(user: User) {
-  await userStore.restoreUser(user.id)
-}*/
+//function clearMessages() {
+//  error.value = ''
+//  success.value = ''
+//}
 
 function goToDashboard() {
   router.push('/dashboard')
@@ -134,17 +36,19 @@ function goToDashboard() {
 async function updateProfile(data: Partial<User> & { password?: string }) {
   if (!auth.user) return
 
-  clearMessages()
+  //clearMessages()
 
   try {
     await userStore.updateUser(auth.user.id, data)
-    success.value = 'Updated successfully'
+
+    toast.show('Profile updated successfully', 'success')
+
     setTimeout(() => router.push('/dashboard'), 700)
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {
-      error.value = e.response?.data?.message ?? 'Update failed'
+      toast.show(e.response?.data?.message ?? 'Update failed', 'error')
     } else {
-      error.value = 'Update failed'
+      toast.show('Update failed', 'error')
     }
   }
 }
@@ -159,12 +63,13 @@ async function saveEmail() {
 
 async function savePassword() {
   if (password.value.length < 6) {
-    error.value = 'Password must be at least 6 characters'
+    //error.value = 'Password must be at least 6 characters'
+    toast.show('Password must be at least 6 characters', 'error')
     return
   }
 
   if (password.value !== confirmPassword.value) {
-    error.value = 'Passwords do not match'
+    toast.show('Passwords do not match', 'error')
     return
   }
 
@@ -187,13 +92,61 @@ function confirmDelete(user: User) {
 
 async function deleteUser() {
   if (!selectedUser.value) return
-  await userStore.deleteUser(selectedUser.value.id)
-  selectedUser.value = null
+
+  //await userStore.deleteUser(selectedUser.value.id)
+  //selectedUser.value = null
+   try {
+    const user = selectedUser.value
+
+    await userStore.deleteUser(user.id)
+
+    toast.show(
+      `User ${user.name ?? 'No name'} (${user.email}) deleted successfully`,
+      'success'
+    )
+
+    selectedUser.value = null
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      toast.show(e.response?.data?.message ?? 'Delete failed', 'error')
+    } else {
+      toast.show('Delete failed', 'error')
+    }
+  }
 }
 
 async function restoreUser(user: User) {
-  await userStore.restoreUser(user.id)
+  //await userStore.restoreUser(user.id)
+  try {
+    await userStore.restoreUser(user.id)
+
+    toast.show(
+      `User ${user.name ?? 'No name'} (${user.email}) restored successfully`,
+      'success'
+    )
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      toast.show(e.response?.data?.message ?? 'Restore failed', 'error')
+    } else {
+      toast.show('Restore failed', 'error')
+    }
+  }
 }
+
+/*
+<p 
+      v-if="error" 
+      class="error"
+    >
+      {{ error }}
+    </p>
+    <p 
+      v-if="success" 
+      class="success"
+    >
+      {{ success }}
+    </p>
+*/
 </script>
 
 <template>
@@ -237,19 +190,7 @@ async function restoreUser(user: User) {
         Save password
       </button>
     </div>
-
-    <p 
-      v-if="error" 
-      class="error"
-    >
-      {{ error }}
-    </p>
-    <p 
-      v-if="success" 
-      class="success"
-    >
-      {{ success }}
-    </p>
+    
     <button 
       class="cancel" 
       @click="goToDashboard"

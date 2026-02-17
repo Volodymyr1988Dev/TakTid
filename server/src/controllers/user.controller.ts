@@ -32,20 +32,6 @@ export class UserController {
     description: 'Current user retrieved',
     type: User,
   })
-  /*
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getCurrentUser(@Req() req: AuthRequest) {
-    const userId = req.user?.id;
-    if (!userId) {
-      throw new HttpException('User not authenticated', HttpStatus.UNAUTHORIZED);
-    }
-    const user = await this.userService.findOne(userId);
-    if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    }
-    return user;
-  }
-  */
   async getCurrentUser(@Req() req: AuthRequest) {
     const userId = req.user?.id;
     if (!userId) {

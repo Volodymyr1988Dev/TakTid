@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import AppToast from './components/AppToast.vue'
 //import { onMounted } from 'vue'
 //import { useAuthStore } from './stores/auth.store';
 
@@ -11,6 +12,7 @@ import { RouterView } from 'vue-router'
 
 <template>
   <RouterView />
+  <AppToast />
 </template>
 
 <style>
