@@ -42,45 +42,6 @@ export class SessionService {
 
     return this.sessionRepository.save(session);
   }
-  /*
-  async validateToken(token: string): Promise<ValidateTokenResult | null> {
-    const now = new Date();
-    try {
-      this.jwtService.verify<{
-        userId: string;
-        email: string;
-      }>(token, { secret: process.env.SECRET });
-
-      const session = await this.sessionRepository.findOne({
-        where: { token },
-        relations: ['user'],
-      });
-
-      if (!session || session.expires_at < now) return null;
-
-      const refreshTokenBeforeExpires = safeMs(
-        process.env.REFRESH_TOKEN_BEFORE_EXPIRES ?? '1h',
-      );
-      const timeLeft = session.expires_at.getTime() - now.getTime();
-
-      if (timeLeft < refreshTokenBeforeExpires) {
-        const refreshed = await this.refreshSession(session);
-        return { user: refreshed.user, newToken: refreshed.token };
-      }
-
-      return { user: session.user };
-      //return { user: this.toAuthUser(session.user) };
-    } /*catch (e: unknown) {
-      if (e instanceof Error) {
-        throw new Error(`Invalid or expired token: ${e.message}`);
-      }
-      return null;
-    }
-      */ /* catch {
-      throw new UnauthorizedException('Invalid or expired token');
-    }
-  }
-*/
 
   async findByToken(token: string): Promise<Session | null> {
     return this.sessionRepository.findOne({

@@ -53,33 +53,7 @@ export class SessionController {
       );
     }
   }
-  /*
-  @Post('validate')
-  @ApiOperation({ summary: 'Перевірка дійсності access token' })
-  @ApiBody({ type: ValidateTokenDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Token is valid',
-    type: ValidateTokenResult,
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Invalid or expired token',
-  })
-  async validateToken(
-    @Body() body: ValidateTokenDto,
-  ): Promise<ValidateTokenResult> {
-    const result = await this.sessionService
-      .validateToken(body.token)
-      .catch(() => null);
-    if (!result)
-      throw new HttpException(
-        'Invalid or expired token',
-        HttpStatus.UNAUTHORIZED,
-      );
-    return result;
-  }
-*/
+
   @Get()
   @ApiOperation({ summary: 'Отримати всі активні сесії' })
   @ApiResponse({
