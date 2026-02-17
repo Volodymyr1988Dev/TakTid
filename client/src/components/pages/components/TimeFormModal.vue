@@ -214,6 +214,12 @@ async function onDelete() {
     deleting.value = false
   }
 }
+const spinnerText = computed(() => {
+  if (deleting.value) return 'Please wait, removing…'
+  if (isSaving.value) return 'Please wait, saving…'
+  if (props.externalLoading) return 'Please wait, loading…'
+  return ''
+})
 </script>
 
 <template>
@@ -222,7 +228,7 @@ async function onDelete() {
     class="overlay"
   >
     <div class="spinner">
-      Please wait, saving…
+      {{ spinnerText }}
     </div>
   </div>
   <div class="modal-backdrop">
