@@ -147,6 +147,12 @@ export class SessionService {
       throw new Error('Session not found');
     }
   }
+
+  async removeAllByUser(userId: string): Promise<void> {
+    await this.sessionRepository.softDelete({
+      user: { id: userId },
+    });
+  }
   public toAuthUser(user: User): AuthUser {
     return {
       id: user.id,

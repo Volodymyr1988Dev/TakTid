@@ -54,6 +54,18 @@ export class UserController {
     }
     return user;
   }
+
+  @Get()
+  async findAll(@Req() req: AuthRequest) {
+    const adminId = req.user?.id;
+
+    if (!adminId) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    return this.userService.findAllWithDeleted(adminId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiParam({ name: 'id', type: 'number', description: 'User ID', example: 12 })
@@ -91,5 +103,15 @@ export class UserController {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     return { message: `User ${id} deleted successfully` };
+  }
+
+  @Put(':id/restore')
+  async restore(@Param('id') id: string, @Req() req: AuthRequest) {
+    const adminId = req.user?.id;
+    if (!adminId) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    return this.userService.restore(id, adminId);
   }
 }
