@@ -31,6 +31,7 @@ export class ProjectImagesController {
   uploadMultiple(
     @Param('projectId') projectId: string,
     @UploadedFiles() files: Express.Multer.File[],
+    //@UploadedFiles() files: Array<Express.Multer.File>,
   ) {
     console.log('FILES:', files);
     return this.imagesService.uploadMultiple(projectId, files);

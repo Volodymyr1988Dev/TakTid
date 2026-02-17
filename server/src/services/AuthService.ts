@@ -57,6 +57,33 @@ export class AuthService {
     };
   }
 
+  async adminSoftDeleteUser(userId: string, adminId: string) {
+    const admin = await this.userService.findById(adminId);
+
+    if (!admin || !admin.isAdmin) {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+
+    const user = await this.userService.findById(userId);
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (user.id === admin.id) {
+      throw new HttpException(
+        'Admin cannot delete himself',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    await this.userService.softDelete(userId, adminId);
+
+    await this.sessionService.removeAllByUser(userId);
+
+    return { message: 'User deleted and sessions removed' };
+  }
+
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
     const user = await this.userService.findByEmail(email);
@@ -68,7 +95,9 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
-
+    if (user.deletedAt) {
+      throw new HttpException('User deleted', HttpStatus.FORBIDDEN);
+    }
     const session = await this.sessionService.createForUser(user);
 
     return {

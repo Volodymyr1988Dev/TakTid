@@ -8,16 +8,22 @@ import {
   Param,
   Put,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from '../types';
 import type { AuthRequest } from '../types';
 import { User } from '../entities';
 import { UserService } from '../services/UserService';
+//import { AuthService } from '../services/AuthService';
+import { AdminGuard } from '../types/auth/admin.guard';
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    //private readonly authService: AuthService,
+  ) {}
 
   @Get('me')
   @ApiOperation({ summary: 'Get current authenticated user' })
@@ -88,6 +94,7 @@ export class UserController {
     return this.userService.update(id, data);
   }
 
+  @UseGuards(AdminGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete user by ID' })
   @ApiParam({ name: 'id', type: 'string', description: 'User ID' })
@@ -98,11 +105,7 @@ export class UserController {
     if (!adminId) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
-    const result = await this.userService.remove(id, adminId);
-    if (result.message.includes('not found')) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    }
-    return { message: `User ${id} deleted successfully` };
+    return this.userService.remove(id, adminId);
   }
 
   @Put(':id/restore')

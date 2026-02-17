@@ -3,14 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from '../types/index';
 import { User } from '../entities/User/User';
-import { SessionService } from './SessionService';
+//import { SessionService } from './SessionService';
 import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly sessionService: SessionService,
+    //private readonly sessionService: SessionService,
   ) {}
   async findById(id: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { id } });
@@ -93,9 +93,20 @@ export class UserService {
 
     await this.userRepository.softDelete(id);
 
-    await this.sessionService.removeAllByUser(id);
+    //await this.sessionService.removeAllByUser(id);
 
     return { message: `User ${id} soft deleted successfully` };
+  }
+
+  async softDelete(id: string, deletedByUserId: string) {
+    const user = await this.findOne(id);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    user.deletedByUserId = deletedByUserId;
+    await this.userRepository.save(user);
+    await this.userRepository.softDelete(id);
   }
 
   async restore(
