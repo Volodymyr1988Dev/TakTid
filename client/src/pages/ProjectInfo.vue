@@ -50,10 +50,18 @@ watch(
   loadStats,
   { immediate: true }
 )
-
+/*
 watch(showImages, async (val) => {
   if (val) {
     await imageStore.load(props.projectId)
+  }
+})*/
+watch(showImages, async (val) => {
+  if (val) {
+    page.value = 1
+    hasMore.value = true
+    imageStore.images = []
+    await loadImages()
   }
 })
 watch(fullscreenUrl, val => {
