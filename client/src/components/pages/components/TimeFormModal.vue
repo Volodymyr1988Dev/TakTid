@@ -231,9 +231,9 @@ const spinnerText = computed(() => {
     class="overlay"
   >
     <div class="loader-wrapper">
-      <div class="loader"></div>
+      <div class="loader" />
       <p class="loader-text"> 
-        <!--spinner-->>
+        <!--spinner-->
         {{ spinnerText }}
       </p>
     </div>
@@ -638,6 +638,13 @@ textarea {
   border-radius: 8px;
   margin-bottom: 10px;
 }
+.loader-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: #475569;
+  text-align: center;
+  letter-spacing: 0.3px;
+}
 
 
 
@@ -671,4 +678,19 @@ textarea {
 }
 @keyframes l2-0 {to{rotate: 1turn}}
 @keyframes l2-1 {to{transform: rotate(1turn) translate(15.625%) rotate(-1.333turn)}}
+.loader-wrapper {
+  background: white;
+  padding: 40px 50px;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  min-width: 220px;
+
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+
+  animation: fadeInScale 0.25s ease-out;
+}
 </style>
