@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { getProjectStats } from '../api/projectStats.api'
 import { useProjectImageStore } from '../stores/projectImage.store'
 import AppLoader from '../components/ui/AppLoader.vue'
@@ -41,6 +41,7 @@ const imageStore = useProjectImageStore()
 const showImages = ref(false)
 const fullscreenUrl = ref<string | null>(null)
 const scrollContainer = ref<HTMLElement | null>(null)
+const sentinel = ref<HTMLElement | null>(null)
 
 const page = ref(1)
 const limit = 5
@@ -67,7 +68,21 @@ watch(showImages, async (val) => {
 watch(fullscreenUrl, val => {
   document.body.style.overflow = val ? 'hidden' : ''
 })
+onMounted(() => {
+  const observer = new IntersectionObserver(
+    entries => {
+      if (!entries[0]) return
+      if (entries[0].intersectionRatio > 0) {
+        loadImages()
+      }
+    },
+    { threshold: 1 }
+  )
 
+  if (sentinel.value) {
+    observer.observe(sentinel.value)
+  }
+})
 async function loadStats() {
   loading.value = true
   try {
@@ -80,7 +95,7 @@ async function loadStats() {
 
 
 async function loadImages() {
-  if (!hasMore.value) return
+  if (!hasMore.value || imageStore.loading) return
 
   const res = await imageStore.loadPaginated(
     props.projectId,
@@ -106,7 +121,10 @@ function onScroll() {
   const el = scrollContainer.value
   if (!el) return
 
-  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
+  const reachedBottom =
+    el.scrollTop + el.clientHeight >= el.scrollHeight - 10
+
+  if (reachedBottom) {
     loadImages()
   }
 }
@@ -209,6 +227,7 @@ const totalAll = computed(() => {
           :src="fullscreenUrl"
         >
       </div>
+      <div ref="sentinel" />
     </div>
   </div>
 </template>
