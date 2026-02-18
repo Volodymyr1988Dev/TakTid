@@ -23,14 +23,6 @@ api.interceptors.response.use(
     //let isRefreshing = false
     const requestUrl = originalRequest.url ?? ''
 
-    //const isAuthRoute = requestUrl.startsWith('/auth/')
-
-    //if (isAuthRoute) {
-    //  return Promise.reject(error)
-    //}
-    //if (originalRequest.url?.startsWith('/auth/')) {
-    //  return Promise.reject(error)
-    //}
     if (requestUrl.startsWith('/auth/')) {
       return Promise.reject(error)
     }

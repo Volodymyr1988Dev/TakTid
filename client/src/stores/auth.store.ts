@@ -9,10 +9,15 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoading = ref(false)
   const isInitialized = ref(false)
 
+  const refreshToken = ref<string | null>(null)
+
   const isAuthenticated = computed(() => !!user.value)
 
    function clearAuth() {
     user.value = null
+
+    accessToken.value = null
+    refreshToken.value = null
   }
 
   async function initAuth() {
@@ -56,10 +61,14 @@ export const useAuthStore = defineStore('auth', () => {
     await authApi.login(payload)
     const { data } = await authApi.me()
     user.value = data
+
+    accessToken.value = data.accessToken
+    refreshToken.value = data.refreshToken
   }
   function setUser(newUser: User) {
     user.value = newUser
   }
+  
 
   async function logout() {
     try {

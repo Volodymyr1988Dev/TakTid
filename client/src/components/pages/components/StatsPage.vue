@@ -479,4 +479,24 @@ onMounted(load)
 .header {
   background-color: #2563eb;
 }
+@media (max-width: 768px) {
+  .calendar-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .calendar-cell {
+    min-height: 70px;
+    font-size: 12px;
+  }
+
+  .entry-badge {
+    font-size: 9px;
+    padding: 2px 4px;
+  }
+}
+@media (max-width: 600px) {
+  .calendar-grid {
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  }
+}
 </style>
