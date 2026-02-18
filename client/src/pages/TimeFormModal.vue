@@ -587,13 +587,16 @@ textarea {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  /*background: rgba(0, 0, 0, 0.45);*/
+  background: rgba(15, 23, 42, 0.45);
+
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
 
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(4px);
+  animation: fadeOverlay 0.2s ease-out;
 }
 
 .spinner {
@@ -701,5 +704,21 @@ textarea {
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
 
   animation: fadeInScale 0.25s ease-out;
+
+  @keyframes fadeOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 }
 </style>

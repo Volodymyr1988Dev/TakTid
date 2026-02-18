@@ -39,16 +39,6 @@ const loading = ref(true)
 const imageStore = useProjectImageStore()
 const showImages = ref(false)
 const fullscreenUrl = ref<string | null>(null)
-/*
-const totals = computed(() => {
-  const entries = entriesStore.byProject(props.projectId)
-
-  return {
-    work: entries.filter(e => e.kind === 'WORK').reduce((s,e)=>s+e.hours,0),
-    extra: entries.filter(e => e.kind === 'EXTRA').reduce((s,e)=>s+e.hours,0),
-  }
-})
-*/
 watch(
   () => props.projectId,
   loadStats,
