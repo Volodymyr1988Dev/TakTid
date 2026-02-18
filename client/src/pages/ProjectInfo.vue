@@ -40,6 +40,11 @@ const loading = ref(true)
 const imageStore = useProjectImageStore()
 const showImages = ref(false)
 const fullscreenUrl = ref<string | null>(null)
+const scrollContainer = ref<HTMLElement | null>(null)
+
+const page = ref(1)
+const limit = 5
+const hasMore = ref(true)  
 watch(
   () => props.projectId,
   loadStats,
@@ -54,6 +59,7 @@ watch(showImages, async (val) => {
 watch(fullscreenUrl, val => {
   document.body.style.overflow = val ? 'hidden' : ''
 })
+
 async function loadStats() {
   loading.value = true
   try {
@@ -63,12 +69,40 @@ async function loadStats() {
     loading.value = false
   }
 }
+
+
+async function loadImages() {
+  if (!hasMore.value) return
+
+  const res = await imageStore.loadPaginated(
+    props.projectId,
+    page.value,
+    limit
+  )
+
+  if (res.page >= res.lastPage) {
+    hasMore.value = false
+  } else {
+    page.value++
+  }
+}
+
 function openFullscreen(url: string) {
   fullscreenUrl.value = url
 }
 function closeFullscreen() {
   fullscreenUrl.value = null
 }
+
+function onScroll() {
+  const el = scrollContainer.value
+  if (!el) return
+
+  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
+    loadImages()
+  }
+}
+
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
 const totalAll = computed(() => {
@@ -128,7 +162,9 @@ const totalAll = computed(() => {
     </button>
     <div 
       v-if="showImages" 
+      ref="scrollContainer"
       class="images"
+      @scroll.passive="onScroll"
     >
       <div v-if="imageStore.loading">
         Loading images…
@@ -235,5 +271,9 @@ const totalAll = computed(() => {
   color: white;
   font-size: 28px;
   cursor: pointer;
+}
+.images {
+  max-height: 400px;
+  overflow-y: auto;
 }
 </style>

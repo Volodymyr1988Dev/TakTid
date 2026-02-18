@@ -56,11 +56,20 @@ export class ProjectImagesService {
     return results;
   }
 
-  async getByProject(projectId: string) {
-    return this.imageRepo.find({
+  async getByProject(projectId: string, page: number, limit: number) {
+    const [data, total] = await this.imageRepo.findAndCount({
       where: { project: { id: projectId } },
       order: { createdAt: 'DESC' },
+      take: limit,
+      skip: (page - 1) * limit,
     });
+
+    return {
+      data,
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    };
   }
   async removeByProject(projectId: string): Promise<void> {
     const images = await this.imageRepo.find({

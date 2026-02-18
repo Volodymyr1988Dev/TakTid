@@ -2,6 +2,7 @@ import {
   Controller,
   Delete,
   Param,
+  Query,
   Post,
   UseInterceptors,
   //UploadedFile,
@@ -38,8 +39,16 @@ export class ProjectImagesController {
   }
 
   @Get('project/:projectId')
-  getByProject(@Param('projectId') projectId: string) {
-    return this.imagesService.getByProject(projectId);
+  getByProject(
+    @Param('projectId') projectId: string,
+    @Query('page') page = '1',
+    @Query('limit') limit = '5',
+  ) {
+    return this.imagesService.getByProject(
+      projectId,
+      Number(page),
+      Number(limit),
+    );
   }
 
   @UseGuards(AdminGuard)
