@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import dayjs, { Dayjs } from 'dayjs'
+//import { isWeekend } from '../pages/components/helpers/helpers'
 
 const emit = defineEmits<{
   (e: 'select-day', day: Dayjs): void
@@ -50,6 +51,7 @@ function selectDay(day: Dayjs): void {
       <div
         v-for="w in weekdays"
         :key="w"
+        :class="{ weekendLabel: w === 'Sat' || w === 'Sun' }"
       >
         {{ w }}
       </div>

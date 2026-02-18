@@ -55,7 +55,8 @@ const suggestionsStore = useSuggestionsStore()
 
     if (e.type === TimeKind.WORK) {
       if (!e.projectId && !e.project?.id) continue
-
+      const projectId = e.projectId ?? e.project?.id
+      if (!projectId) continue
       const work: WorkDayEntry = {
         id: e.id,
         date: e.date,
@@ -113,7 +114,10 @@ const suggestionsStore = useSuggestionsStore()
   return result
 }
 
+let loadCounter = 0
+
 async function loadEntries() {
+  const id = ++loadCounter
 
   const from =
     mode.value === 'week'
@@ -131,6 +135,8 @@ async function loadEntries() {
     getProjectAssignments(from.format('YYYY-MM-DD'), to.format('YYYY-MM-DD'))
       .catch(() => []),
   ])
+  
+  if (id !== loadCounter) return
 
   entries.value = mapToDayEntries(timeEntries, assignments)
 }
@@ -153,6 +159,7 @@ const totals = computed<Totals>(() => {
     )
 })
 /* ================= FETCH ================= */
+/*
 watch(
   ()=>[ auth.isInitialized, auth.isAuthenticated, mode.value, current.value.format('YYYY-MM-DD')],
   //async ([isInitialized, isAuth]) => {
@@ -168,7 +175,20 @@ watch(
     //  console.error('Failed to load time entries', e)
   //}
 }, { immediate: true })
-
+*/
+watch(
+  [
+    () => auth.isInitialized,
+    () => auth.isAuthenticated,
+    () => mode.value,
+    () => current.value.format('YYYY-MM-DD')
+  ],
+  async ([ready, isAuth]) => {
+    if (!ready || !isAuth) return
+    await loadEntries()
+  },
+  { immediate: true }
+)
 /* ================= HELPERS ================= */
 function isWork(e: DayEntry) {
   //return e.kind === 'WORK' || e.kind === 'EXTRA'
@@ -334,22 +354,34 @@ async function reloadCalendar () {
     />
 
     <div class="totals">
-      <div class="total-item main">
+      <div 
+        v-if="(mode === 'week' ? weekTotal : monthTotal) > 0"
+        class="total-item main"
+      >
         <span>{{ mode === 'week' ? 'Week total' : 'Month total' }}</span>
         <strong>{{ mode === 'week' ? weekTotal : monthTotal }} h</strong>
       </div>
 
-      <div class="total-item">
+      <div
+        v-if="totals.sick > 0" 
+        class="total-item"
+      >
         <span>Sick</span>
         <strong>{{ totals.sick }} h</strong>
       </div>
 
-      <div class="total-item">
+      <div 
+        v-if="totals.vab > 0"
+        class="total-item"
+      >
         <span>VAB</span>
         <strong>{{ totals.vab }} h</strong>
       </div>
 
-      <div class="total-item">
+      <div 
+        v-if="totals.work > 0"
+        class="total-item"
+      >
         <span>Total work</span>
         <strong>{{ totals.work }} h</strong>
       </div>

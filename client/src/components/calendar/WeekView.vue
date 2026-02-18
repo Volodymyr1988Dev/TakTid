@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useSwipe } from '@vueuse/core'
 import dayjs, { Dayjs } from 'dayjs'
+import { isWeekend } from '../pages/components/helpers/helpers'
 
 const props = defineProps<{
   current: Dayjs
@@ -63,6 +64,7 @@ const totalWeekHours = computed((): number =>
       :class="{
         today: day.isSame(today, 'day'),
         disabled: isFuture(day),
+        weekend: isWeekend(day),
       }"
       @click="!isFuture(day) && emit('select-day', day)"
     >
