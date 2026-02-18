@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
-import { useSuggestionsStore } from '../../../stores/suggestions.store'
-import { useProjectStore } from '../../../stores/project.store';
-import type { TimeSuggestion } from '../../../types/Suggestion.type'
-import { isWorkSuggestion } from '../../../types/suggestion.guard';
+import { useSuggestionsStore } from '../../stores/suggestions.store'
+import { useProjectStore } from '../../stores/project.store';
+import type { TimeSuggestion } from '../../types/Suggestion.type'
+import { isWorkSuggestion } from '../../types/suggestion.guard';
 //import { createWorkSuggestion } from '../../composables/suggestion.factory';
 //import { createWorkSuggestion } from '../../composables/suggestion.factory';
 

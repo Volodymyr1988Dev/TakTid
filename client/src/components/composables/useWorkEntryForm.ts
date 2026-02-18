@@ -1,7 +1,7 @@
 import { ref, computed,watch } from 'vue'
 import type { Ref } from 'vue'
 import { useTimeEntryStore } from '../../stores/timeEntry.store'
-import { calculateWorkedMinutes } from '../pages/components/helpers/time'
+import { calculateWorkedMinutes } from '../helpers/time'
 import type { WorkDayEntry } from '../../types/DayEntry.type'
 import type { TimeEntryUpdatePayload } from '../../types/TimeEntryUpdatePayload.type'
 import { useTimeEntryImages } from './useTimeEntryImages'

@@ -1,5 +1,5 @@
-import { TimeKind } from '../../../../types/timeKind.enum'
-import type { DayEntry } from '../../../../types/DayEntry.type'
+import { TimeKind } from '../../types/timeKind.enum'
+import type { DayEntry } from '../../types/DayEntry.type'
 
 export interface DefaultTimeResult {
   start: string

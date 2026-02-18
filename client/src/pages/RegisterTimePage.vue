@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import RegisterTabs from './RegisterTabs.vue'
+import RegisterTabs from '../components/tabs/RegisterTabs.vue'
 import type { Dayjs } from 'dayjs'
-import type { TimeSuggestion } from '../../types/Suggestion.type'
+import type { TimeSuggestion } from '../types/Suggestion.type'
 
 defineProps<{ day: Dayjs }>()
 

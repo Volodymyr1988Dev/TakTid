@@ -2,9 +2,9 @@
 import { computed, ref } from 'vue'
 import { useSwipe } from '@vueuse/core'
 import dayjs, { Dayjs } from 'dayjs'
-import { isHoliday } from '../pages/components/helpers/holiday'
+import { isHoliday } from '../helpers/holiday'
 //import Holidays from 'date-holidays'
-import { isWeekend } from '../pages/components/helpers/helpers'
+import { isWeekend } from '../helpers/helpers'
 
 const props = defineProps<{
   current: Dayjs

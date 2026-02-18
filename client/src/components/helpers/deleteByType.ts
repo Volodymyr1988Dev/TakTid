@@ -1,6 +1,6 @@
-import { TimeKind } from '../../../../types/timeKind.enum'
-import { useTimeEntryStore } from '../../../../stores/timeEntry.store'
-import { useProjectAssignmentStore } from '../../../../stores/projectAssignment.store'
+import { TimeKind } from '../../types/timeKind.enum'
+import { useTimeEntryStore } from '../../stores/timeEntry.store'
+import { useProjectAssignmentStore } from '../../stores/projectAssignment.store'
 
 type TimeEntryStore = ReturnType<typeof useTimeEntryStore>
 type AssignmentStore = ReturnType<typeof useProjectAssignmentStore>

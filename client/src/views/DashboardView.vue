@@ -2,13 +2,14 @@
 import { computed, ref } from 'vue'
 
 import BottomTabs from '../components/bottomTabs/BottomTabs.vue'
-import TimeTab from '../components/time/TimeTabs.vue'
-import ProjectsTab from '../components/Projects/ProjectTab.vue'
+import TimeTab from '../pages/TimeTabs.vue'
+import ProjectsTab from '../pages/ProjectTab.vue'
 import AppHeader from './AppHeader.vue'
-import ProjectInfo from '../components/Projects/ProjectInfo.vue'
+import ProjectInfo from '../pages/ProjectInfo.vue'
 import { useAuthStore } from '../stores/auth.store'
 import { useProjectNavigationStore } from '../stores/projectNavigation.store'
-import StatsPage from '../components/pages/components/StatsPage.vue'
+//import StatsPage from '../components/pages/StatsPage.vue'
+import StatsPage from '../pages/StatsPage.vue'
 
 const auth = useAuthStore()
 const projectNav = useProjectNavigationStore()

@@ -4,8 +4,9 @@ import { useAuthStore } from '../stores/auth.store'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import DashboardView from '../views/DashboardView.vue'
-import ProjectInfo from '../components/Projects/ProjectInfo.vue'
+//import ProjectCard from '../components/Projects/ProjectCard.vue'
 //import AccountView from '../views/AccountView.vue'
+import ProjectInfo from '../pages/ProjectInfo.vue'
 
 const router = createRouter({
   history: createWebHistory(),

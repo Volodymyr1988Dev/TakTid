@@ -1,5 +1,5 @@
-import type { DayEntry, WorkDayEntry, ExtraDayEntry } from '../../../../types/DayEntry.type'
-import { TimeKind } from '../../../../types/timeKind.enum'
+import type { DayEntry, WorkDayEntry, ExtraDayEntry } from '../../types/DayEntry.type'
+import { TimeKind } from '../../types/timeKind.enum'
 import { normalizeTime } from './time'
 
 export function getLastWorkEnd(dayEntries?: DayEntry[]): string | null {

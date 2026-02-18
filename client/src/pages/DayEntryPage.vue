@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { DayEntry } from '../../../types/DayEntry.type';
+import type { DayEntry } from '../types/DayEntry.type';
 //import type { TimeEntry } from '../../../types/TimeEntry.type'
-import { TimeKind } from '../../../types/timeKind.enum';
+import { TimeKind } from '../types/timeKind.enum';
 
 defineProps<{
   date: string

@@ -4,10 +4,10 @@ import type { AbsenceDayEntry } from '../../types/DayEntry.type'
 import { TimeKind } from '../../types/timeKind.enum'
 import type { AbsenceForm,AbsenceKind } from '../../types/Form.types'
 import type { DayEntry } from '../../types/DayEntry.type'
-import { isFullDayCovered } from '../pages/components/helpers/isFullDayCovered'
+import { isFullDayCovered } from '../helpers/isFullDayCovered'
 //import { getLastWorkEnd } from '../pages/components/helpers/getLastWorkEnd'
-import { calculateMissingWorkTime } from '../pages/components/helpers/calculateMissingWorkTime'
-import { addMinutes, normalizeTime } from '../pages/components/helpers/time'
+import { calculateMissingWorkTime } from '../helpers/calculateMissingWorkTime'
+import { addMinutes, normalizeTime } from '../helpers/time'
 
 export function useAbsenceEntryForm(props: {
   date: string

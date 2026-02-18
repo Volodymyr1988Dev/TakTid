@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import SuggestionsTab from './tabs/SuggestionsTab.vue'
-import ProjectTab from '../Projects/ProjectTab.vue'
-import AbsenceTab from './tabs/AbsenceTab.vue'
+import SuggestionsTab from '../tabs/SuggestionsTab.vue'
+import ProjectTab from '../../pages/ProjectTab.vue'
+import AbsenceTab from '../tabs/AbsenceTab.vue'
 //import InternalTab from './tabs/InternalTab.vue'
 import type { TimeSuggestion } from '../../types/Suggestion.type'
 import type { TimeEntry } from '../../types/TimeEntry.type'

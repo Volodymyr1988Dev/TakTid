@@ -1,5 +1,5 @@
-import type { DayEntry } from '../../../../types/DayEntry.type'
-import { TimeKind } from '../../../../types/timeKind.enum'
+import type { DayEntry } from '../../types/DayEntry.type'
+import { TimeKind } from '../../types/timeKind.enum'
 import { toMinutes } from './time'
 
 export function isFullDayCovered(dayEntries?: DayEntry[]): boolean {

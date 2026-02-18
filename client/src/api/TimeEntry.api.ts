@@ -3,7 +3,7 @@ import type { TimeEntry } from '../types/TimeEntry.type'
 //import type { TimeKind } from '../types/timeKind.enum'
 import type { TimeEntryCreatePayload } from '../types/TimeEntryCreatePayload'
 import type { TimeEntryUpdatePayload } from '../types/TimeEntryUpdatePayload.type'
-import { normalizeTime } from '../components/pages/components/helpers/time'
+import { normalizeTime } from '../components/helpers/time'
 
 export async function getTimeEntries(
   from: string,

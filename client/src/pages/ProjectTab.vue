@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useAuthStore } from '../../stores/auth.store'
-import ProjectCard from './ProjectCard.vue'
-import CreateProjectModal from './CreateProjectModal.vue'
+import { useAuthStore } from '../stores/auth.store'
+import ProjectCard from '../components/Projects/ProjectCard.vue'
+import CreateProjectModal from '../components/Projects/CreateProjectModal.vue'
 
-import type { Project } from '../../types/Project.dto'
-import type { TimeSuggestion } from '../../types/Suggestion.type'
-import { TimeKind } from '../../types/timeKind.enum'
-import { useProjectNavigationStore } from '../../stores/projectNavigation.store'
-import { useProjectStore } from '../../stores/project.store'
+import type { Project } from '../types/Project.dto'
+import type { TimeSuggestion } from '../types/Suggestion.type'
+import { TimeKind } from '../types/timeKind.enum'
+import { useProjectNavigationStore } from '../stores/projectNavigation.store'
+import { useProjectStore } from '../stores/project.store'
 
 const auth = useAuthStore()
 const isAdmin = computed(() => auth.user?.isAdmin === true)
@@ -22,8 +22,6 @@ const props = defineProps<{
 }>()
 
 const createModalOpen = ref(false)
-//const selectedProject = ref<Project | null>(null)
-//const photoModalOpen = ref(false)
 const projectStore = useProjectStore()
 const projectNav = useProjectNavigationStore()
 
@@ -34,11 +32,6 @@ onMounted(() => {
 function removeProject(id: string) {
   projectStore.removeProject(id)
 }
-/*
-function openPhotoModal(project: Project) {
-  selectedProject.value = project
-  photoModalOpen.value = true
-}*/
 function createWorkSuggestion(project: Project): TimeSuggestion {
   return {
     type: TimeKind.WORK,
@@ -96,4 +89,4 @@ function onProjectCreated(project: Project) {
     />
   </div>
 </template>
-<style scoped src="./project-list.css"></style>
+<style scoped src="../styles/project-list.css"></style>

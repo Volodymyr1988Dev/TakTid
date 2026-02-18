@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import dayjs, { Dayjs } from 'dayjs'
 //import Holidays from 'date-holidays'
-import { isHoliday } from '../pages/components/helpers/holiday'
+import { isHoliday } from '../helpers/holiday'
 //import { isWeekend } from '../pages/components/helpers/helpers'
 
 const emit = defineEmits<{

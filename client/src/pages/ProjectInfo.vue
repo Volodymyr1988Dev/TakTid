@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { getProjectStats } from '../../api/projectStats.api'
-import { useProjectImageStore } from '../../stores/projectImage.store'
+import { getProjectStats } from '../api/projectStats.api'
+import { useProjectImageStore } from '../stores/projectImage.store'
 
 type UserStat = {
   id: string

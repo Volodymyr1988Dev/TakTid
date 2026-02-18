@@ -1,5 +1,5 @@
-import type { DayEntry, WorkDayEntry, ExtraDayEntry } from '../../../../types/DayEntry.type'
-import { TimeKind } from '../../../../types/timeKind.enum'
+import type { DayEntry, WorkDayEntry, ExtraDayEntry } from '../../types/DayEntry.type'
+import { TimeKind } from '../../types/timeKind.enum'
 import { calculateWorkedMinutes } from './time'
 
 const FULL_DAY_MINUTES = 8 * 60

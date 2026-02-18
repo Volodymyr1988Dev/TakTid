@@ -1,7 +1,7 @@
 import { computed } from 'vue'
 import type { DayEntry, WorkDayEntry } from '../../types/DayEntry.type'
 import { TimeKind } from '../../types/timeKind.enum'
-import { normalizeTime, toMinutes, toTimeString } from '../pages/components/helpers/time'
+import { normalizeTime, toMinutes, toTimeString } from '../helpers/time'
 
 interface UseDefaultTimeOptions {
   dayEntries?: DayEntry[]
