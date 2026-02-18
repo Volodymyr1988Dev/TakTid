@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue'
 import { getProjectStats } from '../api/projectStats.api'
 import { useProjectImageStore } from '../stores/projectImage.store'
 import AppLoader from '../components/ui/AppLoader.vue'
@@ -27,36 +27,25 @@ type ProjectStats = {
   }
 }
 
-const props = defineProps<{
-  projectId: string
-}>()
-
-const emit = defineEmits<{
-  (e: 'back'): void
-}>()
+const props = defineProps<{ projectId: string }>()
+const emit = defineEmits<{ (e: 'back'): void }>()
 
 const stats = ref<ProjectStats | null>(null)
 const loading = ref(true)
+
 const imageStore = useProjectImageStore()
 const showImages = ref(false)
 const fullscreenUrl = ref<string | null>(null)
-const scrollContainer = ref<HTMLElement | null>(null)
-const sentinel = ref<HTMLElement | null>(null)
 
 const page = ref(1)
-const limit = 5
-const hasMore = ref(true)  
-watch(
-  () => props.projectId,
-  loadStats,
-  { immediate: true }
-)
-/*
-watch(showImages, async (val) => {
-  if (val) {
-    await imageStore.load(props.projectId)
-  }
-})*/
+const limit = 6
+const hasMore = ref(true)
+
+const sentinel = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+
+watch(() => props.projectId, loadStats, { immediate: true })
+
 watch(showImages, async (val) => {
   if (val) {
     page.value = 1
@@ -65,24 +54,30 @@ watch(showImages, async (val) => {
     await loadImages()
   }
 })
+
 watch(fullscreenUrl, val => {
   document.body.style.overflow = val ? 'hidden' : ''
 })
+
 onMounted(() => {
-  const observer = new IntersectionObserver(
+  observer = new IntersectionObserver(
     entries => {
-      if (!entries[0]) return
-      if (entries[0].intersectionRatio > 0) {
+      if (entries[0]?.isIntersecting) {
         loadImages()
       }
     },
-    { threshold: 1 }
+    { threshold: 0.1 }
   )
 
   if (sentinel.value) {
     observer.observe(sentinel.value)
   }
 })
+
+onBeforeUnmount(() => {
+  observer?.disconnect()
+})
+
 async function loadStats() {
   loading.value = true
   try {
@@ -92,7 +87,6 @@ async function loadStats() {
     loading.value = false
   }
 }
-
 
 async function loadImages() {
   if (!hasMore.value || imageStore.loading) return
@@ -113,35 +107,22 @@ async function loadImages() {
 function openFullscreen(url: string) {
   fullscreenUrl.value = url
 }
+
 function closeFullscreen() {
   fullscreenUrl.value = null
 }
 
-function onScroll() {
-  const el = scrollContainer.value
-  if (!el) return
-
-  const reachedBottom =
-    el.scrollTop + el.clientHeight >= el.scrollHeight - 10
-
-  if (reachedBottom) {
-    loadImages()
-  }
-}
-
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
-const totalAll = computed(() => {
-  return (stats.value?.total.work ?? 0) + (stats.value?.total.extra ?? 0)
-})
+const totalAll = computed(() =>
+  (stats.value?.total.work ?? 0) +
+  (stats.value?.total.extra ?? 0)
+)
 </script>
 
 <template>
   <div class="project-info">
-    <button 
-      class="back"
-      @click="emit('back')"
-    >
+    <button class="back" @click="emit('back')">
       ← Back
     </button>
 
@@ -180,54 +161,44 @@ const totalAll = computed(() => {
         </div>
       </div>
     </div>
-    <button 
+
+    <button
       class="toggle-images"
       @click="showImages = !showImages"
     >
       {{ showImages ? 'Hide images' : 'Show project images' }}
     </button>
-    <div 
-      v-if="showImages" 
-      ref="scrollContainer"
-      class="images"
-      @scroll.passive="onScroll"
-    >
-      <div v-if="imageStore.loading">
-        Loading images…
-      </div>
-      <Swiper
-        v-else
-        :slides-per-view="1"
-        navigation
-        pagination
-      >
-        <SwiperSlide
+
+    <div v-if="showImages" class="images">
+      <div class="masonry">
+        <div
           v-for="img in imageStore.images"
           :key="img.id"
+          class="masonry-item"
         >
           <img
-            class="slide-img"
             :src="img.url"
             @click="openFullscreen(img.url)"
-          >  
-        </SwiperSlide>
-      </Swiper>
+          />
+        </div>
+      </div>
+
+      <div ref="sentinel" class="sentinel" />
+
+      <div v-if="imageStore.loading" class="loading-more">
+        Loading more...
+      </div>
+
       <div
         v-if="fullscreenUrl"
         class="fullscreen"
         @click.self="closeFullscreen"
       >
-        <button 
-          class="close" 
-          @click="closeFullscreen"
-        >
+        <button class="close" @click="closeFullscreen">
           ✕
         </button>
-        <img 
-          :src="fullscreenUrl"
-        >
+        <img :src="fullscreenUrl" />
       </div>
-      <div ref="sentinel" />
     </div>
   </div>
 </template>
@@ -264,16 +235,51 @@ const totalAll = computed(() => {
 .toggle-images {
   margin-top: 16px;
 }
+.project-info {
+  padding: 16px;
+}
+
 .images {
-  margin-top: 12px;
+  margin-top: 16px;
 }
-.slide-img {
+
+.masonry {
+  column-count: 2;
+  column-gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .masonry {
+    column-count: 3;
+  }
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 12px;
+}
+
+.masonry-item img {
   width: 100%;
-  max-height: 300px;
-  object-fit: contain;
+  border-radius: 10px;
   cursor: pointer;
-  border-radius: 8px;
+  transition: transform .2s ease;
 }
+
+.masonry-item img:hover {
+  transform: scale(1.02);
+}
+
+.sentinel {
+  height: 1px;
+}
+
+.loading-more {
+  text-align: center;
+  padding: 12px;
+  color: #777;
+}
+
 .fullscreen {
   position: fixed;
   inset: 0;
@@ -298,9 +304,5 @@ const totalAll = computed(() => {
   color: white;
   font-size: 28px;
   cursor: pointer;
-}
-.images {
-  max-height: 400px;
-  overflow-y: auto;
 }
 </style>
