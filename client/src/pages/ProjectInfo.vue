@@ -2,6 +2,7 @@
 import { ref, watch, computed } from 'vue'
 import { getProjectStats } from '../api/projectStats.api'
 import { useProjectImageStore } from '../stores/projectImage.store'
+import AppLoader from '../components/ui/AppLoader.vue'
 
 type UserStat = {
   id: string
@@ -84,9 +85,10 @@ const totalAll = computed(() => {
       ← Back
     </button>
 
-    <div v-if="loading">
-      Loading…
-    </div>
+    <AppLoader
+      v-if="loading"
+      text="Loading project statistics..."
+    />
 
     <div v-else-if="stats">
       <h2>

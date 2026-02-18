@@ -10,6 +10,7 @@ import { Projects } from '../entities';
 import cloudinary from '../config/cloudinary.config';
 import { Readable } from 'stream';
 import { UploadApiResponse } from 'cloudinary';
+import { Express } from 'express';
 
 @Injectable()
 export class ProjectImagesService {
