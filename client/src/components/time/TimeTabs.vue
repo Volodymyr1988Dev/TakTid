@@ -65,7 +65,7 @@ const suggestionsStore = useSuggestionsStore()
         startTime: e.startTime,
         endTime: e.endTime,
         breakMinutes: e.breakMinutes ?? 0,
-        projectId: e.projectId ?? e.project!.id,
+        projectId: projectId, //e.projectId ?? e.project!.id,
         project: e.project,
         comment: e.comment ?? '',
       }

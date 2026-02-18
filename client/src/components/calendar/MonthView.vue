@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import dayjs, { Dayjs } from 'dayjs'
+import Holidays from 'date-holidays'
 //import { isWeekend } from '../pages/components/helpers/helpers'
 
 const emit = defineEmits<{
@@ -13,6 +14,12 @@ const props = defineProps<{
 }>()
 
 const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+const hd = new Holidays('SE')
+
+const isHoliday = (day: Dayjs): boolean => {
+  return !!hd.isHoliday(day.toDate())
+}
 
 const start = computed(() =>
   props.current.clone().startOf('month').startOf('isoWeek'),
@@ -66,6 +73,7 @@ function selectDay(day: Dayjs): void {
           today: day.isSame(today, 'day'),
           muted: !day.isSame(current, 'month'),
           disabled: isFuture(day),
+          holiday: isHoliday(day),
         }"
         @click="selectDay(day)"
       >

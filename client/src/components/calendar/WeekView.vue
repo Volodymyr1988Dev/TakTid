@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useSwipe } from '@vueuse/core'
 import dayjs, { Dayjs } from 'dayjs'
+import Holidays from 'date-holidays'
 import { isWeekend } from '../pages/components/helpers/helpers'
 
 const props = defineProps<{
@@ -17,6 +18,12 @@ const emit = defineEmits<{
 
 /* ========= SWIPE ========= */
 const el = ref<HTMLElement | null>(null)
+
+const hd = new Holidays('SE')
+
+const isHoliday = (day: Dayjs): boolean => {
+  return !!hd.isHoliday(day.toDate())
+}
 
 useSwipe(el, {
   onSwipeEnd(_, direction) {
@@ -65,6 +72,7 @@ const totalWeekHours = computed((): number =>
         today: day.isSame(today, 'day'),
         disabled: isFuture(day),
         weekend: isWeekend(day),
+        holiday: isHoliday(day),
       }"
       @click="!isFuture(day) && emit('select-day', day)"
     >

@@ -67,3 +67,7 @@
 .week-day.weekend .weekday {
   color: #d32f2f;
 }
+.week-day.holiday .weekday {
+  color: #d32f2f;
+  font-weight: 600;
+}

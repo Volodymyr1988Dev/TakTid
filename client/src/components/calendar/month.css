@@ -44,3 +44,7 @@
 .weekendLabel {
   color: #d32f2f;
 }
+.day.holiday .day-number {
+  color: #d32f2f;
+  font-weight: 600;
+}
