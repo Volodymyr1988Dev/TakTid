@@ -98,6 +98,9 @@ const absence = computed<AbsenceForm | null>(() => {
 const isSaving = computed(() => activeForm.value.isSaving.value)
 const deleting = ref(false)
 const isBlocking = computed(() => isSaving.value || deleting.value || props.externalLoading === true)
+
+//const loader= 
+
 watch(
   () => [props.entry, props.preset] as const,
   ([entry, preset]) => {
@@ -227,8 +230,12 @@ const spinnerText = computed(() => {
     v-if="isBlocking" 
     class="overlay"
   >
-    <div class="spinner">
-      {{ spinnerText }}
+    <div class="loader-wrapper">
+      <div class="loader"></div>
+      <p class="loader-text"> 
+        <!--spinner-->>
+        {{ spinnerText }}
+      </p>
     </div>
   </div>
   <div class="modal-backdrop">
@@ -585,6 +592,8 @@ textarea {
   align-items: center;
   justify-content: center;
   z-index: 9999;
+
+  backdrop-filter: blur(3px);
 }
 
 .spinner {
@@ -628,5 +637,59 @@ textarea {
   padding: 10px;
   border-radius: 8px;
   margin-bottom: 10px;
+}
+
+
+
+.loader-wrapper {
+  background: white;
+  padding: 28px 36px;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* === ANIMATED LOADER === */
+.loader {
+  display: inline-grid;
+  width: 40px;
+  aspect-ratio: 1;
+}
+
+.loader:before,
+.loader:after {
+  content: "";
+  grid-area: 1/1;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    #C02942 0 60deg,
+    #0B486B 0 120deg
+  );
+  animation: l7 2s infinite alternate ease-in-out;
+  rotate: 90deg;
+}
+
+.loader:before {
+  translate: 0 -100%;
+}
+
+.loader:after {
+  padding: 20%;
+  mask:
+    conic-gradient(from 120deg, #0000 120deg, #000 0) content-box exclude,
+    conic-gradient(from 120deg, #0000 120deg, #000 0);
+  animation-direction: alternate-reverse;
+}
+
+@keyframes l7 {
+  to { rotate: -90deg; }
+}
+
+.loader-text {
+  font-weight: 600;
+  color: #475569;
 }
 </style>
