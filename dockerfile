@@ -38,6 +38,7 @@ RUN npm ci --omit=dev
 
 COPY --from=server-build /app/server/dist ./dist
 
+
 COPY --from=client-build /app/client/dist ./public
 
 EXPOSE 8080
