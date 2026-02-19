@@ -26,7 +26,7 @@ import { join } from 'path';
       rootPath: join(__dirname, '..', 'public'),
       //exclude: ['/api*'],
       //serveRoot: '/',
-      exclude: ['/api*'],
+      exclude: ['/api', '/api/(.*)'],
       //renderPath: '*',
     }),
     ConfigModule.forRoot({ isGlobal: true }),
