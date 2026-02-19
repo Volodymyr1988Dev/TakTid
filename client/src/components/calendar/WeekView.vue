@@ -3,7 +3,6 @@ import { computed, ref } from 'vue'
 import { useSwipe } from '@vueuse/core'
 import dayjs, { Dayjs } from 'dayjs'
 import { isHoliday } from '../helpers/holiday'
-//import Holidays from 'date-holidays'
 import { isWeekend } from '../helpers/helpers'
 
 const props = defineProps<{
@@ -17,14 +16,8 @@ const emit = defineEmits<{
   (e: 'next'): void
 }>()
 
-/* ========= SWIPE ========= */
 const el = ref<HTMLElement | null>(null)
 
-//const hd = new Holidays('SE')
-
-//const isHoliday = (day: Dayjs): boolean => {
-//  return !!hd.isHoliday(day.toDate())
-//}
 
 useSwipe(el, {
   onSwipeEnd(_, direction) {
@@ -33,7 +26,6 @@ useSwipe(el, {
   },
 })
 
-/* ========= DAYS ========= */
 const startOfWeek = computed(() =>
   props.current.clone().startOf('isoWeek'),
 )
