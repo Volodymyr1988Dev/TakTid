@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { useSwipe } from '@vueuse/core'
 import dayjs, { Dayjs } from 'dayjs'
 //import Holidays from 'date-holidays'
 import { isHoliday } from '../helpers/holiday'
@@ -7,6 +8,8 @@ import { isHoliday } from '../helpers/holiday'
 
 const emit = defineEmits<{
   (e: 'select-day', day: Dayjs): void
+  (e: 'prev'): void
+  (e: 'next'): void
 }>()
 
 const props = defineProps<{
@@ -14,13 +17,17 @@ const props = defineProps<{
   hoursForDay: (day: Dayjs) => number
 }>()
 
+/* ========= SWIPE ========= */
+const el = ref<HTMLElement | null>(null)
+
+useSwipe(el, {
+  onSwipeEnd(_, direction) {
+    if (direction === 'left') emit('next')
+    if (direction === 'right') emit('prev')
+  },
+})
+
 const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-
-//const hd = new Holidays('SE')
-
-//const isHoliday = (day: Dayjs): boolean => {
-//  return !!hd.isHoliday(day.toDate())
-//}
 
 const start = computed(() =>
   props.current.clone().startOf('month').startOf('isoWeek'),
@@ -34,7 +41,7 @@ const days = computed(() => {
   const result: Dayjs[] = []
   let d = start.value.clone()
 
-  while (d.isBefore(end.value)) {
+  while (d.isBefore(end.value)|| d.isSame(end.value, 'day')) {
     result.push(d)
     d = d.clone().add(1, 'day')
   }
@@ -54,7 +61,10 @@ function selectDay(day: Dayjs): void {
 </script>
 
 <template>
-  <div class="month">
+  <div 
+    ref="el" 
+    class="month"
+  >
     <div class="weekdays">
       <div
         v-for="w in weekdays"
