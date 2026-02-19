@@ -5,9 +5,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import 'dotenv/config';
+//import 'dotenv/config';
 import { JwtService } from '@nestjs/jwt';
-import type { Response } from 'express';
+//import type { Response } from 'express';
 import { SessionService } from '../../services';
 import type { AuthRequest } from '../index';
 import { IS_PUBLIC_KEY } from '../../utils/public.decorator';
@@ -37,12 +37,13 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('No token provided');
     }
     try {
+      //const payload =
       this.jwtService.verify<{
         userId: string;
         email: string;
-      }>(token, {
-        secret: process.env.SECRET,
-      });
+      }>(
+        token, //{secret: process.env.SECRET}
+      );
 
       const session = await this.sessionService.findByToken(token);
 
