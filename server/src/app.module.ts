@@ -23,11 +23,26 @@ import { join } from 'path';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-      //exclude: ['/api*'],
-      //serveRoot: '/',
-      exclude: ['/api', '/api/(.*)'],
+      //rootPath: join(__dirname, '..', 'public'),
+      rootPath: join(process.cwd(), 'public'),
+      exclude: ['/api*'],
+      serveRoot: '/',
+      //exclude: [(path) => path.startsWith('/api')] //['/api', '/api/:path*'],
       //renderPath: '*',
+      //exclude: [(path) => path.startsWith('/api')],
+      /*
+      exclude: [
+        '/api',
+        '/api/dashboard',
+        '/api/',
+        '/api/users',
+        '/api/auth',
+        '/api/projects',
+        '/api/project-images',
+        '/api/project-assignments',
+        '/api/time-entries',
+        '/api/stats',
+      ],*/
     }),
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot(baseConfig),

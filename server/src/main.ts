@@ -3,11 +3,11 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 //import * as cookieParser from 'cookie-parser';
-import { join } from 'path';
+//import { join } from 'path';
 //import express from 'express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 //import * as express from 'express';
-import { Request, Response, NextFunction } from 'express';
+//import { Request, Response, NextFunction } from 'express';
 import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
@@ -35,6 +35,7 @@ async function bootstrap() {
   */
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   app.use(cookieParser());
+
   app.setGlobalPrefix('api');
   //app.use(express.json());
   /*
@@ -75,13 +76,14 @@ async function bootstrap() {
   //    res.sendFile(join(__dirname, '..', 'public', 'index.html'));
   //  }
   //});
+  /*
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (!req.path.startsWith('/api')) {
       res.sendFile(join(__dirname, 'public', 'index.html'));
     } else {
       next();
     }
-  });
+  });*/
   const port = process.env.PORT ? Number(process.env.PORT) : 8080;
   await app.listen(port, '0.0.0.0');
   //await app.listen(port);
