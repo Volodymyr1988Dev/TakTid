@@ -18,6 +18,11 @@ dayjs.extend(isBetween)
 const app = createApp(App);
 const pinia = createPinia();
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+  })
+}
 
 app.use(pinia);
 app.use(router);
