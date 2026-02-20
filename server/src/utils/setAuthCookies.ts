@@ -5,7 +5,6 @@ import { safeMs } from './safeMs';
 export function setAuthCookies(
   res: Response,
   tokens: { accessToken: string; refreshToken?: string },
-  //tokens: { accessToken: string; refreshToken?: string; userId?: string },
 ): void {
   res.cookie('access_token', tokens.accessToken, {
     httpOnly: true,
@@ -29,16 +28,6 @@ export function setAuthCookies(
       maxAge: safeMs(process.env.REFRESH_TOKEN_BEFORE_EXPIRES ?? '10d'),
     });
   }
-  /*
-  if (tokens.userId) {
-    res.cookie('user_id', tokens.userId.toString(), {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: safeMs(process.env.EXPIRES_AT ?? '4h'),
-    });
-  }
-  */
 }
 export function clearAuthCookies(res: Response) {
   res.clearCookie('access_token', {

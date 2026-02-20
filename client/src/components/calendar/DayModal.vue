@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import type { Dayjs } from 'dayjs'
-
-//import { createTimeEntry, updateTimeEntry } from '../../api/TimeEntry'
 import { createTimeEntry, updateTimeEntry } from '../../api/TimeEntry.api'
 import type { TimeEntry } from '../../types/TimeEntry.type'
 import { TimeKind } from '../../types/timeKind.enum'
 import { uploadPhoto } from '../../api/files'
 
-// ===== props / emits =====
 const props = defineProps<{
   day: Dayjs
   entry?: TimeEntry
@@ -24,25 +21,20 @@ async function onFile(e: Event) {
 
   photoUrl.value = await uploadPhoto(file)
 }
-// ===== state =====
 const isEdit = computed(() => !!props.entry)
 
-//const hours = ref<number>(props.entry?.hours ?? 0) // ✅ FIX
 const comment = ref<string>(props.entry?.comment ?? '')
 const type = ref<TimeKind>(props.entry?.type ?? TimeKind.WORK)
 const photoUrl = ref<string | null>(null)   
 
-// ===== watch edit =====
 watch(
   () => props.entry,
   e => {
-    //hours.value = e?.hours ?? 0
     comment.value = e?.comment ?? ''
     type.value = e?.type ?? TimeKind.WORK
   },
 )
 
-// ===== save =====
 async function save() {
   if (isEdit.value && props.entry) {
     await updateTimeEntry(props.entry.id, {
@@ -55,7 +47,6 @@ async function save() {
       date: props.day.format('YYYY-MM-DD'),
       type: type.value,
       comment: comment.value,
-      //photoUrl: photoUrl.value ?? undefined, // ✅ FIX
     })
   }
 
@@ -77,7 +68,6 @@ async function save() {
         placeholder="Comment"
       />
 
-      <!-- type -->
       <select v-model="type">
         <option :value="TimeKind.WORK">
           Work

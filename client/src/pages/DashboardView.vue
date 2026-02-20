@@ -8,7 +8,6 @@ import AppHeader from '../components/ui/AppHeader.vue'
 import ProjectInfo from '../pages/ProjectInfo.vue'
 import { useAuthStore } from '../stores/auth.store'
 import { useProjectNavigationStore } from '../stores/projectNavigation.store'
-//import StatsPage from '../components/pages/StatsPage.vue'
 import StatsPage from '../pages/StatsPage.vue'
 
 const auth = useAuthStore()
@@ -17,11 +16,7 @@ const isAdmin = computed(() => {
   if (!auth.isInitialized) return false
   return auth.user?.isAdmin === true
 })
-//const globalLoading = ref(false)
 const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
-//const selectedProjectId = ref<string | null>(null)
-
-//week-day.today background-color #ede7f6  #6d9cdecc  #78a5e2  #9baae2b5
 </script>
 
 <template>

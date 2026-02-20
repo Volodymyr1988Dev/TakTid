@@ -6,7 +6,6 @@ import ExcelJS from 'exceljs'
 import { saveAs } from 'file-saver'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-//import AppLoader from '../components/ui/AppLoader.vue'
 
 interface Entry {
   id: string
@@ -348,7 +347,6 @@ onMounted(load)
     </div>
   </div>
   <div class="stats-page">
-    <!--class controls-->
     <div class="date-controls">
       <div class="input-group">
         <label>Year</label>
@@ -594,7 +592,6 @@ onMounted(load)
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
-/* Skeleton animation */
 @keyframes shimmer {
   0% { background-position: -400px 0; }
   100% { background-position: 400px 0; }

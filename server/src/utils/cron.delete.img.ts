@@ -23,7 +23,6 @@ export class ImageCleanupCron {
     });
 
     for (const project of projects) {
-      //const lastEntry = project.timeEntries?.at(-1);
       const lastEntry = project.timeEntries?.sort(
         (a, b) => dayjs(b.date).unix() - dayjs(a.date).unix(),
       )[0];

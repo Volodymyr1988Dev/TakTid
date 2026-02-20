@@ -2,9 +2,7 @@
 import { computed, ref } from 'vue'
 import { useSwipe } from '@vueuse/core'
 import dayjs, { Dayjs } from 'dayjs'
-//import Holidays from 'date-holidays'
 import { isHoliday } from '../helpers/holiday'
-//import { isWeekend } from '../pages/components/helpers/helpers'
 
 const emit = defineEmits<{
   (e: 'select-day', day: Dayjs): void
@@ -17,7 +15,6 @@ const props = defineProps<{
   hoursForDay: (day: Dayjs) => number
 }>()
 
-/* ========= SWIPE ========= */
 const el = ref<HTMLElement | null>(null)
 
 useSwipe(el, {

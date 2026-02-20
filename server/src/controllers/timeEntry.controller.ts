@@ -7,7 +7,6 @@ import {
   Post,
   Patch,
   Query,
-  //UseGuards,
   Req,
   UnauthorizedException,
   ForbiddenException,
@@ -15,16 +14,9 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { TimeEntryService } from '../services/TimeEntry';
 import { QueryTimeEntryDto } from '../types/timeEntry/timeEntry.query.dto';
-import type {
-  AuthRequest,
-  //CreateTimeEntryDto,
-  //QueryTimeEntryDto,
-  //UpdateTimeEntryDto,
-  AdminMonthStatsQueryDto,
-} from '../types/index';
+import type { AuthRequest, AdminMonthStatsQueryDto } from '../types/index';
 import { UpdateTimeEntryDto } from '../types/timeEntry/timeEntry.update.dto';
 import { CreateTimeEntryDto } from '../types/timeEntry/timeEntry.create.dto';
-//import { JwtAuthGuard } from '../types/auth/';
 
 @ApiTags('Time Entries')
 @Controller('time-entries')
@@ -51,7 +43,6 @@ export class TimeEntryController {
   findByUser(@Param('userId') userId: string) {
     return this.timeService.findByUser(userId);
   }
-  //@UseGuards(JwtAuthGuard)
   @Get('period')
   findByPeriod(@Query() query: QueryTimeEntryDto, @Req() req: AuthRequest) {
     console.log('QUERY DTO:', query);

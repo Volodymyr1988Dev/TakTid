@@ -8,8 +8,6 @@ import type {
 } from '../../types/Form.types'
 import { TimeKind } from '../../types/timeKind.enum'
 
-//export type ActiveForm = WorkForm | ExtraForm | AbsenceForm
-
 export function useEntryFormSelector(
   mode: Ref<EntryMode>,
   forms: {

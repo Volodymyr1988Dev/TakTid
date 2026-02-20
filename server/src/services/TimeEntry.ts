@@ -37,9 +37,6 @@ export class TimeEntryService {
       });
       if (!project) throw new NotFoundException('Project not found');
     }
-    //const start = this.timeToMinutes(dto.startTime);
-    //const end = this.timeToMinutes(dto.endTime);
-    //const breakMinutes = dto.breakMinutes ?? 0;
 
     const workedMinutes = this.getWorkedMinutes(
       dto.startTime,
@@ -54,20 +51,17 @@ export class TimeEntryService {
     }
     const hours = Number((workedMinutes / 60).toFixed(2));
 
-    //const hours = Number((workedMinutes / 60).toFixed(2));
     const entry = this.timeRepo.create({
       user,
       project,
       projectId: dto.projectId,
       date: dto.date,
       hours,
-      //hours: dto.hours,
       type: dto.type,
       breakMinutes: dto.breakMinutes,
       comment: dto.comment,
       startTime: dto.startTime,
       endTime: dto.endTime,
-      //...dto,
     });
     const saved = await this.timeRepo.save(entry);
 
@@ -82,7 +76,6 @@ export class TimeEntryService {
     if ([timeKind.SICK, timeKind.VACATION, timeKind.VAB].includes(entry.type)) {
       entry.project = null;
     }
-    //return this.timeRepo.save(entry);
     return withProject;
   }
 
@@ -93,17 +86,7 @@ export class TimeEntryService {
       relations: ['project'],
     });
     if (!entry) throw new NotFoundException('Time entry not found');
-    //const startTime = dto.startTime ?? entry.startTime;
-    //const endTime = dto.endTime ?? entry.endTime;
-    //const breakMinutes = dto.breakMinutes ?? entry.breakMinutes;
 
-    //const workedMinutes = this.getWorkedMinutes(
-    //  startTime,
-    //  endTime,
-    //  breakMinutes,
-    //);
-
-    //entry.hours = Number((workedMinutes / 60).toFixed(2));
     if ([timeKind.SICK, timeKind.VACATION, timeKind.VAB].includes(entry.type)) {
       entry.project = null;
     }
@@ -118,23 +101,9 @@ export class TimeEntryService {
         entry.project = project;
       }
     }
-    /*
-    if (dto.projectId !== undefined) {
-      //entry.projectId = dto.projectId;
-      entry.project = dto.projectId
-        ? await this.projectRepo.findOneBy({ id: dto.projectId })
-        : null;
-    } */
     if (dto.type !== undefined) {
       entry.type = dto.type;
     }
-    //const effectiveType = dto.type ?? entry.type;
-    //const effectiveProjectId =
-    //  dto.projectId !== undefined ? dto.projectId : entry.projectId;
-
-    //entry.hours = Number((workedMinutes / 60).toFixed(2));
-    //const { projectId: _, ...rest } = dto;
-    //this.forbidProjectForAbsence(effectiveType, effectiveProjectId);
     this.forbidProjectForAbsence(entry.type, entry.project?.id);
     const startTime = dto.startTime ?? entry.startTime;
     const endTime = dto.endTime ?? entry.endTime;
@@ -152,12 +121,9 @@ export class TimeEntryService {
       entry.comment = dto.comment;
     }
     entry.hours = Number((workedMinutes / 60).toFixed(2));
-    //Object.assign(entry, rest);
     if (workedMinutes <= 0) {
       throw new BadRequestException('Invalid time range');
     }
-    //Object.assign(entry, dto);
-    //Object.assign(entry, rest);
     return this.timeRepo.save(entry);
   }
 

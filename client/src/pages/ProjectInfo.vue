@@ -51,11 +51,8 @@ const hasMore = ref(true)
 const sentinel = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 
-/* LIGHTBOX */
 const currentIndex = ref<number | null>(null)
 const startX = ref(0)
-
-/* ========================= WATCHERS ========================= */
 
 watch(() => props.projectId, loadStats, { immediate: true })
 
@@ -76,8 +73,6 @@ watch(currentIndex, val => {
   document.body.style.overflow = val !== null ? 'hidden' : ''
 })
 
-/* ========================= LIFECYCLE ========================= */
-
 onMounted(() => {
   observeSentinel()
 })
@@ -85,8 +80,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   observer?.disconnect()
 })
-
-/* ========================= FUNCTIONS ========================= */
 
 function observeSentinel() {
   if (!sentinel.value) return
@@ -128,8 +121,6 @@ async function loadImages() {
   }
 }
 
-/* ========================= LIGHTBOX ========================= */
-
 function openLightbox(index: number) {
   currentIndex.value = index
 }
@@ -152,8 +143,6 @@ function prevImage() {
   }
 }
 
-/* ========================= SWIPE ========================= */
-
 function touchStart(e: TouchEvent) {
   if (!e.touches[0]) return
   startX.value = e.touches[0].clientX
@@ -166,16 +155,12 @@ function touchEnd(e: TouchEvent) {
   if (diff < -50) nextImage()
 }
 
-/* ========================= COMPUTED ========================= */
-
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
 const totalAll = computed(() =>
   (stats.value?.total.work ?? 0) +
   (stats.value?.total.extra ?? 0)
 )
-
-/* ========================= CLOUDINARY OPTIMIZATION ========================= */
 
 function optimize(url: string) {
   return url.replace(
@@ -363,8 +348,6 @@ function blur(url: string) {
   margin-top: 16px;
 }
 
-/* ===== Masonry ===== */
-
 .images {
   margin-top: 16px;
 }
@@ -432,8 +415,6 @@ function blur(url: string) {
 .sentinel {
   height: 1px;
 }
-
-/* ===== Lightbox ===== */
 
 .lightbox {
   position: fixed;

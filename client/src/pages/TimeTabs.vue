@@ -153,24 +153,6 @@ const totals = computed<Totals>(() => {
       { work: 0, sick: 0, vab: 0},
     )
 })
-/* ================= FETCH ================= */
-/*
-watch(
-  ()=>[ auth.isInitialized, auth.isAuthenticated, mode.value, current.value.format('YYYY-MM-DD')],
-  //async ([isInitialized, isAuth]) => {
-  async ([ready, isAuth]) => {
-    if (ready && isAuth) //loadEntries()
-    //if (!Initialized || !isAuth) //{
-      //console.error('User not authenticated, skipping time entries load')
-    //  return
-    //}
-   // try {
-      await loadEntries()
-    //} catch (e) {
-    //  console.error('Failed to load time entries', e)
-  //}
-}, { immediate: true })
-*/
 watch(
   [
     () => auth.isInitialized,
@@ -184,28 +166,18 @@ watch(
   },
   { immediate: true }
 )
-/* ================= HELPERS ================= */
 function isWork(e: DayEntry) {
-  //return e.kind === 'WORK' || e.kind === 'EXTRA'
    return e.type === TimeKind.WORK || e.type === TimeKind.EXTRA
 }
 
 function isPaidWork(e: DayEntry) {
-  //return e.kind === 'EXTRA' || (e.kind === 'WORK' && e.type === TimeKind.WORK)
   return e.type === TimeKind.EXTRA || e.type === TimeKind.WORK
 }
 
-function isAbsence(e: DayEntry, type: TimeKind){ // kind: TimeKind) {
-  //return e.kind === 'ABSENCE' && e.type === kind
+function isAbsence(e: DayEntry, type: TimeKind){ 
   return e.type === type
 }
-/*
-function inCurrentPeriod(e: DayEntry): boolean {
-  return mode.value === 'week'
-    ? dayjs(e.date).isSame(current.value, 'week')
-    : dayjs(e.date).isSame(current.value, 'month')
-}
-*/
+
 function inCurrentPeriod(e: DayEntry): boolean {
   const date = dayjs(e.date)
 
@@ -247,11 +219,9 @@ const monthTotal = computed(() => {
     .reduce((sum, e) => sum + Number(e.hours), 0)
 })
 
-/* ================= ACTIONS ================= */
 function openDay(day: Dayjs) {
   selectedDay.value = day
   selectedDayEntries.value = entries.value.filter(
-    //e => e.date === day.format('YYYY-MM-DD'),
     e => dayjs(e.date).isSame(day, 'day'),
   )
   view.value = selectedDayEntries.value.length
@@ -262,14 +232,12 @@ function openDay(day: Dayjs) {
 function editFromList(entry: DayEntry) {
   editEntry.value = entry
   suggestionsStore.clear()
-  //selectedSuggestion.value = null
   view.value = 'modal'
 }
 
 function selectSuggestion(s: TimeSuggestion) {
   suggestionsStore.select(s)
   editEntry.value = null
-  //selectedSuggestion.value = s
   view.value = 'modal'
 }
 
@@ -322,7 +290,6 @@ async function reloadCalendar () {
 </script>
 
 <template>
-  <!-- CALENDAR -->
   <template v-if="view === 'calendar'">
     <SegmentedTabs v-model="mode" />
 
@@ -392,7 +359,6 @@ async function reloadCalendar () {
     @back="view = 'calendar'"
   />
 
-  <!-- TABS -->
   <RegisterTimePage
     v-else-if="view === 'tabs' && selectedDay"
     :day="selectedDay"
@@ -400,7 +366,6 @@ async function reloadCalendar () {
     @close="view = 'calendar'"
   />
 
-  <!-- MODAL -->
   <TimeFormModal
     v-else-if="view === 'modal' && selectedDay"
     :date="selectedDay.format('YYYY-MM-DD')"

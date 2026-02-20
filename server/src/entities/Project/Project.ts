@@ -1,13 +1,4 @@
-import {
-  Column,
-  //CreateDateColumn,
-  Entity,
-  //Index,
-  OneToMany,
-  //OneToOne,
-  PrimaryGeneratedColumn,
-  //UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { ProjectAssignment } from '../Project/ProjectAssignment';
 import { TimeEntry } from '../TimeEntries/TimeEntries';

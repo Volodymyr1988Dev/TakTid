@@ -5,18 +5,9 @@ import { ProjectAssignmentService } from '../services/ProjectAssignment';
 import { ProjectAssignmentController } from '../controllers/project.assignment.controller';
 import { User } from '../entities/User/User';
 import { Projects } from '../entities/Project/Project';
-//import { SessionModule } from './session.module';
-//import { AuthModule } from './auth.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      ProjectAssignment,
-      User,
-      Projects,
-      //SessionModule,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([ProjectAssignment, User, Projects])],
   providers: [ProjectAssignmentService],
   controllers: [ProjectAssignmentController],
   exports: [ProjectAssignmentService],

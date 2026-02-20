@@ -1,5 +1,4 @@
 <script setup lang="ts">
-//import { reactive } from 'vue'
 import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useRouter } from 'vue-router'
@@ -7,12 +6,6 @@ import { registerSchema } from '../schemas/register.schema'
 import api from '../api/axios'
 
 const router = useRouter()
-
-//const form = reactive({
-//  email: '',
-//  password: '',
-//  name: '',
-//})
 
 const { handleSubmit, isSubmitting } = useForm({
   validationSchema: toTypedSchema(registerSchema),
@@ -28,20 +21,9 @@ const onSubmit = handleSubmit(async (values) => {
     await router.push('/login')
   } catch (err) {
     console.error('Register failed', err)
-    alert('Помилка реєстрації')
+    alert('Register failed: ' + (err as Error).message)
   }
 })
-/*
-async function register() {
-  try {
-    await api.post('/auth/register', form)
-    await router.push('/login')
-  } catch (err) {
-    console.error('Register failed', err)
-    alert('Помилка реєстрації')
-  }
-}
-*/
 </script>
 
 <template>

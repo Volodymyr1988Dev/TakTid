@@ -37,7 +37,6 @@ export function useDefaultTime(options: UseDefaultTimeOptions) {
     if (!last) {
       return { start: '08:00', end: '17:00' }
     }
-    //const lastEnd = last.end
     const endOfWorkDay = toMinutes('17:00')
 
     if (last.end < endOfWorkDay) {

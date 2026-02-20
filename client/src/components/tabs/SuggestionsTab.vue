@@ -4,17 +4,13 @@ import { useSuggestionsStore } from '../../stores/suggestions.store'
 import { useProjectStore } from '../../stores/project.store';
 import type { TimeSuggestion } from '../../types/Suggestion.type'
 import { isWorkSuggestion } from '../../types/suggestion.guard';
-//import { createWorkSuggestion } from '../../composables/suggestion.factory';
-//import { createWorkSuggestion } from '../../composables/suggestion.factory';
 
 const emit = defineEmits<{
   (e: 'select', s: TimeSuggestion): void
 }>()
 
 const suggestionsStore = useSuggestionsStore()
-//const store = useSuggestionsStore()
 const projectStore = useProjectStore()
-//onMounted(store.load)
 onMounted(suggestionsStore.load)
 
 
@@ -23,9 +19,6 @@ const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
 
   for (const s of suggestionsStore.items) {
     const key = isWorkSuggestion(s) ? s.projectId : s.type
-    //s.type === 'WORK' || s.type === 'EXTRA'
-      //? s.projectId
-      //: s.type
     if (!map.has(key)) {map.set(key, s)}
   }
 
@@ -33,12 +26,8 @@ const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
 })
 function suggestionKey(s: TimeSuggestion): string {
   return isWorkSuggestion(s) ? s.projectId : s.type
-  //return s.type === 'WORK' || s.type === 'EXTRA'
-  //  ? s.projectId
-  //  : s.type
 }
 function selectSuggestion(s: TimeSuggestion) {
-  //suggestionsStore.select(s)
 
   if (isWorkSuggestion(s)) {
     const project = projectStore.getById(s.projectId)
@@ -46,7 +35,6 @@ function selectSuggestion(s: TimeSuggestion) {
     emit('select', s)
   }
 }
-//@click="emit('select', s)"
 </script>
 
 <template>

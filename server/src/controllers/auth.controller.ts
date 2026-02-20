@@ -6,19 +6,16 @@ import {
   Get,
   Req,
   UnauthorizedException,
-  //UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import 'dotenv/config';
-//import type { Response } from 'express';
 import { AuthService } from '../services/AuthService';
 import { LoginDto, RegisterDto, AuthResponseDto } from '../types';
 import { Public } from '../utils/public.decorator';
 import { setAuthCookies, clearAuthCookies } from '../utils/setAuthCookies';
-//import { AuthGuard } from '../types/auth/guard';
 import type { AuthRequest } from '../types/index';
-//@Public()
+
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

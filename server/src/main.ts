@@ -3,10 +3,8 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
-//import * as cookieParser from 'cookie-parser';
 import express from 'express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-//import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -52,7 +50,6 @@ async function bootstrap() {
   );
   const port = process.env.PORT ? Number(process.env.PORT) : 8080;
   await app.listen(port, '0.0.0.0');
-  //await app.listen(port);
   logger.log(`
     Application is running on: http://localhost:${process.env.PORT ?? 8080}`);
   logger.log(`

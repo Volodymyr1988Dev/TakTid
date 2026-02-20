@@ -7,7 +7,6 @@ export function createWorkSuggestion(
   breakMinutes?: number
 ): TimeSuggestion {
   return {
-    //kind: 'WORK',
     type: TimeKind.WORK,
     title,
     projectId,
@@ -21,7 +20,6 @@ export function createExtraSuggestion(
   breakMinutes?: number
 ): TimeSuggestion {
   return {
-    //kind: 'EXTRA',
     type: TimeKind.EXTRA,
     title,
     projectId,
@@ -37,7 +35,6 @@ export function createAbsenceSuggestion(
   title: string
 ): TimeSuggestion {
   return {
-    //kind: 'ABSENCE',
     type,
     title,
   }

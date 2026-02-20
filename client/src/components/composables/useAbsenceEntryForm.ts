@@ -5,7 +5,6 @@ import { TimeKind } from '../../types/timeKind.enum'
 import type { AbsenceForm,AbsenceKind } from '../../types/Form.types'
 import type { DayEntry } from '../../types/DayEntry.type'
 import { isFullDayCovered } from '../helpers/isFullDayCovered'
-//import { getLastWorkEnd } from '../pages/components/helpers/getLastWorkEnd'
 import { calculateMissingWorkTime } from '../helpers/calculateMissingWorkTime'
 import { addMinutes, normalizeTime } from '../helpers/time'
 

@@ -5,17 +5,6 @@ export function normalizeTime(time?: string | null): string | undefined {
 }
 
 export function toMinutes(t: string): number {
-  /*
-  const parts = t.split(':')
-  if (parts.length !== 2) return 0
-
-  const h = Number(parts[0])
-  const m = Number(parts[1])
-
-  if (Number.isNaN(h) || Number.isNaN(m)) return 0
-
-  return h * 60 + m
-  */
  if (!t) return 0
 
   const normalized = t.slice(0, 5)
@@ -40,8 +29,6 @@ export function calculateWorkedMinutes(
   if (endMin <= startMin) {
     endMin += MINUTES_IN_DAY
   }
-  //const worked = endMin - startMin - breakMinutes
-  //return worked > 0 ? worked : 0
   return Math.max(0, endMin - startMin - breakMinutes)
 }
 

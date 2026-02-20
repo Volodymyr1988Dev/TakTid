@@ -2,8 +2,6 @@
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.store'
-//import api from '../api/axios'
-//import type { LoginResponse } from '../types/LoginResponse'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -15,12 +13,7 @@ const form = reactive({
 
 async function login() {
   try {
-    //const { data } = await api.post('/auth/login', form)
-    //auth.setUser(data.user)
-    //router.push('/dashboard')
     await auth.login(form)
-    //await auth.fetchMe()
-    //await auth.initAuth()
     router.replace('/dashboard')
   } catch (e) {
     alert('Invalid password or email')

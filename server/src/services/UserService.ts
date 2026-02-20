@@ -3,14 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from '../types/index';
 import { User } from '../entities/User/User';
-//import { SessionService } from './SessionService';
 import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    //private readonly sessionService: SessionService,
   ) {}
   async findById(id: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { id } });

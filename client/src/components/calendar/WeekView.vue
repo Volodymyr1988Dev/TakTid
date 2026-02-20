@@ -36,20 +36,10 @@ const days = computed(() =>
   ),
 )
 
-/* ========= HELPERS ========= */
 const today = dayjs()
 
 const isFuture = (day: Dayjs): boolean =>
   day.isAfter(today, 'day')
-
-/* ========= TOTAL ========= 
-const totalWeekHours = computed((): number =>
-  days.value.reduce(
-    (sum, day) => sum + props.hoursForDay(day),
-    0,
-  ),
-)
-*/
 </script>
 
 <template>

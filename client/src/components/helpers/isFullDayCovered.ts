@@ -22,7 +22,6 @@ export function isFullDayCovered(dayEntries?: DayEntry[]): boolean {
       (e.breakMinutes ?? 0)
 
     return sum + Math.max(duration, 0)
-    //return (sum +(toMinutes(e.endTime) - toMinutes(e.startTime)))
   }, 0)
 
   return totalMinutes >= 8 * 60

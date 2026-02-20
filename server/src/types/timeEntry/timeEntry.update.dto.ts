@@ -11,10 +11,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class UpdateTimeEntryDto {
-  //@IsOptional()
-  //@IsNumber()
-  //hours?: number;
-
   @ApiProperty({ format: 'uuid', required: false })
   @IsOptional()
   @IsUUID()

@@ -44,7 +44,6 @@ async function onLogout() {
 
   padding: 0 16px;
   background: transparent;
-  /*border-bottom: 1px solid #e5e5e5;*/
   z-index: 100;
 }
 
