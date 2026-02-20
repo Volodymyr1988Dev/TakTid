@@ -529,16 +529,30 @@ onMounted(load)
   padding:16px;
   margin-bottom:20px;
   background:white;
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.user-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
 .header {
   background-color: #2563eb;
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
+
 .date-controls {
   display: flex;
   gap: 20px;
   align-items: flex-end;
 }
-
+.header:hover {
+  background: #1d4ed8;
+}
 .input-group {
   display: flex;
   flex-direction: column;
