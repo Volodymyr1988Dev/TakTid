@@ -19,6 +19,7 @@ import { ProjectStatsModule } from './modules/projectStats.module';
 import { StatsModule } from './modules/stat.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+//import { SpaController } from './controllers/spa.controller';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { join } from 'path';
       //rootPath: join(__dirname, '..', 'public'),
       rootPath: join(process.cwd(), 'public'),
       exclude: ['/api*'],
+      //exclude: ['/api', '/api/*'],
       serveRoot: '/',
       //exclude: [(path) => path.startsWith('/api')] //['/api', '/api/:path*'],
       //renderPath: '*',
@@ -57,8 +59,7 @@ import { join } from 'path';
     ProjectStatsModule,
     StatsModule,
   ],
-
-  controllers: [AppController],
+  controllers: [AppController], //SpaController
   providers: [
     AppService,
     {

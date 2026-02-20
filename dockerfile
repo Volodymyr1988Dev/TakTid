@@ -8,8 +8,9 @@ WORKDIR /app/client
 COPY client/package*.json ./
 RUN npm ci
 
-COPY client ./
+COPY client/ .
 RUN npm run build
+
 
 # -----------------------------
 # 2️⃣ SERVER BUILD
@@ -21,8 +22,9 @@ WORKDIR /app/server
 COPY server/package*.json ./
 RUN npm ci
 
-COPY server ./
+COPY server/ .
 RUN npm run build
+
 
 # -----------------------------
 # 3️⃣ PRODUCTION IMAGE
@@ -34,10 +36,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY server/package*.json ./
+
 RUN npm ci --omit=dev
 
 COPY --from=server-build /app/server/dist ./dist
-
 
 COPY --from=client-build /app/client/dist ./public
 
