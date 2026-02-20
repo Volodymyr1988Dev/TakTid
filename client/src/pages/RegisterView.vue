@@ -21,7 +21,7 @@ const onSubmit = handleSubmit(async (values) => {
     await router.push('/login')
   } catch (err) {
     console.error('Register failed', err)
-    alert('Помилка реєстрації')
+    alert('Register failed')
   }
 })
 </script>
