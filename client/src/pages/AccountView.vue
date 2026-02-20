@@ -5,12 +5,13 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.store'
 import { useUserStore } from '../stores/user.store'
 import type { User } from '../types/userInterface'
-import { useToastStore } from '../stores/toast.store'
+//import { useToastStore } from '../stores/toast.store'
+import { useToast } from '../components/composables/useToast'
 
 const auth = useAuthStore()
 const userStore = useUserStore()
 const router = useRouter()
-const toast = useToastStore()
+const toast = useToast()
 
 const name = ref(auth.user?.name ?? '')
 const email = ref(auth.user?.email ?? '')
@@ -41,14 +42,14 @@ async function updateProfile(data: Partial<User> & { password?: string }) {
   try {
     await userStore.updateUser(auth.user.id, data)
 
-    toast.show('Profile updated successfully', 'success')
+    toast.show('Profile updated successfully')
 
     setTimeout(() => router.push('/dashboard'), 700)
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {
-      toast.show(e.response?.data?.message ?? 'Update failed', 'error')
+      toast.error(e.response?.data?.message ?? 'Update failed')
     } else {
-      toast.show('Update failed', 'error')
+      toast.error('Update failed')
     }
   }
 }
@@ -64,12 +65,12 @@ async function saveEmail() {
 async function savePassword() {
   if (password.value.length < 6) {
     //error.value = 'Password must be at least 6 characters'
-    toast.show('Password must be at least 6 characters', 'error')
+    toast.error('Password must be at least 6 characters')
     return
   }
 
   if (password.value !== confirmPassword.value) {
-    toast.show('Passwords do not match', 'error')
+    toast.error('Passwords do not match')
     return
   }
 
@@ -101,16 +102,15 @@ async function deleteUser() {
     await userStore.deleteUser(user.id)
 
     toast.show(
-      `User ${user.name ?? 'No name'} (${user.email}) deleted successfully`,
-      'success'
+      `User ${user.name ?? 'No name'} (${user.email}) deleted successfully`
     )
 
     selectedUser.value = null
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {
-      toast.show(e.response?.data?.message ?? 'Delete failed', 'error')
+      toast.error(e.response?.data?.message ?? 'Delete failed')
     } else {
-      toast.show('Delete failed', 'error')
+      toast.error('Delete failed')
     }
   }
 }
@@ -121,32 +121,17 @@ async function restoreUser(user: User) {
     await userStore.restoreUser(user.id)
 
     toast.show(
-      `User ${user.name ?? 'No name'} (${user.email}) restored successfully`,
-      'success'
+      `User ${user.name ?? 'No name'} (${user.email}) restored successfully`
     )
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {
-      toast.show(e.response?.data?.message ?? 'Restore failed', 'error')
+      toast.error(e.response?.data?.message ?? 'Restore failed')
     } else {
-      toast.show('Restore failed', 'error')
+      toast.error('Restore failed')
     }
   }
 }
 
-/*
-<p 
-      v-if="error" 
-      class="error"
-    >
-      {{ error }}
-    </p>
-    <p 
-      v-if="success" 
-      class="success"
-    >
-      {{ success }}
-    </p>
-*/
 </script>
 
 <template>
