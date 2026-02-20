@@ -6,8 +6,6 @@ import { saveAs } from 'file-saver'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-/* ================= TYPES ================= */
-
 interface Entry {
   id: string
   date: string
@@ -33,7 +31,6 @@ interface UserStats {
   totalHours: number
 }
 
-/* ================= STATE ================= */
 
 const stats = useStatsStore()
 const expanded = ref<Record<string, boolean>>({})
@@ -43,8 +40,6 @@ const selectedDay = ref<Record<string, number | null>>({})
 const now = new Date()
 const year = ref(now.getFullYear())
 const month = ref(now.getMonth() + 1)
-
-/* ================= HELPERS ================= */
 
 function getDaysInMonth(y: number, m: number) {
   return new Date(y, m, 0).getDate()
@@ -111,7 +106,6 @@ async function load() {
   detailsOpen.value = {}
 }
 
-/* ================= EXCEL ================= */
 async function exportAllExcel() {
   const workbook = new ExcelJS.Workbook()
 
@@ -187,7 +181,6 @@ async function exportExcelSingle(user: UserStats) {
     ])
   })
 
-  // ✅ AUTO WIDTH
   sheet.columns.forEach(column => {
     let max = 12
     column.eachCell?.({ includeEmpty: true }, cell => {
@@ -200,8 +193,6 @@ async function exportExcelSingle(user: UserStats) {
   const buffer = await workbook.xlsx.writeBuffer()
   saveAs(new Blob([buffer]), `${getUserName(user.user)}_${month.value}_${year.value}.xlsx`)
 }
-
-/* ================= PDF ================= */
 
 async function exportPDFSingle(user: UserStats) {
   if (!stats.details[user.user.id]) {
@@ -282,11 +273,6 @@ async function exportAllPDF() {
         (doc as jsPDF & { lastAutoTable?: { finalY: number } })
             .lastAutoTable?.finalY ?? 30
     autoTable(doc, {
-      //startY: (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY + 10,
-      //const finalY =
-      //  (doc as jsPDF & { lastAutoTable?: { finalY: number } })
-      //      .lastAutoTable?.finalY ?? 30
-
       startY: finalY + 10,
       head: [['Date','Type','Hours','Project','Comment']],
       body: stats.details[user.user.id].entries.map((e: Entry) => [
@@ -387,7 +373,6 @@ onMounted(load)
               </div>
             </div>
           </div>
-          <!-- MOBILE TAP INFO -->
           <div 
             v-if="selectedDay[u.user.id]" 
             class="mobile-info"
@@ -403,7 +388,6 @@ onMounted(load)
             </div>
           </div>
 
-          <!-- LIST BELOW CALENDAR -->
           <div class="details-list">
             <div
               v-for="e in stats.details[u.user.id].entries"

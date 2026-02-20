@@ -2,11 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
-//import * as cookieParser from 'cookie-parser';
 import { join } from 'path';
-//import express from 'express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-//import * as express from 'express';
 import { Request, Response } from 'express';
 import { NextFunction } from 'express';
 import cookieParser from 'cookie-parser';
@@ -79,24 +76,6 @@ async function bootstrap() {
       next();
     }
   });
-  //app.get('*', (req, res) => {
-  //  if (!req.path.startsWith('/api') && !req.path.startsWith('/auth')) {
-  //    res.sendFile(join(__dirname, '..', 'public', 'index.html'));
-  //  }
-  //});
-  //const server = app.getHttpAdapter().getInstance();
-
-  //server.get(/^(?!\/api).*/, (req: Request, res: Response) => {
-  //  res.sendFile(join(process.cwd(), 'public', 'index.html'));
-  //});
-  /*
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(join(join(process.cwd(), 'public', 'index.html')));
-    } else {
-      next();
-    }
-  });*/
   const port = process.env.PORT ? Number(process.env.PORT) : 8080;
   await app.listen(port, '0.0.0.0');
   //await app.listen(port);

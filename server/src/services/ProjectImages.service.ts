@@ -22,9 +22,6 @@ export class ProjectImagesService {
     private readonly projectRepo: Repository<Projects>,
   ) {}
 
-  /**
-   * ADD IMAGE
-   */
   async uploadMultiple(
     projectId: string,
     files: Express.Multer.File[],
@@ -37,8 +34,6 @@ export class ProjectImagesService {
     const results: ProjectImage[] = [];
 
     for (const file of files) {
-      //const uploaded = await cloudinary.uploader.upload(file.path, {
-      //  folder: `projects/${projectId}`,
       const uploaded: UploadApiResponse = await this.uploadToCloudinary(
         file.buffer,
         projectId,

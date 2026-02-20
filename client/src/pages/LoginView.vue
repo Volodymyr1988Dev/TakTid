@@ -15,12 +15,7 @@ const form = reactive({
 
 async function login() {
   try {
-    //const { data } = await api.post('/auth/login', form)
-    //auth.setUser(data.user)
-    //router.push('/dashboard')
     await auth.login(form)
-    //await auth.fetchMe()
-    //await auth.initAuth()
     router.replace('/dashboard')
   } catch (e) {
     alert('Invalid password or email')

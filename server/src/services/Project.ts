@@ -49,9 +49,5 @@ export class ProjectsService {
     }
     await this.imagesService.removeByProject(id);
     await this.projectRepo.remove(project);
-    //const result = await this.projectRepo.delete(id);
-    //if (result.affected === 0) {
-    //  throw new NotFoundException('Project not found');
-    //}
   }
 }

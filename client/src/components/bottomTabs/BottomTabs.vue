@@ -33,32 +33,6 @@ defineProps<{
 </template>
 
 <style scoped>
-/*
-.bottom-tabs {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-
-  height: 56px;
-  background-color: #f9f9f9;
-  z-index: 1000;
-
-  border-top: 1px solid #ddd;
-}
-button {
-  flex: 1;
-  padding: 12px;
-}
-.active {
-  font-weight: bold;
-}
-.bottom-tabs-container {
-  padding-bottom: 56px;
-}*/
 .bottom-tabs-container {
   height: 60px;
 }

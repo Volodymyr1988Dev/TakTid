@@ -9,7 +9,6 @@ export interface ProjectAssignment {
 
   project: {
     id: string
-    //name?: string
     city: string
     address: string
   }

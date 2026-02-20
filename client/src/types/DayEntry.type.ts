@@ -1,8 +1,6 @@
 import { TimeKind } from './timeKind.enum'
 import type { Project } from './Project.dto'
 
-/* ================= BASE ================= */
-
 interface BaseDayEntry {
   id: string
   date: string
@@ -12,17 +10,11 @@ interface BaseDayEntry {
   project?: Project
 }
 
-/* ================= WORK ================= */
-
 export interface WorkDayEntry extends BaseDayEntry {
-  //kind: 'WORK'
   type: typeof TimeKind.WORK
-  //type: 'WORK'
-  //type: WorkKind
   startTime: string
   endTime: string
   breakMinutes: number
-
   projectId: string
   project?: {
     id: string
@@ -31,13 +23,9 @@ export interface WorkDayEntry extends BaseDayEntry {
     images?: any[]
   }
 }
-
-/* ================= EXTRA ================= */
 
 export interface ExtraDayEntry extends BaseDayEntry {
-  //kind: 'EXTRA'
-  //type: 'EXTRA'
-  type: typeof TimeKind.EXTRA//WorkKind
+  type: typeof TimeKind.EXTRA
   projectId: string
   startTime: string
   endTime: string
@@ -50,48 +38,35 @@ export interface ExtraDayEntry extends BaseDayEntry {
   }
 }
 
-/* ================= ABSENCE ================= */
-
 export interface AbsenceDayEntry extends BaseDayEntry {
-  //kind: 'ABSENCE'
  
   type: 
-    | typeof TimeKind.SICK //typeof TimeKind.SICK
-    | typeof TimeKind.VAB //typeof TimeKind.VAB
+    | typeof TimeKind.SICK
+    | typeof TimeKind.VAB
     | typeof TimeKind.VACATION
-    | typeof TimeKind.DAY_OFF //typeof TimeKind.VACATION
-   //type: 'SICK' | 'VAB' | 'VACATION'
-   //type: AbsenceKind
+    | typeof TimeKind.DAY_OFF
 }
-
-/* ================= UNION ================= */
 
 export type DayEntry =
   | WorkDayEntry
   | ExtraDayEntry
   | AbsenceDayEntry
 
-/* ================= GUARDS ================= */
-
 export function isWorkEntry(
   e: DayEntry
 ): e is WorkDayEntry {
-  //return e.kind === TimeKind.WORK //'WORK'
-  return e.type === TimeKind.WORK//'WORK'
+  return e.type === TimeKind.WORK
 }
 
 export function isExtraEntry(
   e: DayEntry
 ): e is ExtraDayEntry {
-  //return e.kind === TimeKind.EXTRA //'EXTRA'
-  return e.type === TimeKind.EXTRA//'EXTRA'
+  return e.type === TimeKind.EXTRA
 }
 
 export function isAbsenceEntry(
   e: DayEntry
 ): e is AbsenceDayEntry {
-  //return e.kind === 'ABSENCE'
-   //return  e.type === 'SICK' || e.type === 'VAB' || e.type === 'VACATION' || e.type === 'DAY_OFF'
   return (
     e.type === TimeKind.SICK ||
     e.type === TimeKind.VAB ||

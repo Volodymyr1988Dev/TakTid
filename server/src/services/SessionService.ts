@@ -1,9 +1,8 @@
-import { Injectable /*, UnauthorizedException*/ } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import 'dotenv/config';
 import { LessThan, Repository } from 'typeorm';
-//import { ValidateTokenResult } from '../types/index';
 import { User, Session } from '../entities';
 import { safeMs } from '../utils/safeMs';
 import { AuthUser } from '../types/index';

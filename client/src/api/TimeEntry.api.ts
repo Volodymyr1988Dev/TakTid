@@ -1,6 +1,5 @@
 import api from './axios'
 import type { TimeEntry } from '../types/TimeEntry.type'
-//import type { TimeKind } from '../types/timeKind.enum'
 import type { TimeEntryCreatePayload } from '../types/TimeEntryCreatePayload'
 import type { TimeEntryUpdatePayload } from '../types/TimeEntryUpdatePayload.type'
 import { normalizeTime } from '../components/helpers/time'
@@ -30,8 +29,8 @@ export async function updateTimeEntry(
     ...payload,
     startTime: normalizeTime(payload.startTime),
     endTime: normalizeTime(payload.endTime),
-  };//payload
-  return api.patch(`/time-entries/${id}`, dto)  //payload
+  };
+  return api.patch(`/time-entries/${id}`, dto)
 }
 
 export async function deleteTimeEntry(id: string): Promise<void> {

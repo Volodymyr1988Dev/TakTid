@@ -9,10 +9,6 @@ const emit = defineEmits<{
   (e: 'select-suggestion', s: TimeSuggestion): void
   (e: 'close'): void
 }>()
-/*
-<RegisterTabs
-      @select-suggestion="s => emit('select-suggestion', s)"
-    />*/
 </script>
 
 <template>

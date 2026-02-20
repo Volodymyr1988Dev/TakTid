@@ -1,12 +1,8 @@
 import {
   Column,
-  //CreateDateColumn,
   Entity,
-  //Index,
   ManyToOne,
-  //OneToOne,
   PrimaryGeneratedColumn,
-  //UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';

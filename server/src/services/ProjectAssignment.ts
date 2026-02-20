@@ -27,11 +27,8 @@ export class ProjectAssignmentService {
 
   async create(
     dto: CreateProjectAssignmentDto,
-    //user: User,
     userId: string,
   ): Promise<ProjectAssignment> {
-    //const user = await this.userRepo.findOne({ where: { id: dto.userId } });
-    //if (!user) throw new NotFoundException('User not found');
     const user = await this.userRepo.findOne({
       where: { id: userId },
     });
@@ -39,12 +36,8 @@ export class ProjectAssignmentService {
       throw new NotFoundException('User not found');
     }
 
-    //console.log('[CREATE ASSIGNMENT DTO]', dto);
-    //console.log('[USER]', user.id);
-
     const project = await this.projectRepo.findOne({
       where: { id: dto.projectId },
-      //relations: ['project'],
     });
     if (!project) throw new NotFoundException('Project not found');
     const hours = this.calculateHours(
@@ -66,7 +59,6 @@ export class ProjectAssignmentService {
       hours,
     });
 
-    //return this.assignmentRepo.save(assignment);
     try {
       return await this.assignmentRepo.save(assignment);
     } catch (e) {
@@ -92,7 +84,6 @@ export class ProjectAssignmentService {
     assignment.hours = this.calculateHours(start, end, breakMinutes);
     Object.assign(assignment, dto);
 
-    //return this.assignmentRepo.save(assignment);
     await this.assignmentRepo.save(assignment);
 
     const updated = await this.assignmentRepo.findOne({

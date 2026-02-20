@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useProjectStore } from '../stores/project.store'
-
 import { useWorkEntryForm } from '../components/composables/useWorkEntryForm'
 import { useExtraEntryForm } from '../components/composables/useExtraEntryForm'
 import { useAbsenceEntryForm } from '../components/composables/useAbsenceEntryForm'
@@ -99,15 +98,9 @@ const isSaving = computed(() => activeForm.value.isSaving.value)
 const deleting = ref(false)
 const isBlocking = computed(() => isSaving.value || deleting.value || props.externalLoading === true)
 
-//const loader= 
-
 watch(
   () => [props.entry, props.preset] as const,
   ([entry, preset]) => {
-
-    //currentEntryId.value = entry?.id ?? null
-    //currentType.value = entry?.type ?? null
-
     if (entry) {
 
       if ('projectId' in entry && entry.projectId) {
@@ -233,14 +226,12 @@ const spinnerText = computed(() => {
     <div class="loader-wrapper">
       <div class="loader" />
       <p class="loader-text"> 
-        <!--spinner-->
         {{ spinnerText }}
       </p>
     </div>
   </div>
   <div class="modal-backdrop">
     <div class="modal">
-      <!-- HEADER -->
       <header class="modal-header">
         <button
           class="back-btn"
@@ -249,8 +240,6 @@ const spinnerText = computed(() => {
           ← Back
         </button>
       </header>
-
-      <!-- TITLE -->
       <h3>
         <template v-if="mode === 'ABSENCE'">
           Register absence ({{ absence?.absenceType.value }})
@@ -265,8 +254,6 @@ const spinnerText = computed(() => {
         </strong>
         {{ date }}
       </p>
-
-      <!-- PROJECT -->
       <div
         v-if="isTimeMode"
         class="project-pill clickable"
@@ -283,8 +270,6 @@ const spinnerText = computed(() => {
           <span class="error">Click to select project</span>
         </div>
       </div>
-
-      <!-- MODE SELECT -->
       <select
         v-if="isTimeMode"
         v-model="mode"
@@ -297,7 +282,6 @@ const spinnerText = computed(() => {
         </option>
       </select>
 
-      <!-- TIME FORM -->
       <div v-if="timeForm">
         <input
           v-model="timeForm.start.value"
@@ -315,7 +299,6 @@ const spinnerText = computed(() => {
           min="0"
         >
 
-        <!-- IMAGES -->
         <div v-if="timeForm.images">
           <input
             type="file"
@@ -347,7 +330,6 @@ const spinnerText = computed(() => {
         </p>
       </div>
 
-      <!-- ABSENCE FORM -->
       <div v-else-if="absence">
         <select v-model="absence.absenceType.value">
           <option 
@@ -371,7 +353,6 @@ const spinnerText = computed(() => {
         </select>
       </div>
 
-      <!-- COMMENT -->
       <textarea
         v-model="activeForm.comment.value"
         placeholder="Comment"
@@ -383,7 +364,6 @@ const spinnerText = computed(() => {
         {{ absence.error.value }}
       </p>
 
-      <!-- ACTIONS -->
       <div class="actions">
         <span
           v-if="isSaving"
@@ -409,7 +389,7 @@ const spinnerText = computed(() => {
           Save
         </button>
       </div>
-      <!-- PROJECT SELECT MODAL -->
+
       <div
         v-if="selectingProject"
         class="modal-backdrop project-modal-layer"
@@ -583,11 +563,9 @@ textarea {
   color: #475569;
 }
 
-/* overlay saving */
 .overlay {
   position: fixed;
   inset: 0;
-  /*background: rgba(0, 0, 0, 0.45);*/
   background: rgba(15, 23, 42, 0.45);
 
   display: flex;
@@ -606,7 +584,6 @@ textarea {
   font-weight: 600;
 }
 
-/* Project modal */
 .project-modal-layer {
   z-index: 2000;
 }

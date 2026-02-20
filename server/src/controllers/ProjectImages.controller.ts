@@ -5,12 +5,10 @@ import {
   Query,
   Post,
   UseInterceptors,
-  //UploadedFile,
   UseGuards,
   Get,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-//import { AuthGuard } from '../types/auth/guard';
 import { AdminGuard } from '../types/auth/admin.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProjectImagesService } from '../services/ProjectImages.service';
@@ -32,7 +30,6 @@ export class ProjectImagesController {
   uploadMultiple(
     @Param('projectId') projectId: string,
     @UploadedFiles() files: Express.Multer.File[],
-    //@UploadedFiles() files: Array<Express.Multer.File>,
   ) {
     console.log('FILES:', files);
     return this.imagesService.uploadMultiple(projectId, files);

@@ -8,9 +8,7 @@ import { useTimeEntryImages } from './useTimeEntryImages'
 import { TimeKind } from '../../types/timeKind.enum'
 import type { WorkForm } from '../../types/Form.types'
 import type { DayEntry } from '../../types/DayEntry.type'
-//import { getNextDefaultTime } from '../pages/components/helpers/getNextDefaultTime'
 import { useDefaultTime } from './useDefaultTime'
-//import { normalizeTime,  } from '../pages/components/helpers/time'
 
 export function useWorkEntryForm(props: {
   date: string
@@ -49,7 +47,6 @@ export function useWorkEntryForm(props: {
 watch(
   [() => props.entry, defaultTime],
   ([entry]) => {
-    // EDIT MODE
     if (entry) {
       startRef.value = normalizeTime(entry.startTime)
       endRef.value = normalizeTime(entry.endTime)
@@ -58,7 +55,6 @@ watch(
       return
     }
 
-    // CREATE MODE
     startRef.value = defaultTime.value.start
     endRef.value = defaultTime.value.end
     breakMinutesRef.value = 30
@@ -119,7 +115,7 @@ watch(
         id: saved.id,
         date: saved.date,
         hours: Number(saved.hours),
-        type: TimeKind.WORK,//saved.type,
+        type: TimeKind.WORK,
         startTime: normalizeTime(saved.startTime),
         endTime: normalizeTime(saved.endTime),
         breakMinutes: saved.breakMinutes,
@@ -140,7 +136,6 @@ watch(
     mode: 'WORK',
     start,
     end,
-    //breakMinutes,
     form: {
       breakMinutes
     },

@@ -17,17 +17,9 @@ const email = ref(auth.user?.email ?? '')
 const password = ref('')
 const confirmPassword = ref('')
 
-//const error = ref('')
-//const success = ref('')
-
 const showUsers = ref(false)
 const selectedUser = ref<User | null>(null)
 const isAdmin = computed(() => auth.user?.isAdmin === true)
-
-//function clearMessages() {
-//  error.value = ''
-//  success.value = ''
-//}
 
 function goToDashboard() {
   router.push('/dashboard')
@@ -35,9 +27,6 @@ function goToDashboard() {
 
 async function updateProfile(data: Partial<User> & { password?: string }) {
   if (!auth.user) return
-
-  //clearMessages()
-
   try {
     await userStore.updateUser(auth.user.id, data)
 
@@ -63,7 +52,6 @@ async function saveEmail() {
 
 async function savePassword() {
   if (password.value.length < 6) {
-    //error.value = 'Password must be at least 6 characters'
     toast.show('Password must be at least 6 characters', 'error')
     return
   }
@@ -72,7 +60,6 @@ async function savePassword() {
     toast.show('Passwords do not match', 'error')
     return
   }
-
   await updateProfile({ password: password.value })
 
   password.value = ''
@@ -92,9 +79,6 @@ function confirmDelete(user: User) {
 
 async function deleteUser() {
   if (!selectedUser.value) return
-
-  //await userStore.deleteUser(selectedUser.value.id)
-  //selectedUser.value = null
    try {
     const user = selectedUser.value
 
@@ -116,7 +100,6 @@ async function deleteUser() {
 }
 
 async function restoreUser(user: User) {
-  //await userStore.restoreUser(user.id)
   try {
     await userStore.restoreUser(user.id)
 
@@ -132,27 +115,11 @@ async function restoreUser(user: User) {
     }
   }
 }
-
-/*
-<p 
-      v-if="error" 
-      class="error"
-    >
-      {{ error }}
-    </p>
-    <p 
-      v-if="success" 
-      class="success"
-    >
-      {{ success }}
-    </p>
-*/
 </script>
 
 <template>
   <div class="account">
     <h1>Account settings</h1>
-    <!-- NAME -->
     <div class="block">
       <input 
         v-model="name" 
@@ -163,7 +130,6 @@ async function restoreUser(user: User) {
       </button>
     </div>
 
-    <!-- EMAIL -->
     <div class="block">
       <input 
         v-model="email" 
@@ -174,7 +140,6 @@ async function restoreUser(user: User) {
       </button>
     </div>
 
-    <!-- PASSWORD -->
     <div class="block">
       <input
         v-model="password"
@@ -197,7 +162,6 @@ async function restoreUser(user: User) {
     >
       Cancel
     </button>
-    <!-- ADMIN PANEL -->
     <div 
       v-if="isAdmin" 
       class="admin-panel"
@@ -241,7 +205,6 @@ async function restoreUser(user: User) {
       </div>
     </div>
 
-    <!-- Confirm Modal -->
     <div 
       v-if="selectedUser" 
       class="modal"

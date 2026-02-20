@@ -3,7 +3,6 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
-//import { TypeOrmModule } from '@nestjs/typeorm';
 import { baseConfig } from './config/typeorm.config';
 import { AuthGuard } from './types/auth/guard';
 import { AppService } from './app.service';
@@ -19,32 +18,13 @@ import { ProjectStatsModule } from './modules/projectStats.module';
 import { StatsModule } from './modules/stat.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-//import { SpaController } from './controllers/spa.controller';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      //rootPath: join(__dirname, '..', 'public'),
       rootPath: join(process.cwd(), 'public'),
       exclude: ['/api*'],
-      //exclude: ['/api', '/api/*'],
       serveRoot: '/',
-      //exclude: [(path) => path.startsWith('/api')] //['/api', '/api/:path*'],
-      //renderPath: '*',
-      //exclude: [(path) => path.startsWith('/api')],
-      /*
-      exclude: [
-        '/api',
-        '/api/dashboard',
-        '/api/',
-        '/api/users',
-        '/api/auth',
-        '/api/projects',
-        '/api/project-images',
-        '/api/project-assignments',
-        '/api/time-entries',
-        '/api/stats',
-      ],*/
     }),
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot(baseConfig),
@@ -59,7 +39,7 @@ import { join } from 'path';
     ProjectStatsModule,
     StatsModule,
   ],
-  controllers: [AppController], //SpaController
+  controllers: [AppController],
   providers: [
     AppService,
     {
