@@ -84,6 +84,14 @@ export class AuthService {
     return { message: 'User deleted and sessions removed' };
   }
 
+  async logout(refreshToken?: string) {
+    if (refreshToken) {
+      await this.sessionService.removeByRefreshToken(refreshToken);
+    }
+
+    return { message: 'Logout successful' };
+  }
+
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
     const user = await this.userService.findByEmail(email);

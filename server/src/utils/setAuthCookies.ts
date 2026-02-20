@@ -34,6 +34,7 @@ export function setAuthCookies(
 }
 export function clearAuthCookies(res: Response) {
   res.clearCookie('access_token', {
+    httpOnly: true,
     path: '/',
     //secure: true,
     secure: process.env.NODE_ENV === 'production',
@@ -42,6 +43,7 @@ export function clearAuthCookies(res: Response) {
   });
 
   res.clearCookie('refresh_token', {
+    httpOnly: true,
     path: '/',
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
