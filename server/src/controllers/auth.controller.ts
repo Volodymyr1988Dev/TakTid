@@ -118,7 +118,7 @@ export class AuthController {
       refresh_token?: string;
     };
     const refreshToken = coockie?.refresh_token;
-    if (!refreshToken) return { message: 'Logout successful' };
+    if (!refreshToken) return;
 
     await this.authService.logout(refreshToken);
 
