@@ -49,6 +49,12 @@ export class SessionService {
     });
   }
 
+  async removeByRefreshToken(refreshToken: string) {
+    await this.sessionRepository.delete({
+      refresh_token: refreshToken,
+    });
+  }
+
   async refreshSession(session: Session): Promise<Session> {
     const payload = { userId: session.user.id, email: session.user.email };
     const token = this.jwtService.sign(payload, {
