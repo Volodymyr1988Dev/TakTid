@@ -29,18 +29,16 @@ RUN npm run build
 # -----------------------------
 # 3️⃣ PRODUCTION IMAGE
 # -----------------------------
-FROM node:20-alpine AS production
+FROM node:20-alpine
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 
 COPY server/package*.json ./
-
 RUN npm ci --omit=dev
 
 COPY --from=server-build /app/server/dist ./dist
-
 COPY --from=client-build /app/client/dist ./public
 
 EXPOSE 8080

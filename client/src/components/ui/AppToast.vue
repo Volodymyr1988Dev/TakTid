@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { useToastStore } from '../../stores/toast.store'
+//import { useToastStore } from '../../stores/toast.store'
+import { useToast } from '../composables/useToast';
 
-const toastStore = useToastStore()
+//const toastStore = useToastStore()
+const {toasts} = useToast()
 </script>
 
 <template>
   <div class="toast-wrapper">
     <div
-      v-for="toast in toastStore.toasts"
+      v-for="toast in toasts"
       :key="toast.id"
       :class="['toast', toast.type]"
     >
