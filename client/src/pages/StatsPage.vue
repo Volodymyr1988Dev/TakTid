@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useToastStore } from '../stores/toast.store'
 import { useStatsStore } from '../stores/stats.store'
 import ExcelJS from 'exceljs'
 import { saveAs } from 'file-saver'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import AppLoader from '../components/ui/AppLoader.vue'
 
 interface Entry {
   id: string
@@ -37,9 +39,21 @@ const expanded = ref<Record<string, boolean>>({})
 const detailsOpen = ref<Record<string, boolean>>({})
 const selectedDay = ref<Record<string, number | null>>({})
 
+const toast = useToastStore()
+const isLoading = ref(false)
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
 const now = new Date()
 const year = ref(now.getFullYear())
 const month = ref(now.getMonth() + 1)
+
+watch([year, month], () => {
+  if (debounceTimer) clearTimeout(debounceTimer)
+
+  debounceTimer = setTimeout(() => {
+    load()
+  }, 600)
+})
 
 function getDaysInMonth(y: number, m: number) {
   return new Date(y, m, 0).getDate()
@@ -101,9 +115,19 @@ function summary(u: UserStats) {
 }
 
 async function load() {
-  await stats.loadMonth(year.value, month.value)
-  expanded.value = {}
-  detailsOpen.value = {}
+  if (!validateInputs()) return
+
+  try {
+    isLoading.value = true
+    await stats.loadMonth(year.value, month.value)
+    expanded.value = {}
+    detailsOpen.value = {}
+  } catch (e) {
+    toast.error('Failed to load statistics')
+    console.error(e)
+  } finally {
+    isLoading.value = false
+  }
 }
 
 async function exportAllExcel() {
@@ -145,6 +169,25 @@ async function exportAllExcel() {
 
   const buffer = await workbook.xlsx.writeBuffer()
   saveAs(new Blob([buffer]), `All_Users_${month.value}_${year.value}.xlsx`)
+}
+
+function validateInputs(): boolean {
+  if (!Number.isInteger(year.value) || year.value < 2000) {
+    toast.error('Year must be a valid number greater than 2000')
+    return false
+  }
+
+  if (!Number.isInteger(month.value)) {
+    toast.error('Month must be a valid number')
+    return false
+  }
+
+  if (month.value < 1 || month.value > 12) {
+    toast.error('Month must be between 1 and 12')
+    return false
+  }
+
+  return true
 }
 
 async function exportExcelSingle(user: UserStats) {
@@ -293,18 +336,33 @@ onMounted(load)
 </script>
 
 <template>
+  <AppLoader 
+    v-if="isLoading" 
+    text="Loading statistics..." 
+  />
   <div class="stats-page">
-    <div class="controls">
-      <input 
-        v-model="year" 
-        type="number" 
-      >
-      <input 
-        v-model="month" 
-        type="number" 
-        min="1" 
-        max="12" 
-      >
+    <!--class controls-->>
+    <div class="date-controls">
+      <div class="input-group">
+        <label>Year</label>
+        <input
+          v-model.number="year"
+          type="number"
+          min="2000"
+          max="2100"
+        >
+      </div>
+
+      <div class="input-group">
+        <label>Month</label>
+        <input
+          v-model.number="month"
+          type="number"
+          min="1"
+          max="12"
+        >
+      </div>
+    
       <button @click="load">
         Load
       </button>
@@ -462,6 +520,37 @@ onMounted(load)
 }
 .header {
   background-color: #2563eb;
+}
+.date-controls {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: #666;
+}
+
+.input-group input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  width: 120px;
+  transition: all 0.2s ease;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 @media (max-width: 768px) {
   .calendar-grid {

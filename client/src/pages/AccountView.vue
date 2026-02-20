@@ -30,14 +30,14 @@ async function updateProfile(data: Partial<User> & { password?: string }) {
   try {
     await userStore.updateUser(auth.user.id, data)
 
-    toast.show('Profile updated successfully', 'success')
+    toast.success('Profile updated successfully')
 
     setTimeout(() => router.push('/dashboard'), 700)
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {
-      toast.show(e.response?.data?.message ?? 'Update failed', 'error')
+      toast.error(e.response?.data?.message ?? 'Update failed')
     } else {
-      toast.show('Update failed', 'error')
+      toast.error('Update failed')
     }
   }
 }
@@ -52,12 +52,12 @@ async function saveEmail() {
 
 async function savePassword() {
   if (password.value.length < 6) {
-    toast.show('Password must be at least 6 characters', 'error')
+    toast.error('Password must be at least 6 characters')
     return
   }
 
   if (password.value !== confirmPassword.value) {
-    toast.show('Passwords do not match', 'error')
+    toast.error('Passwords do not match')
     return
   }
   await updateProfile({ password: password.value })
@@ -92,9 +92,9 @@ async function deleteUser() {
     selectedUser.value = null
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {
-      toast.show(e.response?.data?.message ?? 'Delete failed', 'error')
+      toast.error(e.response?.data?.message ?? 'Delete failed')
     } else {
-      toast.show('Delete failed', 'error')
+      toast.error('Delete failed')
     }
   }
 }
@@ -103,15 +103,14 @@ async function restoreUser(user: User) {
   try {
     await userStore.restoreUser(user.id)
 
-    toast.show(
-      `User ${user.name ?? 'No name'} (${user.email}) restored successfully`,
-      'success'
+    toast.success(
+      `User ${user.name ?? 'No name'} (${user.email}) restored successfully`
     )
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {
-      toast.show(e.response?.data?.message ?? 'Restore failed', 'error')
+      toast.error(e.response?.data?.message ?? 'Restore failed')
     } else {
-      toast.show('Restore failed', 'error')
+      toast.error('Restore failed')
     }
   }
 }
