@@ -5,12 +5,14 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.store'
 import { useUserStore } from '../stores/user.store'
 import type { User } from '../types/userInterface'
-import { useToastStore } from '../stores/toast.store'
+//import { useToastStore } from '../stores/toast.store'
+import { useToast } from '../components/composables/useToast'
 
 const auth = useAuthStore()
 const userStore = useUserStore()
 const router = useRouter()
-const toast = useToastStore()
+//const toast = useToastStore()
+const toast = useToast()
 
 const name = ref(auth.user?.name ?? '')
 const email = ref(auth.user?.email ?? '')

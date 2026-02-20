@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { useToastStore } from '../stores/toast.store'
+//import { useToastStore } from '../stores/toast.store'
+import { useToast } from '../components/composables/useToast'
 import { useStatsStore } from '../stores/stats.store'
 import ExcelJS from 'exceljs'
 import { saveAs } from 'file-saver'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import AppLoader from '../components/ui/AppLoader.vue'
+//import AppLoader from '../components/ui/AppLoader.vue'
 
 interface Entry {
   id: string
@@ -39,7 +40,8 @@ const expanded = ref<Record<string, boolean>>({})
 const detailsOpen = ref<Record<string, boolean>>({})
 const selectedDay = ref<Record<string, number | null>>({})
 
-const toast = useToastStore()
+//const toast = useToastStore()
+const toast = useToast()
 const isLoading = ref(false)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -172,8 +174,8 @@ async function exportAllExcel() {
 }
 
 function validateInputs(): boolean {
-  if (!Number.isInteger(year.value) || year.value < 2000) {
-    toast.error('Year must be a valid number greater than 2000')
+  if (!Number.isInteger(year.value) || year.value < 2025) {
+    toast.error('Year must be a valid number greater than 2025')
     return false
   }
 
@@ -336,31 +338,41 @@ onMounted(load)
 </script>
 
 <template>
-  <AppLoader 
-    v-if="isLoading" 
-    text="Loading statistics..." 
-  />
+  <div v-if="isLoading">
+    <div 
+      v-for="i in 3" 
+      :key="i" 
+      class="user-card skeleton"
+    >
+      <div class="skeleton-line title" />
+      <div class="skeleton-line" />
+      <div class="skeleton-line short" />
+    </div>
+  </div>
   <div class="stats-page">
-    <!--class controls-->>
+    <!--class controls-->
     <div class="date-controls">
       <div class="input-group">
         <label>Year</label>
         <input
           v-model.number="year"
           type="number"
-          min="2000"
+          min="2025"
           max="2100"
         >
       </div>
 
       <div class="input-group">
         <label>Month</label>
-        <input
-          v-model.number="month"
-          type="number"
-          min="1"
-          max="12"
-        >
+        <select v-model.number="month">
+          <option 
+            v-for="m in 12" 
+            :key="m" 
+            :value="m"
+          >
+            {{ m }}
+          </option>
+        </select>
       </div>
     
       <button @click="load">
@@ -552,6 +564,76 @@ onMounted(load)
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
+
+.input-group select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  width: 120px;
+  transition: all 0.2s ease;
+  background: white;
+  cursor: pointer;
+}
+
+.input-group select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* Skeleton animation */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 400px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.skeleton-line.title {
+  height: 20px;
+  width: 60%;
+}
+
+.skeleton-line.short {
+  width: 40%;
+}
+
+.user-card.skeleton {
+  padding: 20px;
+}
+
+button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: #2563eb;
+  color: white;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
 @media (max-width: 768px) {
   .calendar-grid {
     grid-template-columns: repeat(3, 1fr);
