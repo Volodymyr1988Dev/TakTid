@@ -36,7 +36,7 @@ export class User {
     description: 'Enter password',
     example: '12gdf56',
   })
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, select: false })
   password!: string;
 
   @ApiProperty({
@@ -64,10 +64,10 @@ export class User {
   @Index()
   deletedAt!: Date | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   deletedByUserId?: string;
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'deletedByUserId' })
   deletedByUser?: User;
 

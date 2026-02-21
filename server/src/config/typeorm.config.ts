@@ -27,6 +27,7 @@ export const baseConfig: DataSourceOptions = {
   logging: true,
 };
 
+console.log('DB URL:', process.env.DATABASE_URL);
 export const AppDataSource = new DataSource({
   ...baseConfig,
   migrations: ['src/migrations/*.ts'],
