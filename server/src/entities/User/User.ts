@@ -36,7 +36,7 @@ export class User {
     description: 'Enter password',
     example: '12gdf56',
   })
-  @Column({ type: 'varchar', length: 255, select: false })
+  @Column({ type: 'varchar', length: 255 })
   password!: string;
 
   @ApiProperty({
