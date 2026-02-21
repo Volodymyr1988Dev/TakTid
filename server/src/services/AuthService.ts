@@ -50,7 +50,7 @@ export class AuthService {
     const session = await this.sessionService.createForUser(user);
     return {
       message: 'User registered successfully',
-      user,
+      user: this.sessionService.toAuthUser(user),
       token: session.token,
       refreshToken: session.refresh_token,
       expiresAt: session.expires_at,
@@ -112,7 +112,7 @@ export class AuthService {
       token: session.token,
       refreshToken: session.refresh_token,
       expiresAt: session.expires_at,
-      user,
+      user: this.sessionService.toAuthUser(user),
     };
   }
 }
