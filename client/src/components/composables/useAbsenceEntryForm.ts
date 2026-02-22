@@ -56,6 +56,7 @@ export function useAbsenceEntryForm(props: {
           e.type === TimeKind.SICK ||
           e.type === TimeKind.VAB ||
           e.type === TimeKind.VACATION ||
+          e.type === TimeKind.RED_DAY ||
           e.type === TimeKind.DAY_OFF,
       ) ?? []
       if (!props.entry && isFullDayCovered(allEntries)) {

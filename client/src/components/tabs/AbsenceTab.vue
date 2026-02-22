@@ -43,5 +43,11 @@ function select(type: AbsenceKind, title: string) {
     >
       <strong>Day Off</strong>
     </div>
+    <div
+      class="card"
+      @click="select(TimeKind.RED_DAY, 'Red Day')"
+    >
+      <strong>Red Day</strong>
+    </div>
   </div>
 </template>

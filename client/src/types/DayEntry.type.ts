@@ -45,6 +45,7 @@ export interface AbsenceDayEntry extends BaseDayEntry {
     | typeof TimeKind.VAB
     | typeof TimeKind.VACATION
     | typeof TimeKind.DAY_OFF
+    | typeof TimeKind.RED_DAY
 }
 
 export type DayEntry =
@@ -71,6 +72,7 @@ export function isAbsenceEntry(
     e.type === TimeKind.SICK ||
     e.type === TimeKind.VAB ||
     e.type === TimeKind.VACATION ||
-    e.type === TimeKind.DAY_OFF
+    e.type === TimeKind.DAY_OFF ||
+    e.type === TimeKind.RED_DAY
   )
   }
