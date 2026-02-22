@@ -159,6 +159,7 @@ async function exportAllExcel() {
     sheet.addRow(['Vacation', sum.vacation])
     sheet.addRow(['VAB', sum.vab])
     sheet.addRow(['Red Day', sum.redDay])
+    sheet.addRow(['Total + Red Days', sum.total + sum.redDay])
     sheet.addRow(['Total', sum.total])
     sheet.addRow([])
 
@@ -213,13 +214,14 @@ async function exportExcelSingle(user: UserStats) {
   sheet.addRow([])
 
   sheet.addRow(['Work', sum.work + sum.extra])
-  sheet.addRow(['Work + Red Day', sum.work + sum.extra + sum.redDay])
+  sheet.addRow(['Work + Red Days', sum.work + sum.extra + sum.redDay])
   //sheet.addRow(['Extra Work', sum.extra])
   sheet.addRow(['Sick', sum.sick])
   sheet.addRow(['Vacation', sum.vacation])
   sheet.addRow(['VAB', sum.vab])
   sheet.addRow(['Red Day', sum.redDay])
   sheet.addRow(['Total', sum.total])
+  sheet.addRow(['Total+ Red Days', sum.total + sum.redDay])
   sheet.addRow([])
 
   sheet.addRow(['Date','Type','Hours','Project','Comment'])
@@ -273,7 +275,9 @@ async function exportPDFSingle(user: UserStats) {
       ['Vacation', sum.vacation],
       ['VAB', sum.vab],
       ['Red Day', sum.redDay],
-      ['TOTAL', sum.total]
+      ['TOTAL', sum.total],
+      ['TOTAL + RED DAYS', sum.total + sum.redDay]
+
     ],
     theme: 'grid',
     headStyles: { fillColor: [40, 40, 40] }
@@ -323,7 +327,8 @@ async function exportAllPDF() {
         ['Vacation', sum.vacation],
         ['VAB', sum.vab],
         ['Red Day', sum.redDay],
-        ['Total', sum.total]
+        ['Total', sum.total],
+        ['Total + RED DAYS', sum.total + sum.redDay],
       ]
     })
     const finalY =
