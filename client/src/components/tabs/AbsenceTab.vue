@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { TimeKind } from '../../types/timeKind.enum'
 import type { TimeSuggestion } from '../../types/Suggestion.type'
+import type { AbsenceKind } from '../../types/timeKind.enum'
 
 const emit = defineEmits<{
   (e: 'select', s: TimeSuggestion): void
 }>()
-type AbsenceKind = Exclude<TimeKind, 'WORK' | 'EXTRA'>
+//type AbsenceKind = Exclude<TimeKind, 'WORK' | 'EXTRA'>
 
 function select(type: AbsenceKind, title: string) {
   emit('select', {

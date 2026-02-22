@@ -5,7 +5,7 @@ export const TimeKind = {
   SICK: 'SICK',
   VAB: 'VAB',
   VACATION: 'VACATION',
-  //MEETING: 'MEETING',
+  MEETING: 'MEETING',
   DAY_OFF: 'DAY_OFF',
   RED_DAY: 'RED_DAY',
 } as const
@@ -15,6 +15,9 @@ export type TimeKind = typeof TimeKind[keyof typeof TimeKind]
 export type WorkKind =
   | typeof TimeKind.WORK
   | typeof TimeKind.EXTRA
+
+export type MeetingKind =
+  | typeof TimeKind.MEETING
 
 export type AbsenceKind =
   | typeof TimeKind.SICK

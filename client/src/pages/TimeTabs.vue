@@ -12,7 +12,7 @@ import DayEntryPage from './DayEntryPage.vue'
 
 import { getTimeEntries } from '../api/TimeEntry.api'
 import type { TimeSuggestion } from '../types/Suggestion.type'
-import type { DayEntry, WorkDayEntry, AbsenceDayEntry, ExtraDayEntry } from '../types/DayEntry.type'
+import type { DayEntry, WorkDayEntry, AbsenceDayEntry, ExtraDayEntry, MeetingDayEntry } from '../types/DayEntry.type'
 import type { TimeEntry } from '../types/TimeEntry.type'
 import { getProjectAssignments } from '../api/projectAssignment.api'
 import type { ProjectAssignment } from '../types/ProjectAssignment.type'
@@ -67,6 +67,21 @@ const suggestionsStore = useSuggestionsStore()
 
       result.push(work)
       continue
+    }
+
+    if (e.type === TimeKind.MEETING) {
+      const meeting: MeetingDayEntry = {
+        id: e.id,
+        date: e.date,
+        hours,
+        type: TimeKind.MEETING,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        breakMinutes: e.breakMinutes ?? 0,
+        comment: e.comment ?? '',
+      }
+
+      result.push(meeting)
     }
 
     if (

@@ -4,6 +4,7 @@ import type {
   TimeSuggestion,
   WorkSuggestion,
   AbsenceSuggestion,
+  InternalSuggestion,
 } from './Suggestion.type'
 
 export function isWorkSuggestion(
@@ -12,6 +13,14 @@ export function isWorkSuggestion(
   return (
     s.type === TimeKind.WORK ||
     s.type === TimeKind.EXTRA
+  )
+}
+
+export function isInternalSuggestion(
+  s: TimeSuggestion
+): s is InternalSuggestion {
+  return (
+    s.type === TimeKind.MEETING
   )
 }
 

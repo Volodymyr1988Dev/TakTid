@@ -15,6 +15,8 @@ const emit = defineEmits<{
 
 function getTitle(entry: DayEntry) {
   if (entry.type === 'EXTRA') return 'Extra work'
+  if (entry.type === TimeKind.MEETING)
+  return 'Meeting'
   if (
     entry.type === TimeKind.SICK ||
     entry.type === TimeKind.VAB ||

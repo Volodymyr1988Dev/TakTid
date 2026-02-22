@@ -10,11 +10,17 @@ interface BaseDayEntry {
   project?: Project
 }
 
-export interface WorkDayEntry extends BaseDayEntry {
-  type: typeof TimeKind.WORK
+interface TimedEntry {
   startTime: string
   endTime: string
   breakMinutes: number
+}
+
+export interface WorkDayEntry extends BaseDayEntry, TimedEntry {
+  type: typeof TimeKind.WORK
+  //startTime: string
+  //endTime: string
+  //breakMinutes: number
 
   projectId: string
   project?: {
@@ -25,12 +31,12 @@ export interface WorkDayEntry extends BaseDayEntry {
   }
 }
 
-export interface ExtraDayEntry extends BaseDayEntry {
+export interface ExtraDayEntry extends BaseDayEntry, TimedEntry {
   type: typeof TimeKind.EXTRA
   projectId: string
-  startTime: string
-  endTime: string
-  breakMinutes: number
+  //startTime: string
+  //endTime: string
+  //breakMinutes: number
   project?: {
     id: string
     city: string
@@ -48,10 +54,15 @@ export interface AbsenceDayEntry extends BaseDayEntry {
     | typeof TimeKind.RED_DAY
 }
 
+export interface MeetingDayEntry extends BaseDayEntry, TimedEntry {
+  type: typeof TimeKind.MEETING
+}
+
 export type DayEntry =
   | WorkDayEntry
   | ExtraDayEntry
   | AbsenceDayEntry
+  | MeetingDayEntry
 
 export function isWorkEntry(
   e: DayEntry
@@ -63,6 +74,12 @@ export function isExtraEntry(
   e: DayEntry
 ): e is ExtraDayEntry {
   return e.type === TimeKind.EXTRA
+}
+
+export function isMeetingEntry(
+  e: DayEntry
+): e is MeetingDayEntry {
+  return e.type === TimeKind.MEETING
 }
 
 export function isAbsenceEntry(

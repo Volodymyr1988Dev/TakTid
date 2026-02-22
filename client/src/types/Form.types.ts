@@ -33,7 +33,7 @@ export type AbsenceKind =
   | typeof TimeKind.VACATION
   | typeof TimeKind.DAY_OFF
   | typeof TimeKind.RED_DAY
-export type EntryMode = 'WORK' | 'EXTRA' | 'ABSENCE'
+export type EntryMode = 'WORK' | 'EXTRA' | 'MEETING' | 'ABSENCE'
 
 export interface WorkForm extends TimeBaseForm {
   mode: 'WORK'
@@ -43,11 +43,14 @@ export interface ExtraForm extends TimeBaseForm {
   mode: 'EXTRA'
 }
 
+export interface MeetingForm extends TimeBaseForm {
+  mode: 'MEETING'
+}
 export interface AbsenceForm extends BaseForm {
   mode: 'ABSENCE'
   absenceType: Ref<AbsenceKind>
   error: Ref<string | null>
 }
 
-export type TimeForm = WorkForm | ExtraForm
+export type TimeForm = WorkForm | ExtraForm | MeetingForm
 export type ActiveForm = TimeForm | AbsenceForm

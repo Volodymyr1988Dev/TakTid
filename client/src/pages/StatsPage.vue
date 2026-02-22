@@ -31,6 +31,7 @@ interface UserStats {
   vabHours?: number
   redDayHours?: number
   totalHours: number
+  meetingHours: number
 }
 
 
@@ -84,6 +85,7 @@ function typeClass(type: string) {
   switch (type) {
     case 'WORK': return 'badge work'
     case 'EXTRA_WORK': return 'badge extra'
+    case 'MEETING': return 'badge meeting'
     case 'SICK': return 'badge sick'
     case 'VACATION': return 'badge vacation'
     case 'VAB': return 'badge vab'
@@ -109,6 +111,7 @@ function summary(u: UserStats) {
     paidWithRedDay: u.workHours + u.extraHours + (u.redDayHours || 0),
     work: u.workHours,
     extra: u.extraHours,
+    meeting: u.meetingHours,
     sick: u.sickHours,
     vacation: u.vacationHours,
     vab: u.vabHours || 0,
@@ -152,6 +155,7 @@ async function exportAllExcel() {
     sheet.addRow(['Work', sum.work + sum.extra])
     sheet.addRow(['Work + Red Day', sum.work + sum.extra + sum.redDay])
     //sheet.addRow(['Extra Work', sum.extra])
+    sheet.addRow(['Meeting', sum.meeting])
     sheet.addRow(['Sick', sum.sick])
     sheet.addRow(['Vacation', sum.vacation])
     sheet.addRow(['VAB', sum.vab])
@@ -213,6 +217,7 @@ async function exportExcelSingle(user: UserStats) {
   sheet.addRow(['Work', sum.work + sum.extra])
   sheet.addRow(['Work + Red Days', sum.work + sum.extra + sum.redDay])
   //sheet.addRow(['Extra Work', sum.extra])
+  sheet.addRow(['Meeting', sum.meeting])
   sheet.addRow(['Sick', sum.sick])
   sheet.addRow(['Vacation', sum.vacation])
   sheet.addRow(['VAB', sum.vab])
@@ -268,6 +273,7 @@ async function exportPDFSingle(user: UserStats) {
       ['Work', sum.work + sum.extra],
       ['Work + Red Day', sum.work + sum.extra + sum.redDay],
       //['Extra Work', sum.extra],
+      ['Meeting', sum.meeting],
       ['Sick', sum.sick],
       ['Vacation', sum.vacation],
       ['VAB', sum.vab],
@@ -320,6 +326,7 @@ async function exportAllPDF() {
         ['Work', sum.work + sum.extra],
         ['Work + Red Day', sum.work + sum.extra + sum.redDay],
         //['Extra Work', sum.extra],
+        ['Meeting', sum.meeting],
         ['Sick', sum.sick],
         ['Vacation', sum.vacation],
         ['VAB', sum.vab],
@@ -415,6 +422,7 @@ onMounted(load)
           Work: {{ u.workHours }}h |
           Work + Red Day: {{ u.workHours + u.extraHours + (u.redDayHours || 0) }}h |
           Extra: {{ u.extraHours }}h |
+          Meeting: {{ u.meetingHours }}h |
           Sick: {{ u.sickHours }}h |
           Vacation: {{ u.vacationHours }}h |
           Red Day: {{ u.redDayHours }}h |
@@ -519,6 +527,7 @@ onMounted(load)
 .badge.work { background:#2ecc71; }
 .badge.red-day { background: #e67e22; }
 .badge.extra { background:#f1c40f; color:black; }
+.badge.meeting{ background: blue; color: orange}
 .badge.sick { background:#e74c3c; }
 .badge.vacation { background:#3498db; }
 .badge.vab { background:#9b59b6; }

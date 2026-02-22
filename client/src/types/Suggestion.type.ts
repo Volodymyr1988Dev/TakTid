@@ -1,4 +1,4 @@
-import type { WorkKind, AbsenceKind } from './timeKind.enum'
+import type { WorkKind, AbsenceKind, MeetingKind } from './timeKind.enum'
 
 export type WorkSuggestion = {
   type: WorkKind
@@ -12,6 +12,12 @@ export type AbsenceSuggestion = {
   title: string
 }
 
+export type InternalSuggestion = {
+  type: MeetingKind
+  title: string
+}
+
 export type TimeSuggestion =
   | WorkSuggestion
   | AbsenceSuggestion
+  | InternalSuggestion

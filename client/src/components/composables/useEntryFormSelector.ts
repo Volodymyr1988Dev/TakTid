@@ -5,6 +5,7 @@ import type {
   ExtraForm,
   AbsenceForm,
   ActiveForm,
+  MeetingForm,
 } from '../../types/Form.types'
 import { TimeKind } from '../../types/timeKind.enum'
 
@@ -13,6 +14,7 @@ export function useEntryFormSelector(
   forms: {
     work: WorkForm
     extra: ExtraForm
+    meeting: MeetingForm
     absence: AbsenceForm
   },
 ): ComputedRef<ActiveForm> {
@@ -22,6 +24,8 @@ export function useEntryFormSelector(
         return forms.work
       case TimeKind.EXTRA:
         return forms.extra
+      case TimeKind.MEETING:
+        return forms.meeting  
       case 'ABSENCE':
       default:
         return forms.absence
