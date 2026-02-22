@@ -222,12 +222,7 @@ export class StatsService {
     return [...users.values()].map((u) => ({
       ...u,
       totalHours:
-        u.workHours +
-        u.extraHours +
-        u.sickHours +
-        u.vabHours +
-        u.vacationHours +
-        u.redDayHours,
+        u.workHours + u.extraHours + u.sickHours + u.vabHours + u.vacationHours,
     }));
   }
 }
