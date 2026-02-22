@@ -20,8 +20,7 @@ function selectMeeting() {
       class="card"
       @click="selectMeeting"
     >
-      <strong>Internal Meeting</strong>
-      <small>Non project related</small>
+      <strong>Meeting</strong>
     </div>
   </div>
 </template>
