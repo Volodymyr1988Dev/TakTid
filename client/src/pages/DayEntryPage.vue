@@ -19,7 +19,8 @@ function getTitle(entry: DayEntry) {
     entry.type === TimeKind.SICK ||
     entry.type === TimeKind.VAB ||
     entry.type === TimeKind.VACATION ||
-    entry.type === TimeKind.DAY_OFF
+    entry.type === TimeKind.DAY_OFF ||
+    entry.type === TimeKind.RED_DAY
   ) {
     return `Absence (${entry.type})`
   }
