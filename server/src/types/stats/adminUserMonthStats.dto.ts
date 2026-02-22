@@ -14,6 +14,8 @@ export interface AdminUserMonthStats {
   vabDays: number;
   vacationHours: number;
   vacationDays: number;
+  redDayHours: number;
+  redDayDays: number;
 
   totalHours: number;
 }

@@ -139,6 +139,9 @@ export class StatsService {
           workHours: 0,
           extraHours: 0,
 
+          redDayHours: 0,
+          redDayDays: 0,
+
           sickHours: 0,
           sickDays: 0,
 
@@ -174,6 +177,11 @@ export class StatsService {
           u.vacationHours += hours;
           u.vacationDays = Math.ceil(u.vacationHours / 8);
           break;
+
+        case timeKind.RED_DAY:
+          u.redDayHours += hours;
+          u.redDayDays = Math.ceil(u.redDayHours / 8);
+          break;
       }
     }
 
@@ -200,6 +208,9 @@ export class StatsService {
           vacationHours: 0,
           vacationDays: 0,
 
+          redDayHours: 0,
+          redDayDays: 0,
+
           totalHours: 0,
         });
       }
@@ -211,7 +222,12 @@ export class StatsService {
     return [...users.values()].map((u) => ({
       ...u,
       totalHours:
-        u.workHours + u.extraHours + u.sickHours + u.vabHours + u.vacationHours,
+        u.workHours +
+        u.extraHours +
+        u.sickHours +
+        u.vabHours +
+        u.vacationHours +
+        u.redDayHours,
     }));
   }
 }
