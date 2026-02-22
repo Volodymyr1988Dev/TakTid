@@ -69,7 +69,8 @@ const absenceForm = useAbsenceEntryForm({
     props.entry.type === TimeKind.SICK ||
     props.entry.type === TimeKind.VAB ||
     props.entry.type === TimeKind.VACATION ||
-    props.entry.type === TimeKind.DAY_OFF
+    props.entry.type === TimeKind.DAY_OFF ||
+    props.entry.type === TimeKind.RED_DAY
   )
     ? props.entry
     : null,
@@ -349,6 +350,11 @@ const spinnerText = computed(() => {
             value="DAY_OFF"
           >
             Day off
+          </option>
+          <option 
+            value="RED_DAY"
+          >
+            Red Day
           </option>
         </select>
       </div>

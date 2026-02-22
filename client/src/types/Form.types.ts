@@ -32,6 +32,7 @@ export type AbsenceKind =
   | typeof TimeKind.VAB
   | typeof TimeKind.VACATION
   | typeof TimeKind.DAY_OFF
+  | typeof TimeKind.RED_DAY
 export type EntryMode = 'WORK' | 'EXTRA' | 'ABSENCE'
 
 export interface WorkForm extends TimeBaseForm {
