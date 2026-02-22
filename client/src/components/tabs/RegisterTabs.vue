@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import SuggestionsTab from '../tabs/SuggestionsTab.vue'
 import ProjectTab from '../../pages/ProjectTab.vue'
 import AbsenceTab from '../tabs/AbsenceTab.vue'
+import InternalTab from './InternalTab.vue'
 import type { TimeSuggestion } from '../../types/Suggestion.type'
 import type { TimeEntry } from '../../types/TimeEntry.type'
 
@@ -28,6 +29,14 @@ const emit = defineEmits<{
     >
       Projects
     </button>
+
+    <button
+      :class="{ active: tab === 'internal' }"
+      @click="tab = 'internal'"
+    >
+      Internal
+    </button>
+
     <button
       :class="{ active: tab === 'absence' }"
       @click="tab = 'absence'"
@@ -47,6 +56,11 @@ const emit = defineEmits<{
     @select="s => emit('select-suggestion', s)"
   />
 
+  <InternalTab
+    v-if="tab === 'internal'"
+    @select="s => emit('select-suggestion', s)"
+  />
+  
   <AbsenceTab
     v-if="tab === 'absence'"
     @select="s => emit('select-suggestion', s)"

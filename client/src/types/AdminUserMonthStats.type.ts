@@ -6,7 +6,7 @@ export interface AdminUserMonthStats {
   }
   workHours: number
   extraHours: number
-  //meetingHours: number
+  meetingHours: number
   sickHours: number
   sickDays: number
   vabHours: number

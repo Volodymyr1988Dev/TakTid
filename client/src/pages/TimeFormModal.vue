@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useProjectStore } from '../stores/project.store'
 import { useWorkEntryForm } from '../components/composables/useWorkEntryForm'
 import { useExtraEntryForm } from '../components/composables/useExtraEntryForm'
+import { useMeetingEntryForm } from '../components/composables/useMeetingEntryForm'
 import { useAbsenceEntryForm } from '../components/composables/useAbsenceEntryForm'
 import { useEntryFormSelector } from '../components/composables/useEntryFormSelector'
 import { useTimeEntryStore } from '../stores/timeEntry.store'
@@ -38,16 +39,21 @@ const projectStore = useProjectStore()
 const timeEntryStore = useTimeEntryStore()
 const assignmentStore = useProjectAssignmentStore()
 
-const isTimeMode = computed(() => mode.value !== 'ABSENCE')
+//const isTimeMode = computed(() => mode.value !== 'ABSENCE')
+const isProjectMode = computed(
+  () => mode.value === 'WORK' || mode.value === 'EXTRA'
+)
 
 const projectId = computed(() =>
-  isTimeMode.value
+  //isTimeMode.value
+  isProjectMode.value
     ? projectStore.selectedProject?.id ?? null
     : null,
 )
 
 const projectMissing = computed(
-  () => isTimeMode.value && !projectId.value,
+  //() => isTimeMode.value && !projectId.value,
+  () => isProjectMode.value && !projectId.value,
 )
 
 const workForm = useWorkEntryForm({
@@ -61,6 +67,11 @@ const extraForm = useExtraEntryForm({
   date: props.date,
   entry: props.entry?.type === TimeKind.EXTRA ? props.entry : null,
   projectId,
+})
+
+const meetingForm = useMeetingEntryForm({
+  date: props.date,
+  entry: props.entry?.type === TimeKind.MEETING ? props.entry : null,
 })
 
 const absenceForm = useAbsenceEntryForm({
@@ -81,6 +92,7 @@ const activeForm = useEntryFormSelector(mode, {
   work: workForm,
   extra: extraForm,
   absence: absenceForm,
+  meeting: meetingForm,
 })
 
 const timeForm = computed<TimeForm | null>(() => {
@@ -98,7 +110,7 @@ const absence = computed<AbsenceForm | null>(() => {
 const isSaving = computed(() => activeForm.value.isSaving.value)
 const deleting = ref(false)
 const isBlocking = computed(() => isSaving.value || deleting.value || props.externalLoading === true)
-
+/*
 watch(
   () => [props.entry, props.preset] as const,
   ([entry, preset]) => {
@@ -115,22 +127,96 @@ watch(
 
       return
     }
-
+    
     if (preset) {
       if (isWorkSuggestion(preset)) {
         mode.value = preset.type
         const project = projectStore.getById(preset.projectId)
         if (project) projectStore.select(project)
-      } else {
+      }
+     else {
         mode.value = 'ABSENCE'
         absenceForm.absenceType.value = preset.type
       }
+        
       return
     }
 
     mode.value = 'WORK'
   },
+  if (preset) {
+    if (preset.type === TimeKind.WORK) {
+      mode.value = 'WORK'
+      const project = projectStore.getById(preset.projectId!)
+      if (project) projectStore.select(project)
+      return
+    }
+
+    if (preset.type === TimeKind.EXTRA) {
+      mode.value = 'EXTRA'
+      const project = projectStore.getById(preset.projectId!)
+      if (project) projectStore.select(project)
+      return
+    }
+
+    if (preset.type === TimeKind.MEETING) {
+      mode.value = 'MEETING'
+      return
+    }
+
+    // absence
+    mode.value = 'ABSENCE'
+    absenceForm.absenceType.value = preset.type
+  }
   { immediate: true }
+)
+*/
+
+watch(
+  () => [props.entry, props.preset] as const,
+  ([entry, preset]) => {
+    if (entry) {
+      if ('projectId' in entry && entry.projectId) {
+        const project = projectStore.getById(entry.projectId)
+        if (project) projectStore.select(project)
+      }
+
+      if (entry.type === TimeKind.WORK) mode.value = 'WORK'
+      else if (entry.type === TimeKind.EXTRA) mode.value = 'EXTRA'
+      else if (entry.type === TimeKind.MEETING) mode.value = 'MEETING'
+      else mode.value = 'ABSENCE'
+
+      return
+    }
+
+    if (preset) {
+      if (preset.type === TimeKind.WORK) {
+        mode.value = 'WORK'
+        const project = projectStore.getById(preset.projectId!)
+        if (project) projectStore.select(project)
+        return
+      }
+
+      if (preset.type === TimeKind.EXTRA) {
+        mode.value = 'EXTRA'
+        const project = projectStore.getById(preset.projectId!)
+        if (project) projectStore.select(project)
+        return
+      }
+
+      if (preset.type === TimeKind.MEETING) {
+        mode.value = 'MEETING'
+        return
+      }
+
+      mode.value = 'ABSENCE'
+      absenceForm.absenceType.value = preset.type
+      return
+    }
+
+    mode.value = 'WORK'
+  },
+  { immediate: true },
 )
 
 watch(mode, (newMode, oldMode) => {
@@ -174,7 +260,8 @@ async function onSave() {
     originalType.value !== mode.value &&
     (
       originalType.value === TimeKind.WORK ||
-      originalType.value === TimeKind.EXTRA
+      originalType.value === TimeKind.EXTRA ||
+      originalType.value === TimeKind.MEETING
     )
 
   try {
@@ -255,8 +342,9 @@ const spinnerText = computed(() => {
         </strong>
         {{ date }}
       </p>
+      <!--isTimeMode-->
       <div
-        v-if="isTimeMode"
+        v-if="isProjectMode"
         class="project-pill clickable"
         @click="selectingProject = true"
       >
@@ -271,8 +359,9 @@ const spinnerText = computed(() => {
           <span class="error">Click to select project</span>
         </div>
       </div>
+      <!--isTimeMode-->
       <select
-        v-if="isTimeMode"
+        v-if="isProjectMode"
         v-model="mode"
       >
         <option value="WORK">

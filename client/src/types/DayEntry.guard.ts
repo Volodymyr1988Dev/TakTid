@@ -3,6 +3,7 @@ import type {
   DayEntry,
   WorkDayEntry,
   AbsenceDayEntry,
+  MeetingDayEntry,
 } from './DayEntry.type'
 
 export function isWorkEntry(
@@ -12,6 +13,12 @@ export function isWorkEntry(
     e.type === TimeKind.WORK ||
     e.type === TimeKind.EXTRA
   )
+}
+
+export function isMeetingEntry(
+  e: DayEntry
+): e is MeetingDayEntry {
+  return e.type === TimeKind.MEETING
 }
 
 export function isAbsenceEntry(
