@@ -149,9 +149,11 @@ const totals = computed<Totals>(() => {
         if (isAbsence(e, TimeKind.SICK)) acc.sick += hours
         if (isAbsence(e, TimeKind.VAB)) acc.vab += hours
 
+        if (isAbsence(e, TimeKind.RED_DAY)) acc.redDay += hours
+
         return acc
       },
-      { work: 0, sick: 0, vab: 0},
+      { work: 0, sick: 0, vab: 0, redDay: 0 },
     )
 })
 watch(

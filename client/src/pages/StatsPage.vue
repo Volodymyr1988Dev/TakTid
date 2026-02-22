@@ -29,6 +29,7 @@ interface UserStats {
   sickHours: number
   vacationHours: number
   vabHours?: number
+  redDayHours?: number
   totalHours: number
 }
 
@@ -86,6 +87,7 @@ function typeClass(type: string) {
     case 'SICK': return 'badge sick'
     case 'VACATION': return 'badge vacation'
     case 'VAB': return 'badge vab'
+    case 'RED_DAY': return 'badge red-day'
     default: return 'badge'
   }
 }
@@ -104,11 +106,13 @@ async function toggleDetails(userId: string) {
 function summary(u: UserStats) {
   return {
     paid: u.workHours + u.extraHours,
+    paidWithRedDay: u.workHours + u.extraHours + (u.redDayHours || 0),
     work: u.workHours,
     extra: u.extraHours,
     sick: u.sickHours,
     vacation: u.vacationHours,
     vab: u.vabHours || 0,
+    redDay: u.redDayHours || 0,
     total: u.totalHours
   }
 }
@@ -146,10 +150,12 @@ async function exportAllExcel() {
     sheet.addRow([])
 
     sheet.addRow(['Work', sum.work + sum.extra])
+    sheet.addRow(['Work + Red Day', sum.work + sum.extra + sum.redDay])
     //sheet.addRow(['Extra Work', sum.extra])
     sheet.addRow(['Sick', sum.sick])
     sheet.addRow(['Vacation', sum.vacation])
     sheet.addRow(['VAB', sum.vab])
+    sheet.addRow(['Red Day', sum.redDay])
     sheet.addRow(['Total', sum.total])
     sheet.addRow([])
 
@@ -204,10 +210,12 @@ async function exportExcelSingle(user: UserStats) {
   sheet.addRow([])
 
   sheet.addRow(['Work', sum.work + sum.extra])
+  sheet.addRow(['Work + Red Day', sum.work + sum.extra + sum.redDay])
   //sheet.addRow(['Extra Work', sum.extra])
   sheet.addRow(['Sick', sum.sick])
   sheet.addRow(['Vacation', sum.vacation])
   sheet.addRow(['VAB', sum.vab])
+  sheet.addRow(['Red Day', sum.redDay])
   sheet.addRow(['Total', sum.total])
   sheet.addRow([])
 
@@ -256,10 +264,12 @@ async function exportPDFSingle(user: UserStats) {
     head: [['Category', 'Hours']],
     body: [
       ['Work', sum.work + sum.extra],
+      ['Work + Red Day', sum.work + sum.extra + sum.redDay],
       //['Extra Work', sum.extra],
       ['Sick', sum.sick],
       ['Vacation', sum.vacation],
       ['VAB', sum.vab],
+      ['Red Day', sum.redDay],
       ['TOTAL', sum.total]
     ],
     theme: 'grid',
@@ -304,10 +314,12 @@ async function exportAllPDF() {
       head: [['Category','Hours']],
       body: [
         ['Work', sum.work + sum.extra],
+        ['Work + Red Day', sum.work + sum.extra + sum.redDay],
         //['Extra Work', sum.extra],
         ['Sick', sum.sick],
         ['Vacation', sum.vacation],
         ['VAB', sum.vab],
+        ['Red Day', sum.redDay],
         ['Total', sum.total]
       ]
     })
@@ -396,9 +408,11 @@ onMounted(load)
           </strong>
           <br>
           Work: {{ u.workHours }}h |
+          Work + Red Day: {{ u.workHours + u.extraHours + (u.redDayHours || 0) }}h |
           Extra: {{ u.extraHours }}h |
           Sick: {{ u.sickHours }}h |
           Vacation: {{ u.vacationHours }}h |
+          Red Day: {{ u.redDayHours }}h |
           VAB: {{ u.vabHours || 0 }}h
         </div>
         <div>{{ u.totalHours }} h</div>
@@ -498,6 +512,7 @@ onMounted(load)
 }
 
 .badge.work { background:#2ecc71; }
+.badge.red-day { background: #e67e22; }
 .badge.extra { background:#f1c40f; color:black; }
 .badge.sick { background:#e74c3c; }
 .badge.vacation { background:#3498db; }
