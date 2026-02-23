@@ -55,7 +55,10 @@ function selectSuggestion(s: TimeSuggestion) {
       <div v-if="isWorkSuggestion(s)">
         <strong>{{ s.title }}</strong>
       </div>
-      <div v-else>
+      <div 
+        v-else 
+        class="strong-type"
+      >
         <strong>{{ s.type }}</strong>
       </div>
     </div>
@@ -71,5 +74,8 @@ function selectSuggestion(s: TimeSuggestion) {
 }
 .card {
   cursor: pointer;
+}
+.strong-type {
+  font-size: small;
 }
 </style>
