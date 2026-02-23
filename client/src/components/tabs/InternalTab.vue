@@ -25,14 +25,22 @@ function selectMeeting() {
   </div>
 </template>
 <style scoped>
-.card {
-  padding: 3px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
-
+.card {
+  display: flex;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 18px;
+  padding: 4px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
+  transition: transform .15s ease;
+}
 .card:hover {
   transform: translateY(-2px);
 }

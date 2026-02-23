@@ -53,12 +53,21 @@ function select(type: AbsenceKind, title: string) {
   </div>
 </template>
 <style scoped>
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 .card {
-  padding: 3px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 18px;
+  padding: 4px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
+  transition: transform .15s ease;
 }
 
 .card:hover {
