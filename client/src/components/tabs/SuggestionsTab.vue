@@ -65,8 +65,12 @@ function selectSuggestion(s: TimeSuggestion) {
       class="card"
       @click="selectSuggestion(s)"
     >
-      <strong>{{ s.title }}</strong>
-      <span>{{ s.type }}</span>
+      <div v-if="isWorkSuggestion(s)">
+        <strong>{{ s.title }}</strong>
+      </div>
+      <div v-else>
+        <strong>{{ s.type }}</strong>
+      </div>
     </div>
   </div>
 </template>
