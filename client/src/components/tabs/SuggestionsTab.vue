@@ -13,23 +13,9 @@ const suggestionsStore = useSuggestionsStore()
 const projectStore = useProjectStore()
 onMounted(suggestionsStore.load)
 
-/*
 const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
   const map = new Map<string, TimeSuggestion>()
 
-  for (const s of suggestionsStore.items) {
-    const map = new Map<string, TimeSuggestion>()
-    const reversed = [...suggestionsStore.items].reverse()
-
-    const key = isWorkSuggestion(s) ? s.projectId : s.type
-    if (!map.has(key)) {map.set(key, s)}
-  }
-
-  return [...map.values()]
-})*/
-const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
-  const map = new Map<string, TimeSuggestion>()
-  
   const reversed = [...suggestionsStore.items].reverse()
 
   for (const s of reversed) {
@@ -51,7 +37,8 @@ function selectSuggestion(s: TimeSuggestion) {
   if (isWorkSuggestion(s)) {
     const project = projectStore.getById(s.projectId)
     if (project) projectStore.select(project)
-    //emit('select', s)
+    console.log(s.title, 's.title')
+    console.log(s.type, 's.type')
   }
   emit('select', s)
 }
@@ -66,7 +53,7 @@ function selectSuggestion(s: TimeSuggestion) {
       @click="selectSuggestion(s)"
     >
       <strong>{{ s.title }}</strong>
-      <span>{{ s.type }}</span>
+      <span v-if="!isWorkSuggestion">{{ s.type }}</span>
     </div>
   </div>
 </template>
