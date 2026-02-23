@@ -44,14 +44,15 @@ function edit() {
 }
 </script>
 <template>
-  <div class="material-form">
-
+  <div 
+    class="material-form"
+  >
     <input
       v-model="title"
       placeholder="Title"
       class="title-input"
       :disabled="!isEditing"
-    />
+    >
 
     <div
       v-for="item in items"
@@ -66,7 +67,7 @@ function edit() {
         v-model="item.value"
         :disabled="!isEditing"
         placeholder="st / pack / number"
-      />
+      >
     </div>
 
     <div class="other-section">
@@ -78,26 +79,29 @@ function edit() {
       />
     </div>
 
-    <button v-if="isEditing" @click="save">
+    <button 
+      v-if="isEditing" 
+      @click="save"
+    >
       Save
     </button>
 
-    <button v-else @click="edit">
+    <button 
+      v-else 
+      @click="edit"
+    >
       Edit
     </button>
-
   </div>
 </template>
 <style scoped>
 .material-form {
-  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 1px;
 }
 
 .title-input {
-  padding: 10px;
   border-radius: 10px;
   border: 1px solid #ddd;
   font-weight: 600;
@@ -107,7 +111,7 @@ function edit() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  gap: 1px;
 }
 
 .label {
@@ -117,7 +121,6 @@ function edit() {
 
 .row input {
   flex: 1;
-  padding: 6px;
   border-radius: 8px;
   border: 1px solid #ccc;
 }
@@ -125,14 +128,12 @@ function edit() {
 textarea {
   width: 100%;
   resize: vertical;
-  padding: 8px;
   border-radius: 8px;
   border: 1px solid #ccc;
 }
 
 button {
   margin-top: 10px;
-  padding: 10px;
   border-radius: 10px;
   border: none;
   background: #2563eb;
