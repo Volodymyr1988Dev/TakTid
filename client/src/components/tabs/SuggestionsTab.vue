@@ -13,15 +13,32 @@ const suggestionsStore = useSuggestionsStore()
 const projectStore = useProjectStore()
 onMounted(suggestionsStore.load)
 
-
+/*
 const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
   const map = new Map<string, TimeSuggestion>()
 
   for (const s of suggestionsStore.items) {
     const map = new Map<string, TimeSuggestion>()
+    const reversed = [...suggestionsStore.items].reverse()
 
     const key = isWorkSuggestion(s) ? s.projectId : s.type
     if (!map.has(key)) {map.set(key, s)}
+  }
+
+  return [...map.values()]
+})*/
+const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
+  const map = new Map<string, TimeSuggestion>()
+  
+  const reversed = [...suggestionsStore.items].reverse()
+
+  for (const s of reversed) {
+    const key = isWorkSuggestion(s) ? s.projectId : s.type
+
+    if (!map.has(key)) {
+      map.set(key, s)
+    }
+    if (map.size === 5) break
   }
 
   return [...map.values()]
