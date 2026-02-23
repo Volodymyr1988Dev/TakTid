@@ -20,7 +20,7 @@ function selectMeeting() {
       class="card"
       @click="selectMeeting"
     >
-      <strong>Meeting</strong>
+      <strong class="card-meeting">Meeting</strong>
     </div>
   </div>
 </template>
