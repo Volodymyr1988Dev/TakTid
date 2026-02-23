@@ -63,7 +63,7 @@ function selectSuggestion(s: TimeSuggestion) {
       <!-- MEETING -->
       <template v-else-if="isInternalSuggestion(s)">
         <div class="meeting-card">
-          <span>{{ s.title }}</span>
+          <span>{{ s.type }}</span>
         </div>
       </template>
 
@@ -92,7 +92,7 @@ function selectSuggestion(s: TimeSuggestion) {
 }
 */
 .card {
-  padding: 14px;
+  padding: 3px;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -105,14 +105,14 @@ function selectSuggestion(s: TimeSuggestion) {
 
 /* WORK */
 .card-work {
-  background: #e0f2fe;
+ /* background: #e0f2fe;*/
   border: 1px solid #38bdf8;
   color: #0369a1;
 }
 
 /* MEETING */
 .card-meeting {
-  background: #ede9fe;
+ /* background: #ede9fe;*/
   border: 1px solid #8b5cf6;
   color: #5b21b6;
 }
@@ -120,31 +120,31 @@ function selectSuggestion(s: TimeSuggestion) {
 /* ABSENCE TYPES */
 
 .card-sick {
-  background: #fee2e2;
+ /* background: #fee2e2;*/
   border: 1px solid #ef4444;
   color: #991b1b;
 }
 
 .card-vacation {
-  background: #dcfce7;
+ /* background: #dcfce7;*/
   border: 1px solid #22c55e;
   color: #166534;
 }
 
 .card-vab {
-  background: #fef9c3;
+ /* background: #fef9c3;*/
   border: 1px solid #eab308;
   color: #854d0e;
 }
 
 .card-dayoff {
-  background: #e0e7ff;
+ /* background: #e0e7ff;*/
   border: 1px solid #6366f1;
   color: #3730a3;
 }
 
 .card-red {
-  background: #fecaca;
+ /* background: #fecaca;*/
   border: 1px solid #dc2626;
   color: #7f1d1d;
 }
