@@ -9,6 +9,7 @@ import ProjectInfo from '../pages/ProjectInfo.vue'
 import { useAuthStore } from '../stores/auth.store'
 import { useProjectNavigationStore } from '../stores/projectNavigation.store'
 import StatsPage from '../pages/StatsPage.vue'
+import MaterialListForm from './MaterialListForm.vue'
 
 const auth = useAuthStore()
 const projectNav = useProjectNavigationStore()
@@ -16,7 +17,7 @@ const isAdmin = computed(() => {
   if (!auth.isInitialized) return false
   return auth.user?.isAdmin === true
 })
-const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
+const bottomTab = ref<'time' | 'projects' | 'list' | 'stats'>('time')
 </script>
 
 <template>
@@ -40,6 +41,7 @@ const bottomTab = ref<'time' | 'projects' | 'stats'>('time')
       :project-id="projectNav.selectedProjectId!"
       @back="projectNav.closeProject"
     />
+    <MaterialListForm v-else-if="bottomTab === 'list'" />
     <StatsPage v-else-if="bottomTab === 'stats' && isAdmin" />
     <BottomTabs
       v-model="bottomTab"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const model = defineModel<'time' | 'projects' | 'stats'>()
+const model = defineModel<'time' | 'projects' | 'list' | 'stats'>()
 defineProps<{
   isAdmin: boolean
 }>()
@@ -20,6 +20,12 @@ defineProps<{
         @click="model = 'projects'"
       >
         Projects
+      </button>
+      <button
+        :class="{ active: model === 'list' }"
+        @click="model = 'list'"
+      >
+        List
       </button>
       <button
         v-if="isAdmin"
