@@ -27,11 +27,22 @@ export function createExtraSuggestion(
   }
 }
 
+export function createMeetingSuggestion(
+  title = 'Meeting'
+): TimeSuggestion {
+  return {
+    type: TimeKind.MEETING,
+    title,
+  }
+}
+
 export function createAbsenceSuggestion(
   type:
     | typeof TimeKind.SICK
     | typeof TimeKind.VAB
-    | typeof TimeKind.VACATION,
+    | typeof TimeKind.VACATION
+    | typeof TimeKind.DAY_OFF
+    | typeof TimeKind.RED_DAY,
   title: string
 ): TimeSuggestion {
   return {

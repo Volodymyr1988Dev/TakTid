@@ -18,6 +18,8 @@ const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
   const map = new Map<string, TimeSuggestion>()
 
   for (const s of suggestionsStore.items) {
+    const map = new Map<string, TimeSuggestion>()
+
     const key = isWorkSuggestion(s) ? s.projectId : s.type
     if (!map.has(key)) {map.set(key, s)}
   }
@@ -32,8 +34,9 @@ function selectSuggestion(s: TimeSuggestion) {
   if (isWorkSuggestion(s)) {
     const project = projectStore.getById(s.projectId)
     if (project) projectStore.select(project)
-    emit('select', s)
+    //emit('select', s)
   }
+  emit('select', s)
 }
 </script>
 
