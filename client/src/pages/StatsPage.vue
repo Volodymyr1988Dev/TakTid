@@ -420,7 +420,7 @@ onMounted(load)
           </strong>
           <br>
           Work: {{ u.workHours }}h |
-          Work + Red Day: {{ u.workHours + u.extraHours + u.redDayDays /*(u.redDayHours || 0)*/ }}h |
+          Work + Red Day: {{ u.workHours + u.extraHours + u.redDayHours /*(u.redDayHours || 0)*/ }}h |
           Extra: {{ u.extraHours }}h |
           Meeting: {{ u.meetingHours }}h |
           Sick: {{ u.sickHours }}h |
