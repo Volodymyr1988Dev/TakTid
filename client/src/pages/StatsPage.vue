@@ -28,8 +28,8 @@ interface UserStats {
   extraHours: number
   sickHours: number
   vacationHours: number
-  vabHours?: number
-  redDayHours?: number
+  vabHours: number
+  redDayHours: number
   totalHours: number
   meetingHours: number
 }
@@ -108,14 +108,14 @@ async function toggleDetails(userId: string) {
 function summary(u: UserStats) {
   return {
     paid: u.workHours + u.extraHours,
-    paidWithRedDay: u.workHours + u.extraHours + (u.redDayHours || 0),
+    paidWithRedDay: u.workHours + u.extraHours + u.redDayHours, //(u.redDayHours || 0),
     work: u.workHours,
     extra: u.extraHours,
     meeting: u.meetingHours,
     sick: u.sickHours,
     vacation: u.vacationHours,
-    vab: u.vabHours || 0,
-    redDay: u.redDayHours || 0,
+    vab: u.vabHours, // || 0,
+    redDay: u.redDayHours,// || 0,
     total: u.totalHours
   }
 }
@@ -420,13 +420,13 @@ onMounted(load)
           </strong>
           <br>
           Work: {{ u.workHours }}h |
-          Work + Red Day: {{ u.workHours + u.extraHours + (u.redDayHours || 0) }}h |
+          Work + Red Day: {{ u.workHours + u.extraHours + u.redDayDays /*(u.redDayHours || 0)*/ }}h |
           Extra: {{ u.extraHours }}h |
           Meeting: {{ u.meetingHours }}h |
           Sick: {{ u.sickHours }}h |
           Vacation: {{ u.vacationHours }}h |
           Red Day: {{ u.redDayHours }}h |
-          VAB: {{ u.vabHours || 0 }}h
+          VAB: {{ u.vabHours /*|| 0*/ }}h
         </div>
         <div>{{ u.totalHours }} h</div>
       </div>
