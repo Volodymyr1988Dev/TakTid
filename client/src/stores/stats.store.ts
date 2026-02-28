@@ -1,12 +1,19 @@
 import { defineStore } from 'pinia'
 import type { AdminUserMonthStats } from '../types/AdminUserMonthStats.type'
+import type { ProjectUserEntry } from '../types/ProjectUserEntry'
 import { getMonthStats, getUserMonthDetails } from '../api/stats.api'
+//import { getUserProjectEntries } from '../api/projectStats.api'
 
 export const useStatsStore = defineStore('stats', {
   state: () => ({
     users: [] as AdminUserMonthStats[],
     loading: false,
     details: {} as Record<string, any>,
+
+    monthDetails: {} as Record<string, any>,
+    projectUserEntries: {} as Record<string, ProjectUserEntry[]>,
+    loadingProjectUserId: null as string | null,
+    
   }),
 
   actions: {
@@ -16,8 +23,22 @@ export const useStatsStore = defineStore('stats', {
       this.loading = false
     },
     async loadUserDetails(userId: string, year: number, month: number) {
-      this.details[userId] =
+      //this.details[userId] =
+      this.monthDetails[userId]=
         await getUserMonthDetails(userId, year, month);
-    }
+    },
+    /*
+    async loadProjectUserEntries(projectId: string, userId: string) {
+      if (this.projectUserEntries[userId]) return
+
+      this.loadingProjectUserId = userId
+
+      try {
+        const data = await getUserProjectEntries(projectId, userId)
+        this.projectUserEntries[userId] = data.data
+      } finally {
+        this.loadingProjectUserId = null
+      }
+    }*/
   },
 })
