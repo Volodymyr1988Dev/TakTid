@@ -33,10 +33,14 @@ export const useStatsStore = defineStore('stats', {
 
       this.loadingProjectUserId = userId
 
+      this.projectUserEntries[key] = []
+
       try {
         const { data } = await getUserProjectEntries(projectId, userId)
 
         this.projectUserEntries[key] = data
+      } catch (e) {
+        delete this.projectUserEntries[key]
       } finally {
         this.loadingProjectUserId = null
       }

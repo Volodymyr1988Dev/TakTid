@@ -232,8 +232,9 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
             <div
               v-for="n in 3"
               :key="n"
-              class="line"
+              class="skeleton-line"
             />
+            <!--line -->>
           </div>
 
           <div v-else>
@@ -390,5 +391,28 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 
 .details-btn:active {
   transform: scale(0.97);
+}
+
+.skeleton-line {
+  height: 14px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 37%,
+    #f0f0f0 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
 }
 </style>
