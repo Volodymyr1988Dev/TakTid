@@ -424,4 +424,38 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 .user-card.clickable:hover {
   background: #f1f5f9;
 }
+@media (max-width: 640px) {
+
+  .summary {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .user-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .hours {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .hours-breakdown {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .details-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
+}
 </style>
