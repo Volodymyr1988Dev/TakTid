@@ -194,6 +194,8 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
         v-for="u in stats.users"
         :key="u.id"
         class="user-card"
+        :class="{ clickable: isAdmin }"
+        @click="isAdmin && toggleDetails(u.id)"
       >
         <div class="user-header">
           <div>
@@ -213,7 +215,7 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
             <button
               v-if="isAdmin"
               class="details-btn"
-              @click="toggleDetails(u.id)"
+              @click.stop="toggleDetails(u.id)"
             >
               {{ expandedUserId === u.id ? 'Hide Details' : 'Details' }}
             </button>
@@ -414,5 +416,12 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   100% {
     background-position: 0 0;
   }
+}
+.user-card.clickable {
+  cursor: pointer;
+}
+
+.user-card.clickable:hover {
+  background: #f1f5f9;
 }
 </style>
