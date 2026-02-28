@@ -1,7 +1,6 @@
-import { Controller, Get, Query, Param } from '@nestjs/common';
+import { Controller, Get, Query, Param, ParseUUIDPipe } from '@nestjs/common';
 import { StatsService } from '../services/StatService';
 import { ApiTags } from '@nestjs/swagger';
-
 @ApiTags('Admin Stats')
 @Controller('stats')
 export class StatsController {
@@ -10,6 +9,14 @@ export class StatsController {
   @Get('month')
   getMonth(@Query('year') year: number, @Query('month') month: number) {
     return this.statsService.getMonthStats(+year, +month);
+  }
+
+  @Get('project/:projectId/users/:userId')
+  getProjectUserDetails(
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
+  ) {
+    return this.statsService.getProjectUserDetails(projectId, userId);
   }
 
   @Get('month/:userId')

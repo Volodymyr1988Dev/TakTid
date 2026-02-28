@@ -39,6 +39,53 @@ export class StatsService {
     return this.aggregate(timeEntries, extraEntries);
   }
 
+  async getProjectUserDetails(projectId: string, userId: string) {
+    const timeEntries = await this.timeRepo.find({
+      where: {
+        user: { id: userId },
+        project: { id: projectId },
+      },
+      relations: ['project'],
+      order: { date: 'ASC' },
+    });
+
+    const extraEntries = await this.assignmentRepo.find({
+      where: {
+        user: { id: userId },
+        project: { id: projectId },
+      },
+      relations: ['project'],
+      order: { date: 'ASC' },
+    });
+
+    const entries = [
+      ...timeEntries.map((e) => ({
+        id: e.id,
+        date: e.date,
+        type: e.type,
+        hours: e.hours,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        breakMinutes: e.breakMinutes,
+        comment: e.comment,
+        source: 'WORK' as const,
+      })),
+      ...extraEntries.map((e) => ({
+        id: e.id,
+        date: e.date,
+        type: 'EXTRA',
+        hours: e.hours,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        breakMinutes: e.breakMinutes,
+        comment: e.comment,
+        source: 'EXTRA' as const,
+      })),
+    ].sort((a, b) => a.date.localeCompare(b.date));
+
+    return entries;
+  }
+
   async getUserMonthDetails(userId: string, year: number, month: number) {
     const from = new Date(year, month - 1, 1);
     const to = new Date(year, month, 0, 23, 59, 59);

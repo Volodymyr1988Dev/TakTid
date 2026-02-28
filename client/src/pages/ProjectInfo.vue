@@ -3,47 +3,90 @@ import {
   ref,
   watch,
   computed,
-  onMounted,
   onBeforeUnmount,
-  nextTick
+  nextTick,
+  onServerPrefetch
 } from 'vue'
 
-import { getProjectStats } from '../api/projectStats.api'
+import type { ProjectUserEntry } from '../types/ProjectUserEntry'
+import type { ProjectStats } from '../types/projectStats.type'
+import { getProjectStats, getUserProjectEntries } from '../api/projectStats.api'
 import { useProjectImageStore } from '../stores/projectImage.store'
 import AppLoader from '../components/ui/AppLoader.vue'
-
-type UserStat = {
-  id: string
-  name: string
-  email: string
-  workHours: number
-  extraHours: number
-  totalHours: number
-}
-
-type ProjectStats = {
-  project: {
-    id: string
-    city: string
-    address: string
-  }
-  users: UserStat[]
-  total: {
-    work: number
-    extra: number
-    all: number
-  }
-}
 
 const props = defineProps<{ projectId: string }>()
 const emit = defineEmits<{ (e: 'back'): void }>()
 
+const imageStore = useProjectImageStore()
+
 const stats = ref<ProjectStats | null>(null)
 const loading = ref(true)
+const error = ref<string | null>(null)
 
-const imageStore = useProjectImageStore()
+const expandedUserId = ref<string | null>(null)
+const userEntries = ref<Record<string, ProjectUserEntry[]>>({})
+const loadingUserId = ref<string | null>(null)
+
+const cache = new Map<string, ProjectUserEntry[]>()
+
+/* ================= LOAD STATS ================= */
+
+async function loadStats() {
+  loading.value = true
+  error.value = null
+
+  try {
+    const { data } = await getProjectStats(props.projectId)
+    stats.value = data
+  } catch (err: unknown) {
+    error.value =
+      err instanceof Error
+        ? err.message
+        : 'Failed to load project statistics'
+  } finally {
+    loading.value = false
+  }
+}
+
+watch(() => props.projectId, loadStats, { immediate: true })
+onServerPrefetch(loadStats)
+
+/* ================= USER DETAILS ================= */
+
+async function toggleDetails(userId: string) {
+  if (expandedUserId.value === userId) {
+    expandedUserId.value = null
+    return
+  }
+
+  expandedUserId.value = userId
+
+  const cacheKey = `${props.projectId}-${userId}`
+
+  if (cache.has(cacheKey)) {
+    userEntries.value[userId] = cache.get(cacheKey)!
+    return
+  }
+
+  userEntries.value[userId] = []
+  loadingUserId.value = userId
+
+  try {
+    const { data } = await getUserProjectEntries(
+      props.projectId,
+      userId
+    )
+
+    userEntries.value[userId] = data
+    cache.set(cacheKey, data)
+  } finally {
+    loadingUserId.value = null
+  }
+}
+
+/* ================= PAGINATION IMAGES ================= */
+
 const showImages = ref(false)
-
 const page = ref(1)
 const limit = 6
 const hasMore = ref(true)
@@ -51,59 +94,20 @@ const hasMore = ref(true)
 const sentinel = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 
-const currentIndex = ref<number | null>(null)
-const startX = ref(0)
-
-watch(() => props.projectId, loadStats, { immediate: true })
-
 watch(showImages, async (val) => {
-  if (val) {
-    page.value = 1
-    hasMore.value = true
-    imageStore.images = []
-    await loadImages()
-    await nextTick()
-    observeSentinel()
-  } else {
+  if (!val) {
     observer?.disconnect()
+    return
   }
-})
 
-watch(currentIndex, val => {
-  document.body.style.overflow = val !== null ? 'hidden' : ''
-})
+  page.value = 1
+  hasMore.value = true
+  imageStore.images = []
 
-onMounted(() => {
+  await loadImages()
+  await nextTick()
   observeSentinel()
 })
-
-onBeforeUnmount(() => {
-  observer?.disconnect()
-})
-
-function observeSentinel() {
-  if (!sentinel.value) return
-
-  observer?.disconnect()
-
-  observer = new IntersectionObserver(async entries => {
-    if (entries[0]?.isIntersecting) {
-      await loadImages()
-    }
-  }, { rootMargin: '200px' })
-
-  observer.observe(sentinel.value)
-}
-
-async function loadStats() {
-  loading.value = true
-  try {
-    const { data } = await getProjectStats(props.projectId)
-    stats.value = data
-  } finally {
-    loading.value = false
-  }
-}
 
 async function loadImages() {
   if (!hasMore.value || imageStore.loading) return
@@ -121,338 +125,206 @@ async function loadImages() {
   }
 }
 
-function openLightbox(index: number) {
-  currentIndex.value = index
+function observeSentinel() {
+  if (!sentinel.value) return
+
+  observer?.disconnect()
+
+  observer = new IntersectionObserver(async (entries) => {
+    if (entries[0]?.isIntersecting) {
+      await loadImages()
+    }
+  })
+
+  observer.observe(sentinel.value)
 }
 
-function closeLightbox() {
-  currentIndex.value = null
-}
+onBeforeUnmount(() => observer?.disconnect())
 
-function nextImage() {
-  if (currentIndex.value === null) return
-  if (currentIndex.value < imageStore.images.length - 1) {
-    currentIndex.value++
-  }
-}
-
-function prevImage() {
-  if (currentIndex.value === null) return
-  if (currentIndex.value > 0) {
-    currentIndex.value--
-  }
-}
-
-function touchStart(e: TouchEvent) {
-  if (!e.touches[0]) return
-  startX.value = e.touches[0].clientX
-}
-
-function touchEnd(e: TouchEvent) {
-  if (!e.changedTouches[0]) return
-  const diff = e.changedTouches[0].clientX - startX.value
-  if (diff > 50) prevImage()
-  if (diff < -50) nextImage()
-}
+/* ================= COMPUTED ================= */
 
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
-const totalAll = computed(() =>
-  (stats.value?.total.work ?? 0) +
-  (stats.value?.total.extra ?? 0)
-)
-
-function optimize(url: string) {
-  return url.replace(
-    '/upload/',
-    '/upload/f_auto,q_auto/'
-  )
-}
-
-function blur(url: string) {
-  return url.replace(
-    '/upload/',
-    '/upload/w_50,e_blur:300,f_auto,q_auto/'
-  )
-}
+const totalAll = computed(() => totalWork.value + totalExtra.value)
 </script>
 
 <template>
-  <div 
-    class="project-info"
-  >
-    <button
-      class="back"
+  <div class="project-info">
+    <button 
+      class="back" 
       @click="emit('back')"
     >
       ← Back
     </button>
 
-    <AppLoader
-      v-if="loading"
-      text="Loading project statistics..."
+    <AppLoader 
+      v-if="loading" 
+      text="Loading project..." 
     />
 
     <div 
-      v-else-if="stats"
+      v-else-if="error" 
+      class="error"
     >
+      {{ error }}
+    </div>
+
+    <div v-else-if="stats">
       <h2>
         {{ stats.project.city }} – {{ stats.project.address }}
       </h2>
 
       <div class="summary">
-        <div>Work: <strong>{{ totalWork }} h</strong></div>
-        <div>Extra: <strong>{{ totalExtra }} h</strong></div>
-        <div>Total: <strong>{{ totalAll }} h</strong></div>
+        <div>Work <strong>{{ totalWork }}h</strong></div>
+        <div>Extra <strong>{{ totalExtra }}h</strong></div>
+        <div>Total <strong>{{ totalAll }}h</strong></div>
       </div>
 
-      <hr>
-
+      <!-- USERS -->
       <div
         v-for="u in stats.users"
         :key="u.id"
-        class="user-row"
+        class="user-card"
       >
-        <div class="user-main">
-          <strong>{{ u.name }}</strong>
-          <span class="email">{{ u.email }}</span>
-        </div>
+        <div class="user-header">
+          <div>
+            <strong>{{ u.name }}</strong>
+            <div class="email">
+              {{ u.email }}
+            </div>
+          </div>
 
-        <div class="hours">
-          <span>Work: {{ u.workHours }}h</span>
-          <span>Extra: {{ u.extraHours }}h</span>
-          <strong>Total: {{ u.totalHours }}h</strong>
-        </div>
-      </div>
-    </div>
-    <button
-      class="toggle-images"
-      @click="showImages = !showImages"
-    >
-      {{ showImages ? 'Hide images' : 'Show project images' }}
-    </button>
-
-    <div 
-      v-if="showImages" 
-      class="images"
-    >
-      <div 
-        class="masonry"
-      >
-        <div
-          v-for="(img, index) in imageStore.images"
-          :key="img.id"
-          class="masonry-item"
-          @click="openLightbox(index)"
-        >
-          <div 
-            class="img-wrapper"
-          >
-            <img
-              class="blur"
-              :src="blur(img.url)"
-            >
-
-            <img
-              class="real"
-              :src="optimize(img.url)"
-              loading="lazy"
-            >
+          <div class="hours">
+            <span>{{ u.totalHours }}h</span>
+            <button @click="toggleDetails(u.id)">
+              {{ expandedUserId === u.id ? 'Hide' : 'Details' }}
+            </button>
           </div>
         </div>
-        <template v-if="imageStore.loading">
+
+        <!-- DETAILS -->
+        <div
+          v-if="expandedUserId === u.id"
+          class="details"
+        >
           <div
-            v-for="n in 6"
-            :key="'skeleton'+n"
-            class="skeleton"
-          />
-        </template>
+            v-if="loadingUserId === u.id"
+            class="details-skeleton"
+          >
+            <div
+              v-for="n in 3"
+              :key="n"
+              class="line"
+            />
+          </div>
+
+          <div v-else>
+            <div
+              v-for="entry in userEntries[u.id] || []"
+              :key="entry.id"
+              class="entry"
+            >
+              <div class="date">
+                {{ entry.date }}
+              </div>
+
+              <div>
+                {{ entry.hours }}h ({{ entry.type }})
+              </div>
+
+              <div
+                v-if="entry.comment"
+                class="comment"
+              >
+                {{ entry.comment }}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div 
-        ref="sentinel" 
-        class="sentinel" 
-      />
-      <div
-        v-if="currentIndex !== null"
-        class="lightbox"
-        @click.self="closeLightbox"
-        @touchstart="touchStart"
-        @touchend="touchEnd"
-      >
-        <button 
-          class="nav left" 
-          @click.stop="prevImage"
-        >
-          ‹
+
+      <!-- IMAGES -->
+      <div class="images-section">
+        <button @click="showImages = !showImages">
+          {{ showImages ? 'Hide Images' : 'Show Images' }}
         </button>
 
-        <img
-          v-if="currentIndex !== null && imageStore.images[currentIndex]"
-          :src="optimize(imageStore.images[currentIndex]!.url)"
+        <div 
+          v-if="showImages" 
+          class="images-grid"
         >
-        <button 
-          class="nav right" 
-          @click.stop="nextImage"
-        >
-          ›
-        </button>
+          <img
+            v-for="img in imageStore.images"
+            :key="img.id"
+            :src="img.url"
+            class="image"
+          >
 
-        <button 
-          class="close" 
-          @click="closeLightbox"
-        >
-          ✕
-        </button>
+          <div ref="sentinel" />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.project-info {
-  padding: 16px;
-}
-
-.back {
-  margin-bottom: 12px;
-}
+.project-info { padding: 20px; max-width: 900px; margin:auto; }
 
 .summary {
-  display: flex;
-  gap: 16px;
-  margin: 12px 0;
+  display:flex;
+  gap:20px;
+  margin-bottom:20px;
 }
 
-.user-row {
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
+.user-card {
+  border:1px solid #eee;
+  padding:16px;
+  border-radius:12px;
+  margin-bottom:12px;
+  background:white;
+  transition:.2s;
 }
 
-.user-main {
-  display: flex;
-  flex-direction: column;
+.user-card:hover {
+  box-shadow:0 4px 12px rgba(0,0,0,.05);
 }
 
-.email {
-  font-size: 12px;
-  color: #777;
+.user-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-.hours {
-  display: flex;
-  gap: 12px;
-  margin-top: 6px;
+.email { font-size:12px; color:#777; }
+
+.details {
+  margin-top:12px;
+  padding:12px;
+  background:#f8fafc;
+  border-radius:10px;
 }
 
-.toggle-images {
-  margin-top: 16px;
+.entry {
+  padding:8px 0;
+  border-bottom:1px solid #eee;
 }
 
-.images {
-  margin-top: 16px;
+.images-grid {
+  margin-top:16px;
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap:10px;
 }
 
-.masonry {
-  column-count: 2;
-  column-gap: 12px;
+.image {
+  width:100%;
+  border-radius:8px;
 }
 
-@media (min-width: 768px) {
-  .masonry {
-    column-count: 3;
-  }
-}
-
-.masonry-item {
-  break-inside: avoid;
-  margin-bottom: 12px;
-}
-
-.img-wrapper {
-  position: relative;
-  overflow: hidden;
-  border-radius: 10px;
-}
-
-.blur {
-  width: 100%;
-  filter: blur(20px);
-  transform: scale(1.1);
-  position: absolute;
-}
-
-.real {
-  width: 100%;
-  position: relative;
-  z-index: 1;
-  cursor: pointer;
-  transition: transform .2s ease;
-}
-
-.real:hover {
-  transform: scale(1.02);
-}
-
-.skeleton {
-  height: 200px;
-  background: linear-gradient(
-    90deg,
-    #eee 25%,
-    #ddd 37%,
-    #eee 63%
-  );
-  background-size: 400% 100%;
-  animation: shimmer 1.2s infinite;
-  border-radius: 10px;
-  margin-bottom: 12px;
-}
-
-@keyframes shimmer {
-  0% { background-position: 100% 0 }
-  100% { background-position: -100% 0 }
-}
-
-.sentinel {
-  height: 1px;
-}
-
-.lightbox {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.95);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.lightbox img {
-  max-width: 95%;
-  max-height: 95%;
-}
-
-.nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  font-size: 40px;
-  color: white;
-  cursor: pointer;
-}
-
-.left { left: 20px; }
-.right { right: 20px; }
-
-.close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 28px;
-  cursor: pointer;
+.error {
+  padding:16px;
+  background:#fee2e2;
+  color:#991b1b;
+  border-radius:8px;
 }
 </style>
