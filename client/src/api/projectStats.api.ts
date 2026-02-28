@@ -11,7 +11,6 @@ export async function getUserProjectEntries(
   userId: string
 ) {
   return api.get<ProjectUserEntry[]>(
-    //`/projects/${projectId}/users/${userId}/entries`
      `/stats/project/${projectId}/users/${userId}`
   )
 }

@@ -8,13 +8,15 @@ import {
   onServerPrefetch
 } from 'vue'
 
-import type { ProjectUserEntry } from '../types/ProjectUserEntry'
+//import type { ProjectUserEntry } from '../types/ProjectUserEntry'
 import type { ProjectStats } from '../types/projectStats.type'
-import { getProjectStats, getUserProjectEntries } from '../api/projectStats.api'
+//import { getProjectStats, getUserProjectEntries } from '../api/projectStats.api'
+import { getProjectStats } from '../api/projectStats.api'
 import { useProjectImageStore } from '../stores/projectImage.store'
+import { useStatsStore } from '../stores/stats.store'
 import AppLoader from '../components/ui/AppLoader.vue'
 
-const props = defineProps<{ projectId: string }>()
+const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 const emit = defineEmits<{ (e: 'back'): void }>()
 
 const imageStore = useProjectImageStore()
@@ -24,10 +26,11 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 
 const expandedUserId = ref<string | null>(null)
-const userEntries = ref<Record<string, ProjectUserEntry[]>>({})
-const loadingUserId = ref<string | null>(null)
+const statsStore = useStatsStore()
+//const userEntries = ref<Record<string, ProjectUserEntry[]>>({})
+//const loadingUserId = ref<string | null>(null)
 
-const cache = new Map<string, ProjectUserEntry[]>()
+//const cache = new Map<string, ProjectUserEntry[]>()
 
 /* ================= LOAD STATS ================= */
 
@@ -61,8 +64,13 @@ async function toggleDetails(userId: string) {
 
   expandedUserId.value = userId
 
-  const cacheKey = `${props.projectId}-${userId}`
+  await statsStore.loadProjectUserEntries(
+    props.projectId,
+    userId
+  )
 
+  //const cacheKey = `${props.projectId}-${userId}`
+  /*
   if (cache.has(cacheKey)) {
     userEntries.value[userId] = cache.get(cacheKey)!
     return
@@ -81,7 +89,8 @@ async function toggleDetails(userId: string) {
     cache.set(cacheKey, data)
   } finally {
     loadingUserId.value = null
-  }
+  }*/
+
 }
 
 /* ================= PAGINATION IMAGES ================= */
@@ -195,9 +204,18 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
           </div>
 
           <div class="hours">
-            <span>{{ u.totalHours }}h</span>
-            <button @click="toggleDetails(u.id)">
-              {{ expandedUserId === u.id ? 'Hide' : 'Details' }}
+            <div class="hours-breakdown">
+              <span class="work">Work: {{ u.workHours }}h</span>
+              <span class="extra">Extra: {{ u.extraHours }}h</span>
+              <span class="total">Total: {{ u.totalHours }}h</span>
+            </div>
+
+            <button
+              v-if="isAdmin"
+              class="details-btn"
+              @click="toggleDetails(u.id)"
+            >
+              {{ expandedUserId === u.id ? 'Hide Details' : 'Details' }}
             </button>
           </div>
         </div>
@@ -208,7 +226,7 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
           class="details"
         >
           <div
-            v-if="loadingUserId === u.id"
+            v-if="statsStore.loadingProjectUserId === u.id"
             class="details-skeleton"
           >
             <div
@@ -220,7 +238,7 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 
           <div v-else>
             <div
-              v-for="entry in userEntries[u.id] || []"
+              v-for="entry in statsStore.projectUserEntries[`${props.projectId}-${u.id}`] || []"
               :key="entry.id"
               class="entry"
             >
@@ -326,5 +344,51 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   background:#fee2e2;
   color:#991b1b;
   border-radius:8px;
+}
+.hours {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.hours-breakdown {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.work {
+  color: #2ecc71;
+  font-weight: 500;
+}
+
+.extra {
+  color: #f1c40f;
+  font-weight: 500;
+}
+
+.total {
+  font-weight: 600;
+}
+
+.details-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: #2563eb;
+  color: white;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.details-btn:hover {
+  background: #1d4ed8;
+}
+
+.details-btn:active {
+  transform: scale(0.97);
 }
 </style>
