@@ -28,6 +28,9 @@ export const useStatsStore = defineStore('stats', {
         await getUserMonthDetails(userId, year, month);
     },*/
     async loadUserDetails(userId: string, year: number, month: number) {
+      const key = `${userId}-${year}-${month}`
+
+      if (this.details[key]) return
       this.details[userId] =
         await getUserMonthDetails(userId, year, month)
     },
