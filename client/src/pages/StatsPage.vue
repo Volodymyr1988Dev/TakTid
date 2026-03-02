@@ -70,7 +70,9 @@ function getUserName(user: UserInfo) {
 function buildCalendar(userId: string) {
   const days = getDaysInMonth(year.value, month.value)
   //const entries: Entry[] = stats.details[userId]?.entries || []
-  const detail = stats.details[userId]
+  const key = `${userId}-${year.value}-${month.value}`
+  //const detail = stats.details[userId]
+  const detail = stats.details[key]
   if (!detail || !detail.entries) {
     return Array.from({ length: days }, (_, i) => ({
       day: i + 1,
@@ -115,9 +117,10 @@ function typeLabel(type: string) {
   return type
 }
 async function toggleDetails(userId: string) {
+  const key = `${userId}-${year.value}-${month.value}`
   detailsOpen.value[userId] = !detailsOpen.value[userId]
 
-  if (detailsOpen.value[userId] && !stats.details[userId]) {
+  if (detailsOpen.value[userId] && !stats.details[key/*userId*/]) {
     await stats.loadUserDetails(userId, year.value, month.value)
   }
 }
@@ -456,9 +459,9 @@ onMounted(load)
         <button @click="toggleDetails(u.user.id)">
           {{ detailsOpen[u.user.id] ? 'Hide Details' : 'Details' }}
         </button>
-
+        <!--stats.details[u.user.id]-->>
         <div 
-          v-if="detailsOpen[u.user.id] && stats.details[u.user.id]" 
+          v-if="detailsOpen[u.user.id] && stats.details[`${u.user.id}-${year}-${month}`]" 
           class="details-list"
         >
           <div 
@@ -502,7 +505,7 @@ onMounted(load)
 
           <div class="details-list">
             <div
-              v-for="e in stats.details[u.user.id].entries"
+              v-for="e in stats.details[`${u.user.id}-${year}-${month}`].entries"
               :key="e.id"
             >
               {{ e.date }} —
