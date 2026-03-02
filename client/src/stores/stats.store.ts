@@ -31,7 +31,8 @@ export const useStatsStore = defineStore('stats', {
       const key = `${userId}-${year}-${month}`
 
       if (this.details[key]) return
-      this.details[userId] =
+      //this.details[userId] =
+      this.details[key] =
         await getUserMonthDetails(userId, year, month)
     },
     async loadProjectUserEntries(projectId: string, userId: string) {
