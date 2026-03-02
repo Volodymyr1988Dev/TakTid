@@ -10,7 +10,7 @@ export const useStatsStore = defineStore('stats', {
     loading: false,
     details: {} as Record<string, any>,
 
-    monthDetails: {} as Record<string, any>,
+    //monthDetails: {} as Record<string, any>,
     projectUserEntries: {} as Record<string, ProjectUserEntry[]>,
     loadingProjectUserId: null as string | null,
     
@@ -23,7 +23,8 @@ export const useStatsStore = defineStore('stats', {
       this.loading = false
     },
     async loadUserDetails(userId: string, year: number, month: number) {
-      this.monthDetails[userId]=
+      //this.monthDetails[userId]=
+      this.details[userId]
         await getUserMonthDetails(userId, year, month);
     },
     async loadProjectUserEntries(projectId: string, userId: string) {
