@@ -67,11 +67,19 @@ function getUserName(user: UserInfo) {
 function buildCalendar(userId: string) {
   const days = getDaysInMonth(year.value, month.value)
   //const entries: Entry[] = stats.details[userId]?.entries || []
-  const raw = stats.details[userId]
+  const detail = stats.details[userId]
+  if (!detail || !detail.entries) {
+    return Array.from({ length: days }, (_, i) => ({
+      day: i + 1,
+      entries: []
+    }))
+  }
+  //const raw = stats.details[userId]
   //const entries: Entry[] = stats.details[userId]?.entries || stats.details[userId] || []
-  const entries: Entry[] = raw?.entries ?? raw ?? []
-  console.log(stats.details, 'stats.details')
-  console.log(stats.details[userId].entries, 'console.log(stats.details[userId].entries)')
+  //const entries: Entry[] = raw?.entries ?? raw ?? []
+  //console.log(stats.details, 'stats.details')
+  //console.log(stats.details[userId].entries, 'console.log(stats.details[userId].entries)')
+  const entries: Entry[] = detail.entries
   const map: Record<number, Entry[]> = {}
 
   entries.forEach(e => {
@@ -478,8 +486,8 @@ onMounted(load)
             class="mobile-info"
           >
             <div
-              v-for="e in buildCalendar(u.user.id)
-                .find(d => d.day === selectedDay[u.user.id])?.entries"
+              v-for="e in (buildCalendar(u.user.id)
+                .find(d => d.day === selectedDay[u.user.id])?.entries || [])"
               :key="e.id"
             >
               <strong>{{ e.date }}</strong> —
