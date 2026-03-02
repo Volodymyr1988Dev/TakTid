@@ -21,11 +21,15 @@ export const useStatsStore = defineStore('stats', {
       this.loading = true
       this.users = await getMonthStats(year, month)
       this.loading = false
-    },
+    },/*
     async loadUserDetails(userId: string, year: number, month: number) {
       //this.monthDetails[userId]=
       this.details[userId]
         await getUserMonthDetails(userId, year, month);
+    },*/
+    async loadUserDetails(userId: string, year: number, month: number) {
+      this.details[userId] =
+        await getUserMonthDetails(userId, year, month)
     },
     async loadProjectUserEntries(projectId: string, userId: string) {
       const key = `${projectId}-${userId}`
