@@ -455,7 +455,7 @@ onMounted(load)
         <button @click="toggleDetails(u.user.id)">
           {{ detailsOpen[u.user.id] ? 'Hide Details' : 'Details' }}
         </button>
-        <!--stats.details[u.user.id]-->>
+        <!--stats.details[u.user.id]-->
         <div 
           v-if="detailsOpen[u.user.id] && stats.details[`${u.user.id}-${year}-${month}`]" 
           class="details-list"
