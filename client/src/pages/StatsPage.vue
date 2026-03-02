@@ -66,7 +66,12 @@ function getUserName(user: UserInfo) {
 
 function buildCalendar(userId: string) {
   const days = getDaysInMonth(year.value, month.value)
-  const entries: Entry[] = stats.details[userId]?.entries || []
+  //const entries: Entry[] = stats.details[userId]?.entries || []
+  const raw = stats.details[userId]
+  //const entries: Entry[] = stats.details[userId]?.entries || stats.details[userId] || []
+  const entries: Entry[] = raw?.entries ?? raw ?? []
+  console.log(stats.details, 'stats.details')
+  console.log(stats.details[userId].entries, 'console.log(stats.details[userId].entries)')
   const map: Record<number, Entry[]> = {}
 
   entries.forEach(e => {
@@ -125,6 +130,7 @@ async function load() {
 
   try {
     isLoading.value = true
+    selectedDay.value = {}
     await stats.loadMonth(year.value, month.value)
     expanded.value = {}
     detailsOpen.value = {}
