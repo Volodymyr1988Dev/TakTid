@@ -24,7 +24,8 @@ export const baseConfig: DataSourceOptions = {
   migrations: ['dist/migrations/*.js'],
 
   synchronize: false,
-  logging: true,
+  //logging: true,
+  logging: process.env.NODE_ENV !== 'production',
 };
 
 console.log('DB URL:', process.env.DATABASE_URL);

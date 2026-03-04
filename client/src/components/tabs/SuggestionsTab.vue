@@ -15,7 +15,7 @@ onMounted(suggestionsStore.load)
 
 const uniqueSuggestions = computed<TimeSuggestion[]>(() => {
   const map = new Map<string, TimeSuggestion>()
-
+  
   const reversed = [...suggestionsStore.items].reverse()
 
   for (const s of reversed) {
@@ -37,8 +37,6 @@ function selectSuggestion(s: TimeSuggestion) {
   if (isWorkSuggestion(s)) {
     const project = projectStore.getById(s.projectId)
     if (project) projectStore.select(project)
-    console.log(s.title, 's.title')
-    console.log(s.type, 's.type')
   }
   emit('select', s)
 }

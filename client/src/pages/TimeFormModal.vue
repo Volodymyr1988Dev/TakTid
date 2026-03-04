@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useProjectStore } from '../stores/project.store'
-
 import { useWorkEntryForm } from '../components/composables/useWorkEntryForm'
 import { useExtraEntryForm } from '../components/composables/useExtraEntryForm'
 import { useMeetingEntryForm } from '../components/composables/useMeetingEntryForm'
@@ -115,7 +114,6 @@ const isBlocking = computed(() => isSaving.value || deleting.value || props.exte
 watch(
   () => [props.entry, props.preset] as const,
   ([entry, preset]) => {
-
     if (entry) {
 
       if ('projectId' in entry && entry.projectId) {
@@ -330,7 +328,6 @@ const spinnerText = computed(() => {
           ← Back
         </button>
       </header>
-
       <h3>
         <template v-if="mode === 'ABSENCE'">
           Register absence ({{ absence?.absenceType.value }})
@@ -487,6 +484,7 @@ const spinnerText = computed(() => {
           Save
         </button>
       </div>
+
       <div
         v-if="selectingProject"
         class="modal-backdrop project-modal-layer"

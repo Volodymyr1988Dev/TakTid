@@ -16,9 +16,16 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ProjectImagesModule } from './modules/projectImage.module';
 import { ProjectStatsModule } from './modules/projectStats.module';
 import { StatsModule } from './modules/stat.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'public'),
+      exclude: ['/api*'],
+      serveRoot: '/',
+    }),
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot(baseConfig),
     ScheduleModule.forRoot(),
@@ -32,7 +39,6 @@ import { StatsModule } from './modules/stat.module';
     ProjectStatsModule,
     StatsModule,
   ],
-
   controllers: [AppController],
   providers: [
     AppService,

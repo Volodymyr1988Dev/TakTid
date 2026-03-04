@@ -46,6 +46,7 @@ export interface ExtraDayEntry extends BaseDayEntry, TimedEntry {
 }
 
 export interface AbsenceDayEntry extends BaseDayEntry {
+ 
   type: 
     | typeof TimeKind.SICK
     | typeof TimeKind.VAB

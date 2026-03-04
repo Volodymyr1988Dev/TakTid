@@ -85,11 +85,10 @@ export class AuthService {
   }
 
   async logout(refreshToken?: string) {
-    if (!refreshToken) {
-      return { message: 'Logout successful' };
+    if (refreshToken) {
+      await this.sessionService.removeByRefreshToken(refreshToken);
     }
 
-    await this.sessionService.removeByRefreshToken(refreshToken);
     return { message: 'Logout successful' };
   }
 

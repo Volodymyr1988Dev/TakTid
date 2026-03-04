@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+//import { useToastStore } from '../stores/toast.store'
 import { useToast } from '../components/composables/useToast'
 import { useStatsStore } from '../stores/stats.store'
 import ExcelJS from 'exceljs'
@@ -46,6 +47,7 @@ const detailsOpen = ref<Record<string, boolean>>({})
 const selectedDay = ref<Record<string, number | null>>({})
 //const transformedCache = ref<Record<string, StatsEntry[]>>({})
 
+//const toast = useToastStore()
 const toast = useToast()
 const isLoading = ref(false)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -477,6 +479,7 @@ onMounted(load)
     </div>
   </div>
   <div class="stats-page">
+    <!--class controls-->
     <div class="date-controls">
       <div class="input-group">
         <label>Year</label>
@@ -729,6 +732,7 @@ onMounted(load)
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
+/* Skeleton animation */
 @keyframes shimmer {
   0% { background-position: -400px 0; }
   100% { background-position: 400px 0; }

@@ -118,10 +118,8 @@ export class AuthController {
       refresh_token?: string;
     };
     const refreshToken = coockie?.refresh_token;
-    if (!refreshToken) return;
 
     await this.authService.logout(refreshToken);
-
     clearAuthCookies(res);
 
     return { message: 'Logout successful' };

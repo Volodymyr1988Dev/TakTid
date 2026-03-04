@@ -5,6 +5,7 @@
         "axios",
         "coockie",
         "dayoff",
+        "cpus",
         "ddbvtwaf",
         "dotenv",
         "exceljs",

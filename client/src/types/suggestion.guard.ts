@@ -1,5 +1,4 @@
 import { TimeKind } from './timeKind.enum'
-//import type { WorkKind, AbsenceKind } from './timeKind.enum'
 import type {
   TimeSuggestion,
   WorkSuggestion,

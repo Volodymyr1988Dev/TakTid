@@ -11,6 +11,7 @@ import { useToast } from '../components/composables/useToast'
 const auth = useAuthStore()
 const userStore = useUserStore()
 const router = useRouter()
+//const toast = useToastStore()
 const toast = useToast()
 
 const name = ref(auth.user?.name ?? '')
@@ -28,11 +29,10 @@ function goToDashboard() {
 
 async function updateProfile(data: Partial<User> & { password?: string }) {
   if (!auth.user) return
-
   try {
     await userStore.updateUser(auth.user.id, data)
 
-    toast.show('Profile updated successfully')
+    toast.success('Profile updated successfully')
 
     setTimeout(() => router.push('/dashboard'), 700)
   } catch (e: unknown) {
@@ -62,7 +62,6 @@ async function savePassword() {
     toast.error('Passwords do not match')
     return
   }
-
   await updateProfile({ password: password.value })
 
   password.value = ''
@@ -82,7 +81,6 @@ function confirmDelete(user: User) {
 
 async function deleteUser() {
   if (!selectedUser.value) return
-
    try {
     const user = selectedUser.value
 
@@ -106,7 +104,7 @@ async function restoreUser(user: User) {
   try {
     await userStore.restoreUser(user.id)
 
-    toast.show(
+    toast.success(
       `User ${user.name ?? 'No name'} (${user.email}) restored successfully`
     )
   } catch (e: unknown) {
@@ -117,7 +115,6 @@ async function restoreUser(user: User) {
     }
   }
 }
-
 </script>
 
 <template>
@@ -165,7 +162,6 @@ async function restoreUser(user: User) {
     >
       Cancel
     </button>
-
     <div 
       v-if="isAdmin" 
       class="admin-panel"

@@ -86,7 +86,6 @@ export class TimeEntryService {
       relations: ['project'],
     });
     if (!entry) throw new NotFoundException('Time entry not found');
-
     if ([timeKind.SICK, timeKind.VACATION, timeKind.VAB].includes(entry.type)) {
       entry.project = null;
     }
