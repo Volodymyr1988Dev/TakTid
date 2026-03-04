@@ -149,6 +149,7 @@ async function load() {
   try {
     isLoading.value = true
     selectedDay.value = {}
+    stats.details = {}
     await stats.loadMonth(year.value, month.value)
     expanded.value = {}
     detailsOpen.value = {}
