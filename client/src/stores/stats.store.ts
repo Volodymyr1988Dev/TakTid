@@ -3,12 +3,13 @@ import type { AdminUserMonthStats } from '../types/AdminUserMonthStats.type'
 import type { ProjectUserEntry } from '../types/ProjectUserEntry'
 import { getMonthStats, getUserMonthDetails } from '../api/stats.api'
 import { getUserProjectEntries } from '../api/projectStats.api'
+import type { UserDetailsEntry } from '../types/UserDetailsEntry'
 
 export const useStatsStore = defineStore('stats', {
   state: () => ({
     users: [] as AdminUserMonthStats[],
     loading: false,
-    details: {} as Record<string, { entries: any[] }>,
+    details: {} as Record<string, { entries:  UserDetailsEntry[] }>,
     projectUserEntries: {} as Record<string, ProjectUserEntry[]>,
     loadingProjectUserId: null as string | null,
     
