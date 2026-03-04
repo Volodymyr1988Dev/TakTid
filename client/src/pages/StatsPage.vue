@@ -54,26 +54,26 @@ const month = ref(now.getMonth() + 1)
 watch([year, month], () => {
   if (debounceTimer) clearTimeout(debounceTimer)
 
-  debounceTimer = setTimeout(() => {
-    load()
-  }, 600)
+  debounceTimer = setTimeout(() => {load()}, 600)
 })
-
+/*
 function getDaysInMonth(y: number, m: number) {
   return new Date(y, m, 0).getDate()
 }
-
+*/
 function getUserName(user: UserInfo) {
   return user.name || user.email || 'Unknown User'
 }
 
 function buildCalendar(userId: string) {
-  const days = getDaysInMonth(year.value, month.value)
+  //const days = getDaysInMonth(year.value, month.value)
   //const entries: Entry[] = stats.details[userId]?.entries || []
-  const key = `${userId}-${year.value}-${month.value}`
+  //const key = `${userId}-${year.value}-${month.value}`
+  const key = getKey(userId)
   //const detail = stats.details[userId]
   const detail = stats.details[key]
-  if (!detail || !detail.entries) {
+  const days = new Date(year.value, month.value, 0).getDate()
+  if (!detail?.entries) {
     return Array.from({ length: days }, (_, i) => ({
       day: i + 1,
       entries: []
@@ -84,10 +84,10 @@ function buildCalendar(userId: string) {
   //const entries: Entry[] = raw?.entries ?? raw ?? []
   //console.log(stats.details, 'stats.details')
   //console.log(stats.details[userId].entries, 'console.log(stats.details[userId].entries)')
-  const entries: Entry[] = detail.entries
+  //const entries: Entry[] = detail.entries
   const map: Record<number, Entry[]> = {}
 
-  entries.forEach(e => {
+  detail.entries.forEach(e => {
     const d = new Date(e.date).getDate()
     if (!map[d]) map[d] = []
     map[d].push(e)
@@ -117,11 +117,11 @@ function typeLabel(type: string) {
   return type
 }
 async function toggleDetails(userId: string) {
-  const key = `${userId}-${year.value}-${month.value}`
+  //const key = `${userId}-${year.value}-${month.value}`
   detailsOpen.value[userId] = !detailsOpen.value[userId]
 
-  if (detailsOpen.value[userId] && !stats.details[key/*userId*/]) {
-    await stats.loadUserDetails(userId, year.value, month.value)
+  if (detailsOpen.value[userId] /*&& !stats.details[key]*/) {
+    await ensureDetails(userId) //stats.loadUserDetails(userId, year.value, month.value)
   }
 }
 function summary(u: UserStats) {
@@ -139,20 +139,35 @@ function summary(u: UserStats) {
   }
 }
 
-function getKey(userId: string) {
+function getKey (userId: string) {
   return `${userId}-${year.value}-${month.value}`
 }
 
+async function ensureDetails(userId: string) {
+  const key = getKey(userId)
+  if (!stats.details[key]) {
+    await stats.loadUserDetails(userId, year.value, month.value)
+  }
+  const detail = stats.details[key]
+
+  if (!detail) {
+    throw new Error('Failed to load user details')
+  }
+
+  return detail
+}
 async function load() {
   if (!validateInputs()) return
 
   try {
     isLoading.value = true
     selectedDay.value = {}
-    stats.details = {}
-    await stats.loadMonth(year.value, month.value)
     expanded.value = {}
     detailsOpen.value = {}
+    //stats.details = {}
+    await stats.loadMonth(year.value, month.value)
+    //expanded.value = {}
+    //detailsOpen.value = {}
   } catch (e) {
     toast.error('Failed to load statistics')
     console.error(e)
@@ -165,11 +180,12 @@ async function exportAllExcel() {
   const workbook = new ExcelJS.Workbook()
 
   for (const user of stats.users) {
-    const key = `${user.user.id}-${year.value}-${month.value}`
+    const detail = await ensureDetails(user.user.id)
+   /* const key = `${user.user.id}-${year.value}-${month.value}`
     //if (!stats.details[user.user.id]) {
     if (!stats.details[key]) {
       await stats.loadUserDetails(user.user.id, year.value, month.value)
-    }
+    }*/
 
     const sheet = workbook.addWorksheet(getUserName(user.user))
     const sum = summary(user)
@@ -193,7 +209,8 @@ async function exportAllExcel() {
 
     sheet.addRow(['Date','Type','Hours','Project','Comment'])
 
-    stats.details[/*user.user.id*/key].entries.forEach((e: Entry) => {
+    //stats.details[/*user.user.id*/key].entries.forEach((e: Entry) => {
+    detail.entries.forEach((e: Entry) => {
       sheet.addRow([
         e.date,
         e.type,
@@ -228,10 +245,12 @@ function validateInputs(): boolean {
 }
 
 async function exportExcelSingle(user: UserStats) {
+  const detail = await ensureDetails(user.user.id)
+  /*
   const key = `${user.user.id}-${year.value}-${month.value}`
-  if (!stats.details[/*user.user.id*/ key]) {
+  if (!stats.details[ key]) {
     await stats.loadUserDetails(user.user.id, year.value, month.value)
-  }
+  }*/
 
   const workbook = new ExcelJS.Workbook()
   const sheet = workbook.addWorksheet(getUserName(user.user))
@@ -256,7 +275,8 @@ async function exportExcelSingle(user: UserStats) {
 
   sheet.addRow(['Date','Type','Hours','Project','Comment'])
 
-  stats.details[/*user.user.id*/key].entries.forEach((e: Entry) => {
+  //stats.details[/*user.user.id*/key].entries.forEach((e: Entry) => {
+  detail.entries.forEach((e: Entry) => {
     sheet.addRow([
       e.date,
       typeLabel(e.type),
@@ -280,10 +300,11 @@ async function exportExcelSingle(user: UserStats) {
 }
 
 async function exportPDFSingle(user: UserStats) {
-  const key = `${user.user.id}-${year.value}-${month.value}`
-  if (!stats.details[/*user.user.id*/key]) {
+  const detail = await ensureDetails(user.user.id)
+  /*const key = `${user.user.id}-${year.value}-${month.value}`
+  if (!stats.details[key]) {
     await stats.loadUserDetails(user.user.id, year.value, month.value)
-  }
+  }*/
 
   const doc = new jsPDF()
   const sum = summary(user)
@@ -322,7 +343,8 @@ async function exportPDFSingle(user: UserStats) {
   autoTable(doc, {
     startY: finalY + 10,
     head: [['Date','Type','Hours','Project','Comment']],
-    body: stats.details[/*user.user.id*/key].entries.map((e: Entry) => [
+    //body: stats.details[/*user.user.id*/key].entries.map((e: Entry) => [
+    body: detail.entries.map((e: Entry) => [
       e.date,
       typeLabel(e.type),
       e.hours,
@@ -337,12 +359,12 @@ async function exportPDFSingle(user: UserStats) {
 }
 async function exportAllPDF() {
   const doc = new jsPDF()
-
   for (const user of stats.users) {
-    const key = `${user.user.id}-${year.value}-${month.value}`
-    if (!stats.details[/*user.user.id*/key]) {
+    const detail = await ensureDetails(user.user.id)
+    /*const key = `${user.user.id}-${year.value}-${month.value}`
+    if (!stats.details[key]) {
       await stats.loadUserDetails(user.user.id, year.value, month.value)
-    }
+    }*/
 
     const sum = summary(user)
 
@@ -371,7 +393,8 @@ async function exportAllPDF() {
     autoTable(doc, {
       startY: finalY + 10,
       head: [['Date','Type','Hours','Project','Comment']],
-      body: stats.details[/*user.user.id*/key].entries.map((e: Entry) => [
+      //body: stats.details[key].entries.map((e: Entry) => [
+      body: detail.entries.map((e: Entry) => [
         e.date,
         e.type,
         e.hours,
@@ -516,7 +539,7 @@ onMounted(load)
           <div class="details-list">
             <!--`${u.user.id}-${year}-${month}`-->
             <div
-              v-for="e in stats.details[getKey(u.user.id)].entries"
+              v-for="e in stats.details[getKey(u.user.id)]?.entries"
               :key="e.id"
             >
               {{ e.date }} —
