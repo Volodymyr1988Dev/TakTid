@@ -8,9 +8,7 @@ export const useStatsStore = defineStore('stats', {
   state: () => ({
     users: [] as AdminUserMonthStats[],
     loading: false,
-    details: {} as Record<string, any>,
-
-    //monthDetails: {} as Record<string, any>,
+    details: {} as Record<string, { entries: any[] }>,
     projectUserEntries: {} as Record<string, ProjectUserEntry[]>,
     loadingProjectUserId: null as string | null,
     
@@ -19,19 +17,16 @@ export const useStatsStore = defineStore('stats', {
   actions: {
     async loadMonth(year: number, month: number) {
       this.loading = true
-      this.users = await getMonthStats(year, month)
-      this.loading = false
-    },/*
-    async loadUserDetails(userId: string, year: number, month: number) {
-      //this.monthDetails[userId]=
-      this.details[userId]
-        await getUserMonthDetails(userId, year, month);
-    },*/
+      try {
+        this.users = await getMonthStats(year, month)
+      } finally {
+        this.loading = false
+      }
+    },
     async loadUserDetails(userId: string, year: number, month: number) {
       const key = `${userId}-${year}-${month}`
 
       if (this.details[key]) return
-      //this.details[userId] =
       this.details[key] =
         await getUserMonthDetails(userId, year, month)
     },
