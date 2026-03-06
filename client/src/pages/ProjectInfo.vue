@@ -21,6 +21,7 @@ const emit = defineEmits<{ (e: 'back'): void }>()
 
 const imageStore = useProjectImageStore()
 
+const fullscreenImage = ref<string | null>(null)
 const stats = ref<ProjectStats | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
@@ -150,6 +151,13 @@ function observeSentinel() {
 
 onBeforeUnmount(() => observer?.disconnect())
 
+function openImage(url: string) {
+  fullscreenImage.value = url
+}
+
+function closeImage() {
+  fullscreenImage.value = null
+}
 /* ================= COMPUTED ================= */
 
 const totalWork = computed(() => stats.value?.total.work ?? 0)
@@ -279,8 +287,25 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
             :key="img.id"
             :src="img.url"
             class="image"
+            @click="openImage(img.url)"
           >
+          <div
+            v-if="fullscreenImage"
+            class="image-modal"
+            @click="closeImage"
+          >
+            <img
+              :src="fullscreenImage"
+              class="image-modal-content"
+            >
 
+            <button
+              class="image-close"
+              @click.stop="closeImage"
+            >
+              ✕
+            </button>
+          </div>
           <div ref="sentinel" />
         </div>
       </div>
@@ -340,6 +365,9 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 .image {
   width:100%;
   border-radius:8px;
+
+  cursor: zoom-in;
+  transition: transform .2s;
 }
 
 .error {
@@ -457,5 +485,40 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   .images-grid {
     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   }
+}
+.image:hover {
+  transform: scale(1.05);
+}
+
+/* FULLSCREEN MODAL */
+
+.image-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.image-modal-content {
+  max-width: 95%;
+  max-height: 95%;
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+
+.image-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  cursor: pointer;
 }
 </style>
