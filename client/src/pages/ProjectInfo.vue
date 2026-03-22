@@ -10,6 +10,7 @@ import {
 
 //import type { ProjectUserEntry } from '../types/ProjectUserEntry'
 import type { ProjectStats } from '../types/projectStats.type'
+import { cloudinary } from '../utils/cloudinary'
 //import { getProjectStats, getUserProjectEntries } from '../api/projectStats.api'
 import { getProjectStats } from '../api/projectStats.api'
 import { useProjectImageStore } from '../stores/projectImage.store'
@@ -18,12 +19,12 @@ import AppLoader from '../components/ui/AppLoader.vue'
 
 const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 const emit = defineEmits<{ (e: 'back'): void }>()
-
 const imageStore = useProjectImageStore()
 
 const fullscreenImage = ref<string | null>(null)
 const stats = ref<ProjectStats | null>(null)
 const loading = ref(true)
+const loaded = ref(new Set<string>())
 const error = ref<string | null>(null)
 
 const expandedUserId = ref<string | null>(null)
@@ -32,7 +33,9 @@ const statsStore = useStatsStore()
 //const loadingUserId = ref<string | null>(null)
 
 //const cache = new Map<string, ProjectUserEntry[]>()
-
+function onLoad(id: string) {
+  loaded.value.add(id)
+}
 /* ================= LOAD STATS ================= */
 
 async function loadStats() {
@@ -52,11 +55,14 @@ async function loadStats() {
   }
 }
 
-watch(() => props.projectId, loadStats, { immediate: true })
+//watch(() => props.projectId, loadStats, { immediate: true })
+watch(() => props.projectId, async () => {
+  loaded.value.clear()
+  await loadStats()
+}, { immediate: true })
 onServerPrefetch(loadStats)
 
 /* ================= USER DETAILS ================= */
-
 async function toggleDetails(userId: string) {
   if (expandedUserId.value === userId) {
     expandedUserId.value = null
@@ -98,7 +104,7 @@ async function toggleDetails(userId: string) {
 
 const showImages = ref(false)
 const page = ref(1)
-const limit = 6
+const limit = 20
 const hasMore = ref(true)
 
 const sentinel = ref<HTMLElement | null>(null)
@@ -114,6 +120,7 @@ watch(showImages, async (val) => {
   hasMore.value = true
   imageStore.images = []
 
+  loaded.value.clear()
   await loadImages()
   await nextTick()
   observeSentinel()
@@ -282,13 +289,25 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
           v-if="showImages" 
           class="images-grid"
         >
-          <img
+          <div
             v-for="img in imageStore.images"
             :key="img.id"
-            :src="img.url"
-            class="image"
-            @click="openImage(img.url)"
+            class="image-wrapper"
           >
+            <div 
+              v-if="!loaded.has(img.id)" 
+              class="skeleton" 
+            />
+
+            <img
+              :src="cloudinary(img.url, 600)"
+              class="image"
+              :class="{ loaded: loaded.has(img.id) }"
+              loading="lazy"
+              @load="onLoad(img.id)"
+              @click="openImage(img.url)"
+            >
+          </div>
           <div
             v-if="fullscreenImage"
             class="image-modal"
@@ -355,21 +374,31 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   border-bottom:1px solid #eee;
 }
 
-.images-grid {
+.images-grid {/*
   margin-top:16px;
   display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));*/
+  column-count: 3;
   gap:10px;
 }
-
+.image-wrapper {
+  position: relative;
+  break-inside: avoid;
+  margin-bottom: 10px;
+}
 .image {
   width:100%;
   border-radius:8px;
 
+  margin-bottom: 10px;
+  break-inside: avoid;
   cursor: zoom-in;
-  transition: transform .2s;
+  transition: transform .2s, opacity .3s;
+  opacity: 0;
 }
-
+.image.loaded {
+  opacity: 1;
+}
 .error {
   padding:16px;
   background:#fee2e2;
@@ -422,7 +451,18 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 .details-btn:active {
   transform: scale(0.97);
 }
-
+.skeleton {
+  height: 120px;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    #eee 25%,
+    #f5f5f5 37%,
+    #eee 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton 1.2s infinite;
+}
 .skeleton-line {
   height: 14px;
   margin-bottom: 8px;
@@ -444,6 +484,10 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   100% {
     background-position: 0 0;
   }
+}
+@keyframes skeleton {
+  0% { background-position: -200px 0 }
+  100% { background-position: 200px 0 }
 }
 .user-card.clickable {
   cursor: pointer;
@@ -483,7 +527,8 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   }
 
   .images-grid {
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    /*grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));*/
+    column-count: 2;
   }
 }
 .image:hover {
