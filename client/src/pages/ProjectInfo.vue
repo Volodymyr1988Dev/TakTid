@@ -20,6 +20,7 @@ import AppLoader from '../components/ui/AppLoader.vue'
 const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 const emit = defineEmits<{ (e: 'back'): void }>()
 const imageStore = useProjectImageStore()
+const statsStore = useStatsStore()
 
 const fullscreenImage = ref<string | null>(null)
 const stats = ref<ProjectStats | null>(null)
@@ -29,7 +30,6 @@ const error = ref<string | null>(null)
 const currentIndex = ref(0)
 
 const expandedUserId = ref<string | null>(null)
-const statsStore = useStatsStore()
 //const userEntries = ref<Record<string, ProjectUserEntry[]>>({})
 //const loadingUserId = ref<string | null>(null)
 
@@ -159,7 +159,8 @@ function observeSentinel() {
 
 onBeforeUnmount(() => { 
   observer?.disconnect() 
-  document.body.style.overflow = ''
+  //document.body.style.overflow = ''
+  document.body.style = ''
 })
 let scrollY = 0
 function openImage(url: string) {
@@ -172,18 +173,30 @@ function openImage(url: string) {
   scrollY = window.scrollY
   document.body.style.position = 'fixed'
   document.body.style.top = `-${scrollY}px`
-  document.body.style.width = '100%'
+  //document.body.style.width = '100%'
 }
 
 function closeImage() {
   fullscreenImage.value = null
 
-  document.body.style.position = ''
-  document.body.style.top = ''
-  document.body.style.width = ''
+  //document.body.style.position = ''
+  document.body.style = ''
+  //document.body.style.top = ''
+  //document.body.style.width = ''
 
   window.scrollTo(0, scrollY)
 }
+
+const scale = ref(1)
+const lastScale = ref(1)
+const startDistance = ref(0)
+
+const translateX = ref(0)
+const translateY = ref(0)
+
+let lastTouchX = 0
+let lastTouchY = 0
+let isDragging = false
 
 let startX = 0
 let startY = 0
@@ -193,20 +206,65 @@ function onTouchStart(e: TouchEvent) {
   const touch = e.touches[0]
   if (!touch) return
 
+  if (e.touches.length === 2) {
+    //startDistance.value = getDistance(e.touches)
+    const dist = getDistance(e.touches)
+    if (!dist) return
+
+    startDistance.value = dist
+    lastScale.value = scale.value
+  } else if (e.touches.length === 1) {
+    lastTouchX = touch.clientX
+    lastTouchY = touch.clientY
+    isDragging = true
+  }
+
   startX = touch.clientX
   startY = touch.clientY
   isSwiping = true
 }
 
-function onTouchEnd(e: TouchEvent) {
-  if (!isSwiping) return
+function onTouchMove(e: TouchEvent) {
+  if (e.touches.length === 2) {
+    const newDistance = getDistance(e.touches)
+    if (!newDistance || !startDistance.value) return
+    scale.value = Math.min(
+      Math.max(1, (newDistance / startDistance.value) * lastScale.value),
+      4
+    )
+  }
 
+  if (e.touches.length === 1 && scale.value > 1 && isDragging) {
+    const touch = e.touches[0]
+    if (!touch) return
+    const dx = touch.clientX - lastTouchX
+    const dy = touch.clientY - lastTouchY
+
+    translateX.value += dx
+    translateY.value += dy
+
+    lastTouchX = touch.clientX
+    lastTouchY = touch.clientY
+  }
+}
+
+function onTouchEnd(e: TouchEvent) {
+  if (!isSwiping || scale.value > 1) return
   const touch = e.changedTouches[0]
   if (!touch) return
+
+  if (scale.value < 1) scale.value = 1
 
   const dx = touch.clientX - startX
   const dy = touch.clientY - startY
 
+  if (Math.abs(dy) > Math.abs(dx) && dy > 80) {
+    closeImage()
+  }
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx < -50) nextImage()
+    if (dx > 50) prevImage()
+  }/*
   const absX = Math.abs(dx)
   const absY = Math.abs(dy)
 
@@ -222,11 +280,32 @@ function onTouchEnd(e: TouchEvent) {
   if (absX > absY) {
     if (dx < -50) nextImage()
     if (dx > 50) prevImage()
-  }
+  }*/
 
   isSwiping = false
+  isDragging = false
 }
 
+function getDistance(touches: TouchList): number | undefined {
+  if (!touches[0] || !touches[1]) return
+  if (touches.length < 2) return
+  const dx = touches[0].clientX - touches[1].clientX
+  const dy = touches[0].clientY - touches[1].clientY
+  return Math.sqrt(dx * dx + dy * dy)
+}
+/*
+let lastTap = 0
+
+function onTap(e: TouchEvent) {
+  const now = Date.now()
+  if (now - lastTap < 300) {
+    scale.value = scale.value > 1 ? 1 : 2
+    translateX.value = 0
+    translateY.value = 0
+  }
+  lastTap = now
+}
+*/
 function nextImage() {
   //if (currentIndex.value < imageStore.images.length - 1) {
   //  currentIndex.value++
@@ -235,6 +314,12 @@ function nextImage() {
   const next = imageStore.images[currentIndex.value + 1]
   if (!next) return
 
+   /*translateX.value = 50
+  setTimeout(() => {
+    currentIndex.value++
+    fullscreenImage.value = next.url
+    translateX.value = 0
+  }, 100)*/
   currentIndex.value++
   fullscreenImage.value = next.url
 }
@@ -402,11 +487,15 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
             <img
               :src="fullscreenImage"
               class="image-modal-content"
+              :style="{
+                transform: `scale(${scale}) translate(${translateX}px, ${translateY}px)`
+              }"
               @click.stop
               @touchstart="onTouchStart"
+              @touchmove="onTouchMove"
               @touchend="onTouchEnd"
             >
-
+            <!--@click="onTap"-->
             <button
               class="image-close"
               @click.stop="closeImage"
@@ -643,10 +732,12 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   max-height: 95%;
   border-radius: 10px;
 
-  transition: transform 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.2s ease;
   will-change: transform;
-  touch-action: pan-y;
+  /*touch-action: pan-y;*/
 
+  touch-action: none;
+  cursor: grab;
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
 }
 @keyframes fadeIn {
