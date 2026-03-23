@@ -9,6 +9,8 @@ import { TimeKind } from '../../types/timeKind.enum'
 import type { WorkForm } from '../../types/Form.types'
 import type { DayEntry } from '../../types/DayEntry.type'
 import { useDefaultTime } from './useDefaultTime'
+import { normalizeBreakMinutes } from '../helpers/time'
+import { useToast } from './useToast'
 
 export function useWorkEntryForm(props: {
   date: string
@@ -26,6 +28,7 @@ export function useWorkEntryForm(props: {
 
   const isEdit = computed(() => !!props.entry)
 
+  const toast = useToast()
 
   const { defaultTime } = useDefaultTime({
     dayEntries: props.dayEntries,
@@ -40,7 +43,7 @@ export function useWorkEntryForm(props: {
     const minutes = calculateWorkedMinutes(
       normalizeTime(startRef.value),
       normalizeTime(endRef.value),
-      breakMinutesRef.value,
+      normalizeBreakMinutes(breakMinutesRef.value),
     )
     return Number((minutes / 60).toFixed(2))
   })
@@ -89,11 +92,23 @@ watch(
         throw new Error('WORK requires projectId')
     }
     isSavingRef.value = true
+
+    let breakMin: number
+
+    try {
+      breakMin = normalizeBreakMinutes(breakMinutesRef.value)
+    } catch {
+      toast.error('Break must be a valid number')
+      isSavingRef.value = false
+      throw new Error('Invalid break')
+    }
+
+
     try {
       const payload: TimeEntryUpdatePayload = {
         startTime: normalizeTime(startRef.value),
         endTime: normalizeTime(endRef.value),
-        breakMinutes: breakMinutesRef.value,
+        breakMinutes: breakMin,//normalizeBreakMinutes(breakMinutesRef.value),
         comment: commentRef.value,
         projectId: props.projectId.value,
       }
@@ -118,7 +133,7 @@ watch(
         type: TimeKind.WORK,
         startTime: normalizeTime(saved.startTime),
         endTime: normalizeTime(saved.endTime),
-        breakMinutes: saved.breakMinutes,
+        breakMinutes: normalizeBreakMinutes(saved.breakMinutes),
         projectId: saved.projectId,
         comment: saved.comment ?? '',
       }

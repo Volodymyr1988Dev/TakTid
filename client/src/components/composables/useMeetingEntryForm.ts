@@ -4,13 +4,16 @@ import { useTimeRangeForm } from './useTimeRangeForm'
 import { TimeKind } from '../../types/timeKind.enum'
 import type { MeetingForm } from '../../types/Form.types'
 import type { MeetingDayEntry } from '../../types/DayEntry.type'
+import { normalizeBreakMinutes } from '../helpers/time'
+import { useToast } from './useToast'
 
 export function useMeetingEntryForm(props: {
   date: string
   entry?: MeetingDayEntry | null
 }) {
   const store = useTimeEntryStore()
-
+  const toast = useToast()
+  
   const {
     startRef,
     endRef,
@@ -38,13 +41,22 @@ export function useMeetingEntryForm(props: {
 
   async function save(): Promise<MeetingDayEntry> {
     isSavingRef.value = true
+    let breakMin: number
+    
+        try {
+          breakMin = normalizeBreakMinutes(breakMinutesRef.value)
+        } catch {
+          toast.error('Break must be a valid number')
+          isSavingRef.value = false
+          throw new Error('Invalid break')
+        }
     try {
       const payload = {
         date: props.date,
         type: TimeKind.MEETING,
         startTime: normalize(startRef.value),
         endTime: normalize(endRef.value),
-        breakMinutes: breakMinutesRef.value,
+        breakMinutes: breakMin, //breakMinutesRef.value,
         comment: commentRef.value,
       }
 
@@ -59,7 +71,7 @@ export function useMeetingEntryForm(props: {
         type: TimeKind.MEETING,
         startTime: normalize(saved.startTime),
         endTime: normalize(saved.endTime),
-        breakMinutes: saved.breakMinutes,
+        breakMinutes: normalizeBreakMinutes(saved.breakMinutes),
         comment: saved.comment ?? '',
       }
     } finally {

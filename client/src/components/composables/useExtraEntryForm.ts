@@ -6,6 +6,8 @@ import { useTimeEntryImages } from './useTimeEntryImages'
 import { calculateWorkedMinutes } from '../helpers/time'
 import type { ExtraForm } from '../../types/Form.types'
 import { TimeKind } from '../../types/timeKind.enum'
+import { normalizeBreakMinutes } from '../helpers/time'
+import { useToast } from './useToast'
 
 export function useExtraEntryForm(props: {
   date: string
@@ -14,6 +16,7 @@ export function useExtraEntryForm(props: {
 }) {
   const assignmentStore = useProjectAssignmentStore()
   const images = useTimeEntryImages()
+  const toast = useToast()
   const startRef = ref('08:00')
   const endRef = ref('17:00')
   const breakMinutesRef = ref(30)
@@ -43,7 +46,7 @@ export function useExtraEntryForm(props: {
       const minutes = calculateWorkedMinutes(
         normalizeTime(startRef.value),
         normalizeTime(endRef.value),
-        breakMinutesRef.value,
+        normalizeBreakMinutes(breakMinutesRef.value),
       )
       return Number((minutes / 60).toFixed(2))
     })
@@ -69,6 +72,15 @@ async function save(): Promise<DayEntry | null> {
   }
 
   isSavingRef.value = true
+  let breakMin: number
+  
+      try {
+        breakMin = normalizeBreakMinutes(breakMinutesRef.value)
+      } catch {
+        toast.error('Break must be a valid number')
+        isSavingRef.value = false
+        throw new Error('Invalid break')
+      }
   try {
     let saved
 
@@ -76,7 +88,7 @@ async function save(): Promise<DayEntry | null> {
       saved = await assignmentStore.update(props.entry!.id, {
         startTime: normalizeTime(startRef.value),
         endTime: normalizeTime(endRef.value),
-        breakMinutes: breakMinutesRef.value,
+        breakMinutes: breakMin,//breakMinutesRef.value,
         comment: commentRef.value,
       })
     } else {
@@ -85,7 +97,7 @@ async function save(): Promise<DayEntry | null> {
         date: props.date,
         startTime: normalizeTime(startRef.value),
         endTime: normalizeTime(endRef.value),
-        breakMinutes: breakMinutesRef.value,
+        breakMinutes: normalizeBreakMinutes(breakMinutesRef.value),
         comment: commentRef.value,
       })
     }
@@ -107,7 +119,7 @@ async function save(): Promise<DayEntry | null> {
       hours: saved.hours,
       startTime: normalizeTime(saved.startTime),
       endTime: normalizeTime(saved.endTime),
-      breakMinutes: saved.breakMinutes ?? 0,
+      breakMinutes: normalizeBreakMinutes(saved.breakMinutes ?? 0),
       comment: saved.comment ?? '',
       project: saved.project,
       projectId: saved.project.id,

@@ -41,6 +41,22 @@ export function toTimeString(minutes: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 
+export function normalizeBreakMinutes(value: unknown): number {
+  if (value === null || value === undefined) return 0
+
+  const str = String(value).trim()
+
+  if (str === '') return 0
+
+  const num = Number(str)
+
+  if (Number.isNaN(num)) {
+    throw new Error('Break must be a number')
+  }
+
+  return Math.max(0, num)
+}
+
 export function addMinutes(time: string, minutes: number): string {
   const [h, m] = time.split(':').map(Number)
   const total = Number(h) * 60 + Number(m) + minutes
