@@ -26,6 +26,7 @@ const stats = ref<ProjectStats | null>(null)
 const loading = ref(true)
 const loaded = ref(new Set<string>())
 const error = ref<string | null>(null)
+const currentIndex = ref(0)
 
 const expandedUserId = ref<string | null>(null)
 const statsStore = useStatsStore()
@@ -156,14 +157,99 @@ function observeSentinel() {
   observer.observe(sentinel.value)
 }
 
-onBeforeUnmount(() => observer?.disconnect())
-
+onBeforeUnmount(() => { 
+  observer?.disconnect() 
+  document.body.style.overflow = ''
+})
+let scrollY = 0
 function openImage(url: string) {
+  const index = imageStore.images.findIndex(i => i.url === url)
+  if (index === -1) return
+
+  currentIndex.value = index
   fullscreenImage.value = url
+
+  scrollY = window.scrollY
+  document.body.style.position = 'fixed'
+  document.body.style.top = `-${scrollY}px`
+  document.body.style.width = '100%'
 }
 
 function closeImage() {
   fullscreenImage.value = null
+
+  document.body.style.position = ''
+  document.body.style.top = ''
+  document.body.style.width = ''
+
+  window.scrollTo(0, scrollY)
+}
+
+let startX = 0
+let startY = 0
+let isSwiping = false
+
+function onTouchStart(e: TouchEvent) {
+  const touch = e.touches[0]
+  if (!touch) return
+
+  startX = touch.clientX
+  startY = touch.clientY
+  isSwiping = true
+}
+
+function onTouchEnd(e: TouchEvent) {
+  if (!isSwiping) return
+
+  const touch = e.changedTouches[0]
+  if (!touch) return
+
+  const dx = touch.clientX - startX
+  const dy = touch.clientY - startY
+
+  const absX = Math.abs(dx)
+  const absY = Math.abs(dy)
+
+  if (absX < 40 && absY < 40) {
+    isSwiping = false
+    return
+  }
+
+  if (absY > absX && dy > 80) {
+    closeImage()
+  }
+
+  if (absX > absY) {
+    if (dx < -50) nextImage()
+    if (dx > 50) prevImage()
+  }
+
+  isSwiping = false
+}
+
+function nextImage() {
+  //if (currentIndex.value < imageStore.images.length - 1) {
+  //  currentIndex.value++
+  //  fullscreenImage.value = imageStore.images[currentIndex.value].url
+  //}
+  const next = imageStore.images[currentIndex.value + 1]
+  if (!next) return
+
+  currentIndex.value++
+  fullscreenImage.value = next.url
+}
+
+function prevImage() {/*
+  if (currentIndex.value > 0) {
+    currentIndex.value--
+    fullscreenImage.value = imageStore.images[currentIndex.value].url
+    
+  }*/
+ const prev = imageStore.images[currentIndex.value - 1]
+  if (!prev) return
+
+  currentIndex.value--
+  fullscreenImage.value = prev.url
 }
 /* ================= COMPUTED ================= */
 
@@ -316,6 +402,9 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
             <img
               :src="fullscreenImage"
               class="image-modal-content"
+              @click.stop
+              @touchstart="onTouchStart"
+              @touchend="onTouchEnd"
             >
 
             <button
@@ -545,25 +634,42 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.2s ease;
 }
 
 .image-modal-content {
   max-width: 95%;
   max-height: 95%;
   border-radius: 10px;
+
+  transition: transform 0.25s ease;
+  will-change: transform;
+  touch-action: pan-y;
+
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
 }
-
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
 .image-close {
   position: absolute;
   top: 20px;
   right: 20px;
-  background: white;
+  /*background: white;*/
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(6px);
+
   border: none;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   font-size: 18px;
   cursor: pointer;
+  transition: transform 0.2s;
+}
+.image-close:active {
+  transform: scale(0.9);
 }
 </style>
