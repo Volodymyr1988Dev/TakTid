@@ -382,9 +382,9 @@ const spinnerText = computed(() => {
           v-model="timeForm.end.value"
           type="time"
         >
-
+        <!--v-model.number="timeForm.form.breakMinutes.value"-->
         <input
-          v-model.number="timeForm.form.breakMinutes.value"
+          v-model="timeForm.form.breakMinutes.value"
           type="number"
           min="0"
         >

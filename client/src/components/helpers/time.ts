@@ -44,15 +44,14 @@ export function toTimeString(minutes: number): string {
 export function normalizeBreakMinutes(value: unknown): number {
   if (value === null || value === undefined) return 0
 
+  if (typeof value === 'number' && Number.isNaN(value)) return 0
   const str = String(value).trim()
 
   if (str === '') return 0
 
   const num = Number(str)
 
-  if (Number.isNaN(num)) {
-    throw new Error('Break must be a number')
-  }
+  if (Number.isNaN(num)) return 0
 
   return Math.max(0, num)
 }
