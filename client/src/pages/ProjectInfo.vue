@@ -207,10 +207,10 @@ let isDragging = false
 let startX = 0
 let startY = 0
 let isSwiping = false
-
+/*
 function clamp(val: number, min: number, max: number) {
   return Math.min(Math.max(val, min), max)
-}
+}*/
 
 function resetTransform() {
   scale.value = 1
@@ -219,24 +219,22 @@ function resetTransform() {
 }
 
 function onTouchStart(e: TouchEvent) {
-  //const touch = e.touches[0]
-  //if (!touch) return
+  const touch = e.touches[0]
+  if (!touch) return
 
   if (e.touches.length === 2) {
     //startDistance.value = getDistance(e.touches)
-    const newDistance = getDistance(e.touches)
-    if (!newDistance || !startDistance.value) return
+    //const newDistance = getDistance(e.touches)
+    const dist = getDistance(e.touches)
+    if (!dist) return
 
-    //startDistance.value = dist
-    //lastScale.value = scale.value
-     scale.value = Math.min(
-      Math.max(1, (newDistance / startDistance.value) * lastScale.value),
-      4
-    )
-  } //else if (e.touches.length === 1) {
-  if (e.touches.length === 1 && scale.value > 1 && isDragging) {
+    startDistance.value = dist
+    lastScale.value = scale.value
+  } else if (e.touches.length === 1) {
+  //if (e.touches.length === 1 && scale.value > 1 && isDragging) {
     const touch = e.touches[0]
     if (!touch) return
+    /*
     const dx = touch.clientX - lastTouchX
     const dy = touch.clientY - lastTouchY
 
@@ -246,11 +244,15 @@ function onTouchStart(e: TouchEvent) {
 
     translateX.value = clamp(translateX.value + dx, -max, max)
     translateY.value = clamp(translateY.value + dy, -max, max)
-
+    */
     lastTouchX = touch.clientX
     lastTouchY = touch.clientY
   
-    //isDragging = true
+    isDragging = true
+
+    startX = touch.clientX
+    startY = touch.clientY
+    isSwiping = true
   }
 
   //startX = touch.clientX
@@ -258,7 +260,7 @@ function onTouchStart(e: TouchEvent) {
   //isSwiping = true
 }
 let velocityX = 0
-/*
+
 function onTouchMove(e: TouchEvent) {
   if (e.touches.length === 2) {
     const newDistance = getDistance(e.touches)
@@ -282,7 +284,7 @@ function onTouchMove(e: TouchEvent) {
     lastTouchY = touch.clientY
   }
 }
-*/
+
 function onTouchEnd(e: TouchEvent) {
   if (!isSwiping || scale.value > 1) return
   const touch = e.changedTouches[0]
@@ -561,6 +563,7 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
               @click.stop
               @touchstart="onTouchStart"
               @touchend="onTouchEnd"
+              @touchmove="onTouchMove"
             >
             <!--@click="onTap"  @touchmove="onTouchMove"-->
             <button
