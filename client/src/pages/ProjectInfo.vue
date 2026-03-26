@@ -207,10 +207,10 @@ let isDragging = false
 let startX = 0
 let startY = 0
 let isSwiping = false
-/*
+
 function clamp(val: number, min: number, max: number) {
   return Math.min(Math.max(val, min), max)
-}*/
+}
 
 function resetTransform() {
   scale.value = 1
@@ -277,8 +277,15 @@ function onTouchMove(e: TouchEvent) {
     const dx = touch.clientX - lastTouchX
     const dy = touch.clientY - lastTouchY
     velocityX = dx
-    translateX.value += dx
-    translateY.value += dy
+
+    //translateX.value += dx
+    //translateY.value += dy
+
+    const maxX = (window.innerWidth * (scale.value - 1)) / 2
+    const maxY = (window.innerHeight * (scale.value - 1)) / 2
+
+    translateX.value = clamp(translateX.value + dx, -maxX, maxX)
+    translateY.value = clamp(translateY.value + dy, -maxY, maxY)
 
     lastTouchX = touch.clientX
     lastTouchY = touch.clientY
@@ -286,7 +293,12 @@ function onTouchMove(e: TouchEvent) {
 }
 
 function onTouchEnd(e: TouchEvent) {
-  if (!isSwiping || scale.value > 1) return
+  //if (!isSwiping || scale.value > 1) return
+  if (!isSwiping) return
+  if (scale.value > 1) {
+    isSwiping = false
+    return
+  }
   const touch = e.changedTouches[0]
   if (!touch) return
 
