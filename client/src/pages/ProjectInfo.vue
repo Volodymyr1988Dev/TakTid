@@ -281,9 +281,11 @@ function onTouchMove(e: TouchEvent) {
     //translateX.value += dx
     //translateY.value += dy
 
-    const maxX = (window.innerWidth * (scale.value - 1)) / 2
-    const maxY = (window.innerHeight * (scale.value - 1)) / 2
-
+    //const maxX = (window.innerWidth * (scale.value - 1)) / 2
+    //const maxY = (window.innerHeight * (scale.value - 1)) / 2
+    const rect = (e.target as HTMLElement).getBoundingClientRect()
+    const maxX = Math.max(0, (rect.width * scale.value - window.innerWidth) / 2)
+    const maxY = Math.max(0, (rect.height * scale.value - window.innerHeight) / 2)
     translateX.value = clamp(translateX.value + dx, -maxX, maxX)
     translateY.value = clamp(translateY.value + dy, -maxY, maxY)
 
@@ -570,7 +572,7 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
               :src="fullscreenImage"
               class="image-modal-content"
               :style="{
-                transform: `scale(${scale}) translate(${translateX}px, ${translateY}px)`
+                transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`
               }"
               @click.stop
               @touchstart="onTouchStart"
