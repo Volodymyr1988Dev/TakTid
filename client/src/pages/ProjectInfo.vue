@@ -126,7 +126,13 @@ watch(showImages, async (val) => {
   await nextTick()
   observeSentinel()
 })
-
+watch(currentIndex, (i) => {
+  const next = imageStore.images[i + 1]
+  if (next) {
+    const img = new Image()
+    img.src = next.url
+  }
+})
 async function loadImages() {
   if (!hasMore.value || imageStore.loading) return
 
@@ -169,11 +175,10 @@ function openImage(url: string) {
 
   currentIndex.value = index
   fullscreenImage.value = url
-
   scrollY = window.scrollY
   document.body.style.position = 'fixed'
   document.body.style.top = `-${scrollY}px`
-  //document.body.style.width = '100%'
+  document.body.style.width = '100%'
 }
 
 function closeImage() {
@@ -185,6 +190,7 @@ function closeImage() {
   //document.body.style.width = ''
 
   window.scrollTo(0, scrollY)
+  resetTransform()
 }
 
 const scale = ref(1)
@@ -202,28 +208,57 @@ let startX = 0
 let startY = 0
 let isSwiping = false
 
+function clamp(val: number, min: number, max: number) {
+  return Math.min(Math.max(val, min), max)
+}
+
+function resetTransform() {
+  scale.value = 1
+  translateX.value = 0
+  translateY.value = 0
+}
+
 function onTouchStart(e: TouchEvent) {
-  const touch = e.touches[0]
-  if (!touch) return
+  //const touch = e.touches[0]
+  //if (!touch) return
 
   if (e.touches.length === 2) {
     //startDistance.value = getDistance(e.touches)
-    const dist = getDistance(e.touches)
-    if (!dist) return
+    const newDistance = getDistance(e.touches)
+    if (!newDistance || !startDistance.value) return
 
-    startDistance.value = dist
-    lastScale.value = scale.value
-  } else if (e.touches.length === 1) {
+    //startDistance.value = dist
+    //lastScale.value = scale.value
+     scale.value = Math.min(
+      Math.max(1, (newDistance / startDistance.value) * lastScale.value),
+      4
+    )
+  } //else if (e.touches.length === 1) {
+  if (e.touches.length === 1 && scale.value > 1 && isDragging) {
+    const touch = e.touches[0]
+    if (!touch) return
+    const dx = touch.clientX - lastTouchX
+    const dy = touch.clientY - lastTouchY
+
+    velocityX = dx
+
+    const max = 200 * scale.value
+
+    translateX.value = clamp(translateX.value + dx, -max, max)
+    translateY.value = clamp(translateY.value + dy, -max, max)
+
     lastTouchX = touch.clientX
     lastTouchY = touch.clientY
-    isDragging = true
+  
+    //isDragging = true
   }
 
-  startX = touch.clientX
-  startY = touch.clientY
-  isSwiping = true
+  //startX = touch.clientX
+  //startY = touch.clientY
+  //isSwiping = true
 }
-
+let velocityX = 0
+/*
 function onTouchMove(e: TouchEvent) {
   if (e.touches.length === 2) {
     const newDistance = getDistance(e.touches)
@@ -239,7 +274,7 @@ function onTouchMove(e: TouchEvent) {
     if (!touch) return
     const dx = touch.clientX - lastTouchX
     const dy = touch.clientY - lastTouchY
-
+    velocityX = dx
     translateX.value += dx
     translateY.value += dy
 
@@ -247,13 +282,13 @@ function onTouchMove(e: TouchEvent) {
     lastTouchY = touch.clientY
   }
 }
-
+*/
 function onTouchEnd(e: TouchEvent) {
   if (!isSwiping || scale.value > 1) return
   const touch = e.changedTouches[0]
   if (!touch) return
 
-  if (scale.value < 1) scale.value = 1
+  //if (scale.value < 1) scale.value = 1
 
   const dx = touch.clientX - startX
   const dy = touch.clientY - startY
@@ -261,10 +296,15 @@ function onTouchEnd(e: TouchEvent) {
   if (Math.abs(dy) > Math.abs(dx) && dy > 80) {
     closeImage()
   }
-  if (Math.abs(dx) > Math.abs(dy)) {
+  if (Math.abs(velocityX) > 20) {
+    //if (velocityX < 0) nextImage() else prevImage()
+    velocityX < 0 ? nextImage() : prevImage()
+  }
+ // if (Math.abs(dx) > Math.abs(dy)) {
     if (dx < -50) nextImage()
     if (dx > 50) prevImage()
-  }/*
+  //}/*
+/*
   const absX = Math.abs(dx)
   const absY = Math.abs(dy)
 
@@ -288,10 +328,35 @@ function onTouchEnd(e: TouchEvent) {
 
 function getDistance(touches: TouchList): number | undefined {
   if (!touches[0] || !touches[1]) return
-  if (touches.length < 2) return
+  //if (touches.length < 2) return
   const dx = touches[0].clientX - touches[1].clientX
   const dy = touches[0].clientY - touches[1].clientY
   return Math.sqrt(dx * dx + dy * dy)
+}
+/*
+const maxTranslate = 150 * scale.value
+
+translateX.value = clamp(translateX.value + dx, -maxTranslate, maxTranslate)
+translateY.value = clamp(translateY.value + dy, -maxTranslate, maxTranslate)
+function resetTransform() {
+  scale.value = 1
+  translateX.value = 0
+  translateY.value = 0
+}
+let lastTap = 0
+
+function onTap() {
+  const now = Date.now()
+
+  if (now - lastTap < 300) {
+    if (scale.value > 1) {
+      resetTransform()
+    } else {
+      scale.value = 2
+    }
+  }
+
+  lastTap = now
 }
 /*
 let lastTap = 0
@@ -322,6 +387,7 @@ function nextImage() {
   }, 100)*/
   currentIndex.value++
   fullscreenImage.value = next.url
+  resetTransform()
 }
 
 function prevImage() {/*
@@ -335,6 +401,7 @@ function prevImage() {/*
 
   currentIndex.value--
   fullscreenImage.value = prev.url
+  resetTransform()
 }
 /* ================= COMPUTED ================= */
 
@@ -471,6 +538,7 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
             />
 
             <img
+
               :src="cloudinary(img.url, 600)"
               class="image"
               :class="{ loaded: loaded.has(img.id) }"
@@ -492,10 +560,9 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
               }"
               @click.stop
               @touchstart="onTouchStart"
-              @touchmove="onTouchMove"
               @touchend="onTouchEnd"
             >
-            <!--@click="onTap"-->
+            <!--@click="onTap"  @touchmove="onTouchMove"-->
             <button
               class="image-close"
               @click.stop="closeImage"
