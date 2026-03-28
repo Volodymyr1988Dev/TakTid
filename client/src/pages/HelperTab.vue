@@ -5,7 +5,7 @@ const length = ref<number | null>(null)
 
 // режими
 const fixedEdge = ref<number | null>(null) // один край
-const desiredEdge = ref<number | null>(null) // опціонально
+//const desiredEdge = ref<number | null>(null) // опціонально
 
 // drag spacing
 const spacingInput = ref(60)
@@ -123,15 +123,18 @@ watch([length, fixedEdge], calculate)
     <div class="slider">
       <label>Avstånd: {{ spacingDrag }}</label>
       <input
+        v-model.number="spacingDrag"
         type="range"
         min="10"
         max="60"
         step="0.5"
-        v-model.number="spacingDrag"
       >
     </div>
 
-    <div v-if="result" class="card">
+    <div 
+      v-if="result" 
+      class="card"
+    >
       <div class="grid">
         <div>
           <small>Vänster</small>
