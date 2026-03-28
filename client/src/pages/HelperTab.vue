@@ -293,7 +293,7 @@ watch(spacingInput, calculate)
             class="dot-wrapper"
             :style="getDotStyle(m)"
           >
-            <span class="dot-value">{{ m }}</span>
+            <span class="dot-value">{{ m }} sm</span>
             <div class="dot" />
           </div>
         </div>
@@ -402,13 +402,14 @@ input {
 }
 
 .dot {
-  position: absolute;
-  top: -4px;
+  /*position: absolute;
+  top: -4px;*/
   width: 14px;
   height: 14px;
   background: #2563eb;
   border-radius: 50%;
-  transform: translateX(-50%);
+  /*transform: translateX(-50%);*/
+  margin: 0, auto; 
 }
 .plus {
   color: #16a34a;
@@ -421,13 +422,19 @@ input {
   position: absolute;
   top: -18px;
   transform: translateX(-50%);
-  text-align: center;
+  /*text-align: center;*/
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  top: -26px;
 }
 
 .dot-value {
   font-size: 10px;
   color: #1e293b;
-  display: block;
-  margin-bottom: 2px;
+  /*display: block;*/
+  margin-bottom: 4px;
+  white-space: nowrap;
+  font-weight: 500;
 }
 </style>
