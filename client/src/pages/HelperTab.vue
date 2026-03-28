@@ -4,9 +4,7 @@ import { ref, watch, computed } from 'vue'
 const length = ref<number | null>(null)
 
 const fixedEdge = ref<number | null>(null)
-//const desiredEdge = ref<number | null>(null) // опціонально
 
-// drag spacing
 const spacingInput = ref(60)
 const isManual = ref(false)
 
@@ -106,48 +104,7 @@ function calculate() {
   if (!length.value) return
 
   const L = length.value
-  //const spacing = spacingInput.value
-  // 🔥 фіксуємо segments (мінімум гаків)
-  //const baseSegments = Math.floor(L / 60)
-  //if (baseSegments < 1) return
-  /*
-  const spacing = round05(spacingInput.value)
-
-  let edgeLeft = 0
-  let edgeRight = 0
-
-  const used = baseSegments * spacing
-  const remainder = L - used
-
-  if (fixedEdge.value !== null) {
-    edgeLeft = fixedEdge.value
-    edgeRight = remainder - edgeLeft
-  } else {
-    edgeLeft = remainder / 2
-    edgeRight = remainder / 2
-  }
-
-  // перевірка
-  if (edgeLeft < 6 || edgeRight < 6) {
-    result.value = null
-    return
-  }
-
-  const hooks = baseSegments + 1
-
-  const marks: number[] = []
-  for (let i = 1; i <= baseSegments; i++) {
-    marks.push(round05(i * spacing))
-  }
-  if (
-    edgeLeft < 6 ||
-    edgeRight < 6 ||
-    edgeLeft > 20 ||
-    edgeRight > 20
-  ) {
-    result.value = null
-    return
-  }*/
+  
   const spacing = spacingInput.value
   const segments = getSegments(L, spacing)
   if (segments < 1) {
@@ -280,7 +237,7 @@ watch(spacingInput, calculate)
     <input
       v-model.number="length"
       type="number"
-      placeholder="Längd (cm)"
+      placeholder="Längd/ Long (cm)"
     >
 
     <input
@@ -337,7 +294,6 @@ watch(spacingInput, calculate)
         </span>
       </div>
 
-      <!-- графічна лінія -->
       <div 
         class="line"
         @mousedown="onLineDrag"
