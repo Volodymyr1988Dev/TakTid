@@ -30,66 +30,51 @@ function calculate() {
 
   const L = length.value
 
-  let best: Result | null = null
+  // 🔥 фіксуємо segments (мінімум гаків)
+  const baseSegments = Math.floor(L / 60)
+  if (baseSegments < 1) return
 
-  // перебір spacing → головний пріоритет
-  for (let spacing = 60; spacing >= 10; spacing -= 0.5) {
-    spacing = round05(spacing)
+  const spacing = round05(spacingInput.value)
 
-    const segments = Math.floor(L / spacing)
-    if (segments < 1) continue
+  let edgeLeft = 0
+  let edgeRight = 0
 
-    const used = segments * spacing
-    const remainder = L - used
+  const used = baseSegments * spacing
+  const remainder = L - used
 
-    let edgeLeft = remainder / 2
-    let edgeRight = remainder / 2
-
-    // якщо заданий один край
-    if (fixedEdge.value !== null) {
-      edgeLeft = fixedEdge.value
-      edgeRight = remainder - edgeLeft
-
-      if (edgeRight < 6) continue
-    }
-
-    if (edgeLeft < 6 || edgeRight < 6) continue
-
-    const hooks = segments + 1
-
-    // ✔ головний критерій
-    // мінімізуємо кількість гаків (макс spacing)
-    // додатково — баланс edge
-    const edgeBalance = Math.abs(edgeLeft - edgeRight)
-
-    const score =
-      (60 - spacing) * 10 + // головне
-      edgeBalance // другорядне
-
-    if (!best || score < getScore(best)) {
-      const marks: number[] = []
-
-      for (let i = 1; i <= segments; i++) {
-        marks.push(round05(i * spacing))
-      }
-
-      best = {
-        edgeLeft: round05(edgeLeft),
-        edgeRight: round05(edgeRight),
-        spacing,
-        hooks,
-        segments,
-        marks
-      }
-    }
+  if (fixedEdge.value !== null) {
+    edgeLeft = fixedEdge.value
+    edgeRight = remainder - edgeLeft
+  } else {
+    edgeLeft = remainder / 2
+    edgeRight = remainder / 2
   }
 
-  result.value = best
-}
+  // перевірка
+  if (edgeLeft < 6 || edgeRight < 6) {
+    result.value = null
+    return
+  }
 
+  const hooks = baseSegments + 1
+
+  const marks: number[] = []
+  for (let i = 1; i <= baseSegments; i++) {
+    marks.push(round05(i * spacing))
+  }
+
+  result.value = {
+    edgeLeft: round05(edgeLeft),
+    edgeRight: round05(edgeRight),
+    spacing,
+    hooks,
+    segments: baseSegments,
+    marks
+  }
+}/*
 function getScore(r: Result) {
   return (60 - r.spacing) * 10 + Math.abs(r.edgeLeft - r.edgeRight)
-}
+}*/
 
 // drag → snapping
 const spacingDrag = computed({
@@ -100,7 +85,7 @@ const spacingDrag = computed({
 })
 
 // live
-watch([length, fixedEdge], calculate)
+watch([length, fixedEdge, spacingInput], calculate)
 </script>
 
 <template>
