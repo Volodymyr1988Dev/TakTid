@@ -7,9 +7,10 @@ const desiredEdge = ref(15)
 type Result = {
   edge: number
   spacing: number
+  segments: number
   hooks: number
   pattern: string
-  marks: number[]
+  marks2m: number[]
 }
 
 const result = ref<Result | null>(null)
@@ -33,11 +34,10 @@ function calculate() {
   for (let spacing = 60; spacing >= 10; spacing -= 0.5) {
     spacing = round05(spacing)
 
-    // кількість гаків
-    const hooks = Math.floor(L / spacing) + 1
-    const gaps = hooks - 1
+    const segments = Math.floor(L / spacing)
+    if (segments < 1) continue
 
-    const used = gaps * spacing
+    const used = segments * spacing
     const remainder = L - used
     const edge = remainder / 2
 
@@ -50,24 +50,29 @@ function calculate() {
       (isPriority ? 0 : 100)
 
     if (score < bestScore) {
-      const marks: number[] = []
+      // hooks
+      const hooks = segments + 1
 
-      for (let i = 1; i < hooks; i++) {
-        marks.push(round05(i * spacing))
-      }
-
+      // pattern
       const patternParts = [
         edge.toFixed(2),
-        ...Array(gaps - 1).fill(spacing.toFixed(1)),
+        ...Array(segments - 1).fill(spacing.toFixed(1)),
         edge.toFixed(2)
       ]
+
+      // marks every 2m (як ти тепер хочеш)
+      const marks2m: number[] = []
+      for (let i = 200; i < L; i += 200) {
+        marks2m.push(i)
+      }
 
       best = {
         edge: round05(edge),
         spacing,
+        segments,
         hooks,
         pattern: patternParts.join(' — '),
-        marks
+        marks2m
       }
 
       bestScore = score
@@ -77,40 +82,45 @@ function calculate() {
   result.value = best
 }
 
-// авто-перерахунок
+// авто
 watch([length, desiredEdge], calculate)
 </script>
 
 <template>
   <div class="container">
-    <h1>Ränna Kalkylator</h1>
+    <h1>Ränna</h1>
 
     <input
       v-model.number="length"
       type="number"
-      placeholder="Längd (cm)"
+      placeholder="cm"
     >
 
     <input
       v-model.number="desiredEdge"
       type="number"
-      placeholder="Önskad kant (cm)"
+      placeholder="edge"
     >
 
-    <div v-if="result" class="card">
-      <div class="row">
-        <span>Kant (edge):</span>
-        <b>{{ result.edge }} cm</b>
-      </div>
+    <div 
+      v-if="result" 
+      class="card"
+    >
+      <div class="grid">
+        <div>
+          <small>Kant</small>
+          <b>{{ result.edge }}</b>
+        </div>
 
-      <div class="row">
-        <span>Avstånd:</span>
-        <b>{{ result.spacing }} cm</b>
-      </div>
+        <div>
+          <small>Avstånd</small>
+          <b>{{ result.spacing }}</b>
+        </div>
 
-      <div class="row">
-        <span>Totalt krokar:</span>
-        <b>{{ result.hooks }}</b>
+        <div>
+          <small>Krokar</small>
+          <b>{{ result.hooks }}</b>
+        </div>
       </div>
 
       <div class="pattern">
@@ -119,19 +129,18 @@ watch([length, desiredEdge], calculate)
 
       <div class="marks">
         <span
-          v-for="m in result.marks"
+          v-for="m in result.marks2m"
           :key="m"
-          class="mark"
         >
           {{ m }}
         </span>
       </div>
 
-      <!-- проста візуалізація -->
+      <!-- мобільна лінія -->
       <div class="line">
         <div
-          v-for="m in result.marks"
-          :key="'line-' + m"
+          v-for="m in result.marks2m"
+          :key="m"
           class="dot"
           :style="{ left: (m / length!) * 100 + '%' }"
         />
@@ -142,60 +151,64 @@ watch([length, desiredEdge], calculate)
 
 <style scoped>
 .container {
-  max-width: 420px;
-  margin: 40px auto;
-  padding: 20px;
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 16px;
   font-family: system-ui;
 }
 
 h1 {
-  margin-bottom: 16px;
+  text-align: center;
+  margin-bottom: 12px;
 }
 
 input {
   width: 100%;
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 8px;
+  border-radius: 12px;
   border: 1px solid #ccc;
+  font-size: 18px;
 }
 
 .card {
-  margin-top: 16px;
-  padding: 16px;
-  border-radius: 14px;
-  background: #f8fafc;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #f1f5f9;
 }
 
-.row {
+.grid {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 6px;
+  text-align: center;
+}
+
+.grid small {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.grid b {
+  font-size: 20px;
 }
 
 .pattern {
   margin-top: 10px;
   font-family: monospace;
-  font-size: 13px;
-  word-break: break-all;
+  font-size: 12px;
 }
 
 .marks {
-  margin-top: 10px;
+  margin-top: 8px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.mark {
-  background: #e2e8f0;
-  padding: 4px 6px;
-  border-radius: 6px;
+  justify-content: space-between;
   font-size: 12px;
 }
 
 .line {
-  margin-top: 16px;
+  margin-top: 12px;
   height: 6px;
   background: #cbd5f5;
   border-radius: 10px;
