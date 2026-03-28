@@ -189,6 +189,15 @@ function getRulerStyle(mark: number) {
   }
 }
 */
+function shouldShowLabel(index: number) {
+  if (!result.value) return false
+
+  const total = result.value.marks.length
+
+  if (total <= 10) return true
+  if (total <= 20) return index % 2 === 0
+  return index % 3 === 0
+}
 watch([length, fixedEdge], () => {
   if (!isManual.value) {
     autoCalculate()
@@ -279,12 +288,16 @@ watch(spacingInput, calculate)
           @touchmove="onLineDrag"
         >
           <div
-            v-for="m in result.marks"
+            v-for="(m, i) in result.marks"
             :key="m"
             class="dot-wrapper"
             :style="getDotStyle(m)"
           >
-            <span class="dot-value">{{ m }} sm</span>
+            <span 
+              v-if="shouldShowLabel(i)"
+              class="dot-value" 
+              :class="{ edge: i === 0 || i === result.marks.length - 1 }"
+            >{{ m }}</span>
             <div class="dot" />
           </div>
         </div>
@@ -428,5 +441,9 @@ input {
   margin-bottom: 3px;
   white-space: nowrap;
   opacity: 0.8;
+}
+.edge {
+  font-weight: 700;
+  color: #0f172a;
 }
 </style>
