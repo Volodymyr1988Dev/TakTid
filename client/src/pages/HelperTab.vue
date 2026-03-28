@@ -1,25 +1,27 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 const length = ref<number | null>(null)
-const desiredEdge = ref(15)
+
+// режими
+const fixedEdge = ref<number | null>(null) // один край
+const desiredEdge = ref<number | null>(null) // опціонально
+
+// drag spacing
+const spacingInput = ref(60)
 
 type Result = {
-  edge: number
+  edgeLeft: number
+  edgeRight: number
   spacing: number
-  segments: number
   hooks: number
-  pattern: string
-  marks2m: number[]
+  segments: number
+  marks: number[]
 }
 
 const result = ref<Result | null>(null)
 
-const MIN_EDGE = 6
-const PRIORITY_MIN = 10
-const PRIORITY_MAX = 20
-
-function round05(n: number): number {
+function round05(n: number) {
   return Math.round(n * 2) / 2
 }
 
@@ -29,8 +31,8 @@ function calculate() {
   const L = length.value
 
   let best: Result | null = null
-  let bestScore = Infinity
 
+  // перебір spacing → головний пріоритет
   for (let spacing = 60; spacing >= 10; spacing -= 0.5) {
     spacing = round05(spacing)
 
@@ -39,77 +41,101 @@ function calculate() {
 
     const used = segments * spacing
     const remainder = L - used
-    const edge = remainder / 2
 
-    if (edge < MIN_EDGE) continue
+    let edgeLeft = remainder / 2
+    let edgeRight = remainder / 2
 
-    const isPriority = edge >= PRIORITY_MIN && edge <= PRIORITY_MAX
+    // якщо заданий один край
+    if (fixedEdge.value !== null) {
+      edgeLeft = fixedEdge.value
+      edgeRight = remainder - edgeLeft
+
+      if (edgeRight < 6) continue
+    }
+
+    if (edgeLeft < 6 || edgeRight < 6) continue
+
+    const hooks = segments + 1
+
+    // ✔ головний критерій
+    // мінімізуємо кількість гаків (макс spacing)
+    // додатково — баланс edge
+    const edgeBalance = Math.abs(edgeLeft - edgeRight)
 
     const score =
-      Math.abs(edge - desiredEdge.value) +
-      (isPriority ? 0 : 100)
+      (60 - spacing) * 10 + // головне
+      edgeBalance // другорядне
 
-    if (score < bestScore) {
-      // hooks
-      const hooks = segments + 1
+    if (!best || score < getScore(best)) {
+      const marks: number[] = []
 
-      // pattern
-      const patternParts = [
-        edge.toFixed(2),
-        ...Array(segments - 1).fill(spacing.toFixed(1)),
-        edge.toFixed(2)
-      ]
-
-      // marks every 2m (як ти тепер хочеш)
-      const marks2m: number[] = []
-      for (let i = 200; i < L; i += 200) {
-        marks2m.push(i)
+      for (let i = 1; i <= segments; i++) {
+        marks.push(round05(i * spacing))
       }
 
       best = {
-        edge: round05(edge),
+        edgeLeft: round05(edgeLeft),
+        edgeRight: round05(edgeRight),
         spacing,
-        segments,
         hooks,
-        pattern: patternParts.join(' — '),
-        marks2m
+        segments,
+        marks
       }
-
-      bestScore = score
     }
   }
 
   result.value = best
 }
 
-// авто
-watch([length, desiredEdge], calculate)
+function getScore(r: Result) {
+  return (60 - r.spacing) * 10 + Math.abs(r.edgeLeft - r.edgeRight)
+}
+
+// drag → snapping
+const spacingDrag = computed({
+  get: () => spacingInput.value,
+  set: (v: number) => {
+    spacingInput.value = round05(v)
+  }
+})
+
+// live
+watch([length, fixedEdge], calculate)
 </script>
 
 <template>
-  <div class="container">
-    <h1>Ränna</h1>
+  <div class="wrap">
+    <h1>Ränna Pro</h1>
 
     <input
       v-model.number="length"
       type="number"
-      placeholder="cm"
+      placeholder="Längd (cm)"
     >
 
     <input
-      v-model.number="desiredEdge"
+      v-model.number="fixedEdge"
       type="number"
-      placeholder="edge"
+      placeholder="Fast kant (valfri)"
     >
 
-    <div 
-      v-if="result" 
-      class="card"
-    >
+    <!-- drag spacing -->
+    <div class="slider">
+      <label>Avstånd: {{ spacingDrag }}</label>
+      <input
+        type="range"
+        min="10"
+        max="60"
+        step="0.5"
+        v-model.number="spacingDrag"
+      >
+    </div>
+
+    <div v-if="result" class="card">
       <div class="grid">
         <div>
-          <small>Kant</small>
-          <b>{{ result.edge }}</b>
+          <small>Vänster</small>
+          <b>{{ result.edgeLeft }}</b>
         </div>
 
         <div>
@@ -118,28 +144,30 @@ watch([length, desiredEdge], calculate)
         </div>
 
         <div>
+          <small>Höger</small>
+          <b>{{ result.edgeRight }}</b>
+        </div>
+
+        <div>
           <small>Krokar</small>
           <b>{{ result.hooks }}</b>
         </div>
       </div>
 
-      <div class="pattern">
-        {{ result.pattern }}
-      </div>
-
+      <!-- marks -->
       <div class="marks">
         <span
-          v-for="m in result.marks2m"
+          v-for="m in result.marks"
           :key="m"
         >
           {{ m }}
         </span>
       </div>
 
-      <!-- мобільна лінія -->
+      <!-- графічна лінія -->
       <div class="line">
         <div
-          v-for="m in result.marks2m"
+          v-for="m in result.marks"
           :key="m"
           class="dot"
           :style="{ left: (m / length!) * 100 + '%' }"
@@ -150,9 +178,9 @@ watch([length, desiredEdge], calculate)
 </template>
 
 <style scoped>
-.container {
-  max-width: 360px;
-  margin: 0 auto;
+.wrap {
+  max-width: 380px;
+  margin: auto;
   padding: 16px;
   font-family: system-ui;
 }
@@ -165,10 +193,14 @@ h1 {
 input {
   width: 100%;
   padding: 14px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   border-radius: 12px;
   border: 1px solid #ccc;
-  font-size: 18px;
+  font-size: 16px;
+}
+
+.slider {
+  margin: 10px 0;
 }
 
 .card {
@@ -179,36 +211,32 @@ input {
 }
 
 .grid {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
   text-align: center;
 }
 
 .grid small {
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   color: #64748b;
 }
 
 .grid b {
-  font-size: 20px;
-}
-
-.pattern {
-  margin-top: 10px;
-  font-family: monospace;
-  font-size: 12px;
+  font-size: 18px;
 }
 
 .marks {
-  margin-top: 8px;
+  margin-top: 10px;
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
   font-size: 12px;
 }
 
 .line {
-  margin-top: 12px;
+  margin-top: 14px;
   height: 6px;
   background: #cbd5f5;
   border-radius: 10px;
