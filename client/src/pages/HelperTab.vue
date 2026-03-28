@@ -179,29 +179,7 @@ function getDotStyle(mark: number) {
     left: `${(mark / length.value) * 100}%`
   }
 }
-/*
-const rulerMarks = computed(() => {
-  if (!length.value) return []
-  const L = length.value
-  const steps = 4 //10
-  const step = Math.ceil(L / steps / 10) * 10
-  const arr: number[] = []
 
-  for (let i = 0; i <= length.value; i += step) {
-    arr.push(i)
-  }
-
-  return arr
-})
-
-function getRulerStyle(mark: number) {
-  if (!length.value) return { left: '0%' }
-
-  return {
-    left: `${(mark / length.value) * 100}%`
-  }
-}
-*/
 watch([length, fixedEdge], () => {
   if (!isManual.value) {
     autoCalculate()
@@ -230,7 +208,6 @@ watch(spacingInput, calculate)
       </button>
     </div>
 
-    <!-- 🔥 HOOKS -->
     <div v-if="mode === 'hooks'">
       <h1>Ränna hook measure</h1>
 
@@ -299,7 +276,7 @@ watch(spacingInput, calculate)
           >
             <span 
               class="dot-value" 
-              :style="{ top: `-${8 + getLabelRow(i) * 14}px`, opacity: 1 - getLabelRow(i) * 0.3 }"
+              :style="{ top: `-${10 + getLabelRow(i) * 14}px`, opacity: 1 - getLabelRow(i) * 0.3 }"
             >{{ m }}</span>
             <div 
               class="dot"
@@ -309,7 +286,6 @@ watch(spacingInput, calculate)
       </div>
     </div>
 
-    <!-- 🔥 SPACING -->
     <IdealSpacing v-if="mode === 'spacing'" />
   </div>
 </template>

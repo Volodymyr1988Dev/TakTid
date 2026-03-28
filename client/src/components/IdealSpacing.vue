@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { calculateIdealSpacing } from './helpers/utils/IdealSpace'
 
 const length = ref<number | null>(null)
-const ideal = ref(15)
+const ideal = ref(34)
 
 const result = computed(() => {
   if (!length.value) return null
@@ -18,7 +18,7 @@ const result = computed(() => {
     <input
       v-model.number="length"
       type="number"
-      placeholder="Length (cm)"
+      placeholder="Length (sm)"
     >
 
     <input
