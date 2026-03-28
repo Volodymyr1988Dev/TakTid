@@ -15,6 +15,7 @@ import IdealSpacing from '../components/IdealSpacing.vue'
 const length = ref<number | null>(null)
 const fixedEdge = ref<number | null>(null)
 
+const SNAP_EDGES = [12, 15, 18]
 const spacingInput = ref(60)
 const isManual = ref(false)
 
@@ -120,6 +121,34 @@ const spacingDrag = computed({
     spacingInput.value = snapped
   }
 })
+function snapSpacing(spacing: number) {
+  if (length.value === null || length.value === undefined) return spacing
+
+  //const L = length.value
+  //const segments = Math.floor(L / 60)
+
+  let best = spacing
+  let bestScore = Infinity
+
+  for (const s of validSpacings.value) {
+    const L = length.value
+    const segments = getSegments(L, s)
+    const { left } = getEdges(L, s, segments)
+
+    const snapBonus = SNAP_EDGES.some(e => Math.abs(left - e) < 1)
+      ? -5
+      : 0
+
+    const score = Math.abs(s - spacing) + snapBonus
+
+    if (score < bestScore) {
+      best = s
+      bestScore = score
+    }
+  }
+
+  return best
+}
 
 function onLineDrag(e: MouseEvent | TouchEvent) {
   if (!length.value || !validSpacings.value.length) return
@@ -129,8 +158,8 @@ function onLineDrag(e: MouseEvent | TouchEvent) {
   const el = e.currentTarget as HTMLElement
   const rect = el.getBoundingClientRect()
 
-  let clientX = 0
-
+  //let clientX = 0
+  let clientX: number
   if (e instanceof TouchEvent) {
     if (!e.touches.length) return
     const touch = e.touches[0]
@@ -144,15 +173,19 @@ function onLineDrag(e: MouseEvent | TouchEvent) {
     1,
     Math.max(0, (clientX - rect.left) / rect.width)
   )
-
+  
   const min = validSpacings.value[validSpacings.value.length - 1]
   const max = validSpacings.value[0]
-
-  if (min === undefined || max === undefined) return
+  if (min === undefined || max === undefined) {
+    console.warn('validSpacings is empty, cannot drag')
+    return
+  }
+  //if (min === undefined || max === undefined) return
 
   let spacing = min + percent * (max - min)
 
-  spacing = round05(spacing)
+  //spacing = round05(spacing)
+  spacing = snapSpacing(round05(spacing))
 
   if (!validSpacings.value.includes(spacing)) return
 
@@ -169,9 +202,9 @@ function getDotStyle(mark: number) {
 
 const rulerMarks = computed(() => {
   if (!length.value) return []
-  const L = length.value
-  const steps = 4 //10
-  const step = Math.ceil(L / steps / 10) * 10
+  //const L = length.value
+  const step = 10 /4
+  //const step = Math.ceil(L / steps / 10) * 10
   const arr: number[] = []
 
   for (let i = 0; i <= length.value; i += step) {
