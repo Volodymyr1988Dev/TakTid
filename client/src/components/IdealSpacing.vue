@@ -25,9 +25,12 @@ const result = computed(() => {
       v-model.number="ideal"
       type="number"
       placeholder="Ideal spacing"
-    />
+    >
 
-    <div v-if="result" class="card">
+    <div 
+      v-if="result" 
+      class="card"
+    >
       <div class="grid">
         <div>
           <small>Exact</small>

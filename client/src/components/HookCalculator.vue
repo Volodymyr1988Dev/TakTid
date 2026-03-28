@@ -176,13 +176,17 @@ watch(spacingInput, calculate)
   <div class="wrap">
     <h2>Hooks calculator</h2>
 
-    <input v-model.number="length" type="number" placeholder="Length (cm)" />
+    <input 
+      v-model.number="length"
+      type="number"  
+      placeholder="Length (cm)" 
+    >
 
     <input
       v-model.number="fixedEdge"
       type="number"
       placeholder="Fixed edge (optional)"
-    />
+    >
 
     <div class="slider">
       <label>Spacing: {{ spacingDrag }}</label>
@@ -192,10 +196,13 @@ watch(spacingInput, calculate)
         min="10"
         max="60"
         step="0.5"
-      />
+      >
     </div>
 
-    <div v-if="result" class="card">
+    <div 
+      v-if="result" 
+      class="card"
+    >
       <div class="grid">
         <div>
           <small>Left</small>
@@ -218,12 +225,13 @@ watch(spacingInput, calculate)
         </div>
       </div>
 
-      <div class="line"
-           @mousedown="onLineDrag"
-           @mousemove="e => e.buttons && onLineDrag(e)"
-           @touchstart="onLineDrag"
-           @touchmove="onLineDrag">
-
+      <div 
+        class="line"
+        @mousedown="onLineDrag"
+        @mousemove="e => e.buttons && onLineDrag(e)"
+        @touchstart="onLineDrag"
+        @touchmove="onLineDrag"
+      >
         <div
           v-for="m in result.marks"
           :key="m"

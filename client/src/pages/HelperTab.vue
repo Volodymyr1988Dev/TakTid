@@ -9,7 +9,7 @@ import {
   findBestSpacingAuto
 } from '../components/helpers/utils/hookMath'
 
-import HookCalculator from '../components/HookCalculator.vue'
+//import HookCalculator from '../components/HookCalculator.vue'
 import IdealSpacing from '../components/IdealSpacing.vue'
 
 const length = ref<number | null>(null)
@@ -18,7 +18,7 @@ const fixedEdge = ref<number | null>(null)
 const spacingInput = ref(60)
 const isManual = ref(false)
 
-const mode = ref<'hooks' | 'spacing'>('hooks')
+const mode = ref<'none' | 'hooks' | 'spacing'>('none')
 
 type Result = {
   edgeLeft: number
@@ -145,13 +145,11 @@ function onLineDrag(e: MouseEvent | TouchEvent) {
     Math.max(0, (clientX - rect.left) / rect.width)
   )
 
-  //const min = validSpacings.value.at(-1)!
   const min = validSpacings.value[validSpacings.value.length - 1]
   const max = validSpacings.value[0]
-  if (min === undefined || max === undefined) {
-    console.warn('validSpacings is empty, cannot drag')
-    return
-  }
+
+  if (min === undefined || max === undefined) return
+
   let spacing = min + percent * (max - min)
 
   spacing = round05(spacing)
@@ -161,6 +159,19 @@ function onLineDrag(e: MouseEvent | TouchEvent) {
   spacingInput.value = spacing
 }
 
+function getLabelRow(index: number) {
+  if (!result.value) return 0
+
+  const total = result.value.marks.length
+
+  if (total <= 10) return 0
+
+  if (total <= 20) {
+    return index % 2 // 0 або 1
+  }
+
+  return index % 3 // 0,1,2
+}
 function getDotStyle(mark: number) {
   if (!length.value) return { left: '0%' }
 
@@ -168,10 +179,29 @@ function getDotStyle(mark: number) {
     left: `${(mark / length.value) * 100}%`
   }
 }
+/*
+const rulerMarks = computed(() => {
+  if (!length.value) return []
+  const L = length.value
+  const steps = 4 //10
+  const step = Math.ceil(L / steps / 10) * 10
+  const arr: number[] = []
 
-/**
- * 🔥 авто при старті
- */
+  for (let i = 0; i <= length.value; i += step) {
+    arr.push(i)
+  }
+
+  return arr
+})
+
+function getRulerStyle(mark: number) {
+  if (!length.value) return { left: '0%' }
+
+  return {
+    left: `${(mark / length.value) * 100}%`
+  }
+}
+*/
 watch([length, fixedEdge], () => {
   if (!isManual.value) {
     autoCalculate()
@@ -184,86 +214,136 @@ watch(spacingInput, calculate)
 
 <template>
   <div class="wrap">
-    <h1>Ränna hook megure</h1>
+    <div class="tabs">
+      <button
+        :class="{ active: mode === 'hooks' }"
+        @click="mode = 'hooks'"
+      >
+        Hooks
+      </button>
 
-    <input v-model.number="length" type="number" placeholder="Length (cm)" />
+      <button
+        :class="{ active: mode === 'spacing' }"
+        @click="mode = 'spacing'"
+      >
+        Spacing
+      </button>
+    </div>
 
-    <input
-      v-model.number="fixedEdge"
-      type="number"
-      placeholder="Fixed edge (optional)"
-    />
+    <!-- 🔥 HOOKS -->
+    <div v-if="mode === 'hooks'">
+      <h1>Ränna hook measure</h1>
 
-    <div class="slider">
-      <label>Spacing: {{ spacingDrag }}</label>
+      <input 
+        v-model.number="length" 
+        type="number" 
+        placeholder="Length (cm)" 
+      >
+
       <input
-        v-model.number="spacingDrag"
-        type="range"
-        min="10"
-        max="60"
-        step="0.5"
-      />
-    </div>
+        v-model.number="fixedEdge"
+        type="number"
+        placeholder="Fixed edge (optional)"
+      >
 
-    <div v-if="result" class="card">
-      <div class="grid">
-        <div>
-          <small>Left</small>
-          <b>{{ result.edgeLeft }}</b>
-        </div>
-
-        <div>
-          <small>Spacing</small>
-          <b>{{ result.spacing }}</b>
-        </div>
-
-        <div>
-          <small>Right</small>
-          <b>{{ result.edgeRight }}</b>
-        </div>
-
-        <div>
-          <small>Hooks</small>
-          <b>{{ result.hooks }}</b>
-        </div>
+      <div class="slider">
+        <label>Spacing: {{ spacingDrag }}</label>
+        <input
+          v-model.number="spacingDrag"
+          type="range"
+          min="10"
+          max="60"
+          step="0.5"
+        >
       </div>
 
-      <div class="line"
-           @mousedown="onLineDrag"
-           @mousemove="e => e.buttons && onLineDrag(e)"
-           @touchstart="onLineDrag"
-           @touchmove="onLineDrag">
+      <div 
+        v-if="result" 
+        class="card"
+      >
+        <div class="grid">
+          <div>
+            <small>Left</small>
+            <b>{{ result.edgeLeft }}</b>
+          </div>
 
+          <div>
+            <small>Spacing</small>
+            <b>{{ result.spacing }}</b>
+          </div>
+
+          <div>
+            <small>Right</small>
+            <b>{{ result.edgeRight }}</b>
+          </div>
+
+          <div>
+            <small>Hooks</small>
+            <b>{{ result.hooks }}</b>
+          </div>
+        </div>
+
+    
         <div
-          v-for="m in result.marks"
-          :key="m"
-          class="dot"
-          :style="getDotStyle(m)"
-        />
+          class="line"
+          @mousedown="onLineDrag"
+          @mousemove="e => e.buttons && onLineDrag(e)"
+          @touchstart="onLineDrag"
+          @touchmove="onLineDrag"
+        >
+          <div
+            v-for="(m, i) in result.marks"
+            :key="m"
+            class="dot-wrapper"
+            :style="getDotStyle(m)"
+          >
+            <span 
+              class="dot-value" 
+              :style="{ top: `-${getLabelRow(i) * 14}px`, opacity: 1 - getLabelRow(i) * 0.3 }"
+            >{{ m }}</span>
+            <div 
+              class="dot"
+            />
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- 🔥 SPACING -->
+    <IdealSpacing v-if="mode === 'spacing'" />
   </div>
-
-  <button @click="mode = 'hooks'">Hooks</button>
-  <button @click="mode = 'spacing'">Spacing</button>
-
-  <HookCalculator v-if="mode === 'hooks'" />
-  <IdealSpacing v-else />
 </template>
 
 <style scoped>
 .wrap {
-  max-width: 380px;
+  max-width: 420px;
   margin: auto;
   padding: 16px;
   font-family: system-ui;
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 12px;
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 
+.tabs button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #e2e8f0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabs button.active {
+  background: #2563eb;
+  color: white;
+}
+
+/* INPUT */
 input {
   width: 100%;
   padding: 14px;
@@ -273,10 +353,7 @@ input {
   font-size: 16px;
 }
 
-.slider {
-  margin: 10px 0;
-}
-
+/* CARD */
 .card {
   margin-top: 12px;
   padding: 14px;
@@ -301,63 +378,75 @@ input {
   font-size: 18px;
 }
 
-.marks {
-  margin-top: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  font-size: 12px;
+.ruler {
+  position: relative;
+  height: 20px;
+  margin-top: 12px;
+  border-bottom: 2px solid #94a3b8;
+}
+
+.ruler-mark {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  font-size: 10px;
+}
+
+.ruler-mark::before {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 8px;
+  background: #475569;
+  margin: auto;
 }
 
 .line {
-  margin-top: 14px;
-  height: 6px;
+  margin-top: 60px;
+  height: 10px;
   background: #cbd5f5;
   border-radius: 10px;
   position: relative;
+  cursor: pointer;
+  overflow: visible;
 }
 
 .dot {
-  position: absolute;
-  top: -4px;
+  /*position: absolute;
+  top: -4px;*/
   width: 10px;
   height: 10px;
   background: #2563eb;
   border-radius: 50%;
-  transform: translateX(-50%);
+  /*transform: translateX(-50%);*/
+  margin: 0 auto; 
 }
-.good {
+.plus {
   color: #16a34a;
-  font-weight: 700;
-}
-input[type="range"] {
-  width: 100%;
-  height: 36px;
-  touch-action: pan-x;
 }
 
-.line {
-  height: 12px;
-  cursor: pointer;
+.minus {
+  color: #dc2626;
+}
+.dot-wrapper {
+  position: absolute;
+  top: -18px;
+  transform: translateX(-50%);
+  /*text-align: center;*/
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  top: -8px;
 }
 
-.dot {
-  width: 14px;
-  height: 14px;
-}
-
-@media (max-width: 480px) {
-  .wrap {
-    padding: 12px;
-  }
-
-  input {
-    font-size: 18px;
-    padding: 16px;
-  }
-
-  .grid b {
-    font-size: 20px;
-  }
+.dot-value {
+  position: absolute;
+  font-size: 9px;
+  color: #1e293b;
+  /*display: block;*/
+  /*margin-bottom: 3px;*/
+  white-space: nowrap;
+  transform: translateX(-50%);
+  left: 50%;
 }
 </style>
