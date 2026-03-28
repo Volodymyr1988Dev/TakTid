@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-
 import {
   round05,
   getSegments,
@@ -9,16 +8,11 @@ import {
   findBestSpacingAuto
 } from '../components/helpers/utils/hookMath'
 
-import HookCalculator from '../components/HookCalculator.vue'
-import IdealSpacing from '../components/IdealSpacing.vue'
-
 const length = ref<number | null>(null)
 const fixedEdge = ref<number | null>(null)
 
 const spacingInput = ref(60)
 const isManual = ref(false)
-
-const mode = ref<'hooks' | 'spacing'>('hooks')
 
 type Result = {
   edgeLeft: number
@@ -153,7 +147,6 @@ function onLineDrag(e: MouseEvent | TouchEvent) {
     return
   }
   let spacing = min + percent * (max - min)
-
   spacing = round05(spacing)
 
   if (!validSpacings.value.includes(spacing)) return
@@ -169,9 +162,6 @@ function getDotStyle(mark: number) {
   }
 }
 
-/**
- * 🔥 авто при старті
- */
 watch([length, fixedEdge], () => {
   if (!isManual.value) {
     autoCalculate()
@@ -184,7 +174,7 @@ watch(spacingInput, calculate)
 
 <template>
   <div class="wrap">
-    <h1>Ränna hook megure</h1>
+    <h2>Hooks calculator</h2>
 
     <input v-model.number="length" type="number" placeholder="Length (cm)" />
 
@@ -243,121 +233,4 @@ watch(spacingInput, calculate)
       </div>
     </div>
   </div>
-
-  <button @click="mode = 'hooks'">Hooks</button>
-  <button @click="mode = 'spacing'">Spacing</button>
-
-  <HookCalculator v-if="mode === 'hooks'" />
-  <IdealSpacing v-else />
 </template>
-
-<style scoped>
-.wrap {
-  max-width: 380px;
-  margin: auto;
-  padding: 16px;
-  font-family: system-ui;
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 12px;
-}
-
-input {
-  width: 100%;
-  padding: 14px;
-  margin-bottom: 10px;
-  border-radius: 12px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-}
-
-.slider {
-  margin: 10px 0;
-}
-
-.card {
-  margin-top: 12px;
-  padding: 14px;
-  border-radius: 16px;
-  background: #f1f5f9;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  text-align: center;
-}
-
-.grid small {
-  display: block;
-  font-size: 11px;
-  color: #64748b;
-}
-
-.grid b {
-  font-size: 18px;
-}
-
-.marks {
-  margin-top: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  font-size: 12px;
-}
-
-.line {
-  margin-top: 14px;
-  height: 6px;
-  background: #cbd5f5;
-  border-radius: 10px;
-  position: relative;
-}
-
-.dot {
-  position: absolute;
-  top: -4px;
-  width: 10px;
-  height: 10px;
-  background: #2563eb;
-  border-radius: 50%;
-  transform: translateX(-50%);
-}
-.good {
-  color: #16a34a;
-  font-weight: 700;
-}
-input[type="range"] {
-  width: 100%;
-  height: 36px;
-  touch-action: pan-x;
-}
-
-.line {
-  height: 12px;
-  cursor: pointer;
-}
-
-.dot {
-  width: 14px;
-  height: 14px;
-}
-
-@media (max-width: 480px) {
-  .wrap {
-    padding: 12px;
-  }
-
-  input {
-    font-size: 18px;
-    padding: 16px;
-  }
-
-  .grid b {
-    font-size: 20px;
-  }
-}
-</style>
