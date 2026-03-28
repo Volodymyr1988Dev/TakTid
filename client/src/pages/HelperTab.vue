@@ -1,20 +1,28 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 const length = ref<number | null>(null)
-const customEdge = ref<number | null>(null)
 
-const result = ref<{
+// режими
+const fixedEdge = ref<number | null>(null) // один край
+//const desiredEdge = ref<number | null>(null) // опціонально
+
+// drag spacing
+const spacingInput = ref(60)
+
+type Result = {
   edgeLeft: number
   edgeRight: number
   spacing: number
+  hooks: number
   segments: number
-  pattern: string
   marks: number[]
-} | null>(null)
+}
 
-function round05(num: number) {
-  return Math.round(num * 2) / 2
+const result = ref<Result | null>(null)
+
+function round05(n: number) {
+  return Math.round(n * 2) / 2
 }
 
 function calculate() {
@@ -22,168 +30,214 @@ function calculate() {
 
   const L = length.value
 
-  let best: any = null
+  // 🔥 фіксуємо segments (мінімум гаків)
+  const baseSegments = Math.floor(L / 60)
+  if (baseSegments < 1) return
 
-  const edgeMin = customEdge.value ?? 10
-  const edgeMax = customEdge.value ?? 20
+  const spacing = round05(spacingInput.value)
 
-  for (let edge = edgeMin; edge <= edgeMax; edge += 0.01) {
-    if (!customEdge.value && edge < 10) continue
+  let edgeLeft = 0
+  let edgeRight = 0
 
-    const usable = L - edge * 2
-    if (usable <= 0) continue
+  const used = baseSegments * spacing
+  const remainder = L - used
 
-    const segments = Math.ceil(usable / 60)
-
-    let spacing = usable / segments
-    spacing = round05(spacing)
-
-    if (spacing > 60) continue
-
-    if (!best || spacing > best.spacing) {
-      best = {
-        edgeLeft: edge,
-        edgeRight: edge,
-        spacing,
-        segments
-      }
-    }
+  if (fixedEdge.value !== null) {
+    edgeLeft = fixedEdge.value
+    edgeRight = remainder - edgeLeft
+  } else {
+    edgeLeft = remainder / 2
+    edgeRight = remainder / 2
   }
 
-  // fallback (edge >= 6)
-  if (!best && !customEdge.value) {
-    for (let edge = 6; edge <= 20; edge += 0.01) {
-      const usable = L - edge * 2
-      if (usable <= 0) continue
-
-      const segments = Math.ceil(usable / 60)
-
-      let spacing = usable / segments
-      spacing = round05(spacing)
-
-      if (spacing > 60) continue
-
-      if (!best || spacing > best.spacing) {
-        best = {
-          edgeLeft: edge,
-          edgeRight: edge,
-          spacing,
-          segments
-        }
-      }
-    }
+  // перевірка
+  if (edgeLeft < 6 || edgeRight < 6) {
+    result.value = null
+    return
   }
 
-  if (!best) return
+  const hooks = baseSegments + 1
 
-  // pattern
-  const parts = [
-    best.edgeLeft.toFixed(1),
-    ...Array(best.segments - 1).fill(best.spacing.toFixed(1)),
-    best.edgeRight.toFixed(1)
-  ]
-
-  // marks every 2m (200cm)
   const marks: number[] = []
-  for (let i = 200; i < L; i += 200) {
-    marks.push(i)
+  for (let i = 1; i <= baseSegments; i++) {
+    marks.push(round05(i * spacing))
   }
 
   result.value = {
-    ...best,
-    pattern: parts.join(' — '),
+    edgeLeft: round05(edgeLeft),
+    edgeRight: round05(edgeRight),
+    spacing,
+    hooks,
+    segments: baseSegments,
     marks
   }
-}
+}/*
+function getScore(r: Result) {
+  return (60 - r.spacing) * 10 + Math.abs(r.edgeLeft - r.edgeRight)
+}*/
+
+// drag → snapping
+const spacingDrag = computed({
+  get: () => spacingInput.value,
+  set: (v: number) => {
+    spacingInput.value = round05(v)
+  }
+})
+
+// live
+watch([length, fixedEdge, spacingInput], calculate)
 </script>
 
 <template>
-  <div class="helpers">
-    <h2>Ränna Calculator</h2>
+  <div class="wrap">
+    <h1>Ränna Pro</h1>
 
     <input
       v-model.number="length"
       type="number"
-      placeholder="Length (cm)"
+      placeholder="Längd (cm)"
     >
 
     <input
-      v-model.number="customEdge"
+      v-model.number="fixedEdge"
       type="number"
-      placeholder="Custom edge (optional)"
+      placeholder="Fast kant (valfri)"
     >
 
-    <button @click="calculate">
-      Calculate
-    </button>
+    <!-- drag spacing -->
+    <div class="slider">
+      <label>Avstånd: {{ spacingDrag }}</label>
+      <input
+        v-model.number="spacingDrag"
+        type="range"
+        min="10"
+        max="60"
+        step="0.5"
+      >
+    </div>
 
-    <div v-if="result" class="result">
-      <div v-if="!customEdge">
-        <b>Edge:</b> {{ result.edgeLeft.toFixed(2) }} cm
-      </div>
+    <div 
+      v-if="result" 
+      class="card"
+    >
+      <div class="grid">
+        <div>
+          <small>Vänster</small>
+          <b>{{ result.edgeLeft }}</b>
+        </div>
 
-      <div v-else>
-        <b>Spacing:</b> {{ result.spacing }} cm
-      </div>
+        <div>
+          <small>Avstånd</small>
+          <b>{{ result.spacing }}</b>
+        </div>
 
-      <div>
-        <b>Between hooks:</b> {{ result.spacing }} cm
-      </div>
+        <div>
+          <small>Höger</small>
+          <b>{{ result.edgeRight }}</b>
+        </div>
 
-      <div>
-        <b>Pattern:</b>
-        <div 
-          class="pattern"
-        >
-          {{ result.pattern }}
+        <div>
+          <small>Krokar</small>
+          <b>{{ result.hooks }}</b>
         </div>
       </div>
 
-      <div>
-        <b>Marks every 2m:</b>
-        <span 
-          v-for="m in result.marks" 
+      <!-- marks -->
+      <div class="marks">
+        <span
+          v-for="m in result.marks"
           :key="m"
         >
-          {{ m }} cm
+          {{ m }}
         </span>
+      </div>
+
+      <!-- графічна лінія -->
+      <div class="line">
+        <div
+          v-for="m in result.marks"
+          :key="m"
+          class="dot"
+          :style="{ left: (m / length!) * 100 + '%' }"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.helpers {
+.wrap {
+  max-width: 380px;
+  margin: auto;
   padding: 16px;
-  max-width: 400px;
+  font-family: system-ui;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 12px;
 }
 
 input {
   width: 100%;
-  padding: 10px;
+  padding: 14px;
   margin-bottom: 10px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 16px;
 }
 
-button {
-  width: 100%;
-  padding: 12px;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+.slider {
+  margin: 10px 0;
 }
 
-.result {
-  margin-top: 16px;
-  padding: 12px;
+.card {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 16px;
   background: #f1f5f9;
-  border-radius: 10px;
 }
 
-.pattern {
-  margin-top: 8px;
-  font-family: monospace;
-  word-break: break-all;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  text-align: center;
+}
+
+.grid small {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.grid b {
+  font-size: 18px;
+}
+
+.marks {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.line {
+  margin-top: 14px;
+  height: 6px;
+  background: #cbd5f5;
+  border-radius: 10px;
+  position: relative;
+}
+
+.dot {
+  position: absolute;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  background: #2563eb;
+  border-radius: 50%;
+  transform: translateX(-50%);
 }
 </style>
