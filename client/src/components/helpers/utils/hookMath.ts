@@ -50,9 +50,9 @@ export function findBestSpacingAuto(
     const hooks = segments + 1
 
     const score =
-      hooks * 10 +                  // 🔥 мінімізує гачки
-      Math.abs(left - 15) * 2 +     // ближче до 15
-      Math.abs(left - right)        // симетрія
+      hooks * 10 +                  
+      Math.abs(left - 15) * 2 +    
+      Math.abs(left - right)       
 
     if (score < bestScore) {
       bestScore = score

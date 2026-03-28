@@ -167,11 +167,11 @@ function getDotStyle(mark: number) {
   }
 }
 
-// 🔥 шкала (лінійка)
 const rulerMarks = computed(() => {
   if (!length.value) return []
-
-  const step = 10
+  const L = length.value
+  const steps = 4 //10
+  const step = Math.ceil(L / steps / 10) * 10
   const arr: number[] = []
 
   for (let i = 0; i <= length.value; i += step) {
@@ -201,8 +201,6 @@ watch(spacingInput, calculate)
 
 <template>
   <div class="wrap">
-
-    <!-- 🔥 КНОПКИ -->
     <div class="tabs">
       <button
         :class="{ active: mode === 'hooks' }"
@@ -223,13 +221,17 @@ watch(spacingInput, calculate)
     <div v-if="mode === 'hooks'">
       <h1>Ränna hook measure</h1>
 
-      <input v-model.number="length" type="number" placeholder="Length (cm)" />
+      <input 
+        v-model.number="length" 
+        type="number" 
+        placeholder="Length (cm)" 
+      >
 
       <input
         v-model.number="fixedEdge"
         type="number"
         placeholder="Fixed edge (optional)"
-      />
+      >
 
       <div class="slider">
         <label>Spacing: {{ spacingDrag }}</label>
@@ -239,10 +241,13 @@ watch(spacingInput, calculate)
           min="10"
           max="60"
           step="0.5"
-        />
+        >
       </div>
 
-      <div v-if="result" class="card">
+      <div 
+        v-if="result" 
+        class="card"
+      >
         <div class="grid">
           <div>
             <small>Left</small>
@@ -265,7 +270,6 @@ watch(spacingInput, calculate)
           </div>
         </div>
 
-        <!-- 🔥 ЛІНІЙКА -->
         <div class="ruler">
           <div
             v-for="m in rulerMarks"
@@ -276,8 +280,6 @@ watch(spacingInput, calculate)
             <span>{{ m }}</span>
           </div>
         </div>
-
-        <!-- 🔥 ТОЧКИ -->
         <div
           class="line"
           @mousedown="onLineDrag"
@@ -308,7 +310,6 @@ watch(spacingInput, calculate)
   font-family: system-ui;
 }
 
-/* 🔥 ТАБИ */
 .tabs {
   display: flex;
   gap: 10px;
@@ -365,7 +366,6 @@ input {
   font-size: 18px;
 }
 
-/* 🔥 ЛІНІЙКА */
 .ruler {
   position: relative;
   height: 20px;
@@ -389,7 +389,6 @@ input {
   margin: auto;
 }
 
-/* 🔥 ЛІНІЯ */
 .line {
   margin-top: 10px;
   height: 12px;
@@ -407,5 +406,12 @@ input {
   background: #2563eb;
   border-radius: 50%;
   transform: translateX(-50%);
+}
+.plus {
+  color: #16a34a;
+}
+
+.minus {
+  color: #dc2626;
 }
 </style>
