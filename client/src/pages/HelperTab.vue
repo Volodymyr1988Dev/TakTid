@@ -166,7 +166,7 @@ function getDotStyle(mark: number) {
     left: `${(mark / length.value) * 100}%`
   }
 }
-
+/*
 const rulerMarks = computed(() => {
   if (!length.value) return []
   const L = length.value
@@ -188,7 +188,7 @@ function getRulerStyle(mark: number) {
     left: `${(mark / length.value) * 100}%`
   }
 }
-
+*/
 watch([length, fixedEdge], () => {
   if (!isManual.value) {
     autoCalculate()
@@ -270,16 +270,7 @@ watch(spacingInput, calculate)
           </div>
         </div>
 
-        <div class="ruler">
-          <div
-            v-for="m in rulerMarks"
-            :key="m"
-            class="ruler-mark"
-            :style="getRulerStyle(m)"
-          >
-            <span>{{ m }}</span>
-          </div>
-        </div>
+    
         <div
           class="line"
           @mousedown="onLineDrag"
