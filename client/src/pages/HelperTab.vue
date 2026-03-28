@@ -20,7 +20,6 @@ type Result = {
 }
 
 const SNAP_EDGES = [12, 15, 18]
-
 const result = ref<Result | null>(null)
 
 function round05(n: number) {
@@ -127,7 +126,12 @@ function calculate() {
   for (let i = 1; i <= baseSegments; i++) {
     marks.push(round05(i * spacing))
   }
-  if (!validSpacings.value.includes(spacing)) {
+  if (
+    edgeLeft < 6 ||
+    edgeRight < 6 ||
+    edgeLeft > 20 ||
+    edgeRight > 20
+  ) {
     result.value = null
     return
   }
