@@ -19,10 +19,75 @@ type Result = {
   marks: number[]
 }
 
+const SNAP_EDGES = [12, 15, 18]
+
 const result = ref<Result | null>(null)
 
 function round05(n: number) {
   return Math.round(n * 2) / 2
+}
+
+function getEdges(L: number, spacing: number, segments: number) {
+  const used = segments * spacing
+  const remainder = L - used
+
+  let left = remainder / 2
+  let right = remainder / 2
+
+  if (fixedEdge.value !== null) {
+    left = fixedEdge.value
+    right = remainder - left
+  }
+
+  return { left, right }
+}
+const validSpacings = computed(() => {
+  if (!length.value) return []
+
+  const L = length.value
+  const segments = Math.floor(L / 60)
+
+  const list: number[] = []
+
+  for (let s = 60; s >= 10; s -= 0.5) {
+    const spacing = round05(s)
+
+    const { left, right } = getEdges(L, spacing, segments)
+
+    if (left >= 6 && right >= 6 && left <= 20 && right <= 20) {
+      list.push(spacing)
+    }
+  }
+
+  return list
+})
+
+function snapSpacing(spacing: number) {
+  if (!length.value) return spacing
+
+  const L = length.value
+  const segments = Math.floor(L / 60)
+
+  let best = spacing
+  let bestScore = Infinity
+
+  for (const s of validSpacings.value) {
+    const { left } = getEdges(L, s, segments)
+
+    const snapBonus = SNAP_EDGES.some(e => Math.abs(left - e) < 1)
+      ? -5
+      : 0
+
+    const score =
+      Math.abs(s - spacing) + snapBonus
+
+    if (score < bestScore) {
+      best = s
+      bestScore = score
+    }
+  }
+
+  return best
 }
 
 function calculate() {
@@ -62,6 +127,10 @@ function calculate() {
   for (let i = 1; i <= baseSegments; i++) {
     marks.push(round05(i * spacing))
   }
+  if (!validSpacings.value.includes(spacing)) {
+    result.value = null
+    return
+  }
 
   result.value = {
     edgeLeft: round05(edgeLeft),
@@ -80,7 +149,9 @@ function getScore(r: Result) {
 const spacingDrag = computed({
   get: () => spacingInput.value,
   set: (v: number) => {
-    spacingInput.value = round05(v)
+    //spacingInput.value = round05(v)
+    const snapped = snapSpacing(round05(v))
+    spacingInput.value = snapped
   }
 })
 
