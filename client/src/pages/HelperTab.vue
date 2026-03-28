@@ -159,6 +159,19 @@ function onLineDrag(e: MouseEvent | TouchEvent) {
   spacingInput.value = spacing
 }
 
+function getLabelRow(index: number) {
+  if (!result.value) return 0
+
+  const total = result.value.marks.length
+
+  if (total <= 10) return 0
+
+  if (total <= 20) {
+    return index % 2 // 0 або 1
+  }
+
+  return index % 3 // 0,1,2
+}
 function getDotStyle(mark: number) {
   if (!length.value) return { left: '0%' }
 
@@ -279,15 +292,18 @@ watch(spacingInput, calculate)
           @touchmove="onLineDrag"
         >
           <div
-            v-for="m in result.marks"
+            v-for="(m, i) in result.marks"
             :key="m"
             class="dot-wrapper"
             :style="getDotStyle(m)"
           >
             <span 
               class="dot-value" 
+              :style="{ top: `-${getLabelRow(i) * 14}px`, opacity: 1 - getLabelRow(i) * 0.3 }"
             >{{ m }}</span>
-            <div class="dot" />
+            <div 
+              class="dot"
+            />
           </div>
         </div>
       </div>
@@ -386,7 +402,7 @@ input {
 }
 
 .line {
-  margin-top: 38px;
+  margin-top: 60px;
   height: 10px;
   background: #cbd5f5;
   border-radius: 10px;
@@ -420,15 +436,17 @@ input {
   display: flex;
   flex-direction: column;
   align-items: center;
-  top: -28px;
+  top: -8px;
 }
 
 .dot-value {
+  position: absolute;
   font-size: 9px;
   color: #1e293b;
   /*display: block;*/
-  margin-bottom: 3px;
+  /*margin-bottom: 3px;*/
   white-space: nowrap;
-  opacity: 0.8;
+  transform: translateX(-50%);
+  left: 50%;
 }
 </style>
