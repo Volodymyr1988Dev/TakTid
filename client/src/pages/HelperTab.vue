@@ -237,7 +237,7 @@ watch(spacingInput, calculate)
       <input 
         v-model.number="length" 
         type="number" 
-        placeholder="Length (cm)" 
+        placeholder="Length (sm)" 
       >
 
       <input
@@ -299,7 +299,7 @@ watch(spacingInput, calculate)
           >
             <span 
               class="dot-value" 
-              :style="{ top: `-${getLabelRow(i) * 14}px`, opacity: 1 - getLabelRow(i) * 0.3 }"
+              :style="{ top: `-${8 + getLabelRow(i) * 14}px`, opacity: 1 - getLabelRow(i) * 0.3 }"
             >{{ m }}</span>
             <div 
               class="dot"
