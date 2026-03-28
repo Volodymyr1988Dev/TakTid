@@ -384,23 +384,24 @@ input {
 }
 
 .line {
-  margin-top: 10px;
-  height: 12px;
+  margin-top: 18px;
+  height: 10px;
   background: #cbd5f5;
   border-radius: 10px;
   position: relative;
   cursor: pointer;
+  overflow: visible;
 }
 
 .dot {
   /*position: absolute;
   top: -4px;*/
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
   background: #2563eb;
   border-radius: 50%;
   /*transform: translateX(-50%);*/
-  margin: 0, auto; 
+  margin: 0 auto; 
 }
 .plus {
   color: #16a34a;
@@ -417,15 +418,15 @@ input {
   display: flex;
   flex-direction: column;
   align-items: center;
-  top: -26px;
+  top: -28px;
 }
 
 .dot-value {
-  font-size: 10px;
+  font-size: 9px;
   color: #1e293b;
   /*display: block;*/
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   white-space: nowrap;
-  font-weight: 500;
+  opacity: 0.8;
 }
 </style>
