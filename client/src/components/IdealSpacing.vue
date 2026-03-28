@@ -36,24 +36,33 @@ const result = computed(() => {
           <small>Exact</small>
           <b>{{ result.exact.toFixed(2) }}</b>
         </div>
-
         <div>
           <small>Ideal</small>
           <b>{{ result.ideal }}</b>
         </div>
       </div>
-
+      <div>
+        <small>Missing to ideal (roof)</small>
+        <b :class="{ plus: result.missing > 0, minus: result.missing < 0 }">
+          {{ result.missing > 0 ? '+' : '' }}{{ result.missing }} cm
+        </b>
+      </div>
       <div class="grid">
         <div>
           <small>Lower spacing</small>
           <b>{{ result.lower.spacing }}</b>
           <div>segments: {{ result.lower.segments }}</div>
+          <div :class="result.lower.missing > 0 ? 'plus' : 'minus'">
+            {{ result.lower.missing > 0 ? '+' : '' }}{{ result.lower.missing }} cm
+          </div>
         </div>
-
         <div>
           <small>Upper spacing</small>
           <b>{{ result.upper.spacing }}</b>
           <div>segments: {{ result.upper.segments }}</div>
+          <div :class="result.upper.missing > 0 ? 'plus' : 'minus'">
+            {{ result.upper.missing > 0 ? '+' : '' }}{{ result.upper.missing }} cm
+          </div>
         </div>
       </div>
     </div>
