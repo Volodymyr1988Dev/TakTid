@@ -93,11 +93,38 @@ function snapSpacing(spacing: number) {
 
   return best
 }
-
+/*
 function setBestSpacing() {
   if (!validSpacings.value.length || !validSpacings.value[0]) return
   
   spacingInput.value = validSpacings.value[0]
+}
+*/
+function findBestSpacingFixedSegments() {
+  if (!length.value) return
+
+  const L = length.value
+  const baseSegments = getSegments(L, spacingInput.value)
+
+  let best = spacingInput.value
+  let bestScore = Infinity
+
+  for (let s = 60; s >= 10; s -= 0.5) {
+    const spacing = round05(s)
+
+    const { left, right } = getEdges(L, spacing, baseSegments)
+
+    if (left < 6 || right < 6 || left > 20 || right > 20) continue
+
+    const score = Math.abs(spacing - 15)
+
+    if (score < bestScore) {
+      best = spacing
+      bestScore = score
+    }
+  }
+
+  spacingInput.value = best
 }
 
 function calculate() {
@@ -220,9 +247,10 @@ watch([length, fixedEdge, spacingInput], () => {
   setBestSpacing()
   calculate()
 })*/
-watch([length, fixedEdge, validSpacings], () => {
+watch([length, fixedEdge/*, validSpacings*/], () => {
   if (!isManual.value) {
-    setBestSpacing()
+    //setBestSpacing()
+    findBestSpacingFixedSegments()
   }
   calculate()
 })
