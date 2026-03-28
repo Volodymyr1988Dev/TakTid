@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const model = defineModel<'time' | 'projects' | 'list' | 'stats'>()
+const model = defineModel<'time' | 'projects' | 'list' | 'helpers' | 'stats'>()
 defineProps<{
   isAdmin: boolean
 }>()
@@ -33,6 +33,12 @@ defineProps<{
         @click="model = 'stats'"
       >
         Stats
+      </button>
+      <button
+        :class="{ active: model === 'helpers' }"
+        @click="model = 'helpers'"
+      >
+        helpers
       </button>
     </nav>
   </footer>
