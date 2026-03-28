@@ -2,19 +2,25 @@
 import { ref } from 'vue'
 
 const length = ref<number | null>(null)
-const customEdge = ref<number | null>(null)
 
-const result = ref<{
-  edgeLeft: number
-  edgeRight: number
+type Result = {
+  edge: number
   spacing: number
   segments: number
+  hooks: number
   pattern: string
   marks: number[]
-} | null>(null)
+}
 
-function round05(num: number) {
-  return Math.round(num * 2) / 2
+const result = ref<Result | null>(null)
+
+const IDEAL_EDGE = 15
+const MIN_EDGE = 6
+const PRIORITY_MIN = 10
+const PRIORITY_MAX = 20
+
+function round05(n: number): number {
+  return Math.round(n * 2) / 2
 }
 
 function calculate() {
@@ -22,84 +28,59 @@ function calculate() {
 
   const L = length.value
 
-  let best: any = null
+  let best: Result | null = null
+  let bestScore = Infinity
 
-  const edgeMin = customEdge.value ?? 10
-  const edgeMax = customEdge.value ?? 20
-
-  for (let edge = edgeMin; edge <= edgeMax; edge += 0.01) {
-    if (!customEdge.value && edge < 10) continue
-
-    const usable = L - edge * 2
-    if (usable <= 0) continue
-
-    const segments = Math.ceil(usable / 60)
-
-    let spacing = usable / segments
+  for (let spacing = 60; spacing >= 10; spacing -= 0.5) {
     spacing = round05(spacing)
 
-    if (spacing > 60) continue
+    const segments = Math.floor(L / spacing)
+    if (segments < 1) continue
 
-    if (!best || spacing > best.spacing) {
+    const used = segments * spacing
+    const remainder = L - used
+    const edge = remainder / 2
+
+    if (edge < MIN_EDGE) continue
+
+    const isPriority = edge >= PRIORITY_MIN && edge <= PRIORITY_MAX
+
+    const score =
+      Math.abs(edge - IDEAL_EDGE) + (isPriority ? 0 : 100)
+
+    if (score < bestScore) {
+      const marks: number[] = []
+
+      for (let i = 1; i <= segments; i++) {
+        marks.push(round05(i * spacing))
+      }
+
+      const patternParts = [
+        edge.toFixed(2),
+        ...Array(segments - 1).fill(spacing.toFixed(1)),
+        edge.toFixed(2)
+      ]
+
       best = {
-        edgeLeft: edge,
-        edgeRight: edge,
+        edge: round05(edge),
         spacing,
-        segments
+        segments,
+        hooks: segments + 1,
+        pattern: patternParts.join(' — '),
+        marks
       }
+
+      bestScore = score
     }
   }
 
-  // fallback (edge >= 6)
-  if (!best && !customEdge.value) {
-    for (let edge = 6; edge <= 20; edge += 0.01) {
-      const usable = L - edge * 2
-      if (usable <= 0) continue
-
-      const segments = Math.ceil(usable / 60)
-
-      let spacing = usable / segments
-      spacing = round05(spacing)
-
-      if (spacing > 60) continue
-
-      if (!best || spacing > best.spacing) {
-        best = {
-          edgeLeft: edge,
-          edgeRight: edge,
-          spacing,
-          segments
-        }
-      }
-    }
-  }
-
-  if (!best) return
-
-  // pattern
-  const parts = [
-    best.edgeLeft.toFixed(1),
-    ...Array(best.segments - 1).fill(best.spacing.toFixed(1)),
-    best.edgeRight.toFixed(1)
-  ]
-
-  // marks every 2m (200cm)
-  const marks: number[] = []
-  for (let i = 200; i < L; i += 200) {
-    marks.push(i)
-  }
-
-  result.value = {
-    ...best,
-    pattern: parts.join(' — '),
-    marks
-  }
+  result.value = best
 }
 </script>
 
 <template>
-  <div class="helpers">
-    <h2>Ränna Calculator</h2>
+  <div class="container">
+    <h1>Ränna Calculator</h1>
 
     <input
       v-model.number="length"
@@ -107,45 +88,40 @@ function calculate() {
       placeholder="Length (cm)"
     >
 
-    <input
-      v-model.number="customEdge"
-      type="number"
-      placeholder="Custom edge (optional)"
-    >
-
     <button @click="calculate">
       Calculate
     </button>
 
-    <div v-if="result" class="result">
-      <div v-if="!customEdge">
-        <b>Edge:</b> {{ result.edgeLeft.toFixed(2) }} cm
+    <div 
+      v-if="result" 
+      class="card"
+    >
+      <div class="row">
+        <span>Edge:</span>
+        <b>{{ result.edge }} cm</b>
       </div>
 
-      <div v-else>
-        <b>Spacing:</b> {{ result.spacing }} cm
+      <div class="row">
+        <span>Spacing:</span>
+        <b>{{ result.spacing }} cm</b>
       </div>
 
-      <div>
-        <b>Between hooks:</b> {{ result.spacing }} cm
+      <div class="row">
+        <span>Hooks:</span>
+        <b>{{ result.hooks }}</b>
       </div>
 
-      <div>
-        <b>Pattern:</b>
-        <div 
-          class="pattern"
-        >
-          {{ result.pattern }}
-        </div>
+      <div class="pattern">
+        {{ result.pattern }}
       </div>
 
-      <div>
-        <b>Marks every 2m:</b>
-        <span 
-          v-for="m in result.marks" 
+      <div class="marks">
+        <span
+          v-for="m in result.marks"
           :key="m"
+          class="mark"
         >
-          {{ m }} cm
+          {{ m }}
         </span>
       </div>
     </div>
@@ -153,37 +129,75 @@ function calculate() {
 </template>
 
 <style scoped>
-.helpers {
-  padding: 16px;
-  max-width: 400px;
+.container {
+  max-width: 420px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: system-ui;
+}
+
+h1 {
+  margin-bottom: 16px;
 }
 
 input {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 16px;
 }
 
 button {
   width: 100%;
   padding: 12px;
+  border-radius: 10px;
+  border: none;
   background: #2563eb;
   color: white;
-  border: none;
-  border-radius: 8px;
+  font-size: 16px;
   cursor: pointer;
+  transition: 0.2s;
 }
 
-.result {
-  margin-top: 16px;
-  padding: 12px;
-  background: #f1f5f9;
-  border-radius: 10px;
+button:hover {
+  background: #1d4ed8;
+}
+
+.card {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #f8fafc;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 .pattern {
-  margin-top: 8px;
+  margin-top: 12px;
   font-family: monospace;
+  font-size: 13px;
   word-break: break-all;
+  color: #334155;
+}
+
+.marks {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mark {
+  background: #e2e8f0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
 }
 </style>
