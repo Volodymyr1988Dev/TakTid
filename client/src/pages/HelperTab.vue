@@ -26,8 +26,8 @@ function round05(n: number) {
   return Math.round(n * 2) / 2
 }
 
-function getSegments(L: number) {
-  return Math.floor(L / 60)
+function getSegments(L: number, spacing: number) {
+  return Math.floor(L / spacing)
 }
 
 function getEdges(L: number, spacing: number, segments: number) {
@@ -50,12 +50,13 @@ const validSpacings = computed(() => {
 
   const L = length.value
   //const segments = Math.floor(L / 60)
-  const segments = getSegments(L)
+  //const segments = getSegments(L)
   const list: number[] = []
 
   for (let s = 60; s >= 10; s -= 0.5) {
     const spacing = round05(s)
-
+    const segments = getSegments(L, spacing)
+    if (segments < 1) continue
     const { left, right } = getEdges(L, spacing, segments)
 
     if (left >= 6 && right >= 6 && left <= 20 && right <= 20) {
@@ -77,7 +78,7 @@ function snapSpacing(spacing: number) {
 
   for (const s of validSpacings.value) {
     const L = length.value
-    const segments = getSegments(L)
+    const segments = getSegments(L, s)
     const { left } = getEdges(L, s, segments)
 
     const snapBonus = SNAP_EDGES.some(e => Math.abs(left - e) < 1)
@@ -105,11 +106,7 @@ function calculate() {
   if (!length.value) return
 
   const L = length.value
-  const segments = getSegments(L)
-  if (segments < 1) {
-    result.value = null
-    return
-  }
+  //const spacing = spacingInput.value
   // 🔥 фіксуємо segments (мінімум гаків)
   //const baseSegments = Math.floor(L / 60)
   //if (baseSegments < 1) return
@@ -152,6 +149,11 @@ function calculate() {
     return
   }*/
   const spacing = spacingInput.value
+  const segments = getSegments(L, spacing)
+  if (segments < 1) {
+    result.value = null
+    return
+  }
   const { left, right } = getEdges(L, spacing, segments)
   if (
     left < 6 || right < 6 ||
@@ -164,6 +166,9 @@ function calculate() {
   const marks: number[] = []
   for (let i = 1; i <= segments; i++) {
     marks.push(round05(i * spacing))
+  }
+  if (result.value === null) {
+    console.log('Invalid spacing:', spacing)
   }
   /*
   result.value = {
