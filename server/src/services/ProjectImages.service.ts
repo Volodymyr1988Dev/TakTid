@@ -72,7 +72,13 @@ export class ProjectImagesService {
     });
 
     await Promise.all(
-      images.map((image) => cloudinary.uploader.destroy(image.publicId)),
+      images.map(async (image) => {
+        try {
+          await cloudinary.uploader.destroy(image.publicId);
+        } catch (e) {
+          console.warn('Cloudinary delete failed:', image.publicId, e);
+        }
+      }),
     );
 
     await this.imageRepo.remove(images);
@@ -82,11 +88,15 @@ export class ProjectImagesService {
       where: { id: imageId },
     });
 
-    if (!image) {
-      throw new NotFoundException('Image not found');
-    }
+    //if (!image) { throw new NotFoundException('Image not found')}
+    if (!image) return;
 
-    await cloudinary.uploader.destroy(image.publicId);
+    //await cloudinary.uploader.destroy(image.publicId);
+    try {
+      await cloudinary.uploader.destroy(image.publicId);
+    } catch (e) {
+      console.warn('Cloudinary delete failed:', image.publicId, e);
+    }
 
     await this.imageRepo.remove(image);
   }

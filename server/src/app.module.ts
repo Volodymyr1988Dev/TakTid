@@ -16,6 +16,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ProjectImagesModule } from './modules/projectImage.module';
 import { ProjectStatsModule } from './modules/projectStats.module';
 import { StatsModule } from './modules/stat.module';
+import { CleanupService } from './services/CleanupService';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { StatsModule } from './modules/stat.module';
   controllers: [AppController],
   providers: [
     AppService,
+    CleanupService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,

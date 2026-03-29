@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  Index,
+} from 'typeorm';
 import { User } from '../index';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -30,10 +36,12 @@ export class Session {
   @ApiProperty({ example: '2025-02-01T12:00:00.000Z' })
   created_at!: Date;
 
+  @Index()
   @Column({ type: 'timestamp', nullable: true })
   @ApiProperty({ example: '2025-02-01T12:10:00.000Z', nullable: true })
   lastActivityAt!: Date;
 
+  @Index()
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',

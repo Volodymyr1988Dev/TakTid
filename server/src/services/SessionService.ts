@@ -49,6 +49,10 @@ export class SessionService {
     });
   }
 
+  async save(session: Session): Promise<Session> {
+    return this.sessionRepository.save(session);
+  }
+
   async removeByRefreshToken(refreshToken: string) {
     await this.sessionRepository.delete({
       refresh_token: refreshToken,
@@ -74,11 +78,25 @@ export class SessionService {
 
   async cleanupExpiredSessions(): Promise<void> {
     const maxAge = safeMs(process.env.CLEAN_SESSION_TOKEN_AFTER ?? '30d');
-    const sessionClean = new Date(Date.now() - maxAge);
+    const expireDate = new Date(Date.now() - maxAge);
 
-    await this.sessionRepository.delete({
-      expires_at: LessThan(sessionClean),
+    const result = await this.sessionRepository.delete({
+      expires_at: LessThan(expireDate),
     });
+
+    console.log(`🧹 Expired sessions deleted: ${result.affected}`);
+  }
+
+  async cleanupInactiveSessions(): Promise<void> {
+    const maxIdle = safeMs(process.env.CLEAN_SESSION_IDLE ?? '7d');
+
+    const idleDate = new Date(Date.now() - maxIdle);
+
+    const result = await this.sessionRepository.delete({
+      lastActivityAt: LessThan(idleDate),
+    });
+
+    console.log(`💤 Inactive sessions deleted: ${result.affected}`);
   }
 
   async refreshByRefreshToken(refreshToken: string): Promise<Session | null> {

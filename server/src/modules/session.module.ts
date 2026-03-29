@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Session } from '../entities';
 import { SessionService } from '../services';
 import { SessionController } from '../controllers/session.controller';
+//import { CleanupService } from '../services/CleanupService';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { SessionController } from '../controllers/session.controller';
     }),
   ],
   controllers: [SessionController],
-  providers: [SessionService],
+  providers: [SessionService /*, CleanupService*/],
   exports: [SessionService, JwtModule],
 })
 export class SessionModule {}
