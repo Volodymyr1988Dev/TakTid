@@ -16,7 +16,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ProjectImagesModule } from './modules/projectImage.module';
 import { ProjectStatsModule } from './modules/projectStats.module';
 import { StatsModule } from './modules/stat.module';
-import { CleanupModule } from './modules/Cleanup.module';
+import { CleanupModule } from './modules/cleanup.module';
 
 @Module({
   imports: [
