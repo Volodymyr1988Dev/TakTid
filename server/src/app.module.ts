@@ -18,7 +18,7 @@ import { ProjectStatsModule } from './modules/projectStats.module';
 import { StatsModule } from './modules/stat.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { CleanupService } from './services/CleanupService';
+import { CleanupModule } from './modules/Cleanup.module';
 
 @Module({
   imports: [
@@ -39,11 +39,11 @@ import { CleanupService } from './services/CleanupService';
     ProjectImagesModule,
     ProjectStatsModule,
     StatsModule,
+    CleanupModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    CleanupService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
