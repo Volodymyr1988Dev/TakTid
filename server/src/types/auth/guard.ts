@@ -51,11 +51,22 @@ export class AuthGuard implements CanActivate {
       if (session.user.deletedAt) {
         throw new UnauthorizedException('User account deleted');
       }
-
-      if (session.expires_at < new Date()) {
+      const now = new Date();
+      if (session.expires_at < now) {
         throw new UnauthorizedException('Session expired');
       }
+      //const now = new Date();
+      if (
+        !session.lastActivityAt ||
+        now.getTime() - new Date(session.lastActivityAt).getTime() >
+          5 * 60 * 1000
+      ) {
+        session.lastActivityAt = now;
+        await this.sessionService.save(session);
+      }
 
+      //session.lastActivityAt = new Date();
+      //await this.sessionService.save(session);
       request.user = this.sessionService.toAuthUser(session.user);
 
       return true;
