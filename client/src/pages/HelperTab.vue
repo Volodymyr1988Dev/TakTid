@@ -89,8 +89,8 @@ function calculate() {
   }
 
   result.value = {
-    edgeLeft: round05(left),
-    edgeRight: round05(right),
+    edgeLeft: left, //round05(left),
+    edgeRight: right, //round05(right),
     spacing,
     hooks: segments + 1,
     segments,
