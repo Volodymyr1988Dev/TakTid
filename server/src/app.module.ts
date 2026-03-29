@@ -18,7 +18,7 @@ import { ProjectStatsModule } from './modules/projectStats.module';
 import { StatsModule } from './modules/stat.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { CleanupModule } from './modules/Cleanup.module';
+import { CleanupModule } from './modules/cleanup.module';
 
 @Module({
   imports: [

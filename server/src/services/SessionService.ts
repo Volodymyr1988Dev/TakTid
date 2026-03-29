@@ -42,12 +42,6 @@ export class SessionService {
     return this.sessionRepository.save(session);
   }
 
-  async removeByRefreshToken(refreshToken: string) {
-    await this.sessionRepository.delete({
-      refresh_token: refreshToken,
-    });
-  }
-
   async findByToken(token: string): Promise<Session | null> {
     return this.sessionRepository.findOne({
       where: { token },
