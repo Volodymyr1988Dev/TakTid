@@ -8,6 +8,7 @@ import { ProjectImage } from '../entities/Project/ProjectImages';
 import { ProjectImagesService } from './ProjectImages.service';
 import { ProjectAssignment } from '../entities/Project/ProjectAssignment';
 import { TimeEntry } from '../entities/TimeEntries/TimeEntries';
+import pLimit from 'p-limit';
 
 @Injectable()
 export class CleanupService {
@@ -44,60 +45,73 @@ export class CleanupService {
   }
 
   private async cleanupInactiveImages() {
-    await this.imageRepo.query(`
-      DELETE FROM project_image pi
-      WHERE pi.id IN (
-        SELECT id FROM (
-          SELECT pi.id,
-                 ROW_NUMBER() OVER (
-                   PARTITION BY pi."projectId"
-                   ORDER BY pi."createdAt" DESC
-                 ) as rn
-          FROM project_image pi
-          JOIN projects p ON p.id = pi."projectId"
-          LEFT JOIN (
-            SELECT "projectId", MAX(date) as last_time_entry
-            FROM time_entry
-            GROUP BY "projectId"
-          ) t ON t."projectId" = p.id
-          LEFT JOIN (
-            SELECT "projectId", MAX(date) as last_assignment
-            FROM project_assignment
-            GROUP BY "projectId"
-          ) a ON a."projectId" = p.id
-          WHERE COALESCE(t.last_time_entry, a.last_assignment, p."createdAt")
-                < NOW() - INTERVAL '1 year'
-        ) sub
-        WHERE sub.rn > 3
-      );
+    const images: { id: string; publicId: string }[] = await this.imageRepo
+      .query(`
+      SELECT sub.id, sub."publicId"
+      FROM (
+        SELECT 
+          pi.id,
+          pi."publicId",
+          ROW_NUMBER() OVER (
+            PARTITION BY pi."projectId"
+            ORDER BY pi."createdAt" DESC
+          ) as rn
+        FROM project_image pi
+        JOIN projects p ON p.id = pi."projectId"
+        LEFT JOIN (
+          SELECT "projectId", MAX(date) as last_time_entry
+          FROM time_entry
+          GROUP BY "projectId"
+        ) t ON t."projectId" = p.id
+        LEFT JOIN (
+          SELECT "projectId", MAX(date) as last_assignment
+          FROM project_assignment
+          GROUP BY "projectId"
+        ) a ON a."projectId" = p.id
+        WHERE p."createdAt" IS NOT NULL
+          AND COALESCE(t.last_time_entry, a.last_assignment, p."createdAt")
+              < NOW() - INTERVAL '1 year'
+      ) AS sub2  
+      WHERE sub2.rn > 3
     `);
 
-    this.logger.log('🖼 Old images cleaned');
+    if (!images.length) {
+      this.logger.log('🖼 No images to clean');
+      return;
+    }
+    const limit = pLimit(5);
+    await Promise.all(
+      images.map((img) => limit(() => this.imagesService.remove(img.id))),
+    );
+    this.logger.log(`🖼 Deleted ${images.length} old images`);
   }
 
   private async cleanupVeryOldProjects() {
     const oldProjects: { id: string }[] = await this.projectRepo.query(`
-      SELECT p.id
-      FROM projects p
-      LEFT JOIN (
-        SELECT "projectId", MAX(date) as last_time_entry
-        FROM time_entry
-        GROUP BY "projectId"
-      ) t ON t."projectId" = p.id
-      LEFT JOIN (
-        SELECT "projectId", MAX(date) as last_assignment
-        FROM project_assignment
-        GROUP BY "projectId"
-      ) a ON a."projectId" = p.id
-      WHERE COALESCE(t.last_time_entry, a.last_assignment, p."createdAt")
+    SELECT p.id
+    FROM projects p
+    LEFT JOIN (
+      SELECT "projectId", MAX(date) as last_time_entry
+      FROM time_entry
+      GROUP BY "projectId"
+    ) t ON t."projectId" = p.id
+    LEFT JOIN (
+      SELECT "projectId", MAX(date) as last_assignment
+      FROM project_assignment
+      GROUP BY "projectId"
+    ) a ON a."projectId" = p.id
+    WHERE p."createdAt" IS NOT NULL -- ✅ FIX
+      AND COALESCE(t.last_time_entry, a.last_assignment, p."createdAt")
             < NOW() - INTERVAL '5 years'
-    `);
+  `);
 
     for (const p of oldProjects) {
       this.logger.warn(`🔥 DELETE PROJECT ${p.id}`);
 
+      // ✅ Cloudinary + DB images
       await this.imagesService.removeByProject(p.id);
 
+      // ✅ SQL cleanup
       await this.timeEntryRepo.query(
         `DELETE FROM time_entry WHERE "projectId" = $1`,
         [p.id],
