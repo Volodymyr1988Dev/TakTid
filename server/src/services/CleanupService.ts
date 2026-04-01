@@ -56,7 +56,7 @@ export class CleanupService {
             PARTITION BY pi."projectId"
             ORDER BY pi."createdAt" DESC
           ) as rn
-        FROM project_image pi
+        FROM project_images pi
         JOIN projects p ON p.id = pi."projectId"
         LEFT JOIN (
           SELECT "projectId", MAX(date) as last_time_entry
@@ -69,6 +69,7 @@ export class CleanupService {
           GROUP BY "projectId"
         ) a ON a."projectId" = p.id
         WHERE p."createdAt" IS NOT NULL
+          AND pi."projectId" IS NOT NULL
           AND COALESCE(t.last_time_entry, a.last_assignment, p."createdAt")
               < NOW() - INTERVAL '1 year'
       ) AS sub2  
