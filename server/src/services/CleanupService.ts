@@ -60,7 +60,7 @@ export class CleanupService {
         JOIN projects p ON p.id = pi."projectId"
         LEFT JOIN (
           SELECT "projectId", MAX(date) as last_time_entry
-          FROM time_entry
+          FROM time_entries
           GROUP BY "projectId"
         ) t ON t."projectId" = p.id
         LEFT JOIN (
@@ -93,7 +93,7 @@ export class CleanupService {
     FROM projects p
     LEFT JOIN (
       SELECT "projectId", MAX(date) as last_time_entry
-      FROM time_entry
+      FROM time_entries
       GROUP BY "projectId"
     ) t ON t."projectId" = p.id
     LEFT JOIN (
@@ -114,7 +114,7 @@ export class CleanupService {
 
       // ✅ SQL cleanup
       await this.timeEntryRepo.query(
-        `DELETE FROM time_entry WHERE "projectId" = $1`,
+        `DELETE FROM time_entries WHERE "projectId" = $1`,
         [p.id],
       );
 
