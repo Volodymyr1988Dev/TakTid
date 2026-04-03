@@ -8,10 +8,12 @@ import { ProjectImage } from '../entities/Project/ProjectImages';
 import { ProjectImagesService } from './ProjectImages.service';
 import { ProjectAssignment } from '../entities/Project/ProjectAssignment';
 import { TimeEntry } from '../entities/TimeEntries/TimeEntries';
+import pLimit from 'p-limit';
 
 @Injectable()
 export class CleanupService {
   private readonly logger = new Logger(CleanupService.name);
+  private isRunning = false;
 
   constructor(
     private readonly sessionService: SessionService,
@@ -31,121 +33,125 @@ export class CleanupService {
     private readonly imagesService: ProjectImagesService,
   ) {}
 
-  @Cron('0 4 * * *')
+  @Cron('0 4 1 * *')
   async handleCleanup() {
-    this.logger.log('🧹 START CLEANUP');
-
-    await this.cleanupSessions();
-    await this.cleanupInactiveProjects();
-    await this.cleanupVeryOldProjects();
-
-    this.logger.log('✅ CLEANUP DONE');
-  }
-
-  private async cleanupSessions() {
-    await this.sessionService.cleanupExpiredSessions();
-    await this.sessionService.cleanupInactiveSessions();
-  }
-
-  private async cleanupInactiveProjects() {
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-    const projects = await this.projectRepo.find({
-      relations: ['images', 'timeEntries', 'assignments'],
-    });
-
-    for (const project of projects) {
-      let lastActivity = this.getLastActivity(project);
-
-      //if (!lastActivity || lastActivity > oneYearAgo) continue;
-      //if (!lastActivity) continue;
-      if (!lastActivity /*&& project.createdAt  */) {
-        lastActivity = project.createdAt;
-      }
-
-      //if (!lastActivity) continue;
-
-      //if (lastActivity > oneYearAgo) continue;
-      const isInactive = lastActivity <= oneYearAgo;
-      if (!isInactive) continue;
-      const images = await this.imageRepo.find({
-        where: { project: { id: project.id } },
-        order: { createdAt: 'DESC' },
-      });
-
-      if (images.length <= 3) continue;
-
-      const imagesToDelete = images.slice(3);
-
-      this.logger.log(
-        `🖼 Cleaning images for project ${project.id}, deleting ${imagesToDelete.length}`,
-      );
-
-      //for (const img of imagesToDelete) { await this.imagesService.remove(img.id)}
-      await Promise.all(
-        imagesToDelete.map((img) => this.imagesService.remove(img.id)),
-      );
+    if (this.isRunning) {
+      this.logger.warn('⚠️ Cleanup already running, skipping...');
+      return;
     }
+
+    this.isRunning = true;
+
+    try {
+      this.logger.log('🧹 START CLEANUP');
+
+      await this.sessionService.cleanupExpiredSessions();
+      await this.cleanupInactiveImages();
+      await this.cleanupVeryOldProjects();
+
+      this.logger.log('✅ CLEANUP DONE');
+    } catch (e) {
+      this.logger.error('❌ CLEANUP FAILED', e);
+    } finally {
+      this.isRunning = false;
+    }
+  }
+
+  private async cleanupInactiveImages() {
+    const images: { id: string }[] = await this.imageRepo.query(`
+      SELECT sub2.id
+      FROM (
+        SELECT 
+          pi.id,
+          ROW_NUMBER() OVER (
+            PARTITION BY pi."projectId"
+            ORDER BY pi."createdAt" DESC
+          ) as rn
+        FROM project_images pi
+        JOIN projects p ON p.id = pi."projectId"
+
+        LEFT JOIN (
+          SELECT "projectId", MAX(date) as last_time_entry
+          FROM time_entries
+          GROUP BY "projectId"
+        ) t ON t."projectId" = p.id
+
+        LEFT JOIN (
+          SELECT "projectId", MAX(date) as last_assignment
+          FROM project_assignments
+          GROUP BY "projectId"
+        ) a ON a."projectId" = p.id
+
+        WHERE p."createdAt" IS NOT NULL
+          AND COALESCE(t.last_time_entry, a.last_assignment, p."createdAt")
+              < NOW() - INTERVAL '1 year'
+      ) AS sub2  
+      WHERE sub2.rn > 3
+    `);
+
+    if (!images.length) {
+      this.logger.log('🖼 No images to clean');
+      return;
+    }
+
+    const limit = pLimit(5);
+
+    await Promise.all(
+      images.map((img) => limit(() => this.imagesService.remove(img.id))),
+    );
+
+    this.logger.log(`🖼 Deleted ${images.length} old images`);
   }
 
   private async cleanupVeryOldProjects() {
-    const fiveYearsAgo = new Date();
-    fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+    const oldProjects: { id: string }[] = await this.projectRepo.query(`
+      SELECT p.id
+      FROM projects p
 
-    const projects = await this.projectRepo.find({
-      relations: ['images', 'timeEntries', 'assignments'],
-    });
+      LEFT JOIN (
+        SELECT "projectId", MAX(date) as last_time_entry
+        FROM time_entries
+        GROUP BY "projectId"
+      ) t ON t."projectId" = p.id
 
-    for (const project of projects) {
-      let lastActivity = this.getLastActivity(project);
+      LEFT JOIN (
+        SELECT "projectId", MAX(date) as last_assignment
+        FROM project_assignments
+        GROUP BY "projectId"
+      ) a ON a."projectId" = p.id
 
-      //if (!lastActivity || lastActivity > fiveYearsAgo) continue;
-      //if (!lastActivity) continue;
-      if (!lastActivity /*&& project.createdAt*/) {
-        lastActivity = project.createdAt;
-      }
+      WHERE p."createdAt" IS NOT NULL
+        AND COALESCE(t.last_time_entry, a.last_assignment, p."createdAt")
+            < NOW() - INTERVAL '5 years'
+    `);
 
-      //if (!lastActivity) continue;
+    for (const p of oldProjects) {
+      this.logger.warn(`🔥 DELETE PROJECT ${p.id}`);
 
-      //if (lastActivity > fiveYearsAgo) continue;
-      const isVeryOld = lastActivity <= fiveYearsAgo;
-      if (!isVeryOld) continue;
-      this.logger.warn(`🔥 DELETING PROJECT ${project.id}`);
+      await this.projectRepo.manager.transaction(async (manager) => {
+        try {
+          // images
+          await this.imagesService.removeByProject(p.id);
 
-      await this.imagesService.removeByProject(project.id);
+          // time entries
+          await manager.query(
+            `DELETE FROM time_entries WHERE "projectId" = $1`,
+            [p.id],
+          );
 
-      await this.timeEntryRepo.delete({
-        project: { id: project.id },
+          // assignments
+          await manager.query(
+            `DELETE FROM project_assignments WHERE "projectId" = $1`,
+            [p.id],
+          );
+
+          // project
+          await manager.query(`DELETE FROM projects WHERE id = $1`, [p.id]);
+        } catch (e) {
+          this.logger.error(`❌ Failed to fully delete project ${p.id}`, e);
+          throw e;
+        }
       });
-
-      await this.assignmentRepo.delete({
-        project: { id: project.id },
-      });
-
-      await this.projectRepo.delete(project.id);
     }
-  }
-
-  private getLastActivity(project: Projects): Date | null {
-    const dates: Date[] = [];
-
-    if (project.createdAt) {
-      dates.push(new Date(project.createdAt));
-    }
-
-    if (project.timeEntries?.length) {
-      for (const t of project.timeEntries) {
-        if (t.date) dates.push(new Date(t.date));
-      }
-    }
-    if (project.assignments?.length) {
-      for (const a of project.assignments) {
-        if (a.date) dates.push(new Date(a.date));
-      }
-    }
-    return dates.length
-      ? new Date(Math.max(...dates.map((d) => d.getTime())))
-      : null;
   }
 }

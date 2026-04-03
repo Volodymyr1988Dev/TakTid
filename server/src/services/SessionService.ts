@@ -77,14 +77,12 @@ export class SessionService {
   }
 
   async cleanupExpiredSessions(): Promise<void> {
-    const maxAge = safeMs(process.env.CLEAN_SESSION_TOKEN_AFTER ?? '30d');
-    const expireDate = new Date(Date.now() - maxAge);
+    await this.sessionRepository.query(`
+      DELETE FROM sessions
+      WHERE "lastActivityAt" < NOW() - INTERVAL '7 days'
+    `);
 
-    const result = await this.sessionRepository.delete({
-      expires_at: LessThan(expireDate),
-    });
-
-    console.log(`🧹 Expired sessions deleted: ${result.affected}`);
+    console.log('🧹 Expired sessions deleted');
   }
 
   async cleanupInactiveSessions(): Promise<void> {
