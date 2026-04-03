@@ -32,22 +32,34 @@ export class CleanupService {
     private readonly imagesService: ProjectImagesService,
   ) {}
 
+  private isRunning = false;
+
   @Cron('0 2 * * *')
   async handleCleanup() {
-    this.logger.log('🧹 START CLEANUP');
+    if (this.isRunning) {
+      this.logger.warn('⚠️ Cleanup already running, skipping...');
+      return;
+    }
 
-    await this.sessionService.cleanupExpiredSessions();
+    this.isRunning = true;
 
-    await this.cleanupInactiveImages();
-    await this.cleanupVeryOldProjects();
+    try {
+      this.logger.log('🧹 START CLEANUP');
 
-    this.logger.log('✅ CLEANUP DONE');
+      await this.sessionService.cleanupExpiredSessions();
+      await this.cleanupInactiveImages();
+      await this.cleanupVeryOldProjects();
+
+      this.logger.log('✅ CLEANUP DONE');
+    } finally {
+      this.isRunning = false;
+    }
   }
-
+  //SELECT sub.id, sub."publicId"
   private async cleanupInactiveImages() {
     const images: { id: string; publicId: string }[] = await this.imageRepo
       .query(`
-      SELECT sub.id, sub."publicId"
+      SELECT sub2.id, sub2."publicId"
       FROM (
         SELECT 
           pi.id,
@@ -65,7 +77,7 @@ export class CleanupService {
         ) t ON t."projectId" = p.id
         LEFT JOIN (
           SELECT "projectId", MAX(date) as last_assignment
-          FROM project_assignment
+          FROM project_assignments
           GROUP BY "projectId"
         ) a ON a."projectId" = p.id
         WHERE p."createdAt" IS NOT NULL
@@ -98,7 +110,7 @@ export class CleanupService {
     ) t ON t."projectId" = p.id
     LEFT JOIN (
       SELECT "projectId", MAX(date) as last_assignment
-      FROM project_assignment
+      FROM project_assignments
       GROUP BY "projectId"
     ) a ON a."projectId" = p.id
     WHERE p."createdAt" IS NOT NULL -- ✅ FIX
@@ -110,7 +122,12 @@ export class CleanupService {
       this.logger.warn(`🔥 DELETE PROJECT ${p.id}`);
 
       // ✅ Cloudinary + DB images
-      await this.imagesService.removeByProject(p.id);
+      try {
+        await this.imagesService.removeByProject(p.id);
+      } catch (e) {
+        this.logger.error(`❌ Failed to delete images for project ${p.id}`, e);
+        continue;
+      }
 
       // ✅ SQL cleanup
       await this.timeEntryRepo.query(
@@ -119,7 +136,7 @@ export class CleanupService {
       );
 
       await this.assignmentRepo.query(
-        `DELETE FROM project_assignment WHERE "projectId" = $1`,
+        `DELETE FROM project_assignments WHERE "projectId" = $1`,
         [p.id],
       );
 
