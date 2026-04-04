@@ -33,7 +33,7 @@ export class CleanupService {
     private readonly imagesService: ProjectImagesService,
   ) {}
 
-  @Cron('0 2 * * *')
+  @Cron('0 5 1 * *')
   async handleCleanup() {
     if (this.isRunning) {
       this.logger.warn('⚠️ Cleanup already running, skipping...');
