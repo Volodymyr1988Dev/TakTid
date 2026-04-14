@@ -29,6 +29,8 @@ export function useAbsenceEntryForm(props: {
 
   const isEdit = computed(() => !!props.entry)
   
+  const isRedDay = computed(() => kindRef.value === TimeKind.RED_DAY)
+
   watch(
   () => props.entry,
   entry => {
@@ -59,26 +61,28 @@ export function useAbsenceEntryForm(props: {
           e.type === TimeKind.RED_DAY ||
           e.type === TimeKind.DAY_OFF,
       ) ?? []
-      if (!props.entry && isFullDayCovered(allEntries)) {
+      if (!props.entry && !isRedDay.value && isFullDayCovered(allEntries)) {
         errorRef.value =
           'Unavailable to create absence, because you have working time all day'
         return Promise.reject()
       }
       const { missingMinutes, lastEnd } =
       calculateMissingWorkTime(allEntries)
-    if (!props.entry && existingAbsences.length > 0) {
+    if (!props.entry && !isRedDay.value && existingAbsences.length > 0) {
       errorRef.value =
           'Two absence entries are not allowed in one day'
         return Promise.reject()
     }
-    if (!props.entry && missingMinutes <= 0) {
+    if (!props.entry && !isRedDay.value && missingMinutes <= 0) {
       errorRef.value =
           'Day already contains 8 working hours'
         return Promise.reject()
     }
 
-    const start = normalizeTime(lastEnd) ?? '09:00'
-    const end = normalizeTime(addMinutes(start, missingMinutes))
+    //const start = normalizeTime(lastEnd) ?? '09:00'
+    const start = isRedDay.value ? '09:00' : normalizeTime(lastEnd) ?? '09:00'
+    //const end = normalizeTime(addMinutes(start, missingMinutes))
+    const end = isRedDay.value ? '17:00' : normalizeTime(addMinutes(start, missingMinutes))
       const payload =
         kindRef.value === TimeKind.DAY_OFF
           ? {
@@ -88,6 +92,14 @@ export function useAbsenceEntryForm(props: {
               endTime: '08:01',
               breakMinutes: 0,
             }
+          : kindRef.value === TimeKind.RED_DAY
+          ? {
+              type: TimeKind.RED_DAY,
+              comment: commentRef.value,
+              startTime: '09:00',
+              endTime: '17:00',
+              breakMinutes: 0,
+            }    
           : {
               type: kindRef.value,
               comment: commentRef.value,
