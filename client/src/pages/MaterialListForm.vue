@@ -35,12 +35,26 @@ const items = reactive([
 
 const other = ref('')
 
+const visibleItems = ref<typeof items>([])
+
 function save() {
+  visibleItems.value = items.filter(
+    (item) => item.value !== '' && item.value !== null
+  )
   isEditing.value = false
 }
 
 function edit() {
   isEditing.value = true
+}
+
+const textareaRef = ref<HTMLTextAreaElement | null>(null)
+
+function autoResize() {
+  const el = textareaRef.value
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = el.scrollHeight + 'px'
 }
 </script>
 <template>
@@ -53,30 +67,36 @@ function edit() {
       class="title-input"
       :disabled="!isEditing"
     >
-
+    <!--item in items-->
     <div
-      v-for="item in items"
-      :key="item.label"
-      class="row"
-    >
-      <div class="label">
-        {{ item.label }}
-      </div>
-
-      <input
-        v-model="item.value"
-        :disabled="!isEditing"
-        placeholder="st / pack / number"
+      v-if="isEditing || visibleItems.length"
+      class="grid">
+      <div
+        v-for=" item in (isEditing ? items : visibleItems)"
+        :key="item.label"
+        class="row"
       >
-    </div>
+        <div class="label">
+          {{ item.label }}
+        </div>
 
-    <div class="other-section">
-      <label>Other</label>
-      <textarea
-        v-model="other"
-        :disabled="!isEditing"
-        rows="3"
-      />
+        <input
+          v-model="item.value"
+          :disabled="!isEditing"
+          placeholder="st / pack / number"
+        >
+      </div>
+      <div class="other-section">
+        <label>Other</label>
+        <textarea
+          ref="textareaRef"
+          @input="autoResize"
+          v-model="other"
+          :disabled="!isEditing"
+          rows="1"
+        />
+        <!--rows="3"-->
+      </div>
     </div>
 
     <button 
@@ -127,9 +147,10 @@ function edit() {
 
 textarea {
   width: 100%;
-  resize: vertical;
+  resize: /*vertical*/none;
   border-radius: 8px;
   border: 1px solid #ccc;
+  overflow: hidden;
 }
 
 button {
@@ -139,5 +160,10 @@ button {
   background: #2563eb;
   color: white;
   font-weight: 600;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 16px;
 }
 </style>
