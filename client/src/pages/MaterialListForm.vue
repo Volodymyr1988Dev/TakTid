@@ -156,7 +156,7 @@ onMounted(() => {
   flex: 1;
   font-size: 14px;
   color: #333;
-  padding: 1px /*6px 0*/;
+  padding: 1px 6px /*6px 0*/;
 /*
   border-radius: 8px;
   border: 1px solid #ccc;
