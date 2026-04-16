@@ -133,22 +133,22 @@ onMounted(() => {
 .material-form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 12px;
+  gap: 5px;
+  padding: 10px;
 }
 
 .title-input {
   border-radius: 10px;
   border: 1px solid #ddd;
   font-weight: 600;
-  padding: 8px;
+  padding: 1px;
 }
 
 .row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 6px;
+  gap: 1px;
 }
 
 .label {
@@ -156,7 +156,7 @@ onMounted(() => {
   flex: 1;
   font-size: 14px;
   color: #333;
-  padding: 6px 0;
+  padding: 1px /*6px 0*/;
 /*
   border-radius: 8px;
   border: 1px solid #ccc;
@@ -177,13 +177,13 @@ textarea {
   border-radius: 8px;
   border: 1px solid #ccc;
   overflow: hidden;
-  padding: 6px;
+  padding: 1px;
 }
 .other-section {
   grid-column: span 2;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 button {
@@ -201,7 +201,7 @@ button:hover {
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px 16px;
+  gap: 1px /*8px 16px*/;
 }
 @media (max-width: 600px) {
   .grid {
@@ -211,7 +211,7 @@ button:hover {
   .row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    /*gap: 4px;*/
   }
 
   .label {
