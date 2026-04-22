@@ -465,6 +465,12 @@ const filteredDetails = computed(() => {
   )
 })
 
+function formatUser(entry: TimeEntry) {
+  const name = entry.user?.name || 'Unknown'
+  const email = entry.user?.email || ''
+  return `${name} (${email})`
+}
+
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
 const totalAll = computed(() => totalWork.value + totalExtra.value)
@@ -534,7 +540,7 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
           class="detail-row"
         >
           <div class="detail-date">{{ entry.date }}</div>
-          <div class="detail-user">{{ entry.user?.email }}</div>
+          <div class="detail-user">{{ formatUser(entry) }}</div>
           <div class="detail-hours">{{ entry.hours }}h</div>
 
           <div v-if="entry.comment" class="detail-comment">
