@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Project } from '../types/Project.dto'
 import { getProjects } from '../api/project.api'
+import { getProjectDetails } from '../api/project.api'
+import type { TimeEntry } from '../types/TimeEntry.type'
 
 export const useProjectStore = defineStore('projects', () => {
   const selectedProject = ref<Project | null>(null)
@@ -9,6 +11,9 @@ export const useProjectStore = defineStore('projects', () => {
   const projects = ref<Project[]>([])
   const isLoaded = ref(false)
   const isLoading = ref(false)
+
+  const projectDetails = ref<TimeEntry[]>([])
+  const loadingDetails = ref(false)
 
   const projectsMap = computed(() => {
     const map = new Map<string, Project>()
@@ -52,6 +57,15 @@ export const useProjectStore = defineStore('projects', () => {
     projects.value = projects.value.filter(p => p.id !== id)
   }
 
+  async function loadDetails(projectId: string) {
+    loadingDetails.value = true
+    try {
+      projectDetails.value = await getProjectDetails(projectId)
+    } finally {
+      loadingDetails.value = false
+    }
+  }
+
   return {
     projects,
     selectedProject,
@@ -62,6 +76,8 @@ export const useProjectStore = defineStore('projects', () => {
     load,
     getById,
     isLoaded,
+    loadDetails,
+    projectDetails,
     clear,
     select
   }

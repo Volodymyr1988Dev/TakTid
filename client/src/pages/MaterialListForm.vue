@@ -83,6 +83,9 @@ onMounted(() => {
     <div
       v-if="isEditing || visibleItems.length"
       class="grid">
+      <div v-if="!isEditing && !visibleItems.length && !hasOther">
+        No data
+      </div>
       <div
         v-for=" item in (isEditing ? items : visibleItems)"
         :key="item.label"
@@ -209,7 +212,7 @@ button:hover {
   }
 
   .row {
-    flex-direction: column;
+    /*flex-direction: column;*/
     align-items: flex-start;
     /*gap: 4px;*/
   }
