@@ -38,6 +38,11 @@ export class ProjectsController {
     return this.projectsService.findOne(id);
   }
 
+  @Get(':projectId/details')
+  getProjectDetails(@Param('projectId') projectId: string) {
+    return this.projectsService.getProjectDetails(projectId)
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateProjectDto) {
     return this.projectsService.update(id, dto);

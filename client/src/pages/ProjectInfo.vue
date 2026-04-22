@@ -16,7 +16,10 @@ import { getProjectStats } from '../api/projectStats.api'
 import { useProjectImageStore } from '../stores/projectImage.store'
 import { useStatsStore } from '../stores/stats.store'
 import AppLoader from '../components/ui/AppLoader.vue'
+import type { TimeEntry } from '../types/TimeEntry.type'
+import { useProjectStore } from '../stores/project.store'
 
+const projectStore = useProjectStore()
 const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 const emit = defineEmits<{ (e: 'back'): void }>()
 const imageStore = useProjectImageStore()
@@ -30,6 +33,10 @@ const error = ref<string | null>(null)
 const currentIndex = ref(0)
 
 const expandedUserId = ref<string | null>(null)
+
+const showDetails = ref<'work' | 'extra' | 'total' | null>(null)
+const projectDetails = ref<TimeEntry[]>([])
+const loadingDetails = ref(false)  
 //const userEntries = ref<Record<string, ProjectUserEntry[]>>({})
 //const loadingUserId = ref<string | null>(null)
 
@@ -420,6 +427,43 @@ function prevImage() {/*
   resetTransform()
 }
 /* ================= COMPUTED ================= */
+/*
+async function loadProjectDetails() {
+  loadingDetails.value = true
+
+  try {
+    const res = await fetch(`/api/projects/${props.projectId}/details`)
+    projectDetails.value = await res.json()
+  } finally {
+    loadingDetails.value = false
+  }
+}
+*/
+async function toggleSummary(type: 'work' | 'extra' | 'total') {
+  if (showDetails.value === type) {
+    showDetails.value = null
+    return
+  }
+
+  showDetails.value = type
+
+  if (!projectDetails.value.length) {
+    await loadingDetails //loadProjectDetails()
+  }
+}
+const filteredDetails = computed(() => {
+  if (!showDetails.value) return []
+
+  if (showDetails.value === 'total') {
+    return projectStore.projectDetails
+  }
+
+  return projectStore.projectDetails.filter((e: TimeEntry) =>
+    showDetails.value === 'work'
+      ? e.type === 'WORK'
+      : e.type === 'EXTRA'
+  )
+})
 
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
@@ -451,13 +495,54 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
       <h2>
         {{ stats.project.city }} – {{ stats.project.address }}
       </h2>
-
+      <!--
       <div class="summary">
         <div>Work <strong>{{ totalWork }}h</strong></div>
         <div>Extra <strong>{{ totalExtra }}h</strong></div>
         <div>Total <strong>{{ totalAll }}h</strong></div>
       </div>
+      -->
+      <div class="summary">
+        <div 
+          @click="toggleSummary('work')" 
+          :class="{ active: showDetails === 'work' }"
+        >
+          Work <strong>{{ totalWork }}h</strong>
+        </div>
 
+        <div 
+          @click="toggleSummary('extra')" 
+          :class="{ active: showDetails === 'extra' }"
+        >
+          Extra <strong>{{ totalExtra }}h</strong>
+        </div>
+
+        <div 
+          @click="toggleSummary('total')" 
+          :class="{ active: showDetails === 'total' }"
+        >
+          Total <strong>{{ totalAll }}h</strong>
+        </div>
+      </div>
+      <div v-if="showDetails" class="project-details">
+      <div v-if="loadingDetails">Loading...</div>
+
+      <div v-else>
+        <div
+          v-for="entry in filteredDetails"
+          :key="entry.id"
+          class="detail-row"
+        >
+          <div class="detail-date">{{ entry.date }}</div>
+          <div class="detail-user">{{ entry.user?.email }}</div>
+          <div class="detail-hours">{{ entry.hours }}h</div>
+
+          <div v-if="entry.comment" class="detail-comment">
+            {{ entry.comment }}
+          </div>
+        </div>
+      </div>
+    </div>
       <!-- USERS -->
       <div
         v-for="u in stats.users"
@@ -758,7 +843,53 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 .user-card.clickable:hover {
   background: #f1f5f9;
 }
+
+.summary div {
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.summary div:hover {
+  background: #f1f5f9;
+}
+
+.summary .active {
+  background: #2563eb;
+  color: white;
+}
+
+.project-details {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 70px;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-comment {
+  grid-column: span 3;
+  font-size: 13px;
+  color: #666;
+}
+
 @media (max-width: 640px) {
+
+  .detail-row {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-comment {
+    grid-column: span 1;
+  }
 
   .summary {
     flex-direction: column;

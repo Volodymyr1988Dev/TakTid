@@ -4,12 +4,22 @@ import { Repository } from 'typeorm';
 import { Projects } from '../entities/Project/Project';
 import { CreateProjectDto, UpdateProjectDto } from '../types/index';
 import { ProjectImagesService } from './ProjectImages.service';
+import { TimeEntry } from '../entities/TimeEntries/TimeEntries'
+import { ProjectAssignment } from '../entities';
+
 @Injectable()
 export class ProjectsService {
   constructor(
     @InjectRepository(Projects)
     private readonly projectRepo: Repository<Projects>,
     private readonly imagesService: ProjectImagesService,
+
+    @InjectRepository(TimeEntry)
+    private readonly timeRepo: Repository<TimeEntry>,
+    @InjectRepository(ProjectAssignment)
+    private readonly assignmentRepo: Repository<ProjectAssignment>,
+
+    
   ) {}
   async create(dto: CreateProjectDto): Promise<Projects> {
     const project = this.projectRepo.create(dto);
@@ -23,6 +33,31 @@ export class ProjectsService {
     });
   }
 
+  async getProjectDetails(projectId: string) {
+    const project = await this.projectRepo.findOneBy({ id: projectId })
+
+    if (!project) {
+      throw new NotFoundException('Project not found')
+    }
+
+    const entries = await this.timeRepo.find({
+      where: { project: { id: projectId } },
+      relations: ['user'],
+      order: { date: 'ASC' }, // 🔥 важливо
+    })
+
+    return entries.map(e => ({
+      id: e.id,
+      date: e.date,
+      hours: e.hours,
+      type: e.type,
+      comment: e.comment,
+      user: {
+        id: e.user.id,
+        email: e.user.email,
+      }
+    }))
+  }
   async findOne(id: string): Promise<Projects> {
     const project = await this.projectRepo.findOne({
       where: { id },
