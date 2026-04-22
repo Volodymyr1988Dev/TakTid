@@ -17,7 +17,7 @@ export function useExtraEntryForm(props: {
   const assignmentStore = useProjectAssignmentStore()
   const images = useTimeEntryImages()
   const toast = useToast()
-  const startRef = ref('08:00')
+  const startRef = ref('07:00')
   const endRef = ref('17:00')
   const breakMinutesRef = ref(30)
   const commentRef = ref('')

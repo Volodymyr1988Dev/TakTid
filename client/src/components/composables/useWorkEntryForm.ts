@@ -20,7 +20,7 @@ export function useWorkEntryForm(props: {
 }) {
   const store = useTimeEntryStore()
   const images = useTimeEntryImages()
-  const startRef = ref('08:00')
+  const startRef = ref('07:00')
   const endRef = ref('17:00')
   const breakMinutesRef = ref(30)
   const commentRef = ref('')

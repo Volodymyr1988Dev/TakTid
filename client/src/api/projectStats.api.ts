@@ -11,6 +11,10 @@ export async function getUserProjectEntries(
   userId: string
 ) {
   return api.get<ProjectUserEntry[]>(
-     `/stats/project/${projectId}/users/${userId}`
+     `/stats/project/${projectId}/users/${userId}`, {
+    headers: {
+      'Cache-Control': 'no-cache'
+    }
+  }
   )
 }
