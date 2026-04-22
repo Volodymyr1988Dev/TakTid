@@ -441,15 +441,16 @@ async function loadProjectDetails() {
 }
 
 async function toggleSummary(type: 'work' | 'extra' | 'total') {
+   if (!props.isAdmin) return
   if (showDetails.value === type) {
     showDetails.value = null
     return
   }
 
   showDetails.value = type
-  if (!projectStore.projectDetails.length) {
+  //if (!projectStore.projectDetails.length) {
     await loadProjectDetails()
-  }
+  //}
 }
 const filteredDetails = computed(() => {
   if (!showDetails.value) return []
@@ -470,7 +471,11 @@ function formatUser(entry: TimeEntry) {
   const email = entry.user?.email || ''
   return `${name} (${email})`
 }
-
+watch(() => props.isAdmin, (isAdmin) => {
+  if (!isAdmin) {
+    showDetails.value = null
+  }
+})
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
 const totalAll = computed(() => totalWork.value + totalExtra.value)
@@ -510,27 +515,27 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
       -->
       <div class="summary">
         <div 
-          @click="toggleSummary('work')" 
-          :class="{ active: showDetails === 'work' }"
+          @click="isAdmin && toggleSummary('work')" 
+          :class="{ active: showDetails === 'work', disabled: !isAdmin }"
         >
           Work <strong>{{ totalWork }}h</strong>
         </div>
 
         <div 
-          @click="toggleSummary('extra')" 
-          :class="{ active: showDetails === 'extra' }"
+          @click="isAdmin && toggleSummary('extra')" 
+          :class="{ active: showDetails === 'extra', disabled: !isAdmin }"
         >
           Extra <strong>{{ totalExtra }}h</strong>
         </div>
 
         <div 
-          @click="toggleSummary('total')" 
-          :class="{ active: showDetails === 'total' }"
+          @click="isAdmin && toggleSummary('total')" 
+          :class="{ active: showDetails === 'total', disabled: !isAdmin }"
         >
           Total <strong>{{ totalAll }}h</strong>
         </div>
       </div>
-      <div v-if="showDetails" class="project-details">
+      <div v-if="showDetails && isAdmin" class="project-details">
       <div v-if="loadingDetails">Loading...</div>
 
       <div v-else>
@@ -885,6 +890,14 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   grid-column: span 3;
   font-size: 13px;
   color: #666;
+}
+.summary div.disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.summary div.disabled:hover {
+  background: transparent;
 }
 
 @media (max-width: 640px) {
