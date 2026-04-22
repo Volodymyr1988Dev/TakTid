@@ -441,15 +441,16 @@ async function loadProjectDetails() {
 }
 
 async function toggleSummary(type: 'work' | 'extra' | 'total') {
+   if (!props.isAdmin) return
   if (showDetails.value === type) {
     showDetails.value = null
     return
   }
 
   showDetails.value = type
-  if (!projectStore.projectDetails.length) {
+  //if (!projectStore.projectDetails.length) {
     await loadProjectDetails()
-  }
+  //}
 }
 const filteredDetails = computed(() => {
   if (!showDetails.value) return []
@@ -470,7 +471,11 @@ function formatUser(entry: TimeEntry) {
   const email = entry.user?.email || ''
   return `${name} (${email})`
 }
-
+watch(() => props.isAdmin, (isAdmin) => {
+  if (!isAdmin) {
+    showDetails.value = null
+  }
+})
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
 const totalAll = computed(() => totalWork.value + totalExtra.value)
