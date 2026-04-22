@@ -35,7 +35,7 @@ const currentIndex = ref(0)
 const expandedUserId = ref<string | null>(null)
 
 const showDetails = ref<'work' | 'extra' | 'total' | null>(null)
-const projectDetails = ref<TimeEntry[]>([])
+//const projectDetails = ref<TimeEntry[]>([])
 const loadingDetails = ref(false)  
 //const userEntries = ref<Record<string, ProjectUserEntry[]>>({})
 //const loadingUserId = ref<string | null>(null)
@@ -427,18 +427,19 @@ function prevImage() {/*
   resetTransform()
 }
 /* ================= COMPUTED ================= */
-/*
+
 async function loadProjectDetails() {
   loadingDetails.value = true
 
   try {
-    const res = await fetch(`/api/projects/${props.projectId}/details`)
-    projectDetails.value = await res.json()
+    //const res = await fetch(`/api/projects/${props.projectId}/details`)
+    //projectDetails.value = await res.json()
+    await projectStore.loadDetails(props.projectId)
   } finally {
     loadingDetails.value = false
   }
 }
-*/
+
 async function toggleSummary(type: 'work' | 'extra' | 'total') {
   if (showDetails.value === type) {
     showDetails.value = null
@@ -446,9 +447,8 @@ async function toggleSummary(type: 'work' | 'extra' | 'total') {
   }
 
   showDetails.value = type
-
-  if (!projectDetails.value.length) {
-    await loadingDetails //loadProjectDetails()
+  if (!projectStore.projectDetails.length) {
+    await loadProjectDetails()
   }
 }
 const filteredDetails = computed(() => {
