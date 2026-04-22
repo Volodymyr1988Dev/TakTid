@@ -40,23 +40,47 @@ export class ProjectsService {
       throw new NotFoundException('Project not found')
     }
 
-    const entries = await this.timeRepo.find({
+    const timeEntries = await this.timeRepo.find({
       where: { project: { id: projectId } },
       relations: ['user'],
-      order: { date: 'ASC' }, // 🔥 важливо
+      order: { date: 'ASC' },
     })
 
-    return entries.map(e => ({
+    const extraEntries = await this.assignmentRepo.find({
+      where: { project: { id: projectId } },
+      relations: ['user'],
+      order: { date: 'ASC' },
+    })
+
+    const mappedTime = timeEntries.map(e => ({
       id: e.id,
       date: e.date,
       hours: e.hours,
-      type: e.type,
+      type: e.type, // WORK / MEETING
       comment: e.comment,
       user: {
         id: e.user.id,
         email: e.user.email,
+        name: e.user.name,
       }
     }))
+
+    const mappedExtra = extraEntries.map(e => ({
+      id: e.id,
+      date: e.date,
+      hours: e.hours,
+      type: 'EXTRA', // 🔥 ключове
+      comment: e.comment,
+      user: {
+        id: e.user.id,
+        email: e.user.email,
+        name: e.user.name,
+      }
+    }))
+
+    return [...mappedTime, ...mappedExtra].sort(
+      (a, b) => a.date.localeCompare(b.date)
+    )
   }
   async findOne(id: string): Promise<Projects> {
     const project = await this.projectRepo.findOne({

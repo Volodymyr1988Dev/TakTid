@@ -21,5 +21,6 @@ export interface TimeEntry {
   user?: {
     id: string
     email?: string
+    name?: string
   }
 }
