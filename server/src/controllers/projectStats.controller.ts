@@ -9,7 +9,7 @@ import { AdminGuard } from '../types/auth/admin.guard';
 export class ProjectStatsController {
   constructor(private readonly statsService: ProjectStatsService) {}
 
-  //@UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   @Get(':id/stats')
   getStats(@Param('id') id: string) {
     return this.statsService.getProjectStats(id);
