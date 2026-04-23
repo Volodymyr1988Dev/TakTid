@@ -515,27 +515,28 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
       -->
       <div class="summary">
         <div 
-          @click="isAdmin && toggleSummary('work')" 
-          :class="{ active: showDetails === 'work', disabled: !isAdmin }"
+          @click="toggleSummary('work')" 
+          :class="{ active: showDetails === 'work'}"
         >
           Work <strong>{{ totalWork }}h</strong>
         </div>
 
         <div 
-          @click="isAdmin && toggleSummary('extra')" 
-          :class="{ active: showDetails === 'extra', disabled: !isAdmin }"
+          @click="toggleSummary('extra')" 
+          :class="{ active: showDetails === 'extra'}"
         >
           Extra <strong>{{ totalExtra }}h</strong>
         </div>
 
         <div 
-          @click="isAdmin && toggleSummary('total')" 
-          :class="{ active: showDetails === 'total', disabled: !isAdmin }"
+          @click="toggleSummary('total')" 
+          :class="{ active: showDetails === 'total'}"
         >
           Total <strong>{{ totalAll }}h</strong>
         </div>
       </div>
-      <div v-if="showDetails && isAdmin" class="project-details">
+      <div v-if="showDetails" class="project-details">
+        <div v-if="showDetails" class="project-details"></div>
       <div v-if="loadingDetails">Loading...</div>
 
       <div v-else>
