@@ -9,7 +9,8 @@ import {
 } from 'vue'
 import type { ProjectStats } from '../types/projectStats.type'
 import { cloudinary } from '../utils/cloudinary'
-import { getProjectStats, getProjectSummary } from '../api/projectStats.api'
+//import { getProjectStats, getProjectSummary } from '../api/projectStats.api'
+import { getProjectStats } from '../api/projectStats.api'
 import { useProjectImageStore } from '../stores/projectImage.store'
 import { useStatsStore } from '../stores/stats.store'
 import AppLoader from '../components/ui/AppLoader.vue'
@@ -46,6 +47,7 @@ async function loadStats() {
   try {
     //const { data } = await getProjectStats(props.projectId)
     //stats.value = data
+    /*
     let data
     if (props.isAdmin === true) {
        data = (await getProjectStats(props.projectId)).data
@@ -54,6 +56,8 @@ async function loadStats() {
        data  = (await getProjectSummary(props.projectId)).data
       //stats.value = data
     }
+    stats.value = data*/
+    const { data } = await getProjectStats(props.projectId)
     stats.value = data
   } catch (err: any) {
     if (err?.response?.status === 403) {
