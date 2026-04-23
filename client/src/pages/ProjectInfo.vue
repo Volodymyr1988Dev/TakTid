@@ -373,6 +373,7 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
       <h2>
         {{ stats.project.city }} – {{ stats.project.address }}
       </h2>
+      <div v-if="isAdmin">
       <div class="summary">
         <div 
           @click="toggleSummary('work')" 
@@ -418,8 +419,8 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
           </div>
         </div>
         </div>
-        <!-- ADMIN VIEW -->
-        <div v-if="isAdmin">
+        <!-- ADMIN VIEW
+        <div v-if="isAdmin">-->
           <div
           v-for="u in stats?.users || []"
           :key="u.id"
