@@ -110,6 +110,7 @@ export class ProjectsService {
       total: {
         work: totalWork,
         extra: totalExtra,
+        all: totalWork + totalExtra,
       }
     }
   }
