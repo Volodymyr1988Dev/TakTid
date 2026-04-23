@@ -98,8 +98,8 @@ export class ProjectsService {
       where: { project: { id: projectId } },
     })
 
-    const totalWork = timeEntries.reduce((sum, e) => sum + e.hours, 0)
-    const totalExtra = extraEntries.reduce((sum, e) => sum + e.hours, 0)
+    const totalWork = timeEntries.reduce((sum, e) => sum + Number(e.hours), 0)
+    const totalExtra = extraEntries.reduce((sum, e) => sum + Number(e.hours), 0)
 
     return {
       project: {

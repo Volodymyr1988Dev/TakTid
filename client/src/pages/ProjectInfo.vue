@@ -66,8 +66,8 @@ watch(() => props.projectId, async () => {
   await loadStats()
 }, { immediate: true })
 //onServerPrefetch(loadStats)
-onServerPrefetch(async () => { if (props.isAdmin) { await loadStats()}})
-
+//onServerPrefetch(async () => { if (props.isAdmin) { await loadStats()}})
+onServerPrefetch(() => Promise.resolve())
 /* ================= USER DETAILS ================= */
 async function toggleDetails(userId: string) {
   if (expandedUserId.value === userId) {
@@ -332,12 +332,12 @@ const filteredDetails = computed(() => {
       : e.type === 'EXTRA'
   )
 })
-
+/*
 function formatUser(entry: TimeEntry) {
   const name = entry.user?.name || 'Unknown'
   const email = entry.user?.email || ''
   return `${name} (${email})`
-}
+}*/
 watch(() => props.isAdmin, (isAdmin) => {
   if (!isAdmin) {
     showDetails.value = null
@@ -405,7 +405,12 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
           class="detail-row"
         >
           <div class="detail-date">{{ entry.date }}</div>
-          <div class="detail-user">{{ formatUser(entry) }}</div>
+          <div class="detail-user">
+            <div class="user-info">
+            <div class="name">{{ entry.user?.name }}</div>
+            <div class="email">{{ entry.user?.email }}</div>
+          </div>
+          </div>
           <div class="detail-hours">{{ entry.hours }}h</div>
 
           <div v-if="entry.comment" class="detail-comment">
@@ -772,6 +777,25 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   background: transparent;
 }
 
+.name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.email {
+  font-size: 11px;
+  color: #94a3b8;
+}
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
 @media (max-width: 640px) {
 
   .detail-row {
