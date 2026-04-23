@@ -39,29 +39,35 @@ function onLoad(id: string) {
 /* ================= LOAD STATS ================= */
 
 async function loadStats() {
+  if (!props.projectId) return console.log('No project ID provided')
   loading.value = true
   error.value = null
 
   try {
     //const { data } = await getProjectStats(props.projectId)
     //stats.value = data
-    if (props.isAdmin) {
-      const { data } = await getProjectStats(props.projectId)
-      stats.value = data
+    let data
+    if (props.isAdmin === true) {
+       data = (await getProjectStats(props.projectId)).data
+      //stats.value = data
     } else {
-      const { data } = await getProjectSummary(props.projectId)
-      stats.value = data
+       data  = (await getProjectSummary(props.projectId)).data
+      //stats.value = data
     }
-  } catch (err: unknown) {
-    error.value = props.isAdmin
-      ? 'Failed to load stats'
-      : 'Access denied'
+    stats.value = data
+  } catch (err: any) {
+    if (err?.response?.status === 403) {
+      error.value = 'Access denied'
+    } else {
+      error.value = 'Failed to load stats'
+    }
   } finally {
     loading.value = false
   }
 }
 
-watch(() => props.projectId, async () => {
+watch(() => [props.projectId, props.isAdmin], async ([id, isAdmin]) => {
+  if (!id || isAdmin === undefined) return console.log('Missing project ID or admin status')
   loaded.value.clear()
   await loadStats()
 }, { immediate: true })
