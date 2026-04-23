@@ -7,11 +7,9 @@ import {
   nextTick,
   onServerPrefetch
 } from 'vue'
-
-//import type { ProjectUserEntry } from '../types/ProjectUserEntry'
 import type { ProjectStats } from '../types/projectStats.type'
 import { cloudinary } from '../utils/cloudinary'
-//import { getProjectStats, getUserProjectEntries } from '../api/projectStats.api'
+//import { getProjectStats, getProjectSummary } from '../api/projectStats.api'
 import { getProjectStats } from '../api/projectStats.api'
 import { useProjectImageStore } from '../stores/projectImage.store'
 import { useStatsStore } from '../stores/stats.store'
@@ -35,41 +33,51 @@ const currentIndex = ref(0)
 const expandedUserId = ref<string | null>(null)
 
 const showDetails = ref<'work' | 'extra' | 'total' | null>(null)
-//const projectDetails = ref<TimeEntry[]>([])
 const loadingDetails = ref(false)  
-//const userEntries = ref<Record<string, ProjectUserEntry[]>>({})
-//const loadingUserId = ref<string | null>(null)
-
-//const cache = new Map<string, ProjectUserEntry[]>()
 function onLoad(id: string) {
   loaded.value.add(id)
 }
 /* ================= LOAD STATS ================= */
 
 async function loadStats() {
+  if (!props.projectId) return console.log('No project ID provided')
   loading.value = true
   error.value = null
 
   try {
+    //const { data } = await getProjectStats(props.projectId)
+    //stats.value = data
+    /*
+    let data
+    if (props.isAdmin === true) {
+       data = (await getProjectStats(props.projectId)).data
+      //stats.value = data
+    } else {
+       data  = (await getProjectSummary(props.projectId)).data
+      //stats.value = data
+    }
+    stats.value = data*/
     const { data } = await getProjectStats(props.projectId)
     stats.value = data
-  } catch (err: unknown) {
-    error.value =
-      err instanceof Error
-        ? err.message
-        : 'Failed to load project statistics'
+  } catch (err: any) {
+    if (err?.response?.status === 403) {
+      error.value = 'Access denied'
+    } else {
+      error.value = 'Failed to load stats'
+    }
   } finally {
     loading.value = false
   }
 }
 
-//watch(() => props.projectId, loadStats, { immediate: true })
-watch(() => props.projectId, async () => {
+watch(() => [props.projectId, props.isAdmin], async ([id, isAdmin]) => {
+  if (!id || isAdmin === undefined) return console.log('Missing project ID or admin status')
   loaded.value.clear()
   await loadStats()
 }, { immediate: true })
-onServerPrefetch(loadStats)
-
+//onServerPrefetch(loadStats)
+//onServerPrefetch(async () => { if (props.isAdmin) { await loadStats()}})
+onServerPrefetch(() => Promise.resolve())
 /* ================= USER DETAILS ================= */
 async function toggleDetails(userId: string) {
   if (expandedUserId.value === userId) {
@@ -83,28 +91,6 @@ async function toggleDetails(userId: string) {
     props.projectId,
     userId
   )
-
-  //const cacheKey = `${props.projectId}-${userId}`
-  /*
-  if (cache.has(cacheKey)) {
-    userEntries.value[userId] = cache.get(cacheKey)!
-    return
-  }
-
-  userEntries.value[userId] = []
-  loadingUserId.value = userId
-
-  try {
-    const { data } = await getUserProjectEntries(
-      props.projectId,
-      userId
-    )
-
-    userEntries.value[userId] = data
-    cache.set(cacheKey, data)
-  } finally {
-    loadingUserId.value = null
-  }*/
 
 }
 
@@ -172,7 +158,6 @@ function observeSentinel() {
 
 onBeforeUnmount(() => { 
   observer?.disconnect() 
-  //document.body.style.overflow = ''
   document.body.style = ''
 })
 let scrollY = 0
@@ -190,12 +175,7 @@ function openImage(url: string) {
 
 function closeImage() {
   fullscreenImage.value = null
-
-  //document.body.style.position = ''
   document.body.style = ''
-  //document.body.style.top = ''
-  //document.body.style.width = ''
-
   window.scrollTo(0, scrollY)
   resetTransform()
 }
@@ -230,28 +210,14 @@ function onTouchStart(e: TouchEvent) {
   if (!touch) return
 
   if (e.touches.length === 2) {
-    //startDistance.value = getDistance(e.touches)
-    //const newDistance = getDistance(e.touches)
     const dist = getDistance(e.touches)
     if (!dist) return
 
     startDistance.value = dist
     lastScale.value = scale.value
   } else if (e.touches.length === 1) {
-  //if (e.touches.length === 1 && scale.value > 1 && isDragging) {
     const touch = e.touches[0]
     if (!touch) return
-    /*
-    const dx = touch.clientX - lastTouchX
-    const dy = touch.clientY - lastTouchY
-
-    velocityX = dx
-
-    const max = 200 * scale.value
-
-    translateX.value = clamp(translateX.value + dx, -max, max)
-    translateY.value = clamp(translateY.value + dy, -max, max)
-    */
     lastTouchX = touch.clientX
     lastTouchY = touch.clientY
   
@@ -261,10 +227,6 @@ function onTouchStart(e: TouchEvent) {
     startY = touch.clientY
     isSwiping = true
   }
-
-  //startX = touch.clientX
-  //startY = touch.clientY
-  //isSwiping = true
 }
 let velocityX = 0
 
@@ -284,12 +246,6 @@ function onTouchMove(e: TouchEvent) {
     const dx = touch.clientX - lastTouchX
     const dy = touch.clientY - lastTouchY
     velocityX = dx
-
-    //translateX.value += dx
-    //translateY.value += dy
-
-    //const maxX = (window.innerWidth * (scale.value - 1)) / 2
-    //const maxY = (window.innerHeight * (scale.value - 1)) / 2
     const rect = (e.target as HTMLElement).getBoundingClientRect()
     const maxX = Math.max(0, (rect.width * scale.value - window.innerWidth) / 2)
     const maxY = Math.max(0, (rect.height * scale.value - window.innerHeight) / 2)
@@ -302,7 +258,6 @@ function onTouchMove(e: TouchEvent) {
 }
 
 function onTouchEnd(e: TouchEvent) {
-  //if (!isSwiping || scale.value > 1) return
   if (!isSwiping) return
   if (scale.value > 1) {
     isSwiping = false
@@ -311,8 +266,6 @@ function onTouchEnd(e: TouchEvent) {
   const touch = e.changedTouches[0]
   if (!touch) return
 
-  //if (scale.value < 1) scale.value = 1
-
   const dx = touch.clientX - startX
   const dy = touch.clientY - startY
 
@@ -320,105 +273,30 @@ function onTouchEnd(e: TouchEvent) {
     closeImage()
   }
   if (Math.abs(velocityX) > 20) {
-    //if (velocityX < 0) nextImage() else prevImage()
     velocityX < 0 ? nextImage() : prevImage()
   }
- // if (Math.abs(dx) > Math.abs(dy)) {
     if (dx < -50) nextImage()
     if (dx > 50) prevImage()
-  //}/*
-/*
-  const absX = Math.abs(dx)
-  const absY = Math.abs(dy)
-
-  if (absX < 40 && absY < 40) {
-    isSwiping = false
-    return
-  }
-
-  if (absY > absX && dy > 80) {
-    closeImage()
-  }
-
-  if (absX > absY) {
-    if (dx < -50) nextImage()
-    if (dx > 50) prevImage()
-  }*/
-
   isSwiping = false
   isDragging = false
 }
 
 function getDistance(touches: TouchList): number | undefined {
   if (!touches[0] || !touches[1]) return
-  //if (touches.length < 2) return
   const dx = touches[0].clientX - touches[1].clientX
   const dy = touches[0].clientY - touches[1].clientY
   return Math.sqrt(dx * dx + dy * dy)
 }
-/*
-const maxTranslate = 150 * scale.value
 
-translateX.value = clamp(translateX.value + dx, -maxTranslate, maxTranslate)
-translateY.value = clamp(translateY.value + dy, -maxTranslate, maxTranslate)
-function resetTransform() {
-  scale.value = 1
-  translateX.value = 0
-  translateY.value = 0
-}
-let lastTap = 0
-
-function onTap() {
-  const now = Date.now()
-
-  if (now - lastTap < 300) {
-    if (scale.value > 1) {
-      resetTransform()
-    } else {
-      scale.value = 2
-    }
-  }
-
-  lastTap = now
-}
-/*
-let lastTap = 0
-
-function onTap(e: TouchEvent) {
-  const now = Date.now()
-  if (now - lastTap < 300) {
-    scale.value = scale.value > 1 ? 1 : 2
-    translateX.value = 0
-    translateY.value = 0
-  }
-  lastTap = now
-}
-*/
 function nextImage() {
-  //if (currentIndex.value < imageStore.images.length - 1) {
-  //  currentIndex.value++
-  //  fullscreenImage.value = imageStore.images[currentIndex.value].url
-  //}
   const next = imageStore.images[currentIndex.value + 1]
   if (!next) return
-
-   /*translateX.value = 50
-  setTimeout(() => {
-    currentIndex.value++
-    fullscreenImage.value = next.url
-    translateX.value = 0
-  }, 100)*/
   currentIndex.value++
   fullscreenImage.value = next.url
   resetTransform()
 }
 
-function prevImage() {/*
-  if (currentIndex.value > 0) {
-    currentIndex.value--
-    fullscreenImage.value = imageStore.images[currentIndex.value].url
-    
-  }*/
+function prevImage() {
  const prev = imageStore.images[currentIndex.value - 1]
   if (!prev) return
 
@@ -429,11 +307,10 @@ function prevImage() {/*
 /* ================= COMPUTED ================= */
 
 async function loadProjectDetails() {
+  if (!props.isAdmin) return
   loadingDetails.value = true
 
   try {
-    //const res = await fetch(`/api/projects/${props.projectId}/details`)
-    //projectDetails.value = await res.json()
     await projectStore.loadDetails(props.projectId)
   } finally {
     loadingDetails.value = false
@@ -441,7 +318,7 @@ async function loadProjectDetails() {
 }
 
 async function toggleSummary(type: 'work' | 'extra' | 'total') {
-   if (!props.isAdmin) return
+   if (!props.isAdmin) return 
   if (showDetails.value === type) {
     showDetails.value = null
     return
@@ -465,12 +342,12 @@ const filteredDetails = computed(() => {
       : e.type === 'EXTRA'
   )
 })
-
+/*
 function formatUser(entry: TimeEntry) {
   const name = entry.user?.name || 'Unknown'
   const email = entry.user?.email || ''
   return `${name} (${email})`
-}
+}*/
 watch(() => props.isAdmin, (isAdmin) => {
   if (!isAdmin) {
     showDetails.value = null
@@ -506,36 +383,30 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
       <h2>
         {{ stats.project.city }} – {{ stats.project.address }}
       </h2>
-      <!--
-      <div class="summary">
-        <div>Work <strong>{{ totalWork }}h</strong></div>
-        <div>Extra <strong>{{ totalExtra }}h</strong></div>
-        <div>Total <strong>{{ totalAll }}h</strong></div>
-      </div>
-      -->
+      <div v-if="isAdmin">
       <div class="summary">
         <div 
-          @click="isAdmin && toggleSummary('work')" 
+          @click="toggleSummary('work')" 
           :class="{ active: showDetails === 'work', disabled: !isAdmin }"
         >
           Work <strong>{{ totalWork }}h</strong>
         </div>
 
         <div 
-          @click="isAdmin && toggleSummary('extra')" 
+          @click="toggleSummary('extra')" 
           :class="{ active: showDetails === 'extra', disabled: !isAdmin }"
         >
           Extra <strong>{{ totalExtra }}h</strong>
         </div>
 
         <div 
-          @click="isAdmin && toggleSummary('total')" 
+          @click="toggleSummary('total')" 
           :class="{ active: showDetails === 'total', disabled: !isAdmin }"
         >
           Total <strong>{{ totalAll }}h</strong>
         </div>
       </div>
-      <div v-if="showDetails && isAdmin" class="project-details">
+      <!--<div v-if="showDetails && isAdmin" class="project-details"></div>-->
       <div v-if="loadingDetails">Loading...</div>
 
       <div v-else>
@@ -545,90 +416,106 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
           class="detail-row"
         >
           <div class="detail-date">{{ entry.date }}</div>
-          <div class="detail-user">{{ formatUser(entry) }}</div>
+          <div class="detail-user">
+            <div class="user-info">
+            <div class="name">{{ entry.user?.name }}</div>
+            <div class="email">{{ entry.user?.email }}</div>
+          </div>
+          </div>
           <div class="detail-hours">{{ entry.hours }}h</div>
 
           <div v-if="entry.comment" class="detail-comment">
             {{ entry.comment }}
           </div>
         </div>
-      </div>
-    </div>
-      <!-- USERS -->
-      <div
-        v-for="u in stats.users"
-        :key="u.id"
-        class="user-card"
-        :class="{ clickable: isAdmin }"
-        @click="isAdmin && toggleDetails(u.id)"
-      >
-        <div class="user-header">
-          <div>
-            <strong>{{ u.name }}</strong>
-            <div class="email">
-              {{ u.email }}
-            </div>
-          </div>
-
-          <div class="hours">
-            <div class="hours-breakdown">
-              <span class="work">Work: {{ u.workHours }}h</span>
-              <span class="extra">Extra: {{ u.extraHours }}h</span>
-              <span class="total">Total: {{ u.totalHours }}h</span>
-            </div>
-
-            <button
-              v-if="isAdmin"
-              class="details-btn"
-              @click.stop="toggleDetails(u.id)"
-            >
-              {{ expandedUserId === u.id ? 'Hide Details' : 'Details' }}
-            </button>
-          </div>
         </div>
-
-        <!-- DETAILS -->
-        <div
-          v-if="expandedUserId === u.id"
-          class="details"
-        >
+        <!-- ADMIN VIEW
+        <div v-if="isAdmin">-->
           <div
-            v-if="statsStore.loadingProjectUserId === u.id"
-            class="details-skeleton"
+          v-for="u in stats?.users || []"
+          :key="u.id"
+          class="user-card"
+          :class="{ clickable: isAdmin }"
+          @click="isAdmin && toggleDetails(u.id)"
+        >
+          <div class="user-header">
+            <div>
+              <strong>{{ u.name }}</strong>
+              <div class="email">
+                {{ u.email }}
+              </div>
+            </div>
+
+            <div class="hours">
+              <div class="hours-breakdown">
+                <span class="work">Work: {{ u.workHours }}h</span>
+                <span class="extra">Extra: {{ u.extraHours }}h</span>
+                <span class="total">Total: {{ u.totalHours }}h</span>
+              </div>
+              
+              <button
+                v-if="isAdmin"
+                class="details-btn"
+                @click.stop="toggleDetails(u.id)"
+              >
+                {{ expandedUserId === u.id ? 'Hide Details' : 'Details' }}
+              </button>
+            </div>
+            
+          <!-- DETAILS -->
+          <div
+            v-if="expandedUserId === u.id"
+            class="details"
           >
             <div
-              v-for="n in 3"
-              :key="n"
-              class="skeleton-line"
-            />
-            <!--line -->>
-          </div>
-
-          <div v-else>
-            <div
-              v-for="entry in statsStore.projectUserEntries[`${props.projectId}-${u.id}`] || []"
-              :key="entry.id"
-              class="entry"
+              v-if="statsStore.loadingProjectUserId === u.id"
+              class="details-skeleton"
             >
-              <div class="date">
-                {{ entry.date }}
-              </div>
-
-              <div>
-                {{ entry.hours }}h ({{ entry.type }})
-              </div>
-
               <div
-                v-if="entry.comment"
-                class="comment"
+                v-for="n in 3"
+                :key="n"
+                class="skeleton-line"
+              />
+              <!--line -->
+            </div>
+
+            <div v-else>
+              <div
+                v-for="entry in statsStore.projectUserEntries[`${props.projectId}-${u.id}`] || []"
+                :key="entry.id"
+                class="entry"
               >
-                {{ entry.comment }}
+                <div class="date">
+                  {{ entry.date }}
+                </div>
+
+                <div>
+                  {{ entry.hours }}h ({{ entry.type }})
+                </div>
+
+                <div
+                  v-if="entry.comment"
+                  class="comment"
+                >
+                  {{ entry.comment }}
+                </div>
               </div>
             </div>
           </div>
+        <!--</div>-->
         </div>
       </div>
-
+    </div>
+    <!-- USER VIEW -->
+    <div v-else class="user-summary">
+      <div class="user-card">
+        <div class="hours-breakdown">
+          <span class="work">Work: {{ totalWork }}h</span>
+          <span class="extra">Extra: {{ totalExtra }}h</span>
+          <span class="total">Total: {{ totalAll }}h</span>
+        </div>
+      </div>
+    </div>
       <!-- IMAGES -->
       <div class="images-section">
         <button @click="showImages = !showImages">
@@ -894,12 +781,32 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 .summary div.disabled {
   cursor: default;
   opacity: 0.6;
+  pointer-events: none;
 }
 
 .summary div.disabled:hover {
   background: transparent;
 }
 
+.name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.email {
+  font-size: 11px;
+  color: #94a3b8;
+}
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
 @media (max-width: 640px) {
 
   .detail-row {

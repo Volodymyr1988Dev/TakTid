@@ -9,7 +9,6 @@ import {
   findBestSpacingAuto
 } from '../components/helpers/utils/hookMath'
 
-//import HookCalculator from '../components/HookCalculator.vue'
 import IdealSpacing from '../components/IdealSpacing.vue'
 
 const length = ref<number | null>(null)

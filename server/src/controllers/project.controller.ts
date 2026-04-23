@@ -15,6 +15,7 @@ import { ProjectsService } from '../services/Project';
 import { CreateProjectDto, UpdateProjectDto } from '../types/index';
 import type { AuthRequest } from '../types/index';
 import { AdminGuard } from '../types/auth/admin.guard';
+
 @ApiTags('Projects')
 @Controller('projects')
 export class ProjectsController {
@@ -42,6 +43,10 @@ export class ProjectsController {
   @Get(':projectId/details')
   getProjectDetails(@Param('projectId') projectId: string) {
     return this.projectsService.getProjectDetails(projectId)
+  }
+  @Get(':projectId/summary')
+  getSummary(@Param('projectId') projectId: string) {
+    return this.projectsService.getProjectSummary(projectId)
   }
 
   @Patch(':id')

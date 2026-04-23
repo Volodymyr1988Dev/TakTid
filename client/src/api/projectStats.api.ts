@@ -5,6 +5,9 @@ import type { ProjectUserEntry } from '../types/ProjectUserEntry'
 export function getProjectStats(projectId: string) {
   return api.get<ProjectStats>(`/projects/${projectId}/stats`)
 }
+export function getProjectSummary(projectId: string) {
+  return api.get(`/projects/${projectId}/summary`)
+}
 
 export async function getUserProjectEntries(
   projectId: string,
