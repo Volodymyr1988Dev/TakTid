@@ -413,81 +413,93 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
           </div>
         </div>
         </div>
-        <div
-        v-for="u in stats?.users || []"
-        :key="u.id"
-        class="user-card"
-        :class="{ clickable: isAdmin }"
-        @click="isAdmin && toggleDetails(u.id)"
-      >
-        <div class="user-header">
-          <div>
-            <strong>{{ u.name }}</strong>
-            <div class="email">
-              {{ u.email }}
+        <!-- ADMIN VIEW -->
+        <div v-if="isAdmin">
+          <div
+          v-for="u in stats?.users || []"
+          :key="u.id"
+          class="user-card"
+          :class="{ clickable: isAdmin }"
+          @click="isAdmin && toggleDetails(u.id)"
+        >
+          <div class="user-header">
+            <div>
+              <strong>{{ u.name }}</strong>
+              <div class="email">
+                {{ u.email }}
+              </div>
             </div>
-          </div>
 
-          <div class="hours">
-            <div class="hours-breakdown">
-              <span class="work">Work: {{ u.workHours }}h</span>
-              <span class="extra">Extra: {{ u.extraHours }}h</span>
-              <span class="total">Total: {{ u.totalHours }}h</span>
+            <div class="hours">
+              <div class="hours-breakdown">
+                <span class="work">Work: {{ u.workHours }}h</span>
+                <span class="extra">Extra: {{ u.extraHours }}h</span>
+                <span class="total">Total: {{ u.totalHours }}h</span>
+              </div>
+              
+              <button
+                v-if="isAdmin"
+                class="details-btn"
+                @click.stop="toggleDetails(u.id)"
+              >
+                {{ expandedUserId === u.id ? 'Hide Details' : 'Details' }}
+              </button>
             </div>
             
-            <button
-              v-if="isAdmin"
-              class="details-btn"
-              @click.stop="toggleDetails(u.id)"
-            >
-              {{ expandedUserId === u.id ? 'Hide Details' : 'Details' }}
-            </button>
-          </div>
-          
-        <!-- DETAILS -->
-        <div
-          v-if="expandedUserId === u.id"
-          class="details"
-        >
+          <!-- DETAILS -->
           <div
-            v-if="statsStore.loadingProjectUserId === u.id"
-            class="details-skeleton"
+            v-if="expandedUserId === u.id"
+            class="details"
           >
             <div
-              v-for="n in 3"
-              :key="n"
-              class="skeleton-line"
-            />
-            <!--line -->
-          </div>
-
-          <div v-else>
-            <div
-              v-for="entry in statsStore.projectUserEntries[`${props.projectId}-${u.id}`] || []"
-              :key="entry.id"
-              class="entry"
+              v-if="statsStore.loadingProjectUserId === u.id"
+              class="details-skeleton"
             >
-              <div class="date">
-                {{ entry.date }}
-              </div>
-
-              <div>
-                {{ entry.hours }}h ({{ entry.type }})
-              </div>
-
               <div
-                v-if="entry.comment"
-                class="comment"
+                v-for="n in 3"
+                :key="n"
+                class="skeleton-line"
+              />
+              <!--line -->
+            </div>
+
+            <div v-else>
+              <div
+                v-for="entry in statsStore.projectUserEntries[`${props.projectId}-${u.id}`] || []"
+                :key="entry.id"
+                class="entry"
               >
-                {{ entry.comment }}
+                <div class="date">
+                  {{ entry.date }}
+                </div>
+
+                <div>
+                  {{ entry.hours }}h ({{ entry.type }})
+                </div>
+
+                <div
+                  v-if="entry.comment"
+                  class="comment"
+                >
+                  {{ entry.comment }}
+                </div>
               </div>
             </div>
           </div>
+        <!--</div>-->
         </div>
-      <!--</div>-->
       </div>
     </div>
-
+    <!-- USER VIEW -->
+    <div v-else class="user-summary">
+      <div class="user-card">
+        <div class="hours-breakdown">
+          <span class="work">Work: {{ totalWork }}h</span>
+          <span class="extra">Extra: {{ totalExtra }}h</span>
+          <span class="total">Total: {{ totalAll }}h</span>
+        </div>
+      </div>
+    </div>
       <!-- IMAGES -->
       <div class="images-section">
         <button @click="showImages = !showImages">
