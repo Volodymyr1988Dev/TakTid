@@ -82,6 +82,38 @@ export class ProjectsService {
       (a, b) => a.date.localeCompare(b.date)
     )
   }
+
+  async getProjectSummary(projectId: string) {
+    const project = await this.projectRepo.findOneBy({ id: projectId })
+
+    if (!project) {
+      throw new NotFoundException('Project not found')
+    }
+
+    const timeEntries = await this.timeRepo.find({
+      where: { project: { id: projectId } },
+    })
+
+    const extraEntries = await this.assignmentRepo.find({
+      where: { project: { id: projectId } },
+    })
+
+    const totalWork = timeEntries.reduce((sum, e) => sum + e.hours, 0)
+    const totalExtra = extraEntries.reduce((sum, e) => sum + e.hours, 0)
+
+    return {
+      project: {
+        id: project.id,
+        city: project.city,
+        address: project.address,
+      },
+      total: {
+        work: totalWork,
+        extra: totalExtra,
+      }
+    }
+  }
+
   async findOne(id: string): Promise<Projects> {
     const project = await this.projectRepo.findOne({
       where: { id },
