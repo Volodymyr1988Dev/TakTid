@@ -1,17 +1,29 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Req, UnauthorizedException } from '@nestjs/common';
 import { ProjectStatsService } from '../services/projectStats.service';
 import { ApiTags } from '@nestjs/swagger';
-import { UseGuards } from '@nestjs/common';
-import { AdminGuard } from '../types/auth/admin.guard';
+import type { AuthRequest } from '../types/index';
+import { ProjectsService } from '../services/Project';
+//import { UseGuards } from '@nestjs/common';
+//import { AdminGuard } from '../types/auth/admin.guard';
 
 @ApiTags('Project stats')
 @Controller('projects')
 export class ProjectStatsController {
-  constructor(private readonly statsService: ProjectStatsService) {}
+  constructor(
+    private readonly statsService: ProjectStatsService,
+    private readonly projectsService: ProjectsService,
+  ) {}
 
-  @UseGuards(AdminGuard)
+  //@UseGuards(AdminGuard)
   @Get(':id/stats')
-  getStats(@Param('id') id: string) {
-    return this.statsService.getProjectStats(id);
+  getStats(@Param('id') id: string, @Req() req: AuthRequest) {
+    if (!req.user) {
+      throw new UnauthorizedException()
+    }
+    if (req.user.isAdmin) {
+      return this.statsService.getProjectStats(id)
+    }
+
+    return this.projectsService.getProjectSummary(id);
   }
 }
