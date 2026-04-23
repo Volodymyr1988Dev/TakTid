@@ -38,7 +38,7 @@ export class ProjectsController {
     return this.projectsService.findOne(id);
   }
 
-  //@UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   @Get(':projectId/details')
   getProjectDetails(@Param('projectId') projectId: string) {
     return this.projectsService.getProjectDetails(projectId)
