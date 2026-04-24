@@ -8,11 +8,11 @@ const ideal = ref(34)
 const result = computed(() => {
   if (!length.value) return null
   return calculateIdealSpacing(length.value, ideal.value)
-})
+})/*
 const missingFixed = computed(() => {
   if (!result.value) return 0
   return -result.value.missing
-})
+})*/
 
 function generateMarks(spacing: number, max = 200) {
   const marks: number[] = []
@@ -68,7 +68,7 @@ function getMarkStyle(mark: number, max = 200) {
         <div class="center-item">
           <small>to ideal (roof) need</small>
           <b :class="{ plus: result.missing > 0, minus: result.missing < 0 }">
-            {{ result.missing > 0 ? '+' : '' }}{{ missingFixed }} cm
+            {{ result.missing > 0 ? '+' : '' }}{{ result.missing }} cm
           </b>
         </div>
       </div>
@@ -111,19 +111,19 @@ function getMarkStyle(mark: number, max = 200) {
           <div class="sub">
             segments: {{ result.upper.segments }}
           </div>
-          <!--
           <div
             class="sub"
             :class="result.upper.missing > 0 ? 'plus' : 'minus'"
           >
             {{ result.upper.missing > 0 ? '+' : '' }}
             {{ result.upper.missing }} cm
-          </div>-->
+          </div>
+          <!--
           <div
             class="sub"
             :class="{ plus: missingFixed > 0, minus: missingFixed < 0 }">
             {{ missingFixed > 0 ? '+' : '' }}{{ missingFixed }} cm
-          </div>
+          </div>-->
           <div class="scale-2m">
             <div class="line"></div>
 
@@ -225,13 +225,14 @@ function getMarkStyle(mark: number, max = 200) {
 .mark span {
   font-size: 9px;
   white-space: nowrap;
+  transform: translateY(-4px);
 }
 
 .mark::after {
   content: '';
   display: block;
   width: 6px;
-  height: 10px;
+  height: 12px;
   background: #2563eb;
   margin: 2px auto 0;
 }
