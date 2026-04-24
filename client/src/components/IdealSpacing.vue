@@ -348,6 +348,8 @@ input {
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
+  font-size: 9px;
+  white-space: nowrap;
   /*
   left: 50%;
   transform: translateX(-50%);
