@@ -8,11 +8,7 @@ const ideal = ref(34)
 const result = computed(() => {
   if (!length.value) return null
   return calculateIdealSpacing(length.value, ideal.value)
-})/*
-const missingFixed = computed(() => {
-  if (!result.value) return 0
-  return -result.value.missing
-})*/
+})
 
 function generateMarks(spacing: number, max = 200) {
   const marks: number[] = []
@@ -118,12 +114,6 @@ function getMarkStyle(mark: number, max = 200) {
             {{ result.upper.missing > 0 ? '+' : '' }}
             {{ result.upper.missing }} cm
           </div>
-          <!--
-          <div
-            class="sub"
-            :class="{ plus: missingFixed > 0, minus: missingFixed < 0 }">
-            {{ missingFixed > 0 ? '+' : '' }}{{ missingFixed }} cm
-          </div>-->
           <div class="scale-2m">
             <div class="line"></div>
 
@@ -223,7 +213,7 @@ function getMarkStyle(mark: number, max = 200) {
 }
 
 .mark span {
-  font-size: 9px;
+  font-size: 8px;
   white-space: nowrap;
   transform: translateY(-4px);
 }
