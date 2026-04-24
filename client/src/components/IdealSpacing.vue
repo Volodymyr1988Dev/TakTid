@@ -19,7 +19,7 @@ function generateMarks(spacing: number, max = 200) {
 
   let i = 1
   while (true) {
-    const val = +(spacing * i).toFixed(1)
+    const val = +(spacing * i).toFixed(2)
     if (val > max) break
     marks.push(val)
     i++
@@ -111,13 +111,18 @@ function getMarkStyle(mark: number, max = 200) {
           <div class="sub">
             segments: {{ result.upper.segments }}
           </div>
-
+          <!--
           <div
             class="sub"
             :class="result.upper.missing > 0 ? 'plus' : 'minus'"
           >
             {{ result.upper.missing > 0 ? '+' : '' }}
             {{ result.upper.missing }} cm
+          </div>-->
+          <div
+            class="sub"
+            :class="{ plus: missingFixed > 0, minus: missingFixed < 0 }">
+            {{ missingFixed > 0 ? '+' : '' }}{{ missingFixed }} cm
           </div>
           <div class="scale-2m">
             <div class="line"></div>
