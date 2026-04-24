@@ -29,6 +29,9 @@ function getMarkStyle(mark: number, max = 200) {
     left: `${(mark / max) * 100}%`
   }
 }
+function getRow(index: number) {
+  return index % 2 // 2 рядки
+}
 </script>
 
 <template>
@@ -90,12 +93,14 @@ function getMarkStyle(mark: number, max = 200) {
             <div class="line"></div>
 
             <div
-              v-for="m in generateMarks(result.lower.spacing)"
+              v-for="(m, i) in generateMarks(result.lower.spacing)"
               :key="'l' + m"
               class="mark"
               :style="getMarkStyle(m)"
             >
-              <span>{{ m }}</span>
+              <span 
+                class="mark-label"
+                :style="{ top: `${getRow(i) * -14}px` }">{{ m }}</span>
           </div>
         </div>
         </div>
@@ -118,12 +123,14 @@ function getMarkStyle(mark: number, max = 200) {
             <div class="line"></div>
 
             <div
-              v-for="m in generateMarks(result.upper.spacing)"
+              v-for="(m, i) in generateMarks(result.upper.spacing)"
               :key="'u' + m"
               class="mark"
               :style="getMarkStyle(m)"
             >
-              <span>{{ m }}</span>
+              <span 
+                class="mark-label"
+                :style="{ top: `${getRow(i) * -14}px` }">{{ m }}</span>
             </div>
           </div>
         </div>
@@ -190,14 +197,14 @@ function getMarkStyle(mark: number, max = 200) {
   color: #dc2626;
 }
 .scale-2m {
-  margin-top: 12px;
+  margin-top: 25px /*12px*/;
   position: relative;
-  height: 40px;
+  height: 60px;
 }
 
 .scale-2m .line {
   position: absolute;
-  top: 20px;
+  top: 30px;
   left: 0;
   right: 0;
   height: 6px;
@@ -222,8 +229,24 @@ function getMarkStyle(mark: number, max = 200) {
   content: '';
   display: block;
   width: 6px;
-  height: 12px;
+  height: 10px;
   background: #2563eb;
-  margin: 2px auto 0;
+  margin: 18px auto 0;
+}
+.mark-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .scale-2m {
+    height: 70px;
+  }
+
+  .mark-label {
+    font-size: 7px; /* менше */
+  }
 }
 </style>
