@@ -35,32 +35,16 @@ function validate() {
   const len = sanitizeNumber(length.value)
   const edge = sanitizeNumber(fixedEdge.value)
 
-  if (!len) {
-    error.value = 'Length must be a valid number'
-    return false
-  }
+  if (!len) return (error.value = 'Length must be a valid number'), false
+  if (len < 60) return (error.value = 'Length must be at least 60 cm'), false
 
-  if (len < 60) {
-    error.value = 'Length must be at least 60 cm'
-    return false
-  }
-
-  // 👉 тільки якщо edge реально введений
-  if (edge !== null) {
-    if (edge < 6 || edge > 25) {
-      error.value = 'Edge must be between 6 and 25 cm'
-      return false
-    }
-
-    if (edge > len / 2) {
-      error.value = 'Edge cannot be greater than half of length'
-      return false
-    }
+  if (edge !== null && (edge < 0 || edge > len / 2)) {
+    return (error.value = 'Fixed edge must be between 0 and half of length'), false
   }
 
   error.value = null
   return true
-  }
+}
 
 const validSpacings = computed(() => {
   const len = sanitizeNumber(length.value)
@@ -191,8 +175,8 @@ function getEdgeStyle(edge: number) {
       </div>
 
       <div class="line">
-        <div class="edge-dot" :style="getEdgeStyle(result.edgeLeft)" />
-        <div class="edge-dot" :style="getEdgeStyle(length! - result.edgeRight)" />
+        <div class="edge" :style="getEdgeStyle(result.edgeLeft)" />
+        <div class="edge" :style="getEdgeStyle(length! - result.edgeRight)" />
 
         <div
           v-for="(m, i) in result.marks"
@@ -266,15 +250,6 @@ input {
   left: 50%;
   transform: translateX(-50%);
   font-size: 10px;
-}
-.edge-dot {
-  position: absolute;
-  top: -4px;
-  width: 12px;
-  height: 12px;
-  background: #1d4ed8;
-  border-radius: 50%;
-  transform: translateX(-50%);
 }
 
 .row-0 { top: -12px; }
