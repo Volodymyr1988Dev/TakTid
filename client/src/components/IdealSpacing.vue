@@ -42,9 +42,9 @@ const result = computed(() => {
         </div>
 
         <div class="center-item">
-          <small>Missing to ideal (roof)</small>
+          <small>to ideal (roof) need</small>
           <b :class="{ plus: result.missing > 0, minus: result.missing < 0 }">
-            {{ result.missing > 0 ? '+' : '' }}{{ result.missing }} cm
+            {{ result.missing < 0 ? '+' : '' }}{{ result.missing }} cm
           </b>
         </div>
       </div>
