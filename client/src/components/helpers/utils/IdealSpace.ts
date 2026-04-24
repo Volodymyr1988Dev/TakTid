@@ -20,7 +20,6 @@ export function calculateIdealSpacing(L: number, ideal: number) {
     exact,
     missing,
     lower: {
-      //spacing: round05(lowerSpacing),
       spacing: lowerSpacing,
       segments: lowerSegments,
       //diff: round05(L - lowerSegments * ideal)
