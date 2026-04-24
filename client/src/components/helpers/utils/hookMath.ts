@@ -27,7 +27,7 @@ export function getEdges(
 }
 
 export function isValidEdge(left: number, right: number): boolean {
-  return left >= 6 && right >= 6 && left <= 20 && right <= 20
+  return left >= 6 && right >= 6 && left <= 25 && right <= 25
 }
 
 export function findBestSpacingAuto(
