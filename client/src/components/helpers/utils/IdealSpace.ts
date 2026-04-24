@@ -14,7 +14,8 @@ export function calculateIdealSpacing(L: number, ideal: number) {
   const lowerSpacing = L / lowerSegments
   const upperSpacing = L / upperSegments
   //const missing = round05(perfectLength - L)
-  const missing = perfectLength - L
+  //const missing = perfectLength - L
+  const missing = L - perfectLength
   return {
     ideal,
     exact,

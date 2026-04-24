@@ -9,6 +9,26 @@ const result = computed(() => {
   if (!length.value) return null
   return calculateIdealSpacing(length.value, ideal.value)
 })
+
+function generateMarks(spacing: number, max = 200) {
+  const marks: number[] = []
+
+  let i = 1
+  while (true) {
+    const val = +(spacing * i).toFixed(2)
+    if (val > max) break
+    marks.push(val)
+    i++
+  }
+
+  return marks
+}
+
+function getMarkStyle(mark: number, max = 200) {
+  return {
+    left: `${(mark / max) * 100}%`
+  }
+}
 </script>
 
 <template>
@@ -42,7 +62,7 @@ const result = computed(() => {
         </div>
 
         <div class="center-item">
-          <small>Missing to ideal (roof)</small>
+          <small>to ideal (roof) need</small>
           <b :class="{ plus: result.missing > 0, minus: result.missing < 0 }">
             {{ result.missing > 0 ? '+' : '' }}{{ result.missing }} cm
           </b>
@@ -66,6 +86,18 @@ const result = computed(() => {
             {{ result.lower.missing > 0 ? '+' : '' }}
             {{ result.lower.missing }} cm
           </div>
+          <div class="scale-2m">
+            <div class="line"></div>
+
+            <div
+              v-for="m in generateMarks(result.lower.spacing)"
+              :key="'l' + m"
+              class="mark"
+              :style="getMarkStyle(m)"
+            >
+              <span>{{ m }}</span>
+          </div>
+        </div>
         </div>
 
         <div class="col">
@@ -75,13 +107,24 @@ const result = computed(() => {
           <div class="sub">
             segments: {{ result.upper.segments }}
           </div>
-
           <div
             class="sub"
             :class="result.upper.missing > 0 ? 'plus' : 'minus'"
           >
             {{ result.upper.missing > 0 ? '+' : '' }}
             {{ result.upper.missing }} cm
+          </div>
+          <div class="scale-2m">
+            <div class="line"></div>
+
+            <div
+              v-for="m in generateMarks(result.upper.spacing)"
+              :key="'u' + m"
+              class="mark"
+              :style="getMarkStyle(m)"
+            >
+              <span>{{ m }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -145,5 +188,42 @@ const result = computed(() => {
 
 .minus {
   color: #dc2626;
+}
+.scale-2m {
+  margin-top: 12px;
+  position: relative;
+  height: 40px;
+}
+
+.scale-2m .line {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: #cbd5f5;
+  border-radius: 6px;
+}
+
+.mark {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.mark span {
+  font-size: 8px;
+  white-space: nowrap;
+  transform: translateY(-4px);
+}
+
+.mark::after {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 12px;
+  background: #2563eb;
+  margin: 2px auto 0;
 }
 </style>
