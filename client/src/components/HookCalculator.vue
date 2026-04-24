@@ -38,13 +38,24 @@ function validate() {
   if (!len) return (error.value = 'Length must be a valid number'), false
   if (len < 60) return (error.value = 'Length must be at least 60 cm'), false
 
-  if (edge !== null && (edge < 0 || edge > len / 2)) {
-    return (error.value = 'Fixed edge must be between 0 and half of length'), false
-  }
+  //if (edge !== null && (edge < 0 || edge > len / 2)) {
+  //  return (error.value = 'Fixed edge must be between 0 and half of length'), false
+  //}
 
-  error.value = null
-  return true
-}
+  if (edge !== null) {
+    if (edge < 6 || edge > 25) {
+      error.value = 'Edge must be between 6 cm and 25 cm'
+      return false
+    }
+
+    if (edge > len / 2) {
+      error.value = 'Edge cannot be greater than half of length'
+      return false
+    }
+  }
+    error.value = null
+    return true
+  }
 
 const validSpacings = computed(() => {
   const len = sanitizeNumber(length.value)
@@ -52,7 +63,7 @@ const validSpacings = computed(() => {
 
   const list: number[] = []
 
-  for (let s = 60; s >= 10; s -= 0.5) {
+  for (let s = 60; s >= 50; s -= 0.5) {
     const spacing = round05(s)
     const segments = getSegments(len, spacing)
     if (segments < 1) continue
@@ -106,8 +117,13 @@ const spacingDrag = computed({
     isManual.value = true
     const snapped = round05(v)
 
-    if (!validSpacings.value.includes(snapped)) return
-    spacingInput.value = snapped
+    //if (!validSpacings.value.includes(snapped)) return
+    //spacingInput.value = snapped
+    const nearest = validSpacings.value.reduce((prev, curr) =>
+      Math.abs(curr - snapped) < Math.abs(prev - snapped) ? curr : prev
+    )
+
+    spacingInput.value = nearest
   }
 })
 
@@ -158,7 +174,7 @@ function getEdgeStyle(edge: number) {
 
     <div class="slider">
       <label>Spacing: {{ spacingDrag }} cm</label>
-      <input v-model.number="spacingDrag" type="range" min="10" max="60" step="0.5" />
+      <input v-model.number="spacingDrag" type="range" min="50" max="60" step="0.5" />
     </div>
 
     <div v-if="result" class="card">
@@ -170,8 +186,8 @@ function getEdgeStyle(edge: number) {
       </div>
 
       <div class="line">
-        <div class="edge" :style="getEdgeStyle(result.edgeLeft)" />
-        <div class="edge" :style="getEdgeStyle(length! - result.edgeRight)" />
+        <div class="edge-dot" :style="getEdgeStyle(result.edgeLeft)" />
+        <div class="edge-dot" :style="getEdgeStyle(length! - result.edgeRight)" />
 
         <div
           v-for="(m, i) in result.marks"
@@ -245,6 +261,15 @@ input {
   left: 50%;
   transform: translateX(-50%);
   font-size: 10px;
+}
+.edge-dot {
+  position: absolute;
+  top: -4px;
+  width: 12px;
+  height: 12px;
+  background: #1d4ed8;
+  border-radius: 50%;
+  transform: translateX(-50%);
 }
 
 .row-0 { top: -12px; }

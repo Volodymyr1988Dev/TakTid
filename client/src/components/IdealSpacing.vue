@@ -54,11 +54,12 @@ const result = computed(() => {
 function generateMarks(spacing: number, max = 200) {
   const marks: number[] = []
 
-  let i = 1
+  let i = 0
   while (true) {
     const val = +(spacing * i).toFixed(2)
     if (val > max) break
-    marks.push(val)
+    if (val !== 0) marks.push(val)
+    //marks.push(val)
     i++
   }
 
@@ -150,6 +151,7 @@ function getRow(index: number) {
               class="mark"
               :style="getMarkStyle(m)"
             >
+              <div class="dot"></div>
               <span
                 class="mark-label"
                 :style="{ top: `${getRow(i) * -14}px` }"
@@ -254,6 +256,9 @@ input {
 .center-block {
   text-align: center;
   margin-bottom: 20px;
+  padding: 10px;
+  background: #e2e8f0;
+  border-radius: 12px;
 }
 
 .center-item {
@@ -279,9 +284,10 @@ input {
 
 .col {
   background: #e2e8f0;
-  padding: 12px;
-  border-radius: 12px;
+  padding: 14px;
+  border-radius: 14px;
   text-align: center;
+  box-shadow: inset 0 0 0 1px #cbd5f5;
 }
 
 .sub {
@@ -318,6 +324,16 @@ input {
 .mark {
   position: absolute;
   transform: translateX(-50%);
+  text-align: center;
+}
+
+.mark::after {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 10px;
+  background: #2563eb;
+  margin: 4px auto 0;
 }
 
 .mark-label {
@@ -326,6 +342,13 @@ input {
   transform: translateX(-50%);
   font-size: 9px;
   white-space: nowrap;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  background: #2563eb;
+  border-radius: 50%;
+  margin: 20px auto 0;
 }
 
 /* MOBILE */
