@@ -151,7 +151,6 @@ function getRow(index: number) {
               class="mark"
               :style="getMarkStyle(m)"
             >
-              <div class="dot"></div>
               <span
                 class="mark-label"
                 :style="{ top: `${getRow(i) * -14}px` }"
