@@ -179,6 +179,14 @@ function getDotStyle(mark: number) {
   }
 }
 
+function getEdgeStyle(edge: number) {
+    if (!length.value) return { left: '0%' }
+
+    return {
+      left: `${(edge / length.value) * 100}%`
+    }
+  }
+
 watch([length, fixedEdge], () => {
   if (!isManual.value) {
     autoCalculate()
@@ -267,6 +275,20 @@ watch(spacingInput, calculate)
           @touchstart="onLineDrag"
           @touchmove="onLineDrag"
         >
+        <div
+            class="edge edge-left"
+            :style="getEdgeStyle(result.edgeLeft)"
+          >
+            <span class="edge-label">{{ result.edgeLeft }}</span>
+          </div>
+
+          <!-- RIGHT EDGE -->
+          <div
+            class="edge edge-right"
+            :style="getEdgeStyle((length ?? 0) - result.edgeRight)"
+          >
+            <span class="edge-label">{{ result.edgeRight }}</span>
+          </div>
           <div
             v-for="(m, i) in result.marks"
             :key="m"
@@ -423,5 +445,25 @@ input {
   white-space: nowrap;
   transform: translateX(-50%);
   left: 50%;
+}
+.edge {
+  position: absolute;
+  top: -20px;
+  transform: translateX(-50%);
+}
+
+.edge::before {
+  content: '';
+  width: 2px;
+  height: 20px;
+  background: red;
+  display: block;
+  margin: auto;
+}
+
+.edge-label {
+  font-size: 10px;
+  color: red;
+  white-space: nowrap;
 }
 </style>
