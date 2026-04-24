@@ -16,15 +16,8 @@ function validate() {
   const len = sanitizeNumber(length.value)
   const id = sanitizeNumber(ideal.value)
 
-  if (!len || len < 20) {
-    error.value = 'Length must be ≥ 20 cm'
-    return false
-  }
-
-  if (!id || id < 20) {
-    error.value = 'Ideal spacing must be ≥ 20 cm'
-    return false
-  }
+  if (!len || len < 20) return (error.value = 'Length ≥ 20 cm'), false
+  if (!id || id < 20) return (error.value = 'Ideal ≥ 20 cm'), false
 
   error.value = null
   return true
@@ -38,13 +31,21 @@ watch([length, ideal], () => {
 
     debouncedLength.value = length.value
     debouncedIdeal.value = ideal.value
-  }, 400)
+  }, 300)
 })
 
 const result = computed(() => {
   if (!debouncedLength.value || !debouncedIdeal.value) return null
   return calculateIdealSpacing(debouncedLength.value, debouncedIdeal.value)
 })
+/*
+function getMarkStyle(mark: number, max = 200) {
+  return { left: `${(mark / max) * 100}%` }
+}
+
+function getRow(i: number) {
+  return i % 3
+}*/
 </script>
 
 <template>
