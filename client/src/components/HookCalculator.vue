@@ -31,24 +31,21 @@ const error = ref<string | null>(null)
 
 let timer: ReturnType<typeof setTimeout> | null = null
 
-// ---------------- VALIDATION ----------------
 function validate() {
   const len = sanitizeNumber(length.value)
   const edge = sanitizeNumber(fixedEdge.value)
 
-  if (!len) return (error.value = 'Length must be a number'), false
-  if (len < 60) return (error.value = 'Length must be ≥ 60 cm'), false
+  if (!len) return (error.value = 'Length must be a valid number'), false
+  if (len < 60) return (error.value = 'Length must be at least 60 cm'), false
 
   if (edge !== null && (edge < 0 || edge > len / 2)) {
-    error.value = 'Fixed edge is out of valid range'
-    return false
+    return (error.value = 'Fixed edge must be between 0 and half of length'), false
   }
 
   error.value = null
   return true
 }
 
-// ---------------- VALID SPACINGS ----------------
 const validSpacings = computed(() => {
   const len = sanitizeNumber(length.value)
   if (!len) return []
@@ -70,7 +67,6 @@ const validSpacings = computed(() => {
   return list
 })
 
-// ---------------- CALCULATION ----------------
 function calculate() {
   const len = sanitizeNumber(length.value)
   const spacing = sanitizeNumber(spacingInput.value)
@@ -96,7 +92,6 @@ function calculate() {
   }
 }
 
-// ---------------- AUTO ----------------
 function autoCalculate() {
   const len = sanitizeNumber(length.value)
   if (!len) return
@@ -105,21 +100,17 @@ function autoCalculate() {
   if (best) spacingInput.value = best
 }
 
-// ---------------- SLIDER (FIXED) ----------------
 const spacingDrag = computed({
   get: () => spacingInput.value,
   set: (v: number) => {
     isManual.value = true
-
     const snapped = round05(v)
 
     if (!validSpacings.value.includes(snapped)) return
-
     spacingInput.value = snapped
   }
 })
 
-// ---------------- WATCH (DEBOUNCE SAFE) ----------------
 watch([length, fixedEdge, spacingInput], () => {
   if (timer) clearTimeout(timer)
 
@@ -127,15 +118,12 @@ watch([length, fixedEdge, spacingInput], () => {
     if (!validate()) return
 
     if (!isManual.value) autoCalculate()
-
     calculate()
   }, 300)
 })
 
-// ---------------- UI HELPERS ----------------
 function getLabelRow(index: number) {
   const total = result.value?.marks.length ?? 0
-
   if (total <= 10) return 0
   if (total <= 20) return index % 2
   return index % 3
@@ -153,16 +141,23 @@ function getEdgeStyle(edge: number) {
 </script>
 
 <template>
-  <div>
+  <div class="wrap">
     <h1>Hook Calculator</h1>
+
+    <div class="field">
+      <label>Length (cm)</label>
+      <input v-model.number="length" type="number" placeholder="Enter length" />
+    </div>
+
+    <div class="field">
+      <label>Fixed edge (optional)</label>
+      <input v-model.number="fixedEdge" type="number" placeholder="Enter edge" />
+    </div>
 
     <p v-if="error" class="error">{{ error }}</p>
 
-    <input v-model.number="length" type="number" placeholder="Length (cm)" />
-    <input v-model.number="fixedEdge" type="number" placeholder="Fixed edge" />
-
     <div class="slider">
-      <label>Spacing: {{ spacingDrag }}</label>
+      <label>Spacing: {{ spacingDrag }} cm</label>
       <input v-model.number="spacingDrag" type="range" min="10" max="60" step="0.5" />
     </div>
 
@@ -175,8 +170,8 @@ function getEdgeStyle(edge: number) {
       </div>
 
       <div class="line">
-        <div class="edge edge-left" :style="getEdgeStyle(result.edgeLeft)" />
-        <div class="edge edge-right" :style="getEdgeStyle(length! - result.edgeRight)" />
+        <div class="edge" :style="getEdgeStyle(result.edgeLeft)" />
+        <div class="edge" :style="getEdgeStyle(length! - result.edgeRight)" />
 
         <div
           v-for="(m, i) in result.marks"
@@ -185,11 +180,7 @@ function getEdgeStyle(edge: number) {
           :style="getDotStyle(m)"
         >
           <div class="dot" />
-
-          <span
-            class="dot-value"
-            :class="'row-' + getLabelRow(i)"
-          >
+          <span class="dot-value" :class="'row-' + getLabelRow(i)">
             {{ m }}
           </span>
         </div>
@@ -199,39 +190,47 @@ function getEdgeStyle(edge: number) {
 </template>
 
 <style scoped>
-.error {
-  color: red;
+.wrap {
+  max-width: 420px;
+  margin: auto;
+  padding: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
   margin-bottom: 10px;
 }
 
-.card {
-  margin-top: 20px;
-  padding: 12px;
-  background: #f1f5f9;
-  border-radius: 12px;
+label {
+  font-size: 12px;
+  color: #64748b;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+input {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.error {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 8px;
+  border-radius: 8px;
 }
 
 .line {
   margin-top: 40px;
   height: 10px;
   background: #cbd5f5;
-  border-radius: 8px;
+  border-radius: 10px;
   position: relative;
 }
 
 .dot-wrapper {
   position: absolute;
-  top: -10px;
   transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .dot {
@@ -246,21 +245,13 @@ function getEdgeStyle(edge: number) {
   left: 50%;
   transform: translateX(-50%);
   font-size: 10px;
-  white-space: nowrap;
 }
 
 .row-0 { top: -12px; }
-.row-1 { top: -24px; opacity: 0.8; }
-.row-2 { top: -36px; opacity: 0.6; }
+.row-1 { top: -24px; }
+.row-2 { top: -36px; }
 
-/* MOBILE FIX BACK */
 @media (max-width: 480px) {
-  .dot-value {
-    font-size: 8px;
-  }
-
-  .row-0 { top: -10px; }
-  .row-1 { top: -20px; }
-  .row-2 { top: -30px; }
+  .dot-value { font-size: 8px; }
 }
 </style>
