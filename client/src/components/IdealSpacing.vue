@@ -197,7 +197,7 @@ function getRow(index: number) {
   color: #dc2626;
 }
 .scale-2m {
-  margin-top: 12px;
+  margin-top: 25px /*12px*/;
   position: relative;
   height: 60px;
 }
