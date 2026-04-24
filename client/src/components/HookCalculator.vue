@@ -35,16 +35,20 @@ function validate() {
   const len = sanitizeNumber(length.value)
   const edge = sanitizeNumber(fixedEdge.value)
 
-  if (!len) return (error.value = 'Length must be a valid number'), false
-  if (len < 60) return (error.value = 'Length must be at least 60 cm'), false
+  if (!len) {
+    error.value = 'Length must be a valid number'
+    return false
+  }
 
-  //if (edge !== null && (edge < 0 || edge > len / 2)) {
-  //  return (error.value = 'Fixed edge must be between 0 and half of length'), false
-  //}
+  if (len < 60) {
+    error.value = 'Length must be at least 60 cm'
+    return false
+  }
 
+  // 👉 тільки якщо edge реально введений
   if (edge !== null) {
     if (edge < 6 || edge > 25) {
-      error.value = 'Edge must be between 6 cm and 25 cm'
+      error.value = 'Edge must be between 6 and 25 cm'
       return false
     }
 
@@ -53,8 +57,9 @@ function validate() {
       return false
     }
   }
-    error.value = null
-    return true
+
+  error.value = null
+  return true
   }
 
 const validSpacings = computed(() => {
