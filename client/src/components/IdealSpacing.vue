@@ -323,24 +323,36 @@ input {
 .mark {
   position: absolute;
   transform: translateX(-50%);
-  text-align: center;
 }
 
 .mark::after {
   content: '';
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: #2563eb;
+  border-radius: 50%;
+  /*
   display: block;
   width: 4px;
   height: 10px;
   background: #2563eb;
-  margin: 4px auto 0;
+  margin: 4px auto 0;*/
 }
 
 .mark-label {
   position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  /*
   left: 50%;
   transform: translateX(-50%);
   font-size: 9px;
-  white-space: nowrap;
+  white-space: nowrap;*/
 }
 .dot {
   width: 6px;
