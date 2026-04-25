@@ -151,10 +151,7 @@ function getRow(index: number) {
               class="mark"
               :style="getMarkStyle(m)"
             >
-              <span
-                class="mark-label"
-                :style="{ top: `${getRow(i) * -14}px` }"
-              >
+              <span class="mark-label" :class="getRow(i)">
                 {{ m }}
               </span>
             </div>
@@ -283,15 +280,19 @@ input {
 
 .col {
   background: #e2e8f0;
-  padding: 14px;
+  padding: 16px;
   border-radius: 14px;
   text-align: center;
   box-shadow: inset 0 0 0 1px #cbd5f5;
 }
-
+.col b {
+  font-size: 18px;
+  color: #1e293b;
+}
 .sub {
   font-size: 13px;
   margin-top: 4px;
+  color: #475569;
 }
 
 /* COLORS */
@@ -307,12 +308,18 @@ input {
 .scale {
   margin-top: 20px;
   position: relative;
-  height: 60px;
+  height: 70px;
 }
-
+.scale::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, #f1f5f9, transparent 10%, transparent 90%, #f1f5f9);
+  pointer-events: none;
+}
 .line {
   position: absolute;
-  top: 30px;
+  top: 32px;
   left: 0;
   right: 0;
   height: 6px;
@@ -328,11 +335,11 @@ input {
 .mark::after {
   content: '';
   position: absolute;
-  top: 28px;
+  top: 32px;
   left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  height: 6px;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
   background: #2563eb;
   border-radius: 50%;
   /*
@@ -344,17 +351,25 @@ input {
 }
 
 .mark-label {
-  position: absolute;
-  top: -12px;
+   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 9px;
+  font-size: 10px;
   white-space: nowrap;
+  color: #334155;
+  font-weight: 500;
   /*
   left: 50%;
   transform: translateX(-50%);
   font-size: 9px;
   white-space: nowrap;*/
+}
+.row-0 {
+  top: -14px;
+}
+
+.row-1 {
+  top: -28px;
 }
 .dot {
   width: 6px;
