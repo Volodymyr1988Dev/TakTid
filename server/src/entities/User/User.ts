@@ -73,6 +73,13 @@ export class User {
 
   @Column({ type: 'boolean', default: false })
   isAdmin!: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  CanCreateProjects!: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  SpecialCan!: boolean;
+
   @OneToMany(() => ProjectAssignment, (assignment) => assignment.user)
   assignments!: ProjectAssignment[];
   @OneToMany(() => Session, (session) => session.user)

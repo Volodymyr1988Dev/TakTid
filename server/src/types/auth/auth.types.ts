@@ -3,4 +3,6 @@ export interface AuthUser {
   email: string;
   name: string;
   isAdmin: boolean;
+  CanCreateProjects: boolean;
+  SpecialCan: boolean;
 }
