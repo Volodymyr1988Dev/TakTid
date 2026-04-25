@@ -141,6 +141,8 @@ export class SessionService {
       email: user.email,
       name: user.name,
       isAdmin: user.isAdmin,
+      CanCreateProjects: user.CanCreateProjects,
+      SpecialCan: user.SpecialCan,
     };
   }
 }

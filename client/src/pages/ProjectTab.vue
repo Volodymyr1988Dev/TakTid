@@ -29,6 +29,10 @@ const projects = computed(() => projectStore.projects)
 onMounted(() => {
   projectStore.load()
 })
+const canCreateProject = computed(() =>
+  auth.user?.isAdmin === true ||
+  auth.user?.CanCreateProjects === true
+)
 function removeProject(id: string) {
   projectStore.removeProject(id)
 }
@@ -63,7 +67,7 @@ function onProjectCreated(project: Project) {
 <template>
   <div class="projects">
     <button
-      v-if="isAdmin"
+      v-if="canCreateProject"
       class="add-project"
       @click="createModalOpen = true"
     >

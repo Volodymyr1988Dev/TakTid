@@ -15,12 +15,13 @@ import { ProjectsService } from '../services/Project';
 import { CreateProjectDto, UpdateProjectDto } from '../types/index';
 import type { AuthRequest } from '../types/index';
 import { AdminGuard } from '../types/auth/admin.guard';
+import { ProjectCreateGuard } from '../types/auth/ProjectCreate.guard';
 
 @ApiTags('Projects')
 @Controller('projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
-  @UseGuards(AdminGuard)
+  @UseGuards(ProjectCreateGuard)
   @Post()
   create(@Body() dto: CreateProjectDto) {
     return this.projectsService.create(dto);
