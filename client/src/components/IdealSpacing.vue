@@ -306,7 +306,7 @@ input {
   /*margin-top: 20px;*/
   position: relative;
   /*padding-top: 28px;*/
-  height: 60px;
+  height: 70px;
 }/*
 .scale::after {
   content: '';
@@ -321,16 +321,16 @@ input {
   /*bottom: 0;*/
   left: 0;
   right: 0;
-  height: 6px;
+  height: 4px;
   background: #cbd5f5;
-  border-radius: 6px;
+  border-radius: 4px;
   transform: translateY(-50%);
 }
 
 .mark {
   position: absolute;
   top: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
 }
 
 .mark::after {
@@ -354,15 +354,18 @@ input {
 
 .mark-label {
   position: absolute;
-  top: -6px;
+  /*top: -6px;*/
   left: 50%;
   font-size: 10px;
+  transform: translateX(-50%);
   white-space: nowrap;
   color: #334155;
   font-weight: 500;
   background: #e2e8f0;
-  padding: 1px 4px;
-  border-radius: 4px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  pointer-events: none;
   /*
   position: absolute;
   bottom: 14px;
@@ -373,22 +376,18 @@ input {
   color: #334155;
   font-weight: 500;
   top: -16px;*/
-  opacity: 0.85;
   /*
   left: 50%;
   transform: translateX(-50%);
   font-size: 9px;
   white-space: nowrap;*/
 }
-.mark:hover .mark-label {
-  opacity: 1;
-}
 .row-0 {
-  transform: translate(-50%, 0);
+  top: -18px;
 }
 
 .row-1 {
-  transform: translate(-50%, -14px);
+  top: -34px;
 }/*
 .dot {
   width: 6px;
