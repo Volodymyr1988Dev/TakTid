@@ -305,8 +305,8 @@ input {
 .scale {
   /*margin-top: 20px;*/
   position: relative;
-  padding-top: 28px;
-  height: 50px;
+  /*padding-top: 28px;*/
+  height: 60px;
 }/*
 .scale::after {
   content: '';
@@ -317,25 +317,29 @@ input {
 }*/
 .line {
   position: absolute;
-  bottom: 0;
+  top: 50%;
+  /*bottom: 0;*/
   left: 0;
   right: 0;
   height: 6px;
   background: #cbd5f5;
   border-radius: 6px;
+  transform: translateY(-50%);
 }
 
 .mark {
   position: absolute;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .mark::after {
   content: '';
   position: absolute;
-  bottom: 3px;
+  /*bottom: 3px;*/
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   width: 8px;
   height: 8px;
   background: #2563eb;
@@ -350,7 +354,7 @@ input {
 
 .mark-label {
   position: absolute;
-  bottom: 16px;
+  bottom: 14px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 10px;
@@ -363,12 +367,18 @@ input {
   font-size: 9px;
   white-space: nowrap;*/
 }
+.mark-label {
+  opacity: 0.85;
+}
+.mark:hover .mark-label {
+  opacity: 1;
+}
 .row-0 {
-  transform: translate(-50%, -2px);
+  margin-bottom: 0;
 }
 
 .row-1 {
-  transform: translate(-50%, -16px);
+  margin-bottom: 14px;
 }/*
 .dot {
   width: 6px;
