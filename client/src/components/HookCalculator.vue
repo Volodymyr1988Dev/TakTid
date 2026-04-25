@@ -168,9 +168,9 @@ function getEdgeStyle(edge: number) {
 
     <div v-if="result" class="card">
       <div class="grid">
-        <div><small>Left</small><b>{{ result.edgeLeft }}</b></div>
+        <div><small>Left edge</small><b>{{ result.edgeLeft }}</b></div>
+        <div><small>Right edge</small><b>{{ result.edgeRight }}</b></div>
         <div><small>Spacing</small><b>{{ result.spacing }}</b></div>
-        <div><small>Right</small><b>{{ result.edgeRight }}</b></div>
         <div><small>Hooks</small><b>{{ result.hooks }}</b></div>
       </div>
 
