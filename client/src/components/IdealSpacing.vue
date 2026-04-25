@@ -151,7 +151,7 @@ function getRow(index: number) {
               class="mark"
               :style="getMarkStyle(m)"
             >
-              <span class="mark-label" :class="getRow(i)">
+              <span class="mark-label" :class="`row-${getRow(i)}`">
                 {{ m }}
               </span>
             </div>
@@ -184,7 +184,7 @@ function getRow(index: number) {
               class="mark"
               :style="getMarkStyle(m)"
             >
-              <span class="mark-label" :class="getRow(i)">
+              <span class="mark-label" :class="`row-${getRow(i)}`">
                 {{ m }}
               </span>
             </div>
@@ -354,14 +354,14 @@ input {
 
 .mark-label {
   position: absolute;
-  /*top: -6px;*/
+  bottom: 100%; /* ключ! */
   left: 50%;
-  font-size: 10px;
   transform: translateX(-50%);
+  font-size: 10px;
   white-space: nowrap;
   color: #334155;
   font-weight: 500;
-  background: #e2e8f0;
+  background: #f1f5f9;
   padding: 2px 6px;
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.08);
@@ -383,11 +383,11 @@ input {
   white-space: nowrap;*/
 }
 .row-0 {
-  top: -18px;
+  margin-bottom: 6px;
 }
 
 .row-1 {
-  top: -34px;
+  margin-bottom: 20px;
 }/*
 .dot {
   width: 6px;
