@@ -354,6 +354,17 @@ input {
 
 .mark-label {
   position: absolute;
+  top: -6px;
+  left: 50%;
+  font-size: 10px;
+  white-space: nowrap;
+  color: #334155;
+  font-weight: 500;
+  background: #e2e8f0;
+  padding: 1px 4px;
+  border-radius: 4px;
+  /*
+  position: absolute;
   bottom: 14px;
   left: 50%;
   transform: translateX(-50%);
@@ -361,24 +372,23 @@ input {
   white-space: nowrap;
   color: #334155;
   font-weight: 500;
+  top: -16px;*/
+  opacity: 0.85;
   /*
   left: 50%;
   transform: translateX(-50%);
   font-size: 9px;
   white-space: nowrap;*/
 }
-.mark-label {
-  opacity: 0.85;
-}
 .mark:hover .mark-label {
   opacity: 1;
 }
 .row-0 {
-  margin-bottom: 0;
+  transform: translate(-50%, 0);
 }
 
 .row-1 {
-  margin-bottom: 14px;
+  transform: translate(-50%, -14px);
 }/*
 .dot {
   width: 6px;
