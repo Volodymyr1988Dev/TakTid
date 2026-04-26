@@ -35,7 +35,7 @@ const onSubmit = handleSubmit(async (values) => {
     <input
       v-model="email"
       type="email"
-      placeholder="t('auth.email')"
+      :placeholder="t('auth.email')"
     >
     <p 
       v-if="emailError" 
@@ -46,7 +46,7 @@ const onSubmit = handleSubmit(async (values) => {
     <input
       v-model="password"
       type="password"
-      placeholder="t('auth.password')"
+      :placeholder="t('auth.password')"
     >
     <p 
       v-if="passwordError" 
@@ -57,7 +57,7 @@ const onSubmit = handleSubmit(async (values) => {
     <input
       v-model="name"
       type="text"
-      placeholder="t('auth.name')"
+      :placeholder="t('auth.name')"
     >
     <p 
       v-if="nameError" 

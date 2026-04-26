@@ -90,13 +90,13 @@ export default {
   },
 
   hook: {
-    title: 'Калькулятор гачків',
+    title: 'Калькулятор гаків',
     length: 'Довжина',
     fixedEdge: 'Фіксований край',
     lengthPlaceholder: 'Введіть довжину',
     fixedEdgePlaceholder: 'Введіть край',
     spacing: 'Інтервал',
-    hooks: 'Гачки',
+    hooks: 'Гаки',
     left: 'Лівий край',
     right: 'Правий край',
 

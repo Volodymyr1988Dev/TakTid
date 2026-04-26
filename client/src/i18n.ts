@@ -13,7 +13,7 @@ const browserLang =
 const availableLangs = ['en', 'uk', 'sv', 'ro', 'pl']
 
 const lang =
-  savedLang ||
+  savedLang ??
   (availableLangs.includes(browserLang) ? browserLang : 'en')
 
 export const i18n = createI18n({

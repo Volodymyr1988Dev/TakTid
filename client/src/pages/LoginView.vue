@@ -2,6 +2,7 @@
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.store'
+import LanguageSwitcher from '../components/LanguageSwitcher.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -25,18 +26,19 @@ async function login() {
 </script>
 
 <template>
+  <LanguageSwitcher />
   <div class="auth">
     <h1>{{ t('auth.login') }}</h1>
 
     <input
       v-model="form.email"
       type="email"
-      placeholder="t('auth.email')"
+      :placeholder="t('auth.email')"
     >
     <input
       v-model="form.password"
       type="password"
-      placeholder="t('auth.password')"
+      :placeholder="t('auth.password')"
     >
 
     <button @click="login">
