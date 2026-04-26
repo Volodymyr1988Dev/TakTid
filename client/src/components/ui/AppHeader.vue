@@ -29,7 +29,7 @@ async function onLogout() {
       class="logout"
       @click="onLogout"
     >
-      Log out
+      {{ $t('calendar.logout') }}
     </button>
     </div>
     

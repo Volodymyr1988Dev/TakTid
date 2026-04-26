@@ -1,5 +1,6 @@
 import { i18n } from './i18n'
 //import { loadLocaleMessages } from './i18nLoader'
+import dayjs from 'dayjs'
 
 const loadedLanguages = new Set<string>()
 
@@ -14,6 +15,7 @@ export async function setLanguage(locale: string) {
   // ставимо мову
   i18n.global.locale.value = locale
 
+  dayjs.locale(locale)
   // зберігаємо
   localStorage.setItem('lang', locale)
 }
