@@ -4,7 +4,9 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useRouter } from 'vue-router'
 import { registerSchema } from '../schemas/register.schema'
 import api from '../api/axios'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const router = useRouter()
 
 const { handleSubmit, isSubmitting } = useForm({
@@ -20,20 +22,20 @@ const onSubmit = handleSubmit(async (values) => {
     await api.post('/auth/register', values)
     await router.push('/login')
   } catch (err) {
-    console.error('Register failed', err)
-    alert('Register failed: ' + (err as Error).message)
+    console.error(t('errors.registerFailed'), err)
+    alert(t('errors.registerFailed') + ': ' + (err as Error).message)
   }
 })
 </script>
 
 <template>
   <div class="auth">
-    <h1>Register</h1>
+    <h1>{{ t('auth.register') }}</h1>
 
     <input
       v-model="email"
       type="email"
-      placeholder="Email"
+      placeholder="t('auth.email')"
     >
     <p 
       v-if="emailError" 
@@ -44,7 +46,7 @@ const onSubmit = handleSubmit(async (values) => {
     <input
       v-model="password"
       type="password"
-      placeholder="Password"
+      placeholder="t('auth.password')"
     >
     <p 
       v-if="passwordError" 
@@ -55,7 +57,7 @@ const onSubmit = handleSubmit(async (values) => {
     <input
       v-model="name"
       type="text"
-      placeholder="Name"
+      placeholder="t('auth.name')"
     >
     <p 
       v-if="nameError" 
@@ -68,13 +70,13 @@ const onSubmit = handleSubmit(async (values) => {
       :disabled="isSubmitting" 
       @click="onSubmit"
     >
-      Register
+      {{ t('auth.register') }}
     </button>
 
     <p>
-      Already have account?
+      {{ t('auth.haveAccount') }}
       <router-link to="/login">
-        Log in
+        {{ t('auth.login') }}
       </router-link>
     </p>
   </div>

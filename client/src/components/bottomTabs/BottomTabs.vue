@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 const model = defineModel<'time' | 'projects' | 'list' | 'helpers' | 'stats'>()
 defineProps<{
   isAdmin: boolean
@@ -12,33 +15,33 @@ defineProps<{
         :class="{ active: model === 'time' }"
         @click="model = 'time'"
       >
-        Time
+        {{ t('tabs.time') }}
       </button>
 
       <button
         :class="{ active: model === 'projects' }"
         @click="model = 'projects'"
       >
-        Projects
+        {{ t('tabs.projects') }}
       </button>
       <button
         :class="{ active: model === 'list' }"
         @click="model = 'list'"
       >
-        List
+       {{ t('tabs.list') }}
       </button>
       <button
         v-if="isAdmin"
         :class="{ active: model === 'stats' }"
         @click="model = 'stats'"
       >
-        Stats
+        {{ t('tabs.stats') }}
       </button>
       <button
         :class="{ active: model === 'helpers' }"
         @click="model = 'helpers'"
       >
-        helpers
+        {{ t('tabs.helpers') }}
       </button>
     </nav>
   </footer>

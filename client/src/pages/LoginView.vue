@@ -2,7 +2,9 @@
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.store'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 
@@ -16,7 +18,7 @@ async function login() {
     await auth.login(form)
     router.replace('/dashboard')
   } catch (e) {
-    alert('Invalid password or email')
+    alert(t('auth.invalid'))
     console.log(e)
   }
 }
@@ -24,27 +26,27 @@ async function login() {
 
 <template>
   <div class="auth">
-    <h1>Login</h1>
+    <h1>{{ t('auth.login') }}</h1>
 
     <input
       v-model="form.email"
       type="email"
-      placeholder="Email"
+      placeholder="t('auth.email')"
     >
     <input
       v-model="form.password"
       type="password"
-      placeholder="Password"
+      placeholder="t('auth.password')"
     >
 
     <button @click="login">
-      Login
+      {{ t('auth.login') }}
     </button>
 
     <p>
-      Don't have account?
+      {{ t('auth.noAccount') }}
       <router-link to="/register">
-        Register
+        {{ t('auth.register') }}
       </router-link>
     </p>
   </div>

@@ -9,6 +9,8 @@ import type { TimeSuggestion } from '../types/Suggestion.type'
 import { TimeKind } from '../types/timeKind.enum'
 import { useProjectNavigationStore } from '../stores/projectNavigation.store'
 import { useProjectStore } from '../stores/project.store'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 const auth = useAuthStore()
 const isAdmin = computed(() => auth.user?.isAdmin === true)
@@ -71,8 +73,8 @@ function onProjectCreated(project: Project) {
       class="add-project"
       @click="createModalOpen = true"
     >
-      + Add project
-    </button>
+      {{ t('common.addProject') }}
+    </button> <!--+ Add project-->
     <div class="project-list-scroll">
       <div class="grid">
         <ProjectCard

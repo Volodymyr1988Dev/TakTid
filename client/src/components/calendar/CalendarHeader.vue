@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Dayjs } from 'dayjs'
 import { useAuthStore } from '../../stores/auth.store'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 defineProps<{
   mode: 'month' | 'week'
   current: Dayjs
@@ -28,14 +30,14 @@ function logout(): void {
         :class="{ active: mode === 'week' }"
         @click="emit('changeMode', 'week')"
       >
-        Vecka
+        {{ t('calendar.week') }}
       </button>
 
       <button
         :class="{ active: mode === 'month' }"
         @click="emit('changeMode', 'month')"
       >
-        Månad
+        {{ t('calendar.month') }}
       </button>
     </div>
 
@@ -53,7 +55,7 @@ function logout(): void {
         class="logout" 
         @click="logout"
       >
-        Log out
+        {{ t('calendar.logout') }}
       </button>
     </div>
   </div>

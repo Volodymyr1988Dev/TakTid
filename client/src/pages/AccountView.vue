@@ -7,7 +7,9 @@ import { useUserStore } from '../stores/user.store'
 import type { User } from '../types/userInterface'
 //import { useToastStore } from '../stores/toast.store'
 import { useToast } from '../components/composables/useToast'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const auth = useAuthStore()
 const userStore = useUserStore()
 const router = useRouter()
@@ -32,14 +34,14 @@ async function updateProfile(data: Partial<User> & { password?: string }) {
   try {
     await userStore.updateUser(auth.user.id, data)
 
-    toast.show('Profile updated successfully')
+    toast.show(t('toast.profileUpdated'))
 
     setTimeout(() => router.push('/dashboard'), 700)
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {
-      toast.error(e.response?.data?.message ?? 'Update failed')
+      toast.error(e.response?.data?.message ?? t('errors.updateFailed'))
     } else {
-      toast.error('Update failed')
+      toast.error(t('errors.updateFailed'))
     }
   }
 }
@@ -54,12 +56,12 @@ async function saveEmail() {
 
 async function savePassword() {
   if (password.value.length < 6) {
-    toast.error('Password must be at least 6 characters')
+    toast.error(t('toast.passwordShort'))
     return
   }
 
   if (password.value !== confirmPassword.value) {
-    toast.error('Passwords do not match')
+    toast.error(t('toast.passwordMatch'))
     return
   }
 
@@ -95,9 +97,9 @@ async function deleteUser() {
     selectedUser.value = null
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {
-      toast.error(e.response?.data?.message ?? 'Delete failed')
+      toast.error(e.response?.data?.message ?? t('errors.deleteFailed'))
     } else {
-      toast.error('Delete failed')
+      toast.error(t('errors.deleteFailed'))
     }
   }
 }
@@ -107,13 +109,13 @@ async function restoreUser(user: User) {
     await userStore.restoreUser(user.id)
 
     toast.show(
-      `User ${user.name ?? 'No name'} (${user.email}) restored successfully`
+      `User ${user.name ?? 'No name'} (${user.email}) ${t('toast.restoreSuccess')}`
     )
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {
-      toast.error(e.response?.data?.message ?? 'Restore failed')
+      toast.error(e.response?.data?.message ?? t('errors.restoreFailed'))
     } else {
-      toast.error('Restore failed')
+      toast.error(t('errors.restoreFailed'))
     }
   }
 }
@@ -122,24 +124,24 @@ async function restoreUser(user: User) {
 
 <template>
   <div class="account">
-    <h1>Account settings</h1>
+    <h1>{{ t('account.title') }}</h1>
     <div class="block">
       <input 
         v-model="name" 
-        placeholder="Name" 
+        placeholder="t('auth.name')"
       >
       <button @click="saveName">
-        Save name
+        {{ t('account.saveName') }}
       </button>
     </div>
 
     <div class="block">
       <input 
         v-model="email" 
-        placeholder="Email" 
+        placeholder="t('auth.email')" 
       >
       <button @click="saveEmail">
-        Save email
+        {{ t('account.saveEmail') }}
       </button>
     </div>
 
@@ -147,15 +149,15 @@ async function restoreUser(user: User) {
       <input
         v-model="password"
         type="password"
-        placeholder="New password"
+        placeholder="t('auth.password')"
       >
       <input
         v-model="confirmPassword"
         type="password"
-        placeholder="Confirm password"
+        placeholder="t('account.confirmPassword')"
       >
       <button @click="savePassword">
-        Save password
+        {{ t('account.savePassword') }}
       </button>
     </div>
     
@@ -163,7 +165,7 @@ async function restoreUser(user: User) {
       class="cancel" 
       @click="goToDashboard"
     >
-      Cancel
+      {{ t('account.cancel') }}
     </button>
 
     <div 
@@ -174,7 +176,7 @@ async function restoreUser(user: User) {
         class="manage" 
         @click="toggleUsers"
       >
-        Manage users
+        {{ t('account.manageUsers') }}
       </button>
 
       <div 
@@ -195,14 +197,14 @@ async function restoreUser(user: User) {
               class="delete"
               @click="confirmDelete(user)"
             >
-              Delete
+              {{ t('common.delete') }}
             </button>
 
             <button
               class="restore"
               @click="restoreUser(user)"
             >
-              Restore
+              {{ t('account.restore') }}
             </button>
           </div>
         </div>
@@ -215,19 +217,17 @@ async function restoreUser(user: User) {
     >
       <div class="modal-content">
         <p>
-          Are you sure you want to delete
-          {{ selectedUser.name ?? 'User' }}
-          ({{ selectedUser.email }})?
+          {{ t('account.confirmDelete', { name: selectedUser.name ?? 'User', email: selectedUser.email }) }}
         </p>
 
         <button 
           class="delete" 
           @click="deleteUser"
         >
-          Yes
+          {{ t('common.yes') }}
         </button>
         <button @click="selectedUser = null">
-          No
+          {{ t('common.no') }}
         </button>
       </div>
     </div>
