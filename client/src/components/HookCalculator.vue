@@ -10,7 +10,9 @@ import {
 } from './helpers/utils/hookMath'
 
 import { sanitizeNumber } from './helpers/helpers'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 type Result = {
   edgeLeft: number
   edgeRight: number
@@ -35,11 +37,11 @@ function validate() {
   const len = sanitizeNumber(length.value)
   const edge = sanitizeNumber(fixedEdge.value)
 
-  if (!len) return (error.value = 'Length must be a valid number'), false
-  if (len < 60) return (error.value = 'Length must be at least 60 cm'), false
+  if (!len) return (error.value = t('hook.errors.lengthNumber')), false
+  if (len < 60) return (error.value = t('hook.errors.length')), false
 
   if (edge !== null && (edge < 0 || edge > len / 2)) {
-    return (error.value = 'Fixed edge must be between 0 and half of length'), false
+    return (error.value = t('hook.errors.edge')), false
   }
 
   error.value = null
@@ -147,22 +149,22 @@ function getEdgeStyle(edge: number) {
 
 <template>
   <div class="wrap">
-    <h1>Hook Calculator</h1>
+    <h1>{{ t('hook.title') }}</h1>
 
     <div class="field">
-      <label>Length (cm)</label>
-      <input v-model.number="length" type="number" placeholder="Enter length" />
+      <label>{{ t('hook.length') }}</label>
+      <input v-model.number="length" type="number" placeholder="{{ t('hook.lengthPlaceholder') }}" />
     </div>
 
     <div class="field">
-      <label>Fixed edge (optional)</label>
-      <input v-model.number="fixedEdge" type="number" placeholder="Enter edge" />
+      <label>{{ t('hook.fixedEdge') }}</label>
+      <input v-model.number="fixedEdge" type="number" placeholder="{{ t('hook.fixedEdgePlaceholder') }}" />
     </div>
 
     <p v-if="error" class="error">{{ error }}</p>
 
     <div class="slider">
-      <label>Spacing: {{ spacingDrag }} cm</label>
+      <label>{{ t('hook.spacing') }}: {{ spacingDrag }} cm</label>
       <input v-model.number="spacingDrag" type="range" min="50" max="60" step="0.5" />
     </div>
 

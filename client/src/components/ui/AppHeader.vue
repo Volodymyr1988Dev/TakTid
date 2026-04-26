@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '../../stores/auth.store'
 import { useRouter } from 'vue-router'
+import LanguageSwitcher from '../LanguageSwitcher.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -13,7 +14,9 @@ async function onLogout() {
 
 <template>
   <header class="app-header">
-    <div class="spacer" />
+    <div class="wraper-header">
+      <div class="spacer" />
+      <LanguageSwitcher />
     <button
       v-if="auth.isAuthenticated"
       class="settings"
@@ -28,6 +31,8 @@ async function onLogout() {
     >
       Log out
     </button>
+    </div>
+    
   </header>
 </template>
 
@@ -46,6 +51,7 @@ async function onLogout() {
   background: transparent;
   /*border-bottom: 1px solid #e5e5e5;*/
   z-index: 100;
+  backdrop-filter: blur(6px);
 }
 
 .spacer {
@@ -64,5 +70,12 @@ async function onLogout() {
   font-size: 18px;
   cursor: pointer;
   margin-right: 12px;
+}
+.wraper-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
 }
 </style>
