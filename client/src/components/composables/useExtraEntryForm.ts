@@ -8,7 +8,9 @@ import type { ExtraForm } from '../../types/Form.types'
 import { TimeKind } from '../../types/timeKind.enum'
 import { normalizeBreakMinutes } from '../helpers/time'
 import { useToast } from './useToast'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 export function useExtraEntryForm(props: {
   date: string
   entry?: ExtraDayEntry | null,
@@ -77,9 +79,9 @@ async function save(): Promise<DayEntry | null> {
       try {
         breakMin = normalizeBreakMinutes(breakMinutesRef.value)
       } catch {
-        toast.error('Break must be a valid number')
+        toast.error(t('errors.breakNumber'))
         isSavingRef.value = false
-        throw new Error('Invalid break')
+        throw new Error(t('errors.invalidBreak'))
       }
   try {
     let saved
@@ -103,13 +105,13 @@ async function save(): Promise<DayEntry | null> {
     }
 
     if (!saved.project) {
-      throw new Error('Saved assignment has no project')
+      throw new Error(t('errors.noProject'))
     }
 
     try {
       await images.upload(props.projectId.value)
     } catch (e) {
-      console.error('[Images] upload failed', e)
+      console.error('[Images] ' + t('errors.imageUploadFailed'), e)
     }
 
     return {
@@ -130,7 +132,7 @@ async function save(): Promise<DayEntry | null> {
 }
   async function remove() {
     if (!isEdit.value) return
-    if (!confirm('Delete extra work?')) return
+    if (!confirm(t('errors.deleteExtraWork'))) return
     await assignmentStore.remove(props.entry!.id)
   }
 

@@ -153,12 +153,18 @@ function getEdgeStyle(edge: number) {
 
     <div class="field">
       <label>{{ t('hook.length') }}</label>
-      <input v-model.number="length" type="number" placeholder="{{ t('hook.lengthPlaceholder') }}" />
+      <input 
+        v-model.number="length" 
+        type="number" 
+        :placeholder="t('hook.lengthPlaceholder')" />
     </div>
 
     <div class="field">
       <label>{{ t('hook.fixedEdge') }}</label>
-      <input v-model.number="fixedEdge" type="number" placeholder="{{ t('hook.fixedEdgePlaceholder') }}" />
+      <input 
+        v-model.number="fixedEdge" 
+        type="number" 
+        :placeholder="t('hook.fixedEdgePlaceholder')" />
     </div>
 
     <p v-if="error" class="error">{{ error }}</p>

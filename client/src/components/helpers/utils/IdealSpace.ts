@@ -13,8 +13,6 @@ export function calculateIdealSpacing(L: number, ideal: number) {
 
   const lowerSpacing = L / lowerSegments
   const upperSpacing = L / upperSegments
-  //const missing = round05(perfectLength - L)
-  //const missing = perfectLength - L
   const missing = L - perfectLength
   return {
     ideal,
@@ -23,21 +21,14 @@ export function calculateIdealSpacing(L: number, ideal: number) {
     lower: {
       spacing: lowerSpacing,
       segments: lowerSegments,
-      //diff: round05(L - lowerSegments * ideal)
       diff: lowerDiff,
-      //diff: round05(lowerDiff),
-      //missing: round05(lowerDiff)
       missing: lowerDiff
     },
 
     upper: {
-      //spacing: round05(upperSpacing),
       spacing: upperSpacing,
       segments: upperSegments,
-      //diff: round05(L - upperSegments * ideal)
-      //diff: round05(upperDiff),
       diff: upperDiff,
-      //missing: round05(upperDiff)
       missing: upperDiff
     }
   }

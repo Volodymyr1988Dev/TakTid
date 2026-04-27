@@ -61,7 +61,7 @@ async function ensureDetails(userId: string) {
   const detail = stats.details[key]
 
   if (!detail) {
-    throw new Error('Failed to load user details')
+    throw new Error(t('stats.errors.loadUserDetails'))
   }
 
   return detail
@@ -140,7 +140,7 @@ async function load() {
     detailsOpen.value = {}
     await stats.loadMonth(year.value, month.value)
   } catch (e) {
-    toast.error(t('stats.errors.load')) //Failed to load statistics
+    toast.error(t('stats.errors.load'))
     console.error(e)
   } finally {
     isLoading.value = false
@@ -190,17 +190,17 @@ async function exportAllExcel() {
 
 function validateInputs(): boolean {
   if (!Number.isInteger(year.value) || year.value < 2025) {
-    toast.error('Year must be a valid number greater than 2025')
+    toast.error(t('stats.errors.year'))
     return false
   }
 
   if (!Number.isInteger(month.value)) {
-    toast.error('Month must be a valid number')
+    toast.error(t('stats.errors.monthValid'))
     return false
   }
 
   if (month.value < 1 || month.value > 12) {
-    toast.error('Month must be between 1 and 12')
+    toast.error(t('stats.errors.monthRange'))
     return false
   }
 
@@ -415,15 +415,15 @@ onMounted(load)
           <strong>{{ getUserName(u.user) }}
           </strong>
           <br>
-          Work: {{ u.workHours }}h |
-          Extra: {{ u.extraHours }}h |
-          Total Work: {{ u.workHours + u.extraHours }}h |
-          Total Work + Red Day: {{ u.workHours + u.extraHours + u.redDayHours }}h |
-          Meeting: {{ u.meetingHours }}h |
-          Sick: {{ u.sickHours }}h |
-          Vacation: {{ u.vacationHours }}h |
-          Red Day: {{ u.redDayHours }}h |
-          VAB: {{ u.vabHours /*|| 0*/ }}h
+          {{ t('stats.work') }}: {{ u.workHours }}h |
+          {{ t('stats.extra') }}: {{ u.extraHours }}h |
+          {{ t('stats.totalWork') }}: {{ u.workHours + u.extraHours }}h |
+          {{ t('stats.totalWorkRedDay') }}: {{ u.workHours + u.extraHours + u.redDayHours }}h |
+          {{ t('stats.meeting') }}: {{ u.meetingHours }}h |
+          {{ t('stats.sick') }}: {{ u.sickHours }}h |
+          {{ t('stats.vacation') }}: {{ u.vacationHours }}h |
+          {{ t('stats.redDay') }}: {{ u.redDayHours }}h |
+          {{ t('stats.vab') }}: {{ u.vabHours /*|| 0*/ }}h
         </div>
         <div>{{ u.totalHours }} h</div>
       </div>
@@ -432,7 +432,7 @@ onMounted(load)
         v-if="expanded[u.user.id]"
       >
         <button @click="toggleDetails(u.user.id)">
-          {{ detailsOpen[u.user.id] ? 'Hide Details' : 'Details' }}
+          {{ detailsOpen[u.user.id] ? t('stats.hideDetails') : t('stats.details') }}
         </button>
         <!--stats.details[u.user.id]  ${u.user.id}-${year}-${month}-->
         <div 

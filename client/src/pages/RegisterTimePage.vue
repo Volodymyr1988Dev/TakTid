@@ -2,7 +2,9 @@
 import RegisterTabs from '../components/tabs/RegisterTabs.vue'
 import type { Dayjs } from 'dayjs'
 import type { TimeSuggestion } from '../types/Suggestion.type'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 defineProps<{ day: Dayjs }>()
 
 const emit = defineEmits<{
@@ -15,9 +17,9 @@ const emit = defineEmits<{
   <div class="register-page">
     <header>
       <button @click="emit('close')">
-        ← Back
+        ← {{ t('common.back') }}
       </button>
-      Register time
+      {{ t('common.registerTime') }}
     </header>
 
     <RegisterTabs

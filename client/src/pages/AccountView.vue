@@ -128,7 +128,7 @@ async function restoreUser(user: User) {
     <div class="block">
       <input 
         v-model="name" 
-        placeholder="t('auth.name')"
+        :placeholder="t('auth.name')"
       >
       <button @click="saveName">
         {{ t('account.saveName') }}
@@ -138,7 +138,7 @@ async function restoreUser(user: User) {
     <div class="block">
       <input 
         v-model="email" 
-        placeholder="t('auth.email')" 
+        :placeholder="t('auth.email')" 
       >
       <button @click="saveEmail">
         {{ t('account.saveEmail') }}
@@ -149,12 +149,12 @@ async function restoreUser(user: User) {
       <input
         v-model="password"
         type="password"
-        placeholder="t('auth.password')"
+        :placeholder="t('auth.password')"
       >
       <input
         v-model="confirmPassword"
         type="password"
-        placeholder="t('account.confirmPassword')"
+        :placeholder="t('account.confirmPassword')"
       >
       <button @click="savePassword">
         {{ t('account.savePassword') }}

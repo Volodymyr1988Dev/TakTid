@@ -6,7 +6,9 @@ import type { MeetingForm } from '../../types/Form.types'
 import type { MeetingDayEntry } from '../../types/DayEntry.type'
 import { normalizeBreakMinutes } from '../helpers/time'
 import { useToast } from './useToast'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 export function useMeetingEntryForm(props: {
   date: string
   entry?: MeetingDayEntry | null
@@ -46,9 +48,9 @@ export function useMeetingEntryForm(props: {
         try {
           breakMin = normalizeBreakMinutes(breakMinutesRef.value)
         } catch {
-          toast.error('Break must be a valid number')
+          toast.error(t('errors.breakNumber'))
           isSavingRef.value = false
-          throw new Error('Invalid break')
+          throw new Error(t('errors.invalidBreak'))
         }
     try {
       const payload = {

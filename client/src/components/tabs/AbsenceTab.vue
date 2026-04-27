@@ -2,7 +2,9 @@
 import { TimeKind } from '../../types/timeKind.enum'
 import type { TimeSuggestion } from '../../types/Suggestion.type'
 import type { AbsenceKind } from '../../types/timeKind.enum'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const emit = defineEmits<{
   (e: 'select', s: TimeSuggestion): void
 }>()
@@ -22,33 +24,33 @@ function select(type: AbsenceKind, title: string) {
       class="card"
       @click="select(TimeKind.SICK, 'Sick')"
     >
-      <strong>Sick</strong>
+      <strong>{{ t('stats.sick') }}</strong>
     </div>
 
     <div
       class="card"
       @click="select(TimeKind.VAB, 'VAB')"
     >
-      <strong>VAB</strong>
+      <strong>{{ t('stats.vab') }}</strong>
     </div>
 
     <div
       class="card"
       @click="select(TimeKind.VACATION, 'Vacation')"
     >
-      <strong>Vacation</strong>
+      <strong>{{ t('stats.vacation') }}</strong>
     </div>
     <div
       class="card"
       @click="select(TimeKind.DAY_OFF, 'Day off')"
     >
-      <strong>Day Off</strong>
+      <strong>{{ t('stats.dayOff') }}</strong>
     </div>
     <div
       class="card"
       @click="select(TimeKind.RED_DAY, 'Red Day')"
     >
-      <strong>Red Day</strong>
+      <strong>{{ t('stats.redDay') }}</strong>
     </div>
   </div>
 </template>

@@ -1,10 +1,192 @@
 export default {
   common: {
+    title: 'Titlu',
     addProject: 'Adaugă proiect',
     delete: 'Șterge',
+    back: 'Înapoi',
+    create: 'Creează',
+    loading: 'Se încarcă...',
+    error: 'Ceva nu a mers bine',
+    yes: 'Da',
+    no: 'Nu',
+    save: 'Salvează',
+    cancel: 'Anulează',
+    edit: 'Editează',
+    deleteConfirm: 'Ești sigur?',
+    registerTime: 'Înregistrează timp',
   },
+
   project: {
     title: 'Proiecte',
     create: 'Creează proiect',
+    add: 'Adaugă proiect',
+    city: 'Oraș',
+    address: 'Adresă',
+    confirmDelete: 'Ești sigur?',
+    info: 'Info',
+    back: 'Înapoi',
+    hideImages: 'Ascunde imagini',
+    showImages: 'Arată imagini',
+  },
+
+  auth: {
+    login: 'Autentificare',
+    register: 'Înregistrare',
+    email: 'Email',
+    password: 'Parolă',
+    name: 'Nume',
+    noAccount: 'Nu ai cont?',
+    haveAccount: 'Ai deja cont?',
+    invalid: 'Email sau parolă incorectă',
+    registerFailed: 'Înregistrare eșuată'
+  },
+
+  stats: {
+    title: 'Statistici',
+    year: 'An',
+    month: 'Lună',
+    load: 'Încarcă',
+    exportExcel: 'Export Excel',
+    exportPDF: 'Export PDF',
+    details: 'Detalii',
+    hideDetails: 'Ascunde detalii',
+
+    work: 'Muncă',
+    extra: 'Extra',
+    extraWork: 'Muncă extra',
+    meeting: 'Ședință',
+    sick: 'Concediu medical',
+    vacation: 'Vacanță',
+    vab: 'Îngrijire copil',
+    redDay: 'Zi liberă',
+    dayOff: 'Zi liberă',
+    total: 'Total',
+    absence: 'Absență',
+
+    period: 'Perioadă',
+    user: 'Utilizator',
+    monthlyReport: 'Raport lunar',
+
+    workWithExtra: 'Muncă + Extra',
+    workWithRedDay: 'Muncă + Zi liberă',
+    totalWithRedDay: 'Total + Zi liberă',
+
+    errors: {
+      load: 'Eroare la încărcare',
+      year: 'An ≥ 2025',
+      month: 'Lună 1-12',
+    }
+  },
+
+  tabs: {
+    time: 'Timp',
+    projects: 'Proiecte',
+    list: 'Listă',
+    stats: 'Statistici',
+    helpers: 'Instrumente',
+    suggestions: 'Sugestii',
+    internal: 'Intern',
+    absence: 'Absență',
+  },
+
+  calculator: {
+    idealSpacing: 'Spațiere ideală (cm)',
+    length: 'Lungime (cm)',
+    spacing: 'Spațiere (cm)',
+    errorLength: 'Lungime ≥ 20 cm',
+    errorSpacing: 'Spațiere ≥ 20 cm',
+    errorIdeal: 'Spațiere ≥ 20 cm',
+
+    exact: 'Exact',
+    ideal: 'Ideal',
+    difference: 'Diferență',
+    lower: 'Mai mic',
+    upper: 'Mai mare',
+    segments: 'Segmente',
+  },
+
+  hook: {
+    title: 'Calculator cârlige',
+    length: 'Lungime',
+    fixedEdge: 'Margine fixă',
+    lengthPlaceholder: 'Introdu lungimea',
+    fixedEdgePlaceholder: 'Introdu marginea',
+    spacing: 'Spațiere',
+    hooks: 'Cârlige',
+    left: 'Stânga',
+    right: 'Dreapta',
+
+    errors: {
+      length: 'Lungime ≥ 60 cm',
+      edge: 'Valoare invalidă',
+      lengthNumber: 'Număr invalid',
+    }
+  },
+
+  errors: {
+    unauthorized: 'Neautorizat',
+    forbidden: 'Interzis',
+    registerFailed: 'Eroare la înregistrare',
+    updateFailed: 'Eroare la actualizare',
+    deleteFailed: 'Eroare la ștergere',
+    restoreFailed: 'Eroare la restaurare',
+    breakNumber: 'Număr invalid',
+    invalidBreak: 'Pauză invalidă',
+    noProject: 'Fără proiect',
+    imageUploadFailed: 'Upload eșuat',
+    deleteExtraWork: 'Ștergi munca extra?',
+    noProjectId: 'Necesită projectId',
+    accessDenied: 'Acces interzis',
+    loadStats: 'Eroare stats',
+    loadUserDetails: 'Eroare user',
+    monthValid: 'Lună invalidă',
+    monthRange: 'Lună 1-12',
+  },
+
+  account: {
+    title: 'Setări cont',
+    saveName: 'Salvează nume',
+    saveEmail: 'Salvează email',
+    savePassword: 'Salvează parolă',
+    cancel: 'Anulează',
+    manageUsers: 'Gestionare utilizatori',
+    deleteConfirm: 'Sigur vrei să ștergi',
+    deleted: 'șters cu succes',
+    restored: 'restaurat cu succes',
+    passwordShort: 'Minim 6 caractere',
+    passwordMatch: 'Parolele nu coincid',
+    confirmPassword: 'Confirmă parola',
+    restore: 'Restaurare',
+  },
+
+  calendar: {
+    week: 'Săptămână',
+    month: 'Lună',
+    logout: 'Deconectare',
+    comment: 'Comentariu',
+    save: 'Salvează'
+  },
+
+  week: {
+    mon: 'Lu',
+    tue: 'Ma',
+    wed: 'Mi',
+    thu: 'Jo',
+    fri: 'Vi',
+    sat: 'Sâ',
+    sun: 'Du',
+  },
+
+  toast: {
+    profileUpdated: 'Profil actualizat',
+    passwordShort: 'Minim 6 caractere',
+    passwordMatch: 'Parole diferite',
+    deleteFailed: 'Eroare ștergere',
+    updateFailed: 'Eroare actualizare',
+    restoreFailed: 'Eroare restaurare',
+    restoreSuccess: 'Restaurat',
+    success: 'Succes',
+    error: 'Eroare',
+    loadProjectStats: 'Eroare statistici'
   }
 }

@@ -88,12 +88,20 @@ function getRow(index: number) {
     <div class="inputs">
       <div class="field">
         <label>{{ t('calculator.length') }}</label>
-        <input v-model.number="length" type="number" placeholder="{{ t('calculator.length') }}" />
+        <input 
+          v-model.number="length" 
+          type="number"
+          :placeholder="t('calculator.length')"
+        />
       </div>
 
       <div class="field">
         <label>{{ t('calculator.idealSpacing') }}</label>
-        <input v-model.number="ideal" type="number" placeholder="{{ t('calculator.idealSpacing') }}" />
+        <input 
+          v-model.number="ideal" 
+          type="number" 
+          :placeholder="t('calculator.idealSpacing')" 
+        />
       </div>
     </div>
 

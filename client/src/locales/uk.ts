@@ -1,5 +1,6 @@
 export default {
   common: {
+    title: 'Заголовок',
     addProject: 'Додати проект',
     delete: 'Видалити',
     back: 'Назад',
@@ -8,15 +9,24 @@ export default {
     error: 'Щось пішло не так',
     yes: 'Так',
     no: 'Ні',
+    save: 'Зберегти',
+    cancel: 'Скасувати',
+    edit: 'Редагувати',
+    deleteConfirm: 'Ви впевнені?',
+    registerTime: 'Зареєструвати час',
   },
 
   project: {
     title: 'Проекти',
     create: 'Створити проект',
+    add: 'Додати проект',
     city: 'Місто',
     address: 'Адреса',
     confirmDelete: 'Ви впевнені?',
     info: 'Інформація',
+    back: 'Назад',
+    hideImages: 'Сховати зображення',
+    showImages: 'Показати зображення',
   },
 
   auth: {
@@ -28,7 +38,7 @@ export default {
     noAccount: 'Немає акаунту?',
     haveAccount: 'Вже є акаунт?',
     invalid: 'Невірний email або пароль',
-    registerFailed: 'Помилка реєстрації',
+    registerFailed: 'Помилка реєстрації'
   },
 
   stats: {
@@ -43,12 +53,15 @@ export default {
 
     work: 'Робота',
     extra: 'Переробка',
+    extraWork: 'Додаткова робота',
     meeting: 'Зустріч',
     sick: 'Лікарняний',
     vacation: 'Відпустка',
     vab: 'Догляд за дитиною',
     redDay: 'Святковий день',
+    dayOff: 'Вихідний',
     total: 'Всього',
+    absence: 'Відсутність',
 
     period: 'Період',
     user: 'Користувач',
@@ -59,9 +72,9 @@ export default {
     totalWithRedDay: 'Всього + Свято',
 
     errors: {
-      load: 'Помилка завантаження',
+      load: 'Помилка завантаження статистики',
       year: 'Рік має бути ≥ 2025',
-      month: 'Місяць від 1 до 12',
+      month: 'Місяць має бути від 1 до 12',
     }
   },
 
@@ -71,15 +84,18 @@ export default {
     list: 'Список',
     stats: 'Статистика',
     helpers: 'Інструменти',
+    suggestions: 'Пропозиції',
+    internal: 'Внутрішнє',
+    absence: 'Відсутність',
   },
 
   calculator: {
     idealSpacing: 'Ідеальний інтервал (см)',
     length: 'Довжина (см)',
     spacing: 'Інтервал (см)',
-    errorLength: 'Довжина ≥ 20 см',
-    errorSpacing: 'Інтервал ≥ 20 см',
-    errorIdeal: 'Інтервал ≥ 20 см',
+    errorLength: 'Довжина має бути ≥ 20 см',
+    errorSpacing: 'Інтервал має бути ≥ 20 см',
+    errorIdeal: 'Ідеальний інтервал має бути числом і ≥ 20 см',
 
     exact: 'Точний',
     ideal: 'Ідеальний',
@@ -101,10 +117,30 @@ export default {
     right: 'Правий край',
 
     errors: {
-      length: 'Довжина ≥ 60 см',
-      edge: 'Невірний край',
-      lengthNumber: 'Некоректне число',
+      length: 'Довжина має бути ≥ 60 см',
+      edge: 'Невірне значення краю',
+      lengthNumber: 'Довжина має бути числом',
     }
+  },
+
+  errors: {
+    unauthorized: 'Не авторизовано',
+    forbidden: 'Заборонено',
+    registerFailed: 'Помилка реєстрації',
+    updateFailed: 'Помилка оновлення',
+    deleteFailed: 'Помилка видалення',
+    restoreFailed: 'Помилка відновлення',
+    breakNumber: 'Перерва має бути числом',
+    invalidBreak: 'Невірна перерва',
+    noProject: 'Збережений запис не має проекту',
+    imageUploadFailed: 'Помилка завантаження зображення',
+    deleteExtraWork: 'Видалити додаткову роботу?',
+    noProjectId: 'WORK вимагає projectId',
+    accessDenied: 'Доступ заборонено',
+    loadStats: 'Помилка завантаження статистики',
+    loadUserDetails: 'Помилка завантаження даних користувача',
+    monthValid: 'Місяць має бути числом',
+    monthRange: 'Місяць має бути від 1 до 12',
   },
 
   account: {
@@ -117,9 +153,9 @@ export default {
     deleteConfirm: 'Ви впевнені, що хочете видалити',
     deleted: 'успішно видалено',
     restored: 'успішно відновлено',
-    passwordShort: 'Пароль мінімум 6 символів',
+    passwordShort: 'Пароль має бути мінімум 6 символів',
     passwordMatch: 'Паролі не співпадають',
-    confirmPassword: 'Підтвердити пароль',
+    confirmPassword: 'Підтвердіть пароль',
     restore: 'Відновити',
   },
 
@@ -128,7 +164,7 @@ export default {
     month: 'Місяць',
     logout: 'Вийти',
     comment: 'Коментар',
-    save: 'Зберегти',
+    save: 'Зберегти'
   },
 
   week: {
@@ -141,22 +177,16 @@ export default {
     sun: 'Нд',
   },
 
-  errors: {
-    unauthorized: 'Не авторизовано',
-    forbidden: 'Заборонено',
-    registerFailed: 'Помилка реєстрації',
-    updateFailed: 'Помилка оновлення',
-    deleteFailed: 'Помилка видалення',
-    restoreFailed: 'Помилка відновлення',
-  },
-
   toast: {
-    profileUpdated: 'Профіль оновлено',
-    passwordShort: 'Пароль мінімум 6 символів',
+    profileUpdated: 'Профіль успішно оновлено',
+    passwordShort: 'Пароль має бути мінімум 6 символів',
     passwordMatch: 'Паролі не співпадають',
     deleteFailed: 'Помилка видалення',
     updateFailed: 'Помилка оновлення',
     restoreFailed: 'Помилка відновлення',
     restoreSuccess: 'Успішно відновлено',
+    success: 'Успіх',
+    error: 'Помилка',
+    loadProjectStats: 'Не вдалося завантажити статистику проекту'
   }
 }
