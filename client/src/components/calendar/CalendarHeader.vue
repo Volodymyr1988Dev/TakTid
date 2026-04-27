@@ -44,7 +44,7 @@ function logout(): void {
     <div class="center">
       {{ mode === 'month'
         ? current.format('MMMM YYYY')
-        : t('calendar.weekLabel', { num: current.week() }) }}//`${t('calendar.week')} ${current.week()}` }}
+        : t('calendar.weekLabel', { num: current.week() }) }}
     </div>
 
     <div 

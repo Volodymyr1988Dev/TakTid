@@ -148,6 +148,11 @@ export default {
     unavailableAbsence: 'Nie można utworzyć nieobecności, ponieważ dzień jest już wypełniony pracą',
     twoAbsences: 'Nie można dodać dwóch nieobecności w jednym dniu',
     dayContains8Hours: 'Dzień zawiera już 8 godzin pracy',
+    saveFailed: 'Zapisywanie nie powiodło się',
+    removing: 'Usuwanie… proszę czekać',
+    saving: 'Zapisywanie… proszę czekać',
+    loading: 'Ładowanie… proszę czekać',
+    clickToSelectProject: 'Kliknij, aby wybrać projekt',
     
   },
 
@@ -173,7 +178,8 @@ export default {
     month: 'Miesiąc',
     logout: 'Wyloguj',
     comment: 'Komentarz',
-    save: 'Zapisz'
+    save: 'Zapisz',
+    date: 'Data',
   },
 
   week: {
@@ -196,6 +202,9 @@ export default {
     restoreSuccess: 'Przywrócono pomyślnie',
     success: 'Sukces',
     error: 'Błąd',
-    loadProjectStats: 'Błąd ładowania statystyk projektu'
+    loadProjectStats: 'Błąd ładowania statystyk projektu',
+    registerAbsence: 'Zarejestruj nieobecność',
+    editTime: 'Edytuj czas',
+    registerTime: 'Zarejestruj czas',
   }
 }
