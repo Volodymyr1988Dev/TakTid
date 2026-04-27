@@ -81,8 +81,8 @@ onBeforeUnmount(() => {
       >
         <span class="flag">{{ lang.flag }}</span>
         <span class="label">{{ lang.label }}</span>
-        <span v-if="lang.code === currentLocale" class="check">✓</span>
-        <!--locale-->
+        <span v-if="lang.code === locale" class="check">✓</span>
+        <!--locale currentLocale-->
       </div>
     </div>
   </div>
