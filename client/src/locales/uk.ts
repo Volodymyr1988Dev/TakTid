@@ -34,7 +34,7 @@ export default {
     register: 'Реєстрація',
     email: 'Email',
     password: 'Пароль',
-    name: "Ім’я",
+    name: "Найменування",
     noAccount: 'Немає акаунту?',
     haveAccount: 'Вже є акаунт?',
     invalid: 'Невірний email або пароль',
@@ -67,7 +67,7 @@ export default {
     user: 'Користувач',
     monthlyReport: 'Місячний звіт',
 
-    workWithExtra: 'Робота + Переробка',
+    workWithExtra: 'Робота + Екстра',
     workWithRedDay: 'Робота + Свято',
     totalWithRedDay: 'Всього + Свято',
 
@@ -145,7 +145,7 @@ export default {
 
   account: {
     title: 'Налаштування акаунту',
-    saveName: "Зберегти ім’я",
+    saveName: "Зберегти найменування",
     saveEmail: 'Зберегти email',
     savePassword: 'Зберегти пароль',
     cancel: 'Скасувати',
