@@ -144,6 +144,10 @@ export default {
     loadUserDetails: 'Failed to load user details',
     monthValid: 'Month must be a valid number',
     monthRange: 'Month must be between 1 and 12',
+    emailValid: 'Not valid email',
+    passwordMin: 'Password must be at least 6 characters',
+    passwordMax: 'Password must be at most 25 characters',
+    nameMin: 'Name must be at least 2 characters',
   },
   account: {
     title: 'Account settings',
