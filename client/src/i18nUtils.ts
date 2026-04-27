@@ -43,6 +43,7 @@ export async function setLanguage(locale: string) {
 */
 export async function setLanguage(locale: string) {
   let lang = locale as keyof typeof loaders
+  try{
 
   if (!(lang in loaders)) {
     lang = 'en'
@@ -61,6 +62,12 @@ export async function setLanguage(locale: string) {
   i18n.global.locale.value = lang
   dayjs.locale(lang)
   localStorage.setItem('lang', lang)
+  }
+  catch(e){
+    console.error('LANG LOAD ERROR:', lang, e)
+    //locale = 'en'
+  }
+  
 }
 export async function initLanguage() {
   const saved = localStorage.getItem('lang') || 'en'
