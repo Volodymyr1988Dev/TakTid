@@ -2,7 +2,9 @@
 import { ref, computed, watch } from 'vue'
 import { calculateIdealSpacing } from './helpers/utils/IdealSpace'
 import { sanitizeNumber } from './helpers/helpers'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 // ---------------- STATE ----------------
 const length = ref<number | null>(null)
 const ideal = ref<number | null>(34)
@@ -19,12 +21,12 @@ function validate() {
   const id = sanitizeNumber(ideal.value)
 
   if (!len || len < 20) {
-    error.value = 'Length must be a number and ≥ 20 cm'
+    error.value = t('calculator.errorLength')
     return false
   }
 
   if (!id || id < 20) {
-    error.value = 'Ideal spacing must be a number and ≥ 20 cm'
+    error.value = t('calculator.errorIdeal')
     return false
   }
 
@@ -80,18 +82,26 @@ function getRow(index: number) {
 
 <template>
   <div class="wrap">
-    <h2>Ideal Spacing</h2>
+    <h2>{{ t('calculator.idealSpacing') }}</h2>
 
     <!-- INPUTS -->
     <div class="inputs">
       <div class="field">
-        <label>Length (cm)</label>
-        <input v-model.number="length" type="number" placeholder="Enter length" />
+        <label>{{ t('calculator.length') }}</label>
+        <input 
+          v-model.number="length" 
+          type="number"
+          :placeholder="t('calculator.length')"
+        />
       </div>
 
       <div class="field">
-        <label>Ideal spacing (cm)</label>
-        <input v-model.number="ideal" type="number" placeholder="Enter ideal spacing" />
+        <label>{{ t('calculator.idealSpacing') }}</label>
+        <input 
+          v-model.number="ideal" 
+          type="number" 
+          :placeholder="t('calculator.idealSpacing')" 
+        />
       </div>
     </div>
 
@@ -105,17 +115,17 @@ function getRow(index: number) {
       <!-- CENTER BLOCK -->
       <div class="center-block">
         <div class="center-item">
-          <small>Exact</small>
+          <small>{{ t('calculator.exact') }}</small>
           <b>{{ result.exact.toFixed(2) }}</b>
         </div>
 
         <div class="center-item">
-          <small>Ideal</small>
+          <small>{{ t('calculator.ideal') }}</small>
           <b>{{ result.ideal }}</b>
         </div>
 
         <div class="center-item">
-          <small>Difference</small>
+          <small>{{ t('calculator.difference') }}</small>
           <b :class="{ plus: result.missing > 0, minus: result.missing < 0 }">
             {{ result.missing > 0 ? '+' : '' }}{{ result.missing }} cm
           </b>
@@ -127,11 +137,11 @@ function getRow(index: number) {
 
         <!-- LOWER -->
         <div class="col">
-          <small>Lower spacing</small>
+          <small>{{ t('calculator.lower') }}</small>
           <b>{{ result.lower.spacing.toFixed(2) }}</b>
 
           <div class="sub">
-            segments: {{ result.lower.segments }}
+            {{ t('calculator.segments') }}: {{ result.lower.segments }}
           </div>
 
           <div
@@ -160,11 +170,11 @@ function getRow(index: number) {
 
         <!-- UPPER -->
         <div class="col">
-          <small>Upper spacing</small>
+          <small>{{ t('calculator.upper') }}</small>
           <b>{{ result.upper.spacing.toFixed(2) }}</b>
 
           <div class="sub">
-            segments: {{ result.upper.segments }}
+            {{ t('calculator.segments') }}: {{ result.upper.segments }}
           </div>
 
           <div

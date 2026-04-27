@@ -16,7 +16,9 @@ import { useStatsStore } from '../stores/stats.store'
 import AppLoader from '../components/ui/AppLoader.vue'
 import type { TimeEntry } from '../types/TimeEntry.type'
 import { useProjectStore } from '../stores/project.store'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const projectStore = useProjectStore()
 const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 const emit = defineEmits<{ (e: 'back'): void }>()
@@ -40,30 +42,18 @@ function onLoad(id: string) {
 /* ================= LOAD STATS ================= */
 
 async function loadStats() {
-  if (!props.projectId) return console.log('No project ID provided')
+  if (!props.projectId) return console.log(t('errors.missingProjectId'))
   loading.value = true
   error.value = null
 
   try {
-    //const { data } = await getProjectStats(props.projectId)
-    //stats.value = data
-    /*
-    let data
-    if (props.isAdmin === true) {
-       data = (await getProjectStats(props.projectId)).data
-      //stats.value = data
-    } else {
-       data  = (await getProjectSummary(props.projectId)).data
-      //stats.value = data
-    }
-    stats.value = data*/
     const { data } = await getProjectStats(props.projectId)
     stats.value = data
   } catch (err: any) {
     if (err?.response?.status === 403) {
-      error.value = 'Access denied'
+      error.value = t('errors.accessDenied')
     } else {
-      error.value = 'Failed to load stats'
+      error.value = t('errors.loadStats')
     }
   } finally {
     loading.value = false
@@ -71,12 +61,10 @@ async function loadStats() {
 }
 
 watch(() => [props.projectId, props.isAdmin], async ([id, isAdmin]) => {
-  if (!id || isAdmin === undefined) return console.log('Missing project ID or admin status')
+  if (!id || isAdmin === undefined) return console.log(t('errors.missingProjectId'))
   loaded.value.clear()
   await loadStats()
 }, { immediate: true })
-//onServerPrefetch(loadStats)
-//onServerPrefetch(async () => { if (props.isAdmin) { await loadStats()}})
 onServerPrefetch(() => Promise.resolve())
 /* ================= USER DETAILS ================= */
 async function toggleDetails(userId: string) {
@@ -325,9 +313,7 @@ async function toggleSummary(type: 'work' | 'extra' | 'total') {
   }
 
   showDetails.value = type
-  //if (!projectStore.projectDetails.length) {
     await loadProjectDetails()
-  //}
 }
 const filteredDetails = computed(() => {
   if (!showDetails.value) return []
@@ -364,7 +350,7 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
       class="back" 
       @click="emit('back')"
     >
-      ← Back
+      ← {{ t('project.back') }}
     </button>
 
     <AppLoader 
@@ -389,25 +375,25 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
           @click="toggleSummary('work')" 
           :class="{ active: showDetails === 'work', disabled: !isAdmin }"
         >
-          Work <strong>{{ totalWork }}h</strong>
+          {{ t('stats.work') }} <strong>{{ totalWork }}h</strong>
         </div>
 
         <div 
           @click="toggleSummary('extra')" 
           :class="{ active: showDetails === 'extra', disabled: !isAdmin }"
         >
-          Extra <strong>{{ totalExtra }}h</strong>
+          {{ t('stats.extra') }} <strong>{{ totalExtra }}h</strong>
         </div>
 
         <div 
           @click="toggleSummary('total')" 
           :class="{ active: showDetails === 'total', disabled: !isAdmin }"
         >
-          Total <strong>{{ totalAll }}h</strong>
+          {{ t('stats.total') }} <strong>{{ totalAll }}h</strong>
         </div>
       </div>
       <!--<div v-if="showDetails && isAdmin" class="project-details"></div>-->
-      <div v-if="loadingDetails">Loading...</div>
+      <div v-if="loadingDetails">{{ t('common.loading') }}</div>
 
       <div v-else>
         <div
@@ -448,9 +434,9 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 
             <div class="hours">
               <div class="hours-breakdown">
-                <span class="work">Work: {{ u.workHours }}h</span>
-                <span class="extra">Extra: {{ u.extraHours }}h</span>
-                <span class="total">Total: {{ u.totalHours }}h</span>
+                <span class="work">`${t('stats.work')}` {{ u.workHours }}h</span>
+                <span class="extra">`${t('stats.extra')}` {{ u.extraHours }}h</span>
+                <span class="total">`${t('stats.total')}` {{ u.totalHours }}h</span>
               </div>
               
               <button
@@ -510,16 +496,16 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
     <div v-else class="user-summary">
       <div class="user-card">
         <div class="hours-breakdown">
-          <span class="work">Work: {{ totalWork }}h</span>
-          <span class="extra">Extra: {{ totalExtra }}h</span>
-          <span class="total">Total: {{ totalAll }}h</span>
+          <span class="work">`${t('stats.work')}` {{ totalWork }}h</span>
+          <span class="extra">`${t('stats.extra')}` {{ totalExtra }}h</span>
+          <span class="total">`${t('stats.total')}` {{ totalAll }}h</span>
         </div>
       </div>
     </div>
       <!-- IMAGES -->
       <div class="images-section">
         <button @click="showImages = !showImages">
-          {{ showImages ? 'Hide Images' : 'Show Images' }}
+          {{ showImages ? t('project.hideImages') : t('project.showImages') }}
         </button>
 
         <div 
@@ -619,10 +605,7 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   border-bottom:1px solid #eee;
 }
 
-.images-grid {/*
-  margin-top:16px;
-  display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));*/
+.images-grid {
   column-count: 3;
   gap:10px;
 }

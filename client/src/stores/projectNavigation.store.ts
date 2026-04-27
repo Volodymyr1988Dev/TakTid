@@ -23,7 +23,7 @@ export const useProjectNavigationStore = defineStore(
       catch (e) {
         console.error(e)
         projectStats.value = null
-        error.value = 'Failed to load project statistics.'
+        error.value = `${e}`//t('stats.loadProjectStats')
       }
       finally {
         isLoading.value = false

@@ -3,7 +3,9 @@ import { computed, ref } from 'vue'
 import { useSwipe } from '@vueuse/core'
 import dayjs, { Dayjs } from 'dayjs'
 import { isHoliday } from '../helpers/holiday'
+//import { useI18n } from 'vue-i18n'
 
+//const { t } = useI18n()
 const emit = defineEmits<{
   (e: 'select-day', day: Dayjs): void
   (e: 'prev'): void
@@ -24,7 +26,12 @@ useSwipe(el, {
   },
 })
 
-const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+//const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const weekdays = computed(() =>
+  Array.from({ length: 7 }, (_, i) =>
+    dayjs().startOf('isoWeek').add(i, 'day')
+  )
+)
 
 const start = computed(() =>
   props.current.clone().startOf('month').startOf('isoWeek'),
@@ -63,12 +70,19 @@ function selectDay(day: Dayjs): void {
     class="month"
   >
     <div class="weekdays">
-      <div
+      <!--<div
         v-for="w in weekdays"
         :key="w"
         :class="{ weekendLabel: w === 'Sat' || w === 'Sun' }"
       >
         {{ w }}
+      </div>
+    -->
+      <div
+        v-for="w in weekdays"
+        :key="w.format()"
+      >
+        {{ w.format('ddd') }}
       </div>
     </div>
 

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const isEditing = ref(true)
 const title = ref('')
 
@@ -75,7 +77,7 @@ onMounted(() => {
   >
     <input
       v-model="title"
-      placeholder="Title"
+      :placeholder="t('common.title')"
       class="title-input"
       :disabled="!isEditing"
     >
@@ -121,14 +123,14 @@ onMounted(() => {
       v-if="isEditing" 
       @click="save"
     >
-      Save
+      {{ t('common.save') }}
     </button>
 
     <button 
       v-else 
       @click="edit"
     >
-      Edit
+      {{ t('common.edit') }}
     </button>
   </div>
 </template>

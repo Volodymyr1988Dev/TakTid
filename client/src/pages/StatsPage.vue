@@ -6,21 +6,11 @@ import ExcelJS from 'exceljs'
 import { saveAs } from 'file-saver'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-//import type { ProjectUserEntry } from '../types/ProjectUserEntry'
-//import type { StatsEntry } from '../types/StatsEntry'
 import type { UserDetailsEntry } from '../types/UserDetailsEntry'
+import { useI18n } from 'vue-i18n'
 
-/*
-interface Entry {
-  id: string
-  date: string
-  type: string
-  hours: number
-  project?: { city: string; address: string }
-  //comment?: string 
-  comment: string | null
-}
-*/
+const { t } = useI18n()
+
 interface UserInfo {
   id: string
   name?: string
@@ -44,7 +34,6 @@ const stats = useStatsStore()
 const expanded = ref<Record<string, boolean>>({})
 const detailsOpen = ref<Record<string, boolean>>({})
 const selectedDay = ref<Record<string, number | null>>({})
-//const transformedCache = ref<Record<string, StatsEntry[]>>({})
 
 const toast = useToast()
 const isLoading = ref(false)
@@ -59,36 +48,6 @@ watch([year, month], () => {
 
   debounceTimer = setTimeout(() => {load()}, 600)
 })
-/*
-function getDaysInMonth(y: number, m: number) {
-  return new Date(y, m, 0).getDate()
-}
-*//*
-function getTransformedEntries(userId: string): StatsEntry[] {
-  const key = getKey(userId)
-
-  if (transformedCache.value[key]) {
-    return transformedCache.value[key]
-  }
-
-  const raw = stats.details[key]?.entries || []
-
-  const mapped = raw.map(mapToStatsEntry)
-
-  transformedCache.value[key] = mapped
-
-  return mapped
-}
-function mapToStatsEntry(e: ProjectUserEntry): StatsEntry {
-  return {
-    id: e.id,
-    date: e.date,
-    type: e.type,
-    hours: e.hours,
-    comment: e.comment ?? undefined,
-    project: e.project
-  }
-}*/
 
 function getKey (userId: string) {
   return `${userId}-${year.value}-${month.value}`
@@ -102,7 +61,7 @@ async function ensureDetails(userId: string) {
   const detail = stats.details[key]
 
   if (!detail) {
-    throw new Error('Failed to load user details')
+    throw new Error(t('stats.errors.loadUserDetails'))
   }
 
   return detail
@@ -117,34 +76,9 @@ function getUserName(user: UserInfo) {
 
 function buildCalendar(userId: string) {
   const days = new Date(year.value, month.value, 0).getDate()
-  //const entries = getTransformedEntries(userId)
-  const entries = getEntries(userId) //stats.details[getKey(userId)]?.entries || []
-  //const days = getDaysInMonth(year.value, month.value)
-  //const entries: Entry[] = stats.details[userId]?.entries || []
-  //const key = `${userId}-${year.value}-${month.value}`
-
-  //const key = getKey(userId)
-
-  //const detail = stats.details[userId]
-  /*
-  const detail = stats.details[key]
-  if (!detail?.entries) {
-    return Array.from({ length: days }, (_, i) => ({
-      day: i + 1,
-      entries: []
-    }))
-  }*/
-  //const raw = stats.details[userId]
-  //const entries: Entry[] = stats.details[userId]?.entries || stats.details[userId] || []
-  //const entries: Entry[] = raw?.entries ?? raw ?? []
-  //console.log(stats.details, 'stats.details')
-  //console.log(stats.details[userId].entries, 'console.log(stats.details[userId].entries)')
-  //const entries: Entry[] = detail.entries
-  //const map: Record<number, Entry[]> = {}
+  const entries = getEntries(userId)
   const map: Record<number, UserDetailsEntry[]> = {}
-  //detail.entries
   entries
-  //.map(mapToStatsEntry)
   .forEach((e: UserDetailsEntry ) => {
     const d = new Date(e.date).getDate()
     if (!map[d]) map[d] = []
@@ -175,11 +109,10 @@ function typeLabel(type: string) {
   return type
 }
 async function toggleDetails(userId: string) {
-  //const key = `${userId}-${year.value}-${month.value}`
   detailsOpen.value[userId] = !detailsOpen.value[userId]
 
-  if (detailsOpen.value[userId] /*&& !stats.details[key]*/) {
-    await ensureDetails(userId) //stats.loadUserDetails(userId, year.value, month.value)
+  if (detailsOpen.value[userId]) {
+    await ensureDetails(userId)
   }
 }
 function summary(u: UserStats) {
@@ -205,13 +138,9 @@ async function load() {
     selectedDay.value = {}
     expanded.value = {}
     detailsOpen.value = {}
-    //transformedCache.value = {}
-    //stats.details = {}
     await stats.loadMonth(year.value, month.value)
-    //expanded.value = {}
-    //detailsOpen.value = {}
   } catch (e) {
-    toast.error('Failed to load statistics')
+    toast.error(t('stats.errors.load'))
     console.error(e)
   } finally {
     isLoading.value = false
@@ -222,13 +151,6 @@ async function exportAllExcel() {
   const workbook = new ExcelJS.Workbook()
 
   for (const user of stats.users) {
-    //const detail = await ensureDetails(user.user.id)
-   /* const key = `${user.user.id}-${year.value}-${month.value}`
-    //if (!stats.details[user.user.id]) {
-    if (!stats.details[key]) {
-      await stats.loadUserDetails(user.user.id, year.value, month.value)
-    }*/
-
     const sheet = workbook.addWorksheet(getUserName(user.user))
     const sum = summary(user)
 
@@ -239,7 +161,6 @@ async function exportAllExcel() {
 
     sheet.addRow(['Work', sum.work + sum.extra])
     sheet.addRow(['Work + Red Day', sum.work + sum.extra + sum.redDay])
-    //sheet.addRow(['Extra Work', sum.extra])
     sheet.addRow(['Meeting', sum.meeting])
     sheet.addRow(['Sick', sum.sick])
     sheet.addRow(['Vacation', sum.vacation])
@@ -250,11 +171,7 @@ async function exportAllExcel() {
     sheet.addRow([])
 
     sheet.addRow(['Date','Type','Hours','Project','Comment'])
-    //const entries = getTransformedEntries(user.user.id)
     const entries = getEntries(user.user.id)
-    //stats.details[/*user.user.id*/key].entries.forEach((e: Entry) => {
-    //detail.entries
-    //.map(mapToStatsEntry)
     entries
     .forEach((e: UserDetailsEntry/*: Entry*/) => {
       sheet.addRow([
@@ -273,17 +190,17 @@ async function exportAllExcel() {
 
 function validateInputs(): boolean {
   if (!Number.isInteger(year.value) || year.value < 2025) {
-    toast.error('Year must be a valid number greater than 2025')
+    toast.error(t('stats.errors.year'))
     return false
   }
 
   if (!Number.isInteger(month.value)) {
-    toast.error('Month must be a valid number')
+    toast.error(t('stats.errors.monthValid'))
     return false
   }
 
   if (month.value < 1 || month.value > 12) {
-    toast.error('Month must be between 1 and 12')
+    toast.error(t('stats.errors.monthRange'))
     return false
   }
 
@@ -291,12 +208,6 @@ function validateInputs(): boolean {
 }
 
 async function exportExcelSingle(user: UserStats) {
-  //const detail = await ensureDetails(user.user.id)
-  /*
-  const key = `${user.user.id}-${year.value}-${month.value}`
-  if (!stats.details[ key]) {
-    await stats.loadUserDetails(user.user.id, year.value, month.value)
-  }*/
 
   const workbook = new ExcelJS.Workbook()
   const sheet = workbook.addWorksheet(getUserName(user.user))
@@ -309,7 +220,6 @@ async function exportExcelSingle(user: UserStats) {
 
   sheet.addRow(['Work', sum.work + sum.extra])
   sheet.addRow(['Work + Red Days', sum.work + sum.extra + sum.redDay])
-  //sheet.addRow(['Extra Work', sum.extra])
   sheet.addRow(['Meeting', sum.meeting])
   sheet.addRow(['Sick', sum.sick])
   sheet.addRow(['Vacation', sum.vacation])
@@ -320,11 +230,7 @@ async function exportExcelSingle(user: UserStats) {
   sheet.addRow([])
 
   sheet.addRow(['Date','Type','Hours','Project','Comment'])
-  //const entries = getTransformedEntries(user.user.id)
   const entries = getEntries(user.user.id)
-  //stats.details[/*user.user.id*/key].entries.forEach((e: Entry) => {
-  //detail.entries
-  //.map(mapToStatsEntry)
   entries
   .forEach((e: UserDetailsEntry) => {
     sheet.addRow([
@@ -350,12 +256,6 @@ async function exportExcelSingle(user: UserStats) {
 }
 
 async function exportPDFSingle(user: UserStats) {
-  //const detail = await ensureDetails(user.user.id)
-  /*const key = `${user.user.id}-${year.value}-${month.value}`
-  if (!stats.details[key]) {
-    await stats.loadUserDetails(user.user.id, year.value, month.value)
-  }*/
-  //const entries = getTransformedEntries(user.user.id)
   const entries = getEntries(user.user.id)
   const doc = new jsPDF()
   const sum = summary(user)
@@ -373,7 +273,6 @@ async function exportPDFSingle(user: UserStats) {
     body: [
       ['Work', sum.work + sum.extra],
       ['Work + Red Day', sum.work + sum.extra + sum.redDay],
-      //['Extra Work', sum.extra],
       ['Meeting', sum.meeting],
       ['Sick', sum.sick],
       ['Vacation', sum.vacation],
@@ -394,8 +293,7 @@ async function exportPDFSingle(user: UserStats) {
   autoTable(doc, {
     startY: finalY + 10,
     head: [['Date','Type','Hours','Project','Comment']],
-    //body: stats.details[/*user.user.id*/key].entries.map((e: Entry) => [
-    body: /*detail.*/entries.map((e: UserDetailsEntry/*: Entry*/) => [
+    body: entries.map((e: UserDetailsEntry/*: Entry*/) => [
       e.date,
       typeLabel(e.type),
       e.hours,
@@ -411,13 +309,7 @@ async function exportPDFSingle(user: UserStats) {
 async function exportAllPDF() {
   const doc = new jsPDF()
   for (const user of stats.users) {
-    //const detail = await ensureDetails(user.user.id)
-    //const entries = getTransformedEntries(user.user.id)
     const entries = getEntries(user.user.id)
-    /*const key = `${user.user.id}-${year.value}-${month.value}`
-    if (!stats.details[key]) {
-      await stats.loadUserDetails(user.user.id, year.value, month.value)
-    }*/
 
     const sum = summary(user)
 
@@ -430,7 +322,6 @@ async function exportAllPDF() {
       body: [
         ['Work', sum.work + sum.extra],
         ['Work + Red Day', sum.work + sum.extra + sum.redDay],
-        //['Extra Work', sum.extra],
         ['Meeting', sum.meeting],
         ['Sick', sum.sick],
         ['Vacation', sum.vacation],
@@ -446,8 +337,7 @@ async function exportAllPDF() {
     autoTable(doc, {
       startY: finalY + 10,
       head: [['Date','Type','Hours','Project','Comment']],
-      //body: stats.details[key].entries.map((e: Entry) => [
-      body: /*detail.*/entries.map((e: UserDetailsEntry/*: Entry*/) => [
+      body: entries.map((e: UserDetailsEntry) => [
         e.date,
         e.type,
         e.hours,
@@ -479,7 +369,7 @@ onMounted(load)
   <div class="stats-page">
     <div class="date-controls">
       <div class="input-group">
-        <label>Year</label>
+        <label>{{ t('stats.year') }}</label>
         <input
           v-model.number="year"
           type="number"
@@ -489,7 +379,7 @@ onMounted(load)
       </div>
 
       <div class="input-group">
-        <label>Month</label>
+        <label>{{ t('stats.month') }}</label>
         <select v-model.number="month">
           <option 
             v-for="m in 12" 
@@ -500,15 +390,15 @@ onMounted(load)
           </option>
         </select>
       </div>
-    
+    <!--Load-->
       <button @click="load">
-        Load
+        {{ t('stats.load') }}
       </button>
       <button @click="exportAllExcel">
-        Export Excel
+        {{ t('stats.exportExcel') }}
       </button>
       <button @click="exportAllPDF">
-        Export PDF
+        {{ t('stats.exportPDF') }}
       </button>
     </div>
 
@@ -525,15 +415,15 @@ onMounted(load)
           <strong>{{ getUserName(u.user) }}
           </strong>
           <br>
-          Work: {{ u.workHours }}h |
-          Extra: {{ u.extraHours }}h |
-          Total Work: {{ u.workHours + u.extraHours }}h |
-          Total Work + Red Day: {{ u.workHours + u.extraHours + u.redDayHours }}h |
-          Meeting: {{ u.meetingHours }}h |
-          Sick: {{ u.sickHours }}h |
-          Vacation: {{ u.vacationHours }}h |
-          Red Day: {{ u.redDayHours }}h |
-          VAB: {{ u.vabHours /*|| 0*/ }}h
+          {{ t('stats.work') }}: {{ u.workHours }}h |
+          {{ t('stats.extra') }}: {{ u.extraHours }}h |
+          {{ t('stats.totalWork') }}: {{ u.workHours + u.extraHours }}h |
+          {{ t('stats.totalWorkRedDay') }}: {{ u.workHours + u.extraHours + u.redDayHours }}h |
+          {{ t('stats.meeting') }}: {{ u.meetingHours }}h |
+          {{ t('stats.sick') }}: {{ u.sickHours }}h |
+          {{ t('stats.vacation') }}: {{ u.vacationHours }}h |
+          {{ t('stats.redDay') }}: {{ u.redDayHours }}h |
+          {{ t('stats.vab') }}: {{ u.vabHours /*|| 0*/ }}h
         </div>
         <div>{{ u.totalHours }} h</div>
       </div>
@@ -542,7 +432,7 @@ onMounted(load)
         v-if="expanded[u.user.id]"
       >
         <button @click="toggleDetails(u.user.id)">
-          {{ detailsOpen[u.user.id] ? 'Hide Details' : 'Details' }}
+          {{ detailsOpen[u.user.id] ? t('stats.hideDetails') : t('stats.details') }}
         </button>
         <!--stats.details[u.user.id]  ${u.user.id}-${year}-${month}-->
         <div 

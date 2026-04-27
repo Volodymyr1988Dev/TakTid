@@ -1,0 +1,201 @@
+export default {
+  common: {
+    title: 'Tytuł',
+    addProject: 'Dodaj projekt',
+    delete: 'Usuń',
+    back: 'Wstecz',
+    create: 'Utwórz',
+    loading: 'Ładowanie...',
+    error: 'Coś poszło nie tak',
+    yes: 'Tak',
+    no: 'Nie',
+    save: 'Zapisz',
+    cancel: 'Anuluj',
+    edit: 'Edytuj',
+    deleteConfirm: 'Czy jesteś pewien?',
+    registerTime: 'Zarejestruj czas',
+  },
+
+  project: {
+    title: 'Projekty',
+    create: 'Utwórz projekt',
+    add: 'Dodaj projekt',
+    city: 'Miasto',
+    address: 'Adres',
+    confirmDelete: 'Czy jesteś pewien?',
+    info: 'Informacje',
+    back: 'Wstecz',
+    hideImages: 'Ukryj obrazy',
+    showImages: 'Pokaż obrazy',
+  },
+
+  auth: {
+    login: 'Zaloguj się',
+    register: 'Rejestracja',
+    email: 'Email',
+    password: 'Hasło',
+    name: 'Imię',
+    noAccount: 'Nie masz konta?',
+    haveAccount: 'Masz już konto?',
+    invalid: 'Nieprawidłowy email lub hasło',
+    registerFailed: 'Rejestracja nie powiodła się'
+  },
+
+  stats: {
+    title: 'Statystyki',
+    year: 'Rok',
+    month: 'Miesiąc',
+    load: 'Załaduj',
+    exportExcel: 'Eksport Excel',
+    exportPDF: 'Eksport PDF',
+    details: 'Szczegóły',
+    hideDetails: 'Ukryj szczegóły',
+
+    work: 'Praca',
+    extra: 'Nadgodziny',
+    extraWork: 'Dodatkowa praca',
+    meeting: 'Spotkanie',
+    sick: 'Chorobowe',
+    vacation: 'Urlop',
+    vab: 'Opieka nad dzieckiem',
+    redDay: 'Dzień świąteczny',
+    dayOff: 'Dzień wolny',
+    total: 'Razem',
+    absence: 'Nieobecność',
+
+    period: 'Okres',
+    user: 'Użytkownik',
+    monthlyReport: 'Raport miesięczny',
+
+    workWithExtra: 'Praca + Nadgodziny',
+    workWithRedDay: 'Praca + Święto',
+    totalWithRedDay: 'Razem + Święto',
+
+    errors: {
+      load: 'Błąd ładowania statystyk',
+      year: 'Rok musi być ≥ 2025',
+      month: 'Miesiąc od 1 do 12',
+    }
+  },
+
+  tabs: {
+    time: 'Czas',
+    projects: 'Projekty',
+    list: 'Lista',
+    stats: 'Statystyki',
+    helpers: 'Narzędzia',
+    suggestions: 'Sugestie',
+    internal: 'Wewnętrzne',
+    absence: 'Nieobecność',
+  },
+
+  calculator: {
+    idealSpacing: 'Idealny odstęp (cm)',
+    length: 'Długość (cm)',
+    spacing: 'Odstęp (cm)',
+    errorLength: 'Długość ≥ 20 cm',
+    errorSpacing: 'Odstęp ≥ 20 cm',
+    errorIdeal: 'Odstęp ≥ 20 cm',
+
+    exact: 'Dokładny',
+    ideal: 'Idealny',
+    difference: 'Różnica',
+    lower: 'Mniejszy odstęp',
+    upper: 'Większy odstęp',
+    segments: 'Segmenty',
+  },
+
+  hook: {
+    title: 'Kalkulator haków',
+    length: 'Długość',
+    fixedEdge: 'Stała krawędź',
+    lengthPlaceholder: 'Wprowadź długość',
+    fixedEdgePlaceholder: 'Wprowadź krawędź',
+    spacing: 'Odstęp',
+    hooks: 'Haki',
+    left: 'Lewa krawędź',
+    right: 'Prawa krawędź',
+
+    errors: {
+      length: 'Długość ≥ 60 cm',
+      edge: 'Nieprawidłowa wartość',
+      lengthNumber: 'Nieprawidłowa liczba',
+    }
+  },
+
+  errors: {
+    unauthorized: 'Brak autoryzacji',
+    forbidden: 'Zabronione',
+    registerFailed: 'Rejestracja nie powiodła się',
+    updateFailed: 'Aktualizacja nie powiodła się',
+    deleteFailed: 'Usuwanie nie powiodło się',
+    restoreFailed: 'Przywracanie nie powiodło się',
+    breakNumber: 'Nieprawidłowa wartość przerwy',
+    invalidBreak: 'Nieprawidłowa przerwa',
+    noProject: 'Brak projektu',
+    imageUploadFailed: 'Błąd przesyłania obrazu',
+    deleteExtraWork: 'Usunąć dodatkową pracę?',
+    noProjectId: 'Wymagany projectId',
+    accessDenied: 'Brak dostępu',
+    loadStats: 'Błąd ładowania statystyk',
+    loadUserDetails: 'Błąd ładowania użytkownika',
+    monthValid: 'Nieprawidłowy miesiąc',
+    monthRange: 'Miesiąc 1-12',
+    emailValid: 'Nieprawidłowy email',
+    passwordMin: 'Hasło musi mieć co najmniej 6 znaków',
+    passwordMax: 'Hasło musi mieć maksymalnie 25 znaków',
+    nameMin: 'Imię musi mieć co najmniej 2 znaki',
+    unavailableAbsence: 'Nie można utworzyć nieobecności, ponieważ dzień jest już wypełniony pracą',
+    twoAbsences: 'Nie można dodać dwóch nieobecności w jednym dniu',
+    dayContains8Hours: 'Dzień zawiera już 8 godzin pracy',
+    
+  },
+
+  account: {
+    title: 'Ustawienia konta',
+    saveName: 'Zapisz imię',
+    saveEmail: 'Zapisz email',
+    savePassword: 'Zapisz hasło',
+    cancel: 'Anuluj',
+    manageUsers: 'Zarządzanie użytkownikami',
+    deleteConfirm: 'Czy na pewno chcesz usunąć',
+    deleted: 'usunięto pomyślnie',
+    restored: 'przywrócono pomyślnie',
+    passwordShort: 'Hasło min. 6 znaków',
+    passwordMatch: 'Hasła się nie zgadzają',
+    confirmPassword: 'Potwierdź hasło',
+    restore: 'Przywróć',
+  },
+
+  calendar: {
+    week: 'Tydzień',
+    weekLabel: 'Tydzień {num}',
+    month: 'Miesiąc',
+    logout: 'Wyloguj',
+    comment: 'Komentarz',
+    save: 'Zapisz'
+  },
+
+  week: {
+    mon: 'Pn',
+    tue: 'Wt',
+    wed: 'Śr',
+    thu: 'Cz',
+    fri: 'Pt',
+    sat: 'Sb',
+    sun: 'Nd',
+  },
+
+  toast: {
+    profileUpdated: 'Profil zaktualizowany',
+    passwordShort: 'Hasło min. 6 znaków',
+    passwordMatch: 'Hasła się nie zgadzają',
+    deleteFailed: 'Błąd usuwania',
+    updateFailed: 'Błąd aktualizacji',
+    restoreFailed: 'Błąd przywracania',
+    restoreSuccess: 'Przywrócono pomyślnie',
+    success: 'Sukces',
+    error: 'Błąd',
+    loadProjectStats: 'Błąd ładowania statystyk projektu'
+  }
+}

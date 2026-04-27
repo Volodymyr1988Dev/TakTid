@@ -5,7 +5,9 @@ import { createTimeEntry, updateTimeEntry } from '../../api/TimeEntry.api'
 import type { TimeEntry } from '../../types/TimeEntry.type'
 import { TimeKind } from '../../types/timeKind.enum'
 import { uploadPhoto } from '../../api/files'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const props = defineProps<{
   day: Dayjs
   entry?: TimeEntry
@@ -65,24 +67,25 @@ async function save() {
 
       <textarea
         v-model="comment"
-        placeholder="Comment"
+        :placeholder="t('calendar.comment')"
+
       />
 
       <select v-model="type">
         <option :value="TimeKind.WORK">
-          Work
+          {{ t('stats.work') }}
         </option>
         <option :value="TimeKind.EXTRA">
-          Extra Work
+          {{ t('stats.extra') }}
         </option>
         <option :value="TimeKind.SICK">
-          Sick
+          {{ t('stats.sick') }}
         </option>
         <option :value="TimeKind.VACATION">
-          Vacation
+          {{ t('stats.vacation') }}
         </option>
         <option :value="TimeKind.VAB">
-          Vab (Vård av barn)
+          {{ t('stats.vab') }}
         </option>
       </select>
       <input
@@ -95,7 +98,7 @@ async function save() {
         class="preview"
       >
       <button @click="save">
-        Save
+        {{ t('calendar.save') }}
       </button>
     </div>
   </div>

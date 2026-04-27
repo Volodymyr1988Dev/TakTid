@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { TimeKind } from '../../types/timeKind.enum'
 import type { TimeSuggestion } from '../../types/Suggestion.type'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const emit = defineEmits<{
   (e: 'select', s: TimeSuggestion): void
 }>()
@@ -20,7 +22,7 @@ function selectMeeting() {
       class="card"
       @click="selectMeeting"
     >
-      <strong>Meeting</strong>
+      <strong>{{ t('stats.meeting') }}</strong>
     </div>
   </div>
 </template>

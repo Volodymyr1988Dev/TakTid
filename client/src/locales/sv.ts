@@ -1,0 +1,200 @@
+export default {
+  common: {
+    title: 'Titel',
+    addProject: 'Lägg till projekt',
+    delete: 'Ta bort',
+    back: 'Tillbaka',
+    create: 'Skapa',
+    loading: 'Laddar...',
+    error: 'Något gick fel',
+    yes: 'Ja',
+    no: 'Nej',
+    save: 'Spara',
+    cancel: 'Avbryt',
+    edit: 'Redigera',
+    deleteConfirm: 'Är du säker?',
+    registerTime: 'Registrera tid',
+  },
+
+  project: {
+    title: 'Projekt',
+    create: 'Skapa projekt',
+    add: 'Lägg till projekt',
+    city: 'Stad',
+    address: 'Adress',
+    confirmDelete: 'Är du säker?',
+    info: 'Info',
+    back: 'Tillbaka',
+    hideImages: 'Dölj bilder',
+    showImages: 'Visa bilder',
+  },
+
+  auth: {
+    login: 'Logga in',
+    register: 'Registrera',
+    email: 'Email',
+    password: 'Lösenord',
+    name: 'Namn',
+    noAccount: 'Har du inget konto?',
+    haveAccount: 'Har du redan konto?',
+    invalid: 'Fel email eller lösenord',
+    registerFailed: 'Registrering misslyckades'
+  },
+
+  stats: {
+    title: 'Statistik',
+    year: 'År',
+    month: 'Månad',
+    load: 'Ladda',
+    exportExcel: 'Exportera Excel',
+    exportPDF: 'Exportera PDF',
+    details: 'Detaljer',
+    hideDetails: 'Dölj detaljer',
+
+    work: 'Arbete',
+    extra: 'Extra',
+    extraWork: 'Extra arbete',
+    meeting: 'Möte',
+    sick: 'Sjuk',
+    vacation: 'Semester',
+    vab: 'VAB',
+    redDay: 'Röd dag',
+    dayOff: 'Ledig dag',
+    total: 'Totalt',
+    absence: 'Frånvaro',
+
+    period: 'Period',
+    user: 'Användare',
+    monthlyReport: 'Månadsrapport',
+
+    workWithExtra: 'Arbete + Extra',
+    workWithRedDay: 'Arbete + Röd dag',
+    totalWithRedDay: 'Totalt + Röd dag',
+
+    errors: {
+      load: 'Misslyckades att ladda statistik',
+      year: 'År ≥ 2025',
+      month: 'Månad 1-12',
+    }
+  },
+
+  tabs: {
+    time: 'Tid',
+    projects: 'Projekt',
+    list: 'Lista',
+    stats: 'Statistik',
+    helpers: 'Verktyg',
+    suggestions: 'Förslag',
+    internal: 'Intern',
+    absence: 'Frånvaro',
+  },
+
+  calculator: {
+    idealSpacing: 'Ideal avstånd (cm)',
+    length: 'Längd (cm)',
+    spacing: 'Avstånd (cm)',
+    errorLength: 'Längd ≥ 20 cm',
+    errorSpacing: 'Avstånd ≥ 20 cm',
+    errorIdeal: 'Avstånd ≥ 20 cm',
+
+    exact: 'Exakt',
+    ideal: 'Ideal',
+    difference: 'Skillnad',
+    lower: 'Lägre',
+    upper: 'Högre',
+    segments: 'Segment',
+  },
+
+  hook: {
+    title: 'Krok-kalkylator',
+    length: 'Längd',
+    fixedEdge: 'Fast kant',
+    lengthPlaceholder: 'Ange längd',
+    fixedEdgePlaceholder: 'Ange kant',
+    spacing: 'Avstånd',
+    hooks: 'Krokar',
+    left: 'Vänster',
+    right: 'Höger',
+
+    errors: {
+      length: 'Längd ≥ 60 cm',
+      edge: 'Ogiltigt värde',
+      lengthNumber: 'Ogiltigt nummer',
+    }
+  },
+
+  errors: {
+    unauthorized: 'Obehörig',
+    forbidden: 'Förbjudet',
+    registerFailed: 'Registrering misslyckades',
+    updateFailed: 'Uppdatering misslyckades',
+    deleteFailed: 'Borttagning misslyckades',
+    restoreFailed: 'Återställning misslyckades',
+    breakNumber: 'Ogiltigt nummer',
+    invalidBreak: 'Ogiltig paus',
+    noProject: 'Saknar projekt',
+    imageUploadFailed: 'Uppladdning misslyckades',
+    deleteExtraWork: 'Ta bort extra arbete?',
+    noProjectId: 'ProjectId krävs',
+    accessDenied: 'Åtkomst nekad',
+    loadStats: 'Fel vid statistik',
+    loadUserDetails: 'Fel vid användare',
+    monthValid: 'Ogiltig månad',
+    monthRange: 'Månad 1-12',
+    emailValid: 'Ogiltig e-post',
+    passwordMin: 'Lösenord minst 6 tecken',
+    passwordMax: 'Lösenord max 25 tecken',
+    nameMin: 'Namn minst 2 tecken',
+    unavailableAbsence: 'Kan inte skapa frånvaro eftersom dagen redan är full med arbete',
+    twoAbsences: 'Två frånvaroposter är inte tillåtna samma dag',
+    dayContains8Hours: 'Dagen innehåller redan 8 arbetstimmar',
+  },
+
+  account: {
+    title: 'Kontoinställningar',
+    saveName: 'Spara namn',
+    saveEmail: 'Spara email',
+    savePassword: 'Spara lösenord',
+    cancel: 'Avbryt',
+    manageUsers: 'Hantera användare',
+    deleteConfirm: 'Vill du ta bort',
+    deleted: 'borttagen',
+    restored: 'återställd',
+    passwordShort: 'Minst 6 tecken',
+    passwordMatch: 'Lösenord matchar inte',
+    confirmPassword: 'Bekräfta lösenord',
+    restore: 'Återställ',
+  },
+
+  calendar: {
+    week: 'Vecka',
+    weekLabel: 'Vecka {num}',
+    month: 'Månad',
+    logout: 'Logga ut',
+    comment: 'Kommentar',
+    save: 'Spara'
+  },
+
+  week: {
+    mon: 'Mån',
+    tue: 'Tis',
+    wed: 'Ons',
+    thu: 'Tor',
+    fri: 'Fre',
+    sat: 'Lör',
+    sun: 'Sön',
+  },
+
+  toast: {
+    profileUpdated: 'Profil uppdaterad',
+    passwordShort: 'Minst 6 tecken',
+    passwordMatch: 'Matchar inte',
+    deleteFailed: 'Fel vid borttagning',
+    updateFailed: 'Fel vid uppdatering',
+    restoreFailed: 'Fel vid återställning',
+    restoreSuccess: 'Återställd',
+    success: 'Klar',
+    error: 'Fel',
+    loadProjectStats: 'Fel vid statistik'
+  }
+}

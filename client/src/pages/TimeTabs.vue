@@ -21,7 +21,9 @@ import { useAuthStore } from '../stores/auth.store'
 import { useProjectStore } from '../stores/project.store'
 import type { Totals } from '../types/totals'
 import { useSuggestionsStore } from '../stores/suggestions.store'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 type ViewState = 'calendar' | 'tabs' |'dayEntries' | 'modal'
 const view = ref<ViewState>('calendar')
 const navigating = ref(false)
@@ -346,7 +348,7 @@ async function reloadCalendar () {
         v-if="totals.sick > 0" 
         class="total-item"
       >
-        <span>Sick</span>
+        <span>{{ t('stats.sick') }}</span>
         <strong>{{ totals.sick }} h</strong>
       </div>
 
@@ -354,7 +356,7 @@ async function reloadCalendar () {
         v-if="totals.vab > 0"
         class="total-item"
       >
-        <span>VAB</span>
+        <span>{{ t('stats.vab') }}</span>
         <strong>{{ totals.vab }} h</strong>
       </div>
 
@@ -362,7 +364,7 @@ async function reloadCalendar () {
         v-if="totals.work > 0"
         class="total-item"
       >
-        <span>Total work</span>
+        <span>{{ t('stats.totalWork') }}</span>
         <strong>{{ totals.work }} h</strong>
       </div>
     </div>

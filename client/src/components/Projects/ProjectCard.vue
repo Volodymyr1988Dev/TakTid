@@ -2,7 +2,9 @@
 import { ref } from 'vue'
 import { useProjectStore } from '../../stores/project.store';
 import type { Project } from '../../types/Project.dto'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const props = defineProps<{
   project: Project
   isAdmin: boolean
@@ -23,7 +25,7 @@ function toggleMenu(e: MouseEvent) {
 
 async function confirmDelete(e: MouseEvent) {
   e.stopPropagation()
-  if (!confirm('Are you sure?')) return
+  if (!confirm(t('project.confirmDelete'))) return
   await projectStore.removeProject(props.project.id)
   emit('deleted', props.project.id)
 }
@@ -52,12 +54,12 @@ async function confirmDelete(e: MouseEvent) {
       v-if="openMenu"
       class="menu"
     >
-      <li>Info</li>
+      <li>{{ t('project.info') }}</li>
       <li
         class="danger"
         @click="confirmDelete"
       >
-        Delete
+        {{ t('common.delete') }}
       </li>
     </ul>
   </div>
