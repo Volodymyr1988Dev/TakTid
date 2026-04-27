@@ -5,11 +5,26 @@ import dayjs from 'dayjs'
 const loadedLanguages = new Set<string>()
 
 const loaders = {
-  en: () => import('./locales/en.ts'),
-  uk: () => import('./locales/uk.ts'),
-  sv: () => import('./locales/sv.ts'),
-  ro: () => import('./locales/ro.ts'),
-  pl: () => import('./locales/pl.ts'),
+  en: async () => {
+    console.log('LOADING EN')
+    return import('./locales/en')
+  },
+  uk: async () => {
+    console.log('LOADING UK')
+    return import('./locales/uk')
+  },
+  sv: async () => {
+    console.log('LOADING SV')
+    return import('./locales/sv')
+  },
+  ro: async () => {
+    console.log('LOADING RO')
+    return import('./locales/ro')
+  },
+  pl: async () => {
+    console.log('LOADING PL')
+    return import('./locales/pl')
+  },
 }
 /*
 export async function setLanguage(locale: string) {
@@ -65,7 +80,7 @@ export async function setLanguage(locale: string) {
   }
   catch(e){
     console.error('LANG LOAD ERROR:', lang, e)
-    //locale = 'en'
+    locale = 'en'
   }
   
 }
