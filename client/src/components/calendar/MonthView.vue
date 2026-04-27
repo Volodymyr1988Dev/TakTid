@@ -70,14 +70,6 @@ function selectDay(day: Dayjs): void {
     class="month"
   >
     <div class="weekdays">
-      <!--<div
-        v-for="w in weekdays"
-        :key="w"
-        :class="{ weekendLabel: w === 'Sat' || w === 'Sun' }"
-      >
-        {{ w }}
-      </div>
-    -->
       <div
         v-for="w in weekdays"
         :key="w.format()"

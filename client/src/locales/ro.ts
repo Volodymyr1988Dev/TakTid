@@ -148,6 +148,11 @@ export default {
     unavailableAbsence: 'Nu se poate crea absența deoarece ziua este deja plină de muncă',
     twoAbsences: 'Nu sunt permise două absențe într-o singură zi',
     dayContains8Hours: 'Ziua conține deja 8 ore de muncă',
+    saveFailed: 'Salvarea a eșuat',
+    removing: 'Se șterge… vă rugăm așteptați',
+    saving: 'Se salvează… vă rugăm așteptați',
+    loading: 'Se încarcă… vă rugăm așteptați',
+    clickToSelectProject: 'Click pentru a selecta proiectul',
   },
 
   account: {
@@ -172,7 +177,8 @@ export default {
     month: 'Lună',
     logout: 'Deconectare',
     comment: 'Comentariu',
-    save: 'Salvează'
+    save: 'Salvează',
+    date: 'Dată',
   },
 
   week: {
@@ -195,6 +201,9 @@ export default {
     restoreSuccess: 'Restaurat',
     success: 'Succes',
     error: 'Eroare',
-    loadProjectStats: 'Eroare statistici'
+    loadProjectStats: 'Eroare statistici',
+    registerAbsence: 'Înregistrează absența',
+    editTime: 'Editează timpul',
+    registerTime: 'Înregistrează timpul',
   }
 }

@@ -364,7 +364,7 @@ async function reloadCalendar () {
         v-if="totals.work > 0"
         class="total-item"
       >
-        <span>{{ t('stats.totalWork') }}</span>
+        <span>{{ t('stats.work') }}</span>
         <strong>{{ totals.work }} h</strong>
       </div>
     </div>

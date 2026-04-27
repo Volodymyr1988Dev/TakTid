@@ -434,9 +434,9 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 
             <div class="hours">
               <div class="hours-breakdown">
-                <span class="work">`${t('stats.work')}` {{ u.workHours }}h</span>
-                <span class="extra">`${t('stats.extra')}` {{ u.extraHours }}h</span>
-                <span class="total">`${t('stats.total')}` {{ u.totalHours }}h</span>
+                <span class="work">{{t('stats.work')}} {{ u.workHours }}h</span>
+                <span class="extra">{{t('stats.extra')}} {{ u.extraHours }}h</span>
+                <span class="total">{{t('stats.total')}} {{ u.totalHours }}h</span>
               </div>
               
               <button
@@ -444,7 +444,7 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
                 class="details-btn"
                 @click.stop="toggleDetails(u.id)"
               >
-                {{ expandedUserId === u.id ? 'Hide Details' : 'Details' }}
+                {{ expandedUserId === u.id ? t('project.hideDetails') : t('project.showDetails') }}
               </button>
             </div>
             
@@ -496,9 +496,9 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
     <div v-else class="user-summary">
       <div class="user-card">
         <div class="hours-breakdown">
-          <span class="work">`${t('stats.work')}` {{ totalWork }}h</span>
-          <span class="extra">`${t('stats.extra')}` {{ totalExtra }}h</span>
-          <span class="total">`${t('stats.total')}` {{ totalAll }}h</span>
+          <span class="work">{{t('stats.work')}} {{ totalWork }}h</span>
+          <span class="extra">{{t('stats.extra')}} {{ totalExtra }}h</span>
+          <span class="total">{{t('stats.total')}} {{ totalAll }}h</span>
         </div>
       </div>
     </div>
