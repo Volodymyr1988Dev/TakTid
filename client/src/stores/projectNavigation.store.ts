@@ -2,9 +2,9 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { ProjectStats } from '../types/projectStats.type'
 import { getProjectStats } from '../api/projectStats.api'
-import { useI18n } from 'vue-i18n'
+//import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+//const { t } = useI18n()
 export const useProjectNavigationStore = defineStore(
   'projectNavigation',
   () => {
@@ -25,7 +25,7 @@ export const useProjectNavigationStore = defineStore(
       catch (e) {
         console.error(e)
         projectStats.value = null
-        error.value = t('stats.loadProjectStats')
+        error.value = 'error loading project stats'//t('stats.loadProjectStats')
       }
       finally {
         isLoading.value = false
