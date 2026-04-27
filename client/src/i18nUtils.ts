@@ -5,11 +5,11 @@ import dayjs from 'dayjs'
 const loadedLanguages = new Set<string>()
 
 const loaders = {
-  en: () => import('./locales/en'),
-  uk: () => import('./locales/uk'),
-  sv: () => import('./locales/sv'),
-  ro: () => import('./locales/ro'),
-  pl: () => import('./locales/pl'),
+  en: () => import('./locales/en.ts'),
+  uk: () => import('./locales/uk.ts'),
+  sv: () => import('./locales/sv.ts'),
+  ro: () => import('./locales/ro.ts'),
+  pl: () => import('./locales/pl.ts'),
 }
 /*
 export async function setLanguage(locale: string) {
@@ -50,11 +50,10 @@ export async function setLanguage(locale: string) {
 
   if (!loadedLanguages.has(lang)) {
     const messages = await loaders[lang]()
-    
+    console.log('LOADED LANG:', lang, messages)
     i18n.global.setLocaleMessage(lang, messages.default)
     loadedLanguages.add(lang)
   }
-
   i18n.global.locale.value = lang
   dayjs.locale(lang)
   localStorage.setItem('lang', lang)
