@@ -17,7 +17,26 @@ const { handleSubmit, isSubmitting } = useForm({
 const { value: email, errorMessage: emailError } = useField<string>('email')
 const { value: password, errorMessage: passwordError } = useField<string>('password')
 const { value: name, errorMessage: nameError } = useField<string>('name')
-
+/*
+  function mapError(message?: string) {
+  if (!message) return ''  
+  switch (message) {
+    case 'Invalid email':
+      return t('errors.emailValid')
+    case 'String must contain at least 6 character(s)':
+      return t('errors.passwordMin')
+    case 'String must contain at most 25 character(s)':
+      return t('errors.passwordMax')
+    case 'String must contain at least 2 character(s)':
+      return t('errors.nameMin')
+    default:
+      return message
+  }
+}
+*/
+function mapError(message?: string) {
+  return message ? t(`errors.${message}`) : ''
+}
 const onSubmit = handleSubmit(async (values) => {
   try {
     await api.post('/auth/register', values)
@@ -43,7 +62,7 @@ const onSubmit = handleSubmit(async (values) => {
       v-if="emailError" 
       class="error"
     >
-      {{ emailError }}
+      {{ mapError(emailError) }}
     </p>
     <input
       v-model="password"
@@ -54,7 +73,7 @@ const onSubmit = handleSubmit(async (values) => {
       v-if="passwordError" 
       class="error"
     >
-      {{ passwordError }}
+      {{ mapError(passwordError) }}
     </p>
     <input
       v-model="name"
@@ -65,7 +84,7 @@ const onSubmit = handleSubmit(async (values) => {
       v-if="nameError" 
       class="error"
     >
-      {{ nameError }}
+      {{ mapError(nameError) }}
     </p>
 
     <button 

@@ -136,7 +136,7 @@ onBeforeUnmount(() => {
 
   min-width: 180px;
   padding: 6px;
-  z-index: 100;
+  z-index: 400;
 
   animation: fadeIn 0.15s ease;
 }
@@ -171,7 +171,12 @@ onBeforeUnmount(() => {
   text-align: left;
   font-size: 13px;
 }
-
+.auth-lang {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 500;
+}
 .check {
   color: #2563eb;
   font-weight: bold;

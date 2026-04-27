@@ -1,12 +1,13 @@
 import { z } from 'zod'
 
 export const registerSchema = z.object({
-  email: z.string().email('Not valid email'),
+  
+  email: z.string().email({ message: 'emailValid' }),
   password: z
     .string()
-    .min(6, 'Minimum 6 symbols')
-    .max(25, 'Maximum 25 symbols'),
+    .min(6, { message: 'passwordMin' })
+    .max(25, { message: 'passwordMax' }),
   name: z
     .string()
-    .min(2, 'Minimum 2 symbols'),
+    .min(2, { message: 'nameMin' }),
 })

@@ -145,6 +145,9 @@ export default {
     passwordMin: 'Пароль мінімум 6 символів',
     passwordMax: 'Пароль максимум 25 символів',
     nameMin: 'Імʼя мінімум 2 символи',
+    unavailableAbsence: 'Неможливо створити відсутність — день вже повністю заповнений роботою',
+    twoAbsences: 'Не можна створити дві відсутності в один день',
+    dayContains8Hours: 'День вже містить 8 робочих годин',
   },
 
   account: {
@@ -165,6 +168,7 @@ export default {
 
   calendar: {
     week: 'Тиждень',
+    weekLabel: 'Тиждень {num}',
     month: 'Місяць',
     logout: 'Вийти',
     comment: 'Коментар',

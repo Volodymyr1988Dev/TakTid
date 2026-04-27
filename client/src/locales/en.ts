@@ -148,6 +148,9 @@ export default {
     passwordMin: 'Password must be at least 6 characters',
     passwordMax: 'Password must be at most 25 characters',
     nameMin: 'Name must be at least 2 characters',
+    unavailableAbsence: 'Unavailable to create absence, because you have working time all day',
+    twoAbsences: 'Two absence entries are not allowed in one day',
+    dayContains8Hours: 'Day already contains 8 working hours'
   },
   account: {
     title: 'Account settings',
@@ -166,6 +169,7 @@ export default {
   },
   calendar: {
     week: 'Week',
+    weekLabel: 'Week {num}',
     month: 'Month',
     logout: 'Log out',
     comment: 'Comment',
