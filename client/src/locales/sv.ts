@@ -145,6 +145,9 @@ export default {
     passwordMin: 'Lösenord minst 6 tecken',
     passwordMax: 'Lösenord max 25 tecken',
     nameMin: 'Namn minst 2 tecken',
+    unavailableAbsence: 'Kan inte skapa frånvaro eftersom dagen redan är full med arbete',
+    twoAbsences: 'Två frånvaroposter är inte tillåtna samma dag',
+    dayContains8Hours: 'Dagen innehåller redan 8 arbetstimmar',
   },
 
   account: {
@@ -165,6 +168,7 @@ export default {
 
   calendar: {
     week: 'Vecka',
+    weekLabel: 'Vecka {num}',
     month: 'Månad',
     logout: 'Logga ut',
     comment: 'Kommentar',

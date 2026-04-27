@@ -145,6 +145,9 @@ export default {
     passwordMin: 'Parola trebuie să aibă cel puțin 6 caractere',
     passwordMax: 'Parola trebuie să aibă cel mult 25 de caractere',
     nameMin: 'Numele trebuie să aibă cel puțin 2 caractere',
+    unavailableAbsence: 'Nu se poate crea absența deoarece ziua este deja plină de muncă',
+    twoAbsences: 'Nu sunt permise două absențe într-o singură zi',
+    dayContains8Hours: 'Ziua conține deja 8 ore de muncă',
   },
 
   account: {
@@ -165,6 +168,7 @@ export default {
 
   calendar: {
     week: 'Săptămână',
+    weekLabel: 'Săptămâna {num}',
     month: 'Lună',
     logout: 'Deconectare',
     comment: 'Comentariu',

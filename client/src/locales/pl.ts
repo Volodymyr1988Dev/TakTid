@@ -145,6 +145,9 @@ export default {
     passwordMin: 'Hasło musi mieć co najmniej 6 znaków',
     passwordMax: 'Hasło musi mieć maksymalnie 25 znaków',
     nameMin: 'Imię musi mieć co najmniej 2 znaki',
+    unavailableAbsence: 'Nie można utworzyć nieobecności, ponieważ dzień jest już wypełniony pracą',
+    twoAbsences: 'Nie można dodać dwóch nieobecności w jednym dniu',
+    dayContains8Hours: 'Dzień zawiera już 8 godzin pracy',
     
   },
 
@@ -166,6 +169,7 @@ export default {
 
   calendar: {
     week: 'Tydzień',
+    weekLabel: 'Tydzień {num}',
     month: 'Miesiąc',
     logout: 'Wyloguj',
     comment: 'Komentarz',

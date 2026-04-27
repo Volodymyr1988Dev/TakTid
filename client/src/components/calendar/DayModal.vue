@@ -67,7 +67,7 @@ async function save() {
 
       <textarea
         v-model="comment"
-        placeholder="t('calendar.comment')"
+        :placeholder="t('calendar.comment')"
 
       />
 

@@ -7,6 +7,7 @@ import type { DayEntry } from '../../types/DayEntry.type'
 import { isFullDayCovered } from '../helpers/isFullDayCovered'
 import { calculateMissingWorkTime } from '../helpers/calculateMissingWorkTime'
 import { addMinutes, normalizeTime } from '../helpers/time'
+import { useI18n } from 'vue-i18n'
 
 export function useAbsenceEntryForm(props: {
   date: string
@@ -14,6 +15,7 @@ export function useAbsenceEntryForm(props: {
   dayEntries?: DayEntry[]
 }) {
   const store = useTimeEntryStore()
+  const { t } = useI18n()
   const kindRef = ref<AbsenceKind>(
     props.entry?.type ?? TimeKind.SICK
   )
@@ -63,19 +65,19 @@ export function useAbsenceEntryForm(props: {
       ) ?? []
       if (!props.entry && !isRedDay.value && isFullDayCovered(allEntries)) {
         errorRef.value =
-          'Unavailable to create absence, because you have working time all day'
+          t('errors.unavailableAbsence')
         return Promise.reject()
       }
       const { missingMinutes, lastEnd } =
       calculateMissingWorkTime(allEntries)
     if (!props.entry && !isRedDay.value && existingAbsences.length > 0) {
       errorRef.value =
-          'Two absence entries are not allowed in one day'
+          t('errors.twoAbsences')
         return Promise.reject()
     }
     if (!props.entry && !isRedDay.value && missingMinutes <= 0) {
       errorRef.value =
-          'Day already contains 8 working hours'
+          t('errors.dayContains8Hours')
         return Promise.reject()
     }
 

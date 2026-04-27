@@ -6,23 +6,18 @@ const loadedLanguages = new Set<string>()
 
 const loaders = {
   en: async () => {
-    console.log('LOADING EN')
     return import('./locales/en')
   },
   uk: async () => {
-    console.log('LOADING UK')
     return import('./locales/uk')
   },
   sv: async () => {
-    console.log('LOADING SV')
     return import('./locales/sv')
   },
   ro: async () => {
-    console.log('LOADING RO')
     return import('./locales/ro')
   },
   pl: async () => {
-    console.log('LOADING PL')
     return import('./locales/pl')
   },
 }
