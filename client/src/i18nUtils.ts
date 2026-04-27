@@ -8,7 +8,7 @@ const loaders = {
   en: async () => {
     console.log('LOADING EN')
     return import('./locales/en')
-  },
+  },/*
   uk: async () => {
     console.log('LOADING UK')
     return import('./locales/uk')
@@ -24,7 +24,7 @@ const loaders = {
   pl: async () => {
     console.log('LOADING PL')
     return import('./locales/pl')
-  },
+  },*/
 }
 /*
 export async function setLanguage(locale: string) {
