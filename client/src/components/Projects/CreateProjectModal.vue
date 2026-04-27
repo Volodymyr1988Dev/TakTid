@@ -30,11 +30,11 @@ async function submit() {
     </button>
     <input
       v-model="city"
-      placeholder="City"
+      :placeholder="t('project.city')"
     >
     <input
       v-model="address"
-      placeholder="Address"
+      :placeholder="t('project.address')"
     >
     <button @click="submit">
       {{ t('project.create') }}
