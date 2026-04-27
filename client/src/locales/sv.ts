@@ -181,6 +181,8 @@ export default {
     comment: 'Kommentar',
     save: 'Spara',
     date: 'Datum',
+    weekTotal: 'Veckototal',
+    monthTotal: 'Månadstotal',
   },
 
   week: {

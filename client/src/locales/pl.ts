@@ -182,6 +182,8 @@ export default {
     comment: 'Komentarz',
     save: 'Zapisz',
     date: 'Data',
+    weekTotal: 'Suma tygodnia',
+    monthTotal: 'Suma miesiąca',
   },
 
   week: {
