@@ -4,6 +4,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useRouter } from 'vue-router'
 import { registerSchema } from '../schemas/register.schema'
 import api from '../api/axios'
+import LanguageSwitcher from '../components/LanguageSwitcher.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -29,6 +30,7 @@ const onSubmit = handleSubmit(async (values) => {
 </script>
 
 <template>
+  <LanguageSwitcher class="auth-lang"/>
   <div class="auth">
     <h1>{{ t('auth.register') }}</h1>
 

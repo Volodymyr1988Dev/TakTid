@@ -2,7 +2,9 @@
 import { ref } from 'vue'
 import HookCalculator from '../components/HookCalculator.vue'
 import IdealSpacing from '../components/IdealSpacing.vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const mode = ref<'hooks' | 'spacing'>('hooks')
 </script>
 
@@ -10,11 +12,11 @@ const mode = ref<'hooks' | 'spacing'>('hooks')
   <div class="wrap">
     <div class="tabs">
       <button :class="{ active: mode === 'hooks' }" @click="mode = 'hooks'">
-        Hooks
+        {{ t('hook.hooks') }}
       </button>
 
       <button :class="{ active: mode === 'spacing' }" @click="mode = 'spacing'">
-        Spacing
+        {{ t('hook.spacing') }}
       </button>
     </div>
 

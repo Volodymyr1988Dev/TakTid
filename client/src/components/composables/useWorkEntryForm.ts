@@ -11,7 +11,9 @@ import type { DayEntry } from '../../types/DayEntry.type'
 import { useDefaultTime } from './useDefaultTime'
 import { normalizeBreakMinutes } from '../helpers/time'
 import { useToast } from './useToast'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 export function useWorkEntryForm(props: {
   date: string
   entry?: WorkDayEntry | null
@@ -89,7 +91,7 @@ watch(
 
   async function save(): Promise<WorkDayEntry> {
     if (!props.projectId.value) {
-        throw new Error('WORK requires projectId')
+        throw new Error(t('errors.noProjectId'))
     }
     isSavingRef.value = true
 
@@ -98,9 +100,9 @@ watch(
     try {
       breakMin = normalizeBreakMinutes(breakMinutesRef.value)
     } catch {
-      toast.error('Break must be a valid number')
+      toast.error(t('errors.breakNumber'))
       isSavingRef.value = false
-      throw new Error('Invalid break')
+      throw new Error(t('errors.invalidBreak'))
     }
 
 
@@ -124,7 +126,7 @@ watch(
         try {
           await images.upload(props.projectId.value)
         } catch (e) {
-          console.error('[Images] upload failed', e)
+          console.error('[Images] ' + t('errors.imageUploadFailed'), e)
         }
       return {
         id: saved.id,

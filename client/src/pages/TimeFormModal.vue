@@ -110,67 +110,6 @@ const absence = computed<AbsenceForm | null>(() => {
 const isSaving = computed(() => activeForm.value.isSaving.value)
 const deleting = ref(false)
 const isBlocking = computed(() => isSaving.value || deleting.value || props.externalLoading === true)
-/*
-watch(
-  () => [props.entry, props.preset] as const,
-  ([entry, preset]) => {
-    if (entry) {
-
-      if ('projectId' in entry && entry.projectId) {
-        const project = projectStore.getById(entry.projectId)
-        if (project) projectStore.select(project)
-      }
-
-      if (entry.type === TimeKind.WORK) mode.value = 'WORK'
-      else if (entry.type === TimeKind.EXTRA) mode.value = 'EXTRA'
-      else mode.value = 'ABSENCE'
-
-      return
-    }
-    
-    if (preset) {
-      if (isWorkSuggestion(preset)) {
-        mode.value = preset.type
-        const project = projectStore.getById(preset.projectId)
-        if (project) projectStore.select(project)
-      }
-     else {
-        mode.value = 'ABSENCE'
-        absenceForm.absenceType.value = preset.type
-      }
-        
-      return
-    }
-
-    mode.value = 'WORK'
-  },
-  if (preset) {
-    if (preset.type === TimeKind.WORK) {
-      mode.value = 'WORK'
-      const project = projectStore.getById(preset.projectId!)
-      if (project) projectStore.select(project)
-      return
-    }
-
-    if (preset.type === TimeKind.EXTRA) {
-      mode.value = 'EXTRA'
-      const project = projectStore.getById(preset.projectId!)
-      if (project) projectStore.select(project)
-      return
-    }
-
-    if (preset.type === TimeKind.MEETING) {
-      mode.value = 'MEETING'
-      return
-    }
-
-    // absence
-    mode.value = 'ABSENCE'
-    absenceForm.absenceType.value = preset.type
-  }
-  { immediate: true }
-)
-*/
 
 watch(
   () => [props.entry, props.preset] as const,

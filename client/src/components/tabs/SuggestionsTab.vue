@@ -5,6 +5,7 @@ import { useProjectStore } from '../../stores/project.store';
 import type { TimeSuggestion } from '../../types/Suggestion.type'
 import { isWorkSuggestion, isInternalSuggestion } from '../../types/suggestion.guard';
 import { cardClass } from '../helpers/cardClass';
+
 const emit = defineEmits<{
   (e: 'select', s: TimeSuggestion): void
 }>()

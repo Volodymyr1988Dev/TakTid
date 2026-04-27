@@ -6,7 +6,9 @@ import AbsenceTab from '../tabs/AbsenceTab.vue'
 import InternalTab from './InternalTab.vue'
 import type { TimeSuggestion } from '../../types/Suggestion.type'
 import type { TimeEntry } from '../../types/TimeEntry.type'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const tab = ref<'suggestions' | 'projects' | 'internal' | 'absence'>('suggestions')
 
 const emit = defineEmits<{
@@ -21,27 +23,27 @@ const emit = defineEmits<{
       :class="{ active: tab === 'suggestions' }"
       @click="tab = 'suggestions'"
     >
-      Suggestions
+      {{ t('tabs.suggestions') }}
     </button>
     <button
       :class="{ active: tab === 'projects' }"
       @click="tab = 'projects'"
     >
-      Projects
+      {{ t('tabs.projects') }}
     </button>
 
     <button
       :class="{ active: tab === 'internal' }"
       @click="tab = 'internal'"
     >
-      Internal
+      {{ t('tabs.internal') }}
     </button>
 
     <button
       :class="{ active: tab === 'absence' }"
       @click="tab = 'absence'"
     >
-      Absence
+      {{ t('tabs.absence') }}
     </button>
   </div>
 

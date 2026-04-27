@@ -39,7 +39,7 @@ function close() {
 
 const currentLang = computed<Language>(() => {
   const found = languages.find(l => l.code === locale.value)
-   if (!languages[0]) {
+  if (!languages[0]) {
     throw new Error('Languages array is empty')
   }
   return found ?? languages[0]
@@ -81,7 +81,8 @@ onBeforeUnmount(() => {
       >
         <span class="flag">{{ lang.flag }}</span>
         <span class="label">{{ lang.label }}</span>
-        <span v-if="lang.code === locale" class="check">✓</span>
+        <span v-if="lang.code === currentLocale" class="check">✓</span>
+        <!--locale-->
       </div>
     </div>
   </div>
@@ -174,6 +175,13 @@ onBeforeUnmount(() => {
 .check {
   color: #2563eb;
   font-weight: bold;
+}
+.auth-lang .label {
+  color: #1e293b;
+}
+
+.auth-lang .lang-btn {
+  color: #1e293b;
 }
 
 @keyframes fadeIn {

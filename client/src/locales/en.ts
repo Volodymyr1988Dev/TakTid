@@ -2,6 +2,7 @@
 
 export default {
   common: {
+    title: 'Title',
     addProject: 'Add project',
     delete: 'Delete',
     back: 'Back',
@@ -9,17 +10,26 @@ export default {
     loading: 'Loading...',
     error: 'Something went wrong',
     yes: 'Yes',
-    no: 'No'
+    no: 'No',
+    save: 'Save',
+    cancel: 'Cancel',
+    edit: 'Edit',
+    deleteConfirm: 'Are you sure?',
+    registerTime: 'Register time',
 
   },
 
   project: {
     title: 'Projects',
     create: 'Create project',
+    add: 'Add project',
     city: 'City',
     address: 'Address',
     confirmDelete: 'Are you sure?',
-    info: 'Info'
+    info: 'Info',
+    back: 'Back',
+    hideImages: 'Hide Images',
+    showImages: 'Show Images',
   },
 
   auth: {
@@ -46,12 +56,15 @@ export default {
 
     work: 'Work',
     extra: 'Extra',
+    extraWork: 'Extra work',
     meeting: 'Meeting',
     sick: 'Sick',
     vacation: 'Vacation',
     vab: 'VAB',
     redDay: 'Red Day',
+    dayOff: 'Day off',
     total: 'Total',
+    absence: 'Absence',
 
     period: 'Period',
     user: 'User',
@@ -74,7 +87,10 @@ export default {
     projects: 'Projects',
     list: 'List',
     stats: 'Stats',
-    helpers: 'Helpers'
+    helpers: 'Helpers',
+    suggestions: 'Suggestions',
+    internal: 'Internal',
+    absence: 'Absence',
   },
 
   calculator: {
@@ -117,6 +133,17 @@ export default {
     updateFailed: 'Update failed',
     deleteFailed: 'Delete failed',
     restoreFailed: 'Restore failed',
+    breakNumber: 'Break must be a valid number',
+    invalidBreak: 'Invalid break',
+    noProject: 'Saved assignment has no project',
+    imageUploadFailed: 'Image upload failed',
+    deleteExtraWork: 'Delete extra work?',
+    noProjectId: 'WORK requires projectId',
+    accessDenied: 'Access denied',
+    loadStats: 'Failed to load stats',
+    loadUserDetails: 'Failed to load user details',
+    monthValid: 'Month must be a valid number',
+    monthRange: 'Month must be between 1 and 12',
   },
   account: {
     title: 'Account settings',
@@ -157,6 +184,9 @@ export default {
     updateFailed: 'Update failed',
     restoreFailed: 'Restore failed',
     restoreSuccess: 'Restored successfully',
+    success: 'Success',
+    error: 'Error',
+    loadProjectStats: 'Failed to load project statistics.'
   }
 
 }

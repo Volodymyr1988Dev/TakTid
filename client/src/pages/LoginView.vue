@@ -26,7 +26,7 @@ async function login() {
 </script>
 
 <template>
-  <LanguageSwitcher />
+  <LanguageSwitcher class="auth-lang"/>
   <div class="auth">
     <h1>{{ t('auth.login') }}</h1>
 

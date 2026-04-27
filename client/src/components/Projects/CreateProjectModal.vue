@@ -2,7 +2,9 @@
 import { ref } from 'vue'
 import api from '../../api/axios'
 import type { Project } from '../../types/Project.dto';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'created', project: Project): void
@@ -24,7 +26,7 @@ async function submit() {
 <template>
   <div class="modal">
     <button @click="$emit('close')">
-      ← Back
+      ← {{ t('project.back') }}
     </button>
     <input
       v-model="city"
@@ -35,7 +37,7 @@ async function submit() {
       placeholder="Address"
     >
     <button @click="submit">
-      Create
+      {{ t('project.create') }}
     </button>
   </div>
 </template>

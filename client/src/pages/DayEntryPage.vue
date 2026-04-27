@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { DayEntry } from '../types/DayEntry.type';
 import { TimeKind } from '../types/timeKind.enum';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 defineProps<{
   date: string
   entries: DayEntry[]
@@ -14,9 +16,9 @@ const emit = defineEmits<{
 }>()
 
 function getTitle(entry: DayEntry) {
-  if (entry.type === 'EXTRA') return 'Extra work'
+  if (entry.type === 'EXTRA') return t('stats.extraWork')
   if (entry.type === TimeKind.MEETING)
-  return 'Meeting'
+  return t('stats.meeting')
   if (
     entry.type === TimeKind.SICK ||
     entry.type === TimeKind.VAB ||
@@ -24,11 +26,11 @@ function getTitle(entry: DayEntry) {
     entry.type === TimeKind.DAY_OFF ||
     entry.type === TimeKind.RED_DAY
   ) {
-    return `Absence (${entry.type})`
+    return `${t('stats.absence')} (${entry.type})`
   }
   return entry.project
-  ? `Work · ${entry.project.city}`
-  : 'Work'
+  ? `${t('stats.work')} · ${entry.project.city}`
+  : `${t('stats.work')}`
 }
 
 function getProjectSubtitle(e: DayEntry) {
@@ -47,10 +49,10 @@ function getProjectSubtitle(e: DayEntry) {
   <div class="day-entries">
     <header>
       <button @click="emit('back')">
-        ← Back
+        ← {{ t('project.back') }}
       </button>
       <button @click="emit('add')">
-        + Add work
+        + {{ t('project.add') }}
       </button>
       <strong>{{ date }}</strong>
     </header>

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 defineProps<{
   modelValue: 'week' | 'month'
 }>()
@@ -14,13 +17,13 @@ defineEmits<{
       :class="{ active: modelValue === 'week' }"
       @click="$emit('update:modelValue', 'week')"
     >
-      📅 Vecka
+      📅 {{ t('calendar.week') }}
     </button>
     <button
       :class="{ active: modelValue === 'month' }"
       @click="$emit('update:modelValue', 'month')"
     >
-      🗓 Månad
+      🗓 {{ t('calendar.month') }}
     </button>
   </div>
 </template>
