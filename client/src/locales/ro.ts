@@ -27,6 +27,8 @@ export default {
     back: 'Înapoi',
     hideImages: 'Ascunde imagini',
     showImages: 'Arată imagini',
+    hideDetails: 'Ascunde detaliile',
+    showDetails: 'Arată detaliile',
   },
 
   auth: {

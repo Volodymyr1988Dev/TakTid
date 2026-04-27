@@ -27,6 +27,8 @@ export default {
     back: 'Wstecz',
     hideImages: 'Ukryj obrazy',
     showImages: 'Pokaż obrazy',
+    hideDetails: 'Ukryj szczegóły',
+    showDetails: 'Pokaż szczegóły',
   },
 
   auth: {

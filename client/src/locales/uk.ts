@@ -27,6 +27,8 @@ export default {
     back: 'Назад',
     hideImages: 'Сховати зображення',
     showImages: 'Показати зображення',
+    hideDetails: 'Сховати деталі',
+    showDetails: 'Показати деталі',
   },
 
   auth: {
