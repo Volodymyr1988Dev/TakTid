@@ -13,13 +13,14 @@ import { normalizeBreakMinutes } from '../helpers/time'
 import { useToast } from './useToast'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+
 export function useWorkEntryForm(props: {
   date: string
   entry?: WorkDayEntry | null
   projectId: Ref <string | null>
   dayEntries?: DayEntry[]
 }) {
+  const { t } = useI18n()
   const store = useTimeEntryStore()
   const images = useTimeEntryImages()
   const startRef = ref('07:00')
