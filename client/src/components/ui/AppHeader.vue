@@ -2,7 +2,9 @@
 import { useAuthStore } from '../../stores/auth.store'
 import { useRouter } from 'vue-router'
 import LanguageSwitcher from '../LanguageSwitcher.vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const auth = useAuthStore()
 const router = useRouter()
 
@@ -29,7 +31,7 @@ async function onLogout() {
       class="logout"
       @click="onLogout"
     >
-      {{ $t('calendar.logout') }}
+      {{ t('calendar.logout') }}
     </button>
     </div>
     

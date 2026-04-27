@@ -141,6 +141,11 @@ export default {
     loadUserDetails: 'Błąd ładowania użytkownika',
     monthValid: 'Nieprawidłowy miesiąc',
     monthRange: 'Miesiąc 1-12',
+    emailValid: 'Nieprawidłowy email',
+    passwordMin: 'Hasło musi mieć co najmniej 6 znaków',
+    passwordMax: 'Hasło musi mieć maksymalnie 25 znaków',
+    nameMin: 'Imię musi mieć co najmniej 2 znaki',
+    
   },
 
   account: {

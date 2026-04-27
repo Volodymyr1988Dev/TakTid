@@ -141,6 +141,10 @@ export default {
     loadUserDetails: 'Помилка завантаження даних користувача',
     monthValid: 'Місяць має бути числом',
     monthRange: 'Місяць має бути від 1 до 12',
+    emailValid: 'Невірний email',
+    passwordMin: 'Пароль мінімум 6 символів',
+    passwordMax: 'Пароль максимум 25 символів',
+    nameMin: 'Імʼя мінімум 2 символи',
   },
 
   account: {

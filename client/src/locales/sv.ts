@@ -141,6 +141,10 @@ export default {
     loadUserDetails: 'Fel vid användare',
     monthValid: 'Ogiltig månad',
     monthRange: 'Månad 1-12',
+    emailValid: 'Ogiltig e-post',
+    passwordMin: 'Lösenord minst 6 tecken',
+    passwordMax: 'Lösenord max 25 tecken',
+    nameMin: 'Namn minst 2 tecken',
   },
 
   account: {
