@@ -44,12 +44,16 @@ export async function setLanguage(locale: string) {
 export async function setLanguage(locale: string) {
   let lang = locale as keyof typeof loaders
 
-  if (!loaders[lang]) {
+  if (!(lang in loaders)) {
     lang = 'en'
   }
 
   if (!loadedLanguages.has(lang)) {
     const messages = await loaders[lang]()
+    if (!messages?.default) {
+      console.error('Invalid locale file:', lang)
+      return
+    }
     console.log('LOADED LANG:', lang, messages)
     i18n.global.setLocaleMessage(lang, messages.default)
     loadedLanguages.add(lang)

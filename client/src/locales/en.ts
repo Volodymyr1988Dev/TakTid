@@ -38,7 +38,7 @@ export default {
     email: 'Email',
     password: 'Password',
     name: 'Name',
-    noAccount: "Don't have account?",
+    noAccount: "Don’t have account?",
     haveAccount: 'Already have account?',
     invalid: 'Invalid email or password',
     registerFailed: 'Register failed'
