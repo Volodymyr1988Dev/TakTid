@@ -315,7 +315,7 @@ async function reloadCalendar () {
 
     <Toolbar
       :title="mode === 'week'
-        ? `Week ${current.week()}`
+        ? t('calendar.weekLabel', { num: current.week() }) //`Week ${current.week()}`
         : current.format('MMMM YYYY')"
       @prev="prev"
       @next="next"
@@ -340,7 +340,7 @@ async function reloadCalendar () {
         v-if="(mode === 'week' ? weekTotal : monthTotal) > 0"
         class="total-item main"
       >
-        <span>{{ mode === 'week' ? 'Week total' : 'Month total' }}</span>
+        <span>{{ mode === 'week' ? t('calendar.weekTotal') : t('calendar.monthTotal') }}</span>
         <strong>{{ mode === 'week' ? weekTotal : monthTotal }} h</strong>
       </div>
 
