@@ -181,6 +181,8 @@ export default {
     comment: 'Comentariu',
     save: 'Salvează',
     date: 'Dată',
+    weekTotal: 'Total săptămână',
+    monthTotal: 'Total lună',
   },
 
   week: {

@@ -369,7 +369,7 @@ const spinnerText = computed(() => {
             {{ t('stats.sick') }}
           </option>
           <option value="VAB">
-            VAB
+            {{ t('stats.vab') }}
           </option>
           <option 
             value="VACATION"

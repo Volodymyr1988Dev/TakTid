@@ -182,6 +182,8 @@ export default {
     comment: 'Comment',
     save: 'Save',
     date: 'Date',
+    weekTotal: 'Week total',
+    monthTotal: 'Month total',
   },
     week: {
     mon: 'Mon',

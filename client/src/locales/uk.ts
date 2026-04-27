@@ -181,6 +181,8 @@ export default {
     comment: 'Коментар',
     save: 'Зберегти',
     date: 'Дата',
+    weekTotal: 'Всього за тиждень',
+    monthTotal: 'Всього за місяць',
   },
 
   week: {
