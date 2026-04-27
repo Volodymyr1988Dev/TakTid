@@ -30,6 +30,8 @@ export default {
     back: 'Back',
     hideImages: 'Hide Images',
     showImages: 'Show Images',
+    hideDetails: 'Hide details',
+    showDetails: 'Show details',
   },
 
   auth: {
@@ -150,7 +152,12 @@ export default {
     nameMin: 'Name must be at least 2 characters',
     unavailableAbsence: 'Unavailable to create absence, because you have working time all day',
     twoAbsences: 'Two absence entries are not allowed in one day',
-    dayContains8Hours: 'Day already contains 8 working hours'
+    dayContains8Hours: 'Day already contains 8 working hours',
+    saveFailed: 'Save failed',
+    removing: 'Please wait, removing…',
+    saving: 'Please wait, saving…',
+    loading: 'Please wait, loading…',
+    clickToSelectProject: 'Click to select project',
   },
   account: {
     title: 'Account settings',
@@ -173,7 +180,8 @@ export default {
     month: 'Month',
     logout: 'Log out',
     comment: 'Comment',
-    save: 'Save'
+    save: 'Save',
+    date: 'Date',
   },
     week: {
     mon: 'Mon',
@@ -194,7 +202,10 @@ export default {
     restoreSuccess: 'Restored successfully',
     success: 'Success',
     error: 'Error',
-    loadProjectStats: 'Failed to load project statistics.'
+    loadProjectStats: 'Failed to load project statistics.',
+    registerAbsence: 'Register absence',
+    editTime: 'Edit time',
+    registerTime: 'Register time',
   }
 
 }

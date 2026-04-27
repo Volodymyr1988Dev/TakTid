@@ -27,6 +27,8 @@ export default {
     back: 'Назад',
     hideImages: 'Сховати зображення',
     showImages: 'Показати зображення',
+    hideDetails: 'Сховати деталі',
+    showDetails: 'Показати деталі',
   },
 
   auth: {
@@ -148,6 +150,11 @@ export default {
     unavailableAbsence: 'Неможливо створити відсутність — день вже повністю заповнений роботою',
     twoAbsences: 'Не можна створити дві відсутності в один день',
     dayContains8Hours: 'День вже містить 8 робочих годин',
+    saveFailed: 'Помилка збереження',
+    removing: 'Зачекайте, видалення…',
+    saving: 'Зачекайте, збереження…',
+    loading: 'Зачекайте, завантаження…',
+    clickToSelectProject: 'Натисніть, щоб вибрати проект',
   },
 
   account: {
@@ -172,7 +179,8 @@ export default {
     month: 'Місяць',
     logout: 'Вийти',
     comment: 'Коментар',
-    save: 'Зберегти'
+    save: 'Зберегти',
+    date: 'Дата',
   },
 
   week: {
@@ -195,6 +203,9 @@ export default {
     restoreSuccess: 'Успішно відновлено',
     success: 'Успіх',
     error: 'Помилка',
-    loadProjectStats: 'Не вдалося завантажити статистику проекту'
+    loadProjectStats: 'Не вдалося завантажити статистику проекту',
+    registerAbsence: 'Зареєструвати відсутність',
+    editTime: 'Редагувати час',
+    registerTime: 'Зареєструвати час',
   }
 }

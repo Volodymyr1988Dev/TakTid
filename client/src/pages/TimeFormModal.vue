@@ -16,7 +16,9 @@ import type { AbsenceForm, EntryMode, TimeForm } from '../types/Form.types'
 import { isWorkSuggestion  } from '../types/suggestion.guard'
 import { TimeKind } from '../types/timeKind.enum'
 import ProjectTab from './ProjectTab.vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 
 const props = defineProps<{
   date: string
@@ -190,7 +192,7 @@ const originalType = computed(() => props.entry?.type ?? null)
 
 async function onSave() {
   if (projectMissing.value) {
-    alert('Please select a project')
+    alert(t('project.errorSelectProject'))
     return
   }
 
@@ -224,7 +226,7 @@ async function onSave() {
     if (entry) emit('saved', entry)
 
   } catch (e) {
-    console.error('Save failed', e)
+    console.error(t('errors.saveFailed'), e)
   }
 }
 
@@ -239,9 +241,9 @@ async function onDelete() {
   }
 }
 const spinnerText = computed(() => {
-  if (deleting.value) return 'Please wait, removing…'
-  if (isSaving.value) return 'Please wait, saving…'
-  if (props.externalLoading) return 'Please wait, loading…'
+  if (deleting.value) return t('toast.deleting')
+  if (isSaving.value) return t('toast.saving')
+  if (props.externalLoading) return t('toast.loading')
   return ''
 })
 </script>
@@ -265,21 +267,21 @@ const spinnerText = computed(() => {
           class="back-btn"
           @click="emit('cancel')"
         >
-          ← Back
+          ← {{ t('common.back') }}
         </button>
       </header>
 
       <h3>
         <template v-if="mode === 'ABSENCE'">
-          Register absence ({{ absence?.absenceType.value }})
+          {{ t('toast.registerAbsence') }} ({{ absence?.absenceType.value }})
         </template>
         <template v-else>
-          {{ activeForm.isEdit.value ? 'Edit time' : 'Register time' }}
+          {{ activeForm.isEdit.value ? t('toast.editTime') : t('toast.registerTime') }}
         </template>
       </h3>
       <p>
         <strong>
-          Date:
+          {{ t('calendar.date') }}:
         </strong>
         {{ date }}
       </p>
@@ -297,7 +299,7 @@ const spinnerText = computed(() => {
           <small class="change-hint">{{ projectStore.selectedProject.address }}</small>
         </div>
         <div v-else>
-          <span class="error">Click to select project</span>
+          <span class="error">{{ t('errors.clickToSelectProject') }}</span>
         </div>
       </div>
       <!--isTimeMode-->
@@ -306,10 +308,10 @@ const spinnerText = computed(() => {
         v-model="mode"
       >
         <option value="WORK">
-          Work
+          {{ t('stats.work') }}
         </option>
         <option value="EXTRA">
-          Extra work
+          {{ t('stats.extra') }}
         </option>
       </select>
 
@@ -366,7 +368,7 @@ const spinnerText = computed(() => {
           <option 
             value="SICK"
           >
-            Sick
+            {{ t('stats.sick') }}
           </option>
           <option value="VAB">
             VAB
@@ -374,17 +376,17 @@ const spinnerText = computed(() => {
           <option 
             value="VACATION"
           >
-            Vacation
+            {{ t('stats.vacation') }}
           </option>
           <option 
             value="DAY_OFF"
           >
-            Day off
+            {{ t('stats.dayOff') }}
           </option>
           <option 
             value="RED_DAY"
           >
-            Red Day
+            {{ t('stats.redDay') }}
           </option>
         </select>
       </div>
@@ -414,7 +416,7 @@ const spinnerText = computed(() => {
           :disabled="isSaving"
           @click="onDelete"
         >
-          Delete
+          {{ t('common.delete') }}
         </button>
 
         <button
@@ -422,7 +424,7 @@ const spinnerText = computed(() => {
           :disabled="isSaving"
           @click="onSave"
         >
-          Save
+          {{ t('common.save') }}
         </button>
       </div>
       <div
@@ -434,7 +436,7 @@ const spinnerText = computed(() => {
             class="close-projects"
             @click="selectingProject = false"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </button>
           <ProjectTab
             mode="select"
@@ -444,7 +446,7 @@ const spinnerText = computed(() => {
             class="close-projects"
             @click="selectingProject = false"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </button>
         </div>
       </div>

@@ -27,6 +27,8 @@ export default {
     back: 'Tillbaka',
     hideImages: 'Dölj bilder',
     showImages: 'Visa bilder',
+    hideDetails: 'Dölj detaljer',
+    showDetails: 'Visa detaljer',
   },
 
   auth: {
@@ -148,6 +150,11 @@ export default {
     unavailableAbsence: 'Kan inte skapa frånvaro eftersom dagen redan är full med arbete',
     twoAbsences: 'Två frånvaroposter är inte tillåtna samma dag',
     dayContains8Hours: 'Dagen innehåller redan 8 arbetstimmar',
+    saveFailed: 'Sparande misslyckades',
+    removing: 'Tar bort… vänligen vänta',
+    saving: 'Sparar… vänligen vänta',
+    loading: 'Laddar… vänligen vänta',
+    clickToSelectProject: 'Klicka för att välja projekt',
   },
 
   account: {
@@ -172,7 +179,8 @@ export default {
     month: 'Månad',
     logout: 'Logga ut',
     comment: 'Kommentar',
-    save: 'Spara'
+    save: 'Spara',
+    date: 'Datum',
   },
 
   week: {
@@ -195,6 +203,9 @@ export default {
     restoreSuccess: 'Återställd',
     success: 'Klar',
     error: 'Fel',
-    loadProjectStats: 'Fel vid statistik'
+    loadProjectStats: 'Fel vid statistik',
+    registerAbsence: 'Registrera frånvaro',
+    editTime: 'Redigera tid',
+    registerTime: 'Registrera tid',
   }
 }
