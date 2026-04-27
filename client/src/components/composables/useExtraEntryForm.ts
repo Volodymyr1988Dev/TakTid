@@ -10,12 +10,13 @@ import { normalizeBreakMinutes } from '../helpers/time'
 import { useToast } from './useToast'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+
 export function useExtraEntryForm(props: {
   date: string
   entry?: ExtraDayEntry | null,
   projectId: Ref<string | null>
 }) {
+  const { t } = useI18n()
   const assignmentStore = useProjectAssignmentStore()
   const images = useTimeEntryImages()
   const toast = useToast()

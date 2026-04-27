@@ -8,12 +8,13 @@ import { normalizeBreakMinutes } from '../helpers/time'
 import { useToast } from './useToast'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+
 export function useMeetingEntryForm(props: {
   date: string
   entry?: MeetingDayEntry | null
 }) {
   const store = useTimeEntryStore()
+  const { t } = useI18n()
   const toast = useToast()
   
   const {
