@@ -141,6 +141,10 @@ export default {
     loadUserDetails: 'Eroare user',
     monthValid: 'Lună invalidă',
     monthRange: 'Lună 1-12',
+    emailValid: 'Email invalid',
+    passwordMin: 'Parola trebuie să aibă cel puțin 6 caractere',
+    passwordMax: 'Parola trebuie să aibă cel mult 25 de caractere',
+    nameMin: 'Numele trebuie să aibă cel puțin 2 caractere',
   },
 
   account: {
