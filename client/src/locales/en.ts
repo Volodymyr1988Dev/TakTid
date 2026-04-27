@@ -30,6 +30,8 @@ export default {
     back: 'Back',
     hideImages: 'Hide Images',
     showImages: 'Show Images',
+    hideDetails: 'Hide details',
+    showDetails: 'Show details',
   },
 
   auth: {

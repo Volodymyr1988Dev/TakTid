@@ -27,6 +27,8 @@ export default {
     back: 'Tillbaka',
     hideImages: 'Dölj bilder',
     showImages: 'Visa bilder',
+    hideDetails: 'Dölj detaljer',
+    showDetails: 'Visa detaljer',
   },
 
   auth: {
