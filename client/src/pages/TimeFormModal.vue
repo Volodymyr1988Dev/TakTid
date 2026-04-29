@@ -241,9 +241,9 @@ async function onDelete() {
   }
 }
 const spinnerText = computed(() => {
-  if (deleting.value) return t('toast.deleting')
-  if (isSaving.value) return t('toast.saving')
-  if (props.externalLoading) return t('toast.loading')
+  if (deleting.value) return t('errors.deleting')
+  if (isSaving.value) return t('errors.saving')
+  if (props.externalLoading) return t('errors.loading')
   return ''
 })
 </script>
