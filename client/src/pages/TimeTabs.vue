@@ -22,6 +22,7 @@ import { useProjectStore } from '../stores/project.store'
 import type { Totals } from '../types/totals'
 import { useSuggestionsStore } from '../stores/suggestions.store'
 import { useI18n } from 'vue-i18n'
+import { isCountedInTotal } from '../components/helpers/helpers'
 
 const { t } = useI18n()
 type ViewState = 'calendar' | 'tabs' |'dayEntries' | 'modal'
@@ -187,13 +188,14 @@ watch(
     await loadEntries()
   },
   { immediate: true }
-)
+)/*
 function isWork(e: DayEntry) {
    return e.type === TimeKind.WORK || e.type === TimeKind.EXTRA
-}
+}*/
 
 function isPaidWork(e: DayEntry) {
-  return e.type === TimeKind.EXTRA || e.type === TimeKind.WORK
+  return e.type === TimeKind.EXTRA || e.type === TimeKind.WORK ||
+    e.type === TimeKind.RED_DAY
 }
 
 function isAbsence(e: DayEntry, type: TimeKind){ 
@@ -226,7 +228,8 @@ const weekTotal = computed(() => {
   const start = current.value.startOf('isoWeek')
 
   return entries.value
-    .filter(isWork)
+    //.filter(isWork)
+    .filter(isCountedInTotal)
     .filter(e =>
       dayjs(e.date).isSame(start, 'week')
     )
@@ -236,7 +239,8 @@ const weekTotal = computed(() => {
 const monthTotal = computed(() => {
   if (mode.value !== 'month') return 0
   return entries.value
-    .filter(isWork)
+    //.filter(isWork)
+    .filter(isCountedInTotal)
     .filter(inCurrentPeriod)
     .reduce((sum, e) => sum + Number(e.hours), 0)
 })
@@ -360,6 +364,14 @@ async function reloadCalendar () {
       >
         <span>{{ t('stats.vab') }}</span>
         <strong>{{ totals.vab }} h</strong>
+      </div>
+
+      <div 
+        v-if="totals.vacation > 0"
+        class="total-item"
+      >
+        <span>{{ t('stats.vacation') }}</span>
+        <strong>{{ totals.vacation }} h</strong>
       </div>
 
       <div 
