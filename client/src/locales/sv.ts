@@ -69,6 +69,8 @@ export default {
     user: 'Användare',
     monthlyReport: 'Månadsrapport',
 
+    totalWork: 'Totala arbetstimmar',
+    totalWorkRedDay: 'Totala arbetstimmar + röda dagar',
     workWithExtra: 'Arbete + Extra',
     workWithRedDay: 'Arbete + Röd dag',
     totalWithRedDay: 'Totalt + Röd dag',
@@ -155,6 +157,7 @@ export default {
     saving: 'Sparar… vänligen vänta',
     loading: 'Laddar… vänligen vänta',
     clickToSelectProject: 'Klicka för att välja projekt',
+    deleting: 'Vänligen vänta, tar bort…',
   },
 
   account: {

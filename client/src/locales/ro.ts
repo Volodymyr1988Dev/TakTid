@@ -69,6 +69,8 @@ export default {
     user: 'Utilizator',
     monthlyReport: 'Raport lunar',
 
+    totalWork: 'Total ore de muncă',
+    totalWorkRedDay: 'Total ore de muncă + zile roșii',
     workWithExtra: 'Muncă + Extra',
     workWithRedDay: 'Muncă + Zi liberă',
     totalWithRedDay: 'Total + Zi liberă',
@@ -155,6 +157,7 @@ export default {
     saving: 'Se salvează… vă rugăm așteptați',
     loading: 'Se încarcă… vă rugăm așteptați',
     clickToSelectProject: 'Click pentru a selecta proiectul',
+    deleting: 'Vă rugăm să așteptați, se șterge…'
   },
 
   account: {

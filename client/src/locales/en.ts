@@ -72,6 +72,8 @@ export default {
     user: 'User',
     monthlyReport: 'Monthly Report',
 
+    totalWork: 'Total work',
+    totalWorkRedDay: 'Total work + Red Day',
     workWithExtra: 'Work + Extra',
     workWithRedDay: 'Work + Red Day',
     totalWithRedDay: 'Total + Red Day',
@@ -158,6 +160,7 @@ export default {
     saving: 'Please wait, saving…',
     loading: 'Please wait, loading…',
     clickToSelectProject: 'Click to select project',
+    deleting: 'Please wait, deleting…',
   },
   account: {
     title: 'Account settings',

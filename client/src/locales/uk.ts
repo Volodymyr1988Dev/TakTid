@@ -60,7 +60,7 @@ export default {
     sick: 'Лікарняний',
     vacation: 'Відпустка',
     vab: 'Догляд за дитиною',
-    redDay: 'Святковий день',
+    redDay: 'Червоний день (Святковий)',
     dayOff: 'Вихідний',
     total: 'Всього',
     absence: 'Відсутність',
@@ -69,6 +69,8 @@ export default {
     user: 'Користувач',
     monthlyReport: 'Місячний звіт',
 
+    totalWork: 'Загальна кількість робочих годин',
+    totalWorkRedDay: 'Загальні робочі години + червоні дні',
     workWithExtra: 'Робота + Екстра',
     workWithRedDay: 'Робота + Свято',
     totalWithRedDay: 'Всього + Свято',
@@ -155,6 +157,7 @@ export default {
     saving: 'Зачекайте, збереження…',
     loading: 'Зачекайте, завантаження…',
     clickToSelectProject: 'Натисніть, щоб вибрати проект',
+    deleting: 'Будь ласка, зачекайте, видалення…',
   },
 
   account: {
