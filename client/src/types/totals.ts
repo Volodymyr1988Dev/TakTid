@@ -3,4 +3,5 @@ export interface Totals {
   sick: number
   vab: number
   redDay: number
+  vacation: number
 }
