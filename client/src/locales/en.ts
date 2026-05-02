@@ -72,6 +72,8 @@ export default {
     user: 'User',
     monthlyReport: 'Monthly Report',
 
+    totalWork: 'Total work',
+    totalWorkRedDay: 'Total work + Red Day',
     workWithExtra: 'Work + Extra',
     workWithRedDay: 'Work + Red Day',
     totalWithRedDay: 'Total + Red Day',

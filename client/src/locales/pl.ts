@@ -69,6 +69,8 @@ export default {
     user: 'Użytkownik',
     monthlyReport: 'Raport miesięczny',
 
+    totalWork: 'Łączna liczba godzin pracy',
+    totalWorkRedDay: 'Łączna liczba godzin pracy + dni czerwone',
     workWithExtra: 'Praca + Nadgodziny',
     workWithRedDay: 'Praca + Święto',
     totalWithRedDay: 'Razem + Święto',

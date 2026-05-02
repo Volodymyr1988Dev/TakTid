@@ -69,6 +69,8 @@ export default {
     user: 'Användare',
     monthlyReport: 'Månadsrapport',
 
+    totalWork: 'Totala arbetstimmar',
+    totalWorkRedDay: 'Totala arbetstimmar + röda dagar',
     workWithExtra: 'Arbete + Extra',
     workWithRedDay: 'Arbete + Röd dag',
     totalWithRedDay: 'Totalt + Röd dag',

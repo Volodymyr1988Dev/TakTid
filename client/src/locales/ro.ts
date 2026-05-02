@@ -69,6 +69,8 @@ export default {
     user: 'Utilizator',
     monthlyReport: 'Raport lunar',
 
+    totalWork: 'Total ore de muncă',
+    totalWorkRedDay: 'Total ore de muncă + zile roșii',
     workWithExtra: 'Muncă + Extra',
     workWithRedDay: 'Muncă + Zi liberă',
     totalWithRedDay: 'Total + Zi liberă',
