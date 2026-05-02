@@ -155,6 +155,7 @@ export default {
     saving: 'Zapisywanie… proszę czekać',
     loading: 'Ładowanie… proszę czekać',
     clickToSelectProject: 'Kliknij, aby wybrać projekt',
+    deleting: 'Proszę czekać, usuwanie…'
     
   },
 

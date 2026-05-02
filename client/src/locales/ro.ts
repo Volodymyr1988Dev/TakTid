@@ -155,6 +155,7 @@ export default {
     saving: 'Se salvează… vă rugăm așteptați',
     loading: 'Se încarcă… vă rugăm așteptați',
     clickToSelectProject: 'Click pentru a selecta proiectul',
+    deleting: 'Vă rugăm să așteptați, se șterge…'
   },
 
   account: {
