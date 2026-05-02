@@ -69,6 +69,8 @@ export default {
     user: 'Користувач',
     monthlyReport: 'Місячний звіт',
 
+    totalWork: 'Загальна кількість робочих годин',
+    totalWorkRedDay: 'Загальні робочі години + червоні дні',
     workWithExtra: 'Робота + Екстра',
     workWithRedDay: 'Робота + Свято',
     totalWithRedDay: 'Всього + Свято',

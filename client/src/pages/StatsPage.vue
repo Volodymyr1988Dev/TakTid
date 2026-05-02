@@ -425,7 +425,7 @@ onMounted(load)
           {{ t('stats.meeting') }}: {{ u.meetingHours }}h |
           {{ t('stats.sick') }}: {{ u.sickHours }}h |
           {{ t('stats.vacation') }}: {{ u.vacationHours }}h |
-          {{ t('stats.redDay') }}: {{ u.redDayHours }}h |
+          {{ t('stats.redDay') }}: {{ u.redDayHours }} |
           {{ t('stats.vab') }}: {{ u.vabHours /*|| 0*/ }}h
         </div>
         <div>{{ u.totalHours }} h</div>
