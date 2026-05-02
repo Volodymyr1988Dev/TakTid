@@ -155,6 +155,7 @@ export default {
     saving: 'Sparar… vänligen vänta',
     loading: 'Laddar… vänligen vänta',
     clickToSelectProject: 'Klicka för att välja projekt',
+    deleting: 'Vänligen vänta, tar bort…',
   },
 
   account: {

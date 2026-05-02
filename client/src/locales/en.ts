@@ -158,6 +158,7 @@ export default {
     saving: 'Please wait, saving…',
     loading: 'Please wait, loading…',
     clickToSelectProject: 'Click to select project',
+    deleting: 'Please wait, deleting…',
   },
   account: {
     title: 'Account settings',
