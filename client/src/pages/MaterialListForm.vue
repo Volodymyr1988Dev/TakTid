@@ -7,15 +7,15 @@ const isEditing = ref(true)
 const title = ref('')
 
 const items = reactive([
+  { label: 'ränna 6m', value: '' },
+  { label: 'ränna 4m', value: '' },
+  { label: 'ränna hooks', value: '' },
+  { label: 'omvik', value: '' },
   { label: 'stuprör 2.5m', value: '' },
   { label: 'stuprör 6m', value: '' },
   { label: 'stuprörshållare', value: '' },
   { label: 'lövsil', value: '' },
-  { label: 'omvik', value: '' },
   { label: 'rörvinkel', value: '' },
-  { label: 'ränna 6m', value: '' },
-  { label: 'ränna 4m', value: '' },
-  { label: 'ränna hooks', value: '' },
   { label: 'vindskivor trä', value: '' },
   { label: 'vindskiveplåt', value: '' },
   { label: 'metal stairs', value: '' },
@@ -31,6 +31,8 @@ const items = reactive([
   { label: 'nokband', value: '' },
   { label: 'fågelband', value: '' },
   { label: 'fotplåt 2m', value: '' },
+  { label: 'läkts standart 2,5cm thick', value: '' },
+  { label: 'läkts thin 1cm thick', value: '' },
   { label: 'trash bags', value: '' },
   { label: 'paint', value: '' },
 ])
