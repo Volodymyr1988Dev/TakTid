@@ -827,12 +827,13 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 }
 
 .summary-item.clickable:hover {
-  background: #f1f5f9;
+  background: rgb(175, 130, 238);
   transform: translateY(-1px);
 }
 .summary-item.active {
   background: #2563eb;
-  color: white;
+  /*color: white;*/
+  color: 2563eb;
   border-color: #2563eb;
   transform: scale(0.97);
 }
