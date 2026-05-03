@@ -372,25 +372,40 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
       <div v-if="isAdmin">
       <div class="summary">
         <div 
-          @click="toggleSummary('work')" 
-          :class="{ active: showDetails === 'work', disabled: !isAdmin }"
+          @click="toggleSummary('work')"
+          :class="[
+            'summary-item',
+            'work',
+            { active: showDetails === 'work', clickable: isAdmin }
+          ]" 
         >
+        <!--:class="{ active: showDetails === 'work', disabled: !isAdmin }"-->
           {{ t('stats.work') }} <strong>{{ totalWork }}h</strong>
         </div>
 
         <div 
           @click="toggleSummary('extra')" 
-          :class="{ active: showDetails === 'extra', disabled: !isAdmin }"
+          :class="[
+            'summary-item',
+            'extra',
+            { active: showDetails === 'extra', clickable: isAdmin }
+          ]"
         >
           {{ t('stats.extra') }} <strong>{{ totalExtra }}h</strong>
         </div>
+        <!--:class="{ active: showDetails === 'extra', disabled: !isAdmin }"-->
 
         <div 
           @click="toggleSummary('total')" 
-          :class="{ active: showDetails === 'total', disabled: !isAdmin }"
+          :class="[
+            'summary-item',
+            'total',
+            { active: showDetails === 'total', clickable: isAdmin }
+          ]"
         >
           {{ t('stats.total') }} <strong>{{ totalAll }}h</strong>
         </div>
+        <!--:class="{ active: showDetails === 'total', disabled: !isAdmin }"-->
       </div>
       <!--<div v-if="showDetails && isAdmin" class="project-details"></div>-->
       <div v-if="loadingDetails">{{ t('common.loading') }}</div>
@@ -726,7 +741,7 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 }
 
 .summary div {
-  cursor: pointer;
+  /*cursor: pointer;*/
   padding: 6px 10px;
   border-radius: 8px;
   transition: 0.2s;
@@ -785,7 +800,42 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   justify-content: space-between;
   align-items: flex-start;
 }
+.summary-item {
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.summary-item.work {
+  color: #2ecc71;
+}
 
+.summary-item.extra {
+  color: #f1c40f;
+}
+
+.summary-item.total {
+  color: #111;
+}
+
+/* кнопка тільки для адміна */
+.summary-item.clickable {
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  background: white;
+}
+
+.summary-item.clickable:hover {
+  background: #f1f5f9;
+  transform: translateY(-1px);
+}
+.summary-item.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+  transform: scale(0.97);
+}
 .user-info {
   display: flex;
   flex-direction: column;
