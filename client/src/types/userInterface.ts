@@ -5,4 +5,5 @@ export interface User {
   isAdmin: boolean
   CanCreateProjects: boolean
   SpecialCan: boolean
+  currentSalary?: number
 }

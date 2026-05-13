@@ -81,6 +81,9 @@ export class User {
   @Column({ type: 'boolean', default: false })
   SpecialCan!: boolean;
 
+  @Column({ nullable: true })
+  currentSalary?: number;
+  
   @OneToMany(() => UserSalaryHistory, (s) => s.user)
   salaryHistory!: UserSalaryHistory[];
   @OneToMany(() => ProjectAssignment, (assignment) => assignment.user)
