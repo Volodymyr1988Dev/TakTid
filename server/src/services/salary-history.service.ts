@@ -15,7 +15,8 @@ export class SalaryHistoryService {
   ) {}
 
   async addSalary(userId: string, salary: number) {
-    const user = await this.userRepo.findOne({
+    try{
+        const user = await this.userRepo.findOne({
       where: { id: userId },
     });
 
@@ -39,6 +40,11 @@ export class SalaryHistoryService {
     await this.userRepo.save(user);
 
     return item;
+    } catch(e){
+      console.error(e);
+      throw e;
+    }
+    
   }
 
   async getHistory(userId: string) {
