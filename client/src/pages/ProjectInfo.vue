@@ -406,8 +406,24 @@ const totalProjectPrice = computed(() => {
       </h2>
       <div v-if="isAdmin">
 
+        <div class="metrics-header">
+            <h3>{{ t('project.metrics') }}</h3>
+
+            <button
+              v-if="isAdmin"
+              class="edit-project-btn"
+              @click="showEdit = !showEdit"
+            >
+              {{
+                showEdit
+                  ? t('common.close')
+                  : t('project.editProject')
+              }}
+            </button>
+          </div>
         <div class="project-metrics">
 
+          
           <div class="metric-card">
             <span class="metric-label">
               {{ t('project.area') }}
@@ -991,6 +1007,23 @@ const totalProjectPrice = computed(() => {
   font-size: 22px;
   font-weight: 700;
   color: #111827;
+}
+
+.metrics-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.edit-project-btn {
+  border:none;
+  background:#2563eb;
+  color:white;
+  padding:8px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
 }
 @media (max-width: 640px) {
 
