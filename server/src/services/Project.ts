@@ -106,6 +106,8 @@ export class ProjectsService {
         id: project.id,
         city: project.city,
         address: project.address,
+        areaM2: project.areaM2,
+        pricePerM2: project.pricePerM2,
       },
       total: {
         work: totalWork,

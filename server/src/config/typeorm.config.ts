@@ -6,6 +6,7 @@ import { ProjectAssignment } from '../entities/Project/ProjectAssignment';
 import { Session } from '../entities/Sessions/Sessions';
 import { TimeEntry } from '../entities/TimeEntries/TimeEntries';
 import { ProjectImage } from '../entities/Project/ProjectImages';
+import { UserSalaryHistory } from '../entities/User/SallaryHistory';
 
 const useSSL = process.env.DATABASE_URL?.includes('neon.tech') ?? false;
 
@@ -20,6 +21,7 @@ export const baseConfig: DataSourceOptions = {
     Session,
     TimeEntry,
     ProjectImage,
+    UserSalaryHistory,
   ],
   migrations: ['dist/migrations/*.js'],
 

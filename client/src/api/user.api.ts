@@ -15,3 +15,11 @@ export const deleteUser = (id: string) =>
 
 export const restoreUser = (id: string) =>
   api.put(`/users/${id}/restore`)
+
+export const saveSalary = (
+  userId: string,
+  salary: number
+) =>
+  api.post(`/users/${userId}/salary`, {
+    salary
+  })

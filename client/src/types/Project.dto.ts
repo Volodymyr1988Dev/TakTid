@@ -4,4 +4,7 @@ export interface Project {
   city: string;
   address: string;
   images?: ProjectImages[]
+
+  areaM2?: number | null
+  pricePerM2?: number | null
 }

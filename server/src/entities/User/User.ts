@@ -14,6 +14,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ProjectAssignment } from '../Project/ProjectAssignment';
 import { Session } from '../Sessions/Sessions';
 import { TimeEntry } from '../TimeEntries/TimeEntries';
+import { UserSalaryHistory } from './SallaryHistory';
 
 @Entity('users')
 export class User {
@@ -80,6 +81,8 @@ export class User {
   @Column({ type: 'boolean', default: false })
   SpecialCan!: boolean;
 
+  @OneToMany(() => UserSalaryHistory, (s) => s.user)
+  salaryHistory!: UserSalaryHistory[];
   @OneToMany(() => ProjectAssignment, (assignment) => assignment.user)
   assignments!: ProjectAssignment[];
   @OneToMany(() => Session, (session) => session.user)

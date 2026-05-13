@@ -5,6 +5,8 @@ export interface ProjectStats {
     id: string
     city: string
     address: string
+    areaM2?: number | null
+    pricePerM2?: number | null
   }
 
   users: ProjectUserStat[]
@@ -14,4 +16,5 @@ export interface ProjectStats {
     extra: number
     all: number
   }
+  totalProjectPrice: number
 }

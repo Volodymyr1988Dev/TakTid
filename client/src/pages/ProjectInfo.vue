@@ -34,6 +34,10 @@ const currentIndex = ref(0)
 
 const expandedUserId = ref<string | null>(null)
 
+const showEdit = ref(false)
+const area = ref<number | null>(null)
+const price = ref<number | null>(null)
+
 const showDetails = ref<'work' | 'extra' | 'total' | null>(null)
 const loadingDetails = ref(false)  
 function onLoad(id: string) {
@@ -339,6 +343,18 @@ watch(() => props.isAdmin, (isAdmin) => {
     showDetails.value = null
   }
 })
+
+async function saveProjectData() {
+  //await projectStore.updateProjectData(props.projectId, {
+  await projectStore.updateProject(props.projectId, {
+    areaM2: area.value,
+    pricePerM2: price.value
+  })
+
+  showEdit.value = false
+  await loadStats()
+}
+
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
 const totalAll = computed(() => totalWork.value + totalExtra.value)
@@ -370,6 +386,25 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
         {{ stats.project.city }} – {{ stats.project.address }}
       </h2>
       <div v-if="isAdmin">
+        <div v-if="showEdit" class="modal">
+          <div class="modal-content">
+
+            <input v-model="area" type="number">
+            <input v-model="price" type="number">
+
+            <button @click="saveProjectData">
+              Save
+            </button>
+
+            <button @click="showEdit = false">
+              Cancel
+            </button>
+
+          </div>
+        </div>
+        <button v-if="isAdmin" @click="showEdit = true">
+          Change project data
+        </button>
       <div class="summary">
         <div 
           @click="toggleSummary('work')"

@@ -10,3 +10,16 @@ export async function getProjectDetails(projectId: string) {
   const { data } = await api.get(`/projects/${projectId}/details`)
   return data
 }
+
+export async function updateProjectApi(
+  id: string,
+  data: Partial<Project>,
+): Promise<Project> {
+
+  const response = await api.patch<Project>(
+    `/projects/${id}`,
+    data
+  )
+
+  return response.data
+}
