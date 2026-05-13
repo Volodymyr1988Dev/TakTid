@@ -267,14 +267,14 @@ async function saveSalary(userId: string) {
               >
 
               <button @click="saveSalary(user.id)">
-                Save
+                {{ t('common.save') }}
               </button>
 
               <button
                 class="cancel-btn"
                 @click="editingSalaryUserId = null"
               >
-                Cancel
+                {{ t('common.cancel') }}
               </button>
             </div>
 
