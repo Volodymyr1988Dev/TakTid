@@ -23,13 +23,22 @@ export class SalaryHistoryService {
       throw new NotFoundException('User not found');
     }
 
+    const TAX_RATE = 0.3
     const item = this.salaryRepo.create({
       user,
       salary,
-      salaryNetto: salary * 0.7,
+      salaryNetto: salary * (1 - TAX_RATE),
     });
 
-    return this.salaryRepo.save(item);
+    //user.currentSalary = salary
+    //return this.salaryRepo.save(item);
+    await this.salaryRepo.save(item);
+
+    user.currentSalary = salary;
+
+    await this.userRepo.save(user);
+
+    return item;
   }
 
   async getHistory(userId: string) {

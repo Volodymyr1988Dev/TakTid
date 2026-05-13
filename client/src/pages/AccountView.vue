@@ -15,7 +15,10 @@ const userStore = useUserStore()
 const router = useRouter()
 const toast = useToast()
 
-const salary = ref<number | null>(null)
+//const salary = ref<number | null>(null)
+const editingSalaryUserId = ref<string | null>(null)
+
+const salaryInputs = ref<Record<string, number>>({})
 
 const name = ref(auth.user?.name ?? '')
 const email = ref(auth.user?.email ?? '')
@@ -123,17 +126,27 @@ async function restoreUser(user: User) {
 }
 
 async function saveSalary(userId: string) {
-  if (!salary.value) return
+  const salary = salaryInputs.value[userId]
+
+  if (!salary || salary <= 0) {
+    toast.error('Invalid salary')
+    return
+  }
 
   try {
     await userStore.saveSalary(
       userId,
-      salary.value
+      salary
     )
 
     toast.show('Salary saved')
 
-    salary.value = null
+    delete salaryInputs.value[userId]
+
+    editingSalaryUserId.value = null
+
+    await userStore.fetchUsers()
+
   } catch (e) {
     toast.error('Failed to save salary')
   }
@@ -226,9 +239,45 @@ async function saveSalary(userId: string) {
               {{ t('account.restore') }}
             </button>
           </div>
-          <div v-if="isAdmin" class="block">
-            <input v-model="salary" placeholder="Salary per hour" />
-            <button @click="saveSalary(user.id)">Save salary</button>
+          <div v-if="isAdmin" class="salary-section">
+
+            <div class="current-salary">
+              {{ t('account.currentSalary') }}:
+              <strong>
+                {{ user.currentSalary ?? 0 }} kr/h
+              </strong>
+            </div>
+
+            <button
+              v-if="editingSalaryUserId !== user.id"
+              class="salary-btn"
+              @click="editingSalaryUserId = user.id"
+            >
+              {{ t('account.editSalary') }}
+            </button>
+
+            <div
+              v-else
+              class="salary-editor"
+            >
+              <input
+                v-model.number="salaryInputs[user.id]"
+                type="number"
+                placeholder="Salary per hour"
+              >
+
+              <button @click="saveSalary(user.id)">
+                Save
+              </button>
+
+              <button
+                class="cancel-btn"
+                @click="editingSalaryUserId = null"
+              >
+                Cancel
+              </button>
+            </div>
+
           </div>
         </div>
       </div>
@@ -324,5 +373,32 @@ async function saveSalary(userId: string) {
   background: white;
   padding: 20px;
   border-radius: 8px;
+}
+.salary-section {
+  margin-top: 12px;
+}
+
+.current-salary {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.salary-editor {
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+}
+
+.salary-editor input {
+  width:140px;
+}
+
+.salary-btn {
+  background:#2563eb;
+  color:white;
+}
+
+.cancel-btn {
+  background:#ddd;
 }
 </style>
