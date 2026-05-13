@@ -29,6 +29,13 @@ export default {
     showImages: 'Arată imagini',
     hideDetails: 'Ascunde detaliile',
     showDetails: 'Arată detaliile',
+    area: 'Suprafață',
+    pricePerM2: 'Preț per m²',
+    totalProjectPrice: 'Cost total proiect',
+    changeArea: 'Modifică suprafața',
+    changePricePerM2: 'Modifică prețul pe m²',
+    saveArea: 'Salvează suprafața',
+    savePrice: 'Salvează prețul',
   },
 
   auth: {

@@ -29,6 +29,13 @@ export default {
     showImages: 'Показати зображення',
     hideDetails: 'Сховати деталі',
     showDetails: 'Показати деталі',
+    area: 'Площа',
+    pricePerM2: 'Ціна за м²',
+    totalProjectPrice: 'Загальна вартість проекту',
+    changePricePerM2: 'Змінити ціну за м²',
+    changeArea: 'Змінити площу',
+    saveArea: 'Зберегти площу',
+    savePrice: 'Зберегти ціну',
   },
 
   auth: {

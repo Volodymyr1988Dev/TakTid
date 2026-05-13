@@ -29,6 +29,13 @@ export default {
     showImages: 'Visa bilder',
     hideDetails: 'Dölj detaljer',
     showDetails: 'Visa detaljer',
+    area: 'Yta',
+    pricePerM2: 'Pris per m²',
+    totalProjectPrice: 'Totalt projektpris',
+    changeArea: 'Ändra yta',
+    changePricePerM2: 'Ändra pris per m²',
+    saveArea: 'Spara yta',
+    savePrice: 'Spara pris',
   },
 
   auth: {

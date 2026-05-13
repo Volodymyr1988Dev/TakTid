@@ -29,6 +29,13 @@ export default {
     showImages: 'Pokaż obrazy',
     hideDetails: 'Ukryj szczegóły',
     showDetails: 'Pokaż szczegóły',
+    area: 'Powierzchnia',
+    pricePerM2: 'Cena za m²',
+    totalProjectPrice: 'Całkowity koszt projektu',
+    changeArea: 'Zmień powierzchnię',
+    changePricePerM2: 'Zmień cenę za m²',
+    saveArea: 'Zapisz powierzchnię',
+    savePrice: 'Zapisz cenę',
   },
 
   auth: {

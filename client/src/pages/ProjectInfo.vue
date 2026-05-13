@@ -32,9 +32,12 @@ const loaded = ref(new Set<string>())
 const error = ref<string | null>(null)
 const currentIndex = ref(0)
 
+const editMode = ref<'area' | 'price' | null>(null)
+
 const expandedUserId = ref<string | null>(null)
 
 const showEdit = ref(false)
+
 const area = ref<number | null>(null)
 const price = ref<number | null>(null)
 
@@ -53,6 +56,9 @@ async function loadStats() {
   try {
     const { data } = await getProjectStats(props.projectId)
     stats.value = data
+
+    area.value = data.project.areaM2 ?? null
+    price.value = data.project.pricePerM2 ?? null
   } catch (err: any) {
     if (err?.response?.status === 403) {
       error.value = t('errors.accessDenied')
@@ -332,32 +338,45 @@ const filteredDetails = computed(() => {
       : e.type === 'EXTRA'
   )
 })
-/*
-function formatUser(entry: TimeEntry) {
-  const name = entry.user?.name || 'Unknown'
-  const email = entry.user?.email || ''
-  return `${name} (${email})`
-}*/
+
 watch(() => props.isAdmin, (isAdmin) => {
   if (!isAdmin) {
     showDetails.value = null
   }
 })
 
-async function saveProjectData() {
-  //await projectStore.updateProjectData(props.projectId, {
-  await projectStore.updateProject(props.projectId, {
-    areaM2: area.value,
-    pricePerM2: price.value
-  })
-
-  showEdit.value = false
-  await loadStats()
-}
 
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
 const totalAll = computed(() => totalWork.value + totalExtra.value)
+
+async function saveArea() {
+  await projectStore.updateProject(props.projectId, {
+    areaM2: area.value,
+  })
+
+  await loadStats()
+
+  editMode.value = null
+}
+
+async function savePrice() {
+  await projectStore.updateProject(props.projectId, {
+    pricePerM2: price.value,
+  })
+
+  await loadStats()
+
+  editMode.value = null
+}
+//const area = Number(project.areaM2 || 0)
+//const price = Number(project.pricePerM2 || 0)
+const totalProjectPrice = computed(() => {
+  const projectArea = Number(area.value || 0)
+  const projectPrice = Number(price.value || 0)
+
+  return projectArea * projectPrice
+})
 </script>
 
 <template>
@@ -386,25 +405,88 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
         {{ stats.project.city }} – {{ stats.project.address }}
       </h2>
       <div v-if="isAdmin">
-        <div v-if="showEdit" class="modal">
+
+        <div class="project-metrics">
+
+          <div class="metric-card">
+            <span class="metric-label">
+              {{ t('project.area') }}
+            </span>
+
+            <strong class="metric-value">
+              {{ area || 0 }} m²
+            </strong>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-label">
+              {{ t('project.pricePerM2') }}
+            </span>
+
+            <strong class="metric-value">
+              {{ price || 0 }} kr
+            </strong>
+          </div>
+
+          <div class="metric-card total">
+            <span class="metric-label">
+              {{ t('project.totalProjectPrice') }}
+            </span>
+
+            <strong class="metric-value">
+              {{ totalProjectPrice.toLocaleString() }} kr
+            </strong>
+          </div>
+        </div>
+
+        <div v-if="showEdit" class="edit-menu">
+
+          <button @click="editMode = 'area'">
+            {{ t('project.changeArea') }}
+          </button>
+
+          <button @click="editMode = 'price'">
+            {{ t('project.changePricePerM2') }}
+          </button>
+
+        </div>
+
+        <div v-if="editMode === 'area'" class="modal">
           <div class="modal-content">
 
-            <input v-model="area" type="number">
-            <input v-model="price" type="number">
+            <label for="area">{{ t('project.area') }}</label>
+            <input
+              v-model="area"
+              type="number"
+              :placeholder="t('project.area')"
+              id="area"
+            >
 
-            <button @click="saveProjectData">
-              Save
-            </button>
-
-            <button @click="showEdit = false">
-              Cancel
+            <button @click="saveArea">
+              {{ t('project.saveArea') }}
             </button>
 
           </div>
         </div>
-        <button v-if="isAdmin" @click="showEdit = true">
-          Change project data
-        </button>
+
+        <div v-if="editMode === 'price'" class="modal">
+          <div class="modal-content">
+
+            <label for="price">{{ t('project.pricePerM2') }}</label>
+            <input
+              v-model.number="price"
+              type="number"
+              :placeholder="t('project.pricePerM2')"
+              id="price"
+            >
+
+            <button @click="savePrice">
+              {{ t('project.savePrice') }}
+            </button>
+
+          </div>
+        </div>
+
       <div class="summary">
         <div 
           @click="toggleSummary('work')"
@@ -875,6 +957,40 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 .user-info {
   display: flex;
   flex-direction: column;
+}
+
+.project-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.metric-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+}
+
+.metric-card.total {
+  background: #eff6ff;
+  border-color: #2563eb;
+}
+
+.metric-label {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.metric-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
 }
 @media (max-width: 640px) {
 

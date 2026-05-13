@@ -32,6 +32,13 @@ export default {
     showImages: 'Show Images',
     hideDetails: 'Hide details',
     showDetails: 'Show details',
+    area: 'Area',
+    pricePerM2: 'Price per m²',
+    totalProjectPrice: 'Total project price',
+    changeArea: 'Change area',
+    changePricePerM2: 'Change price per m²',
+    saveArea: 'Save area',
+    savePrice: 'Save price',
   },
 
   auth: {
