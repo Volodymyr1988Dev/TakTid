@@ -182,6 +182,9 @@ export default {
     passwordMatch: 'Hasła się nie zgadzają',
     confirmPassword: 'Potwierdź hasło',
     restore: 'Przywróć',
+    currentSalary: 'Aktualna pensja',
+    editSalary: 'Zmień pensję',
+    salaryPerHour: 'Pensja netto',
   },
 
   calendar: {

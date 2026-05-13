@@ -181,6 +181,9 @@ export default {
     passwordMatch: 'Parolele nu coincid',
     confirmPassword: 'Confirmă parola',
     restore: 'Restaurare',
+    currentSalary: 'Salariu curent',
+    editSalary: 'Modifică salariul',
+    salaryPerHour: 'Salariu pe oră',
   },
 
   calendar: {

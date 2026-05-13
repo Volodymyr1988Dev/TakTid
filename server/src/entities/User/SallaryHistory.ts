@@ -18,12 +18,12 @@ export class UserSalaryHistory {
   })
   user!: User;
 
-  @Column('decimal', { nullable: true })
+  @Column('float', { nullable: true })
   salary!: number | null;
 
-  @Column('decimal', { nullable: true })
+  @Column('float', { nullable: true })
   salaryNetto!: number | null;
 
-  @Column({ type: 'timestamp' })
+  @CreateDateColumn()
   fromDate!: Date;
 }
