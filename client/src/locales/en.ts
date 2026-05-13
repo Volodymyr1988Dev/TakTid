@@ -183,6 +183,9 @@ export default {
     passwordMatch: 'Passwords do not match',
     confirmPassword: 'Confirm password',
     restore: 'Restore',
+    currentSalary: 'Current salary',
+    editSalary: 'Edit salary',
+    salaryPerHour: 'Salary per hour',
   },
   calendar: {
     week: 'Week',

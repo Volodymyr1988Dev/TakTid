@@ -181,6 +181,9 @@ export default {
     passwordMatch: 'Lösenord matchar inte',
     confirmPassword: 'Bekräfta lösenord',
     restore: 'Återställ',
+    currentSalary: 'Nuvarande lön',
+    editSalary: 'Ändra lön',
+    salaryPerHour: 'Lön per timme',
   },
 
   calendar: {

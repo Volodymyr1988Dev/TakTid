@@ -181,6 +181,9 @@ export default {
     passwordMatch: 'Паролі не співпадають',
     confirmPassword: 'Підтвердіть пароль',
     restore: 'Відновити',
+    currentSalary: 'Поточна зарплата',
+    editSalary: 'Змінити зарплату',
+    salaryPerHour: 'Зарплата за годину',
   },
 
   calendar: {

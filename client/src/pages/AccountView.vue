@@ -261,7 +261,7 @@ async function saveSalary(userId: string) {
               <input
                 v-model.number="salaryInputs[user.id]"
                 type="number"
-                placeholder="Salary per hour"
+                :placeholder="t('account.salaryPerHour')"
               >
 
               <button @click="saveSalary(user.id)">
