@@ -17,6 +17,7 @@ import { UploadedFiles } from '@nestjs/common/decorators/http/route-params.decor
 @ApiTags('Project Images')
 @Controller('project-images')
 export class ProjectImagesController {
+
   constructor(private readonly imagesService: ProjectImagesService) {}
 
   @Post(':projectId')
@@ -31,7 +32,6 @@ export class ProjectImagesController {
     @Param('projectId') projectId: string,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    console.log('FILES:', files);
     return this.imagesService.uploadMultiple(projectId, files);
   }
 

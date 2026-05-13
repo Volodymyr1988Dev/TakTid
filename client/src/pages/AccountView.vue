@@ -15,6 +15,8 @@ const userStore = useUserStore()
 const router = useRouter()
 const toast = useToast()
 
+const salary = ref<number | null>(null)
+
 const name = ref(auth.user?.name ?? '')
 const email = ref(auth.user?.email ?? '')
 const password = ref('')
@@ -120,6 +122,23 @@ async function restoreUser(user: User) {
   }
 }
 
+async function saveSalary(userId: string) {
+  if (!salary.value) return
+
+  try {
+    await userStore.saveSalary(
+      userId,
+      salary.value
+    )
+
+    toast.show('Salary saved')
+
+    salary.value = null
+  } catch (e) {
+    toast.error('Failed to save salary')
+  }
+}
+
 </script>
 
 <template>
@@ -206,6 +225,10 @@ async function restoreUser(user: User) {
             >
               {{ t('account.restore') }}
             </button>
+          </div>
+          <div v-if="isAdmin" class="block">
+            <input v-model="salary" placeholder="Salary per hour" />
+            <button @click="saveSalary(user.id)">Save salary</button>
           </div>
         </div>
       </div>

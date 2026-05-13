@@ -32,6 +32,13 @@ export class Projects {
   })
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt!: Date;
+
+  @Column('decimal', { nullable: true })
+  pricePerM2!: number | null;
+
+  @Column('decimal', { nullable: true })
+  areaM2!: number | null;
+  
   @OneToMany(() => ProjectAssignment, (assignment) => assignment.project)
   assignments!: ProjectAssignment[];
   @OneToMany(() => TimeEntry, (timeEntry) => timeEntry.project)
