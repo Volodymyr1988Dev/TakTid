@@ -14,6 +14,7 @@ export default {
     edit: 'Editează',
     deleteConfirm: 'Ești sigur?',
     registerTime: 'Înregistrează timp',
+    close: 'Închide',
   },
 
   project: {
@@ -29,6 +30,17 @@ export default {
     showImages: 'Arată imagini',
     hideDetails: 'Ascunde detaliile',
     showDetails: 'Arată detaliile',
+    area: 'Suprafață',
+    pricePerM2: 'Preț per m²',
+    totalProjectPrice: 'Cost total proiect',
+    changeArea: 'Modifică suprafața',
+    changePricePerM2: 'Modifică prețul pe m²',
+    saveArea: 'Salvează suprafața',
+    savePrice: 'Salvează prețul',
+    workersCost: 'Cost muncitori',
+    profit: 'Profit',
+    metrics: 'Metrii',
+    editProject: 'Editează proiectul',
   },
 
   auth: {
@@ -174,6 +186,9 @@ export default {
     passwordMatch: 'Parolele nu coincid',
     confirmPassword: 'Confirmă parola',
     restore: 'Restaurare',
+    currentSalary: 'Salariu curent',
+    editSalary: 'Modifică salariul',
+    salaryPerHour: 'Salariu pe oră',
   },
 
   calendar: {

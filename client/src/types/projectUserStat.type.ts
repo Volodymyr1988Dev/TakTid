@@ -5,4 +5,6 @@ export interface ProjectUserStat {
   workHours: number
   extraHours: number
   totalHours: number
+
+  currentSalary?: number | null
 }

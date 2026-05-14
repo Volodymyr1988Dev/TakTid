@@ -14,6 +14,7 @@ export default {
     edit: 'Редагувати',
     deleteConfirm: 'Ви впевнені?',
     registerTime: 'Зареєструвати час',
+    close: 'Закрити',
   },
 
   project: {
@@ -29,6 +30,17 @@ export default {
     showImages: 'Показати зображення',
     hideDetails: 'Сховати деталі',
     showDetails: 'Показати деталі',
+    area: 'Площа',
+    pricePerM2: 'Ціна за м²',
+    totalProjectPrice: 'Загальна вартість проекту',
+    changePricePerM2: 'Змінити ціну за м²',
+    changeArea: 'Змінити площу',
+    saveArea: 'Зберегти площу',
+    savePrice: 'Зберегти ціну',
+    workersCost: 'Вартість працівників',
+    profit: 'Прибуток',
+    metrics: 'Метрики',
+    editProject: 'Редагувати проект',
   },
 
   auth: {
@@ -174,6 +186,9 @@ export default {
     passwordMatch: 'Паролі не співпадають',
     confirmPassword: 'Підтвердіть пароль',
     restore: 'Відновити',
+    currentSalary: 'Поточна зарплата',
+    editSalary: 'Змінити зарплату',
+    salaryPerHour: 'Зарплата за годину',
   },
 
   calendar: {

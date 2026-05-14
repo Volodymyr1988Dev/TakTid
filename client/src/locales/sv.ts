@@ -14,6 +14,7 @@ export default {
     edit: 'Redigera',
     deleteConfirm: 'Är du säker?',
     registerTime: 'Registrera tid',
+    close: 'Stäng',
   },
 
   project: {
@@ -29,6 +30,17 @@ export default {
     showImages: 'Visa bilder',
     hideDetails: 'Dölj detaljer',
     showDetails: 'Visa detaljer',
+    area: 'Yta',
+    pricePerM2: 'Pris per m²',
+    totalProjectPrice: 'Totalt projektpris',
+    changeArea: 'Ändra yta',
+    changePricePerM2: 'Ändra pris per m²',
+    saveArea: 'Spara yta',
+    savePrice: 'Spara pris',
+    workersCost: 'Personalkostnad',
+    profit: 'Vinst',
+    metrics: 'Projektdata',
+    editProject: 'Redigera projekt',
   },
 
   auth: {
@@ -174,6 +186,9 @@ export default {
     passwordMatch: 'Lösenord matchar inte',
     confirmPassword: 'Bekräfta lösenord',
     restore: 'Återställ',
+    currentSalary: 'Nuvarande lön',
+    editSalary: 'Ändra lön',
+    salaryPerHour: 'Lön per timme',
   },
 
   calendar: {

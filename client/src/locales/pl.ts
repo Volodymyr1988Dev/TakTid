@@ -14,6 +14,7 @@ export default {
     edit: 'Edytuj',
     deleteConfirm: 'Czy jesteś pewien?',
     registerTime: 'Zarejestruj czas',
+    close: 'Zamknij',
   },
 
   project: {
@@ -29,6 +30,17 @@ export default {
     showImages: 'Pokaż obrazy',
     hideDetails: 'Ukryj szczegóły',
     showDetails: 'Pokaż szczegóły',
+    area: 'Powierzchnia',
+    pricePerM2: 'Cena za m²',
+    totalProjectPrice: 'Całkowity koszt projektu',
+    changeArea: 'Zmień powierzchnię',
+    changePricePerM2: 'Zmień cenę za m²',
+    saveArea: 'Zapisz powierzchnię',
+    savePrice: 'Zapisz cenę',
+    workersCost: 'Koszt pracowników',
+    profit: 'Zysk',
+    metrics: 'Metryki',
+    editProject: 'Edytuj projekt',
   },
 
   auth: {
@@ -175,6 +187,9 @@ export default {
     passwordMatch: 'Hasła się nie zgadzają',
     confirmPassword: 'Potwierdź hasło',
     restore: 'Przywróć',
+    currentSalary: 'Aktualna pensja',
+    editSalary: 'Zmień pensję',
+    salaryPerHour: 'Pensja netto',
   },
 
   calendar: {

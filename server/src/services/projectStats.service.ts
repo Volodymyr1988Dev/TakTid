@@ -59,6 +59,8 @@ export class ProjectStatsService {
           workHours: 0,
           extraHours: 0,
           totalHours: 0,
+
+          currentSalary: e.user.currentSalary ?? 0,
         });
       }
 
@@ -79,6 +81,8 @@ export class ProjectStatsService {
           workHours: 0,
           extraHours: 0,
           totalHours: 0,
+
+          currentSalary: e.user.currentSalary ?? 0,
         });
       }
 
@@ -96,11 +100,14 @@ export class ProjectStatsService {
     const totalWork = usersArray.reduce((sum, u) => sum + u.workHours, 0);
     const totalExtra = usersArray.reduce((sum, u) => sum + u.extraHours, 0);
 
+    const totalProjectPrice = Number(project.pricePerM2 ?? 0) * Number(project.areaM2 ?? 0)
     return {
       project: {
         id: project.id,
         city: project.city,
         address: project.address,
+        areaM2: project.areaM2,
+        pricePerM2: project.pricePerM2,
       },
       users: usersArray,
       total: {
@@ -108,6 +115,7 @@ export class ProjectStatsService {
         extra: totalExtra,
         all: totalWork + totalExtra,
       },
+      totalProjectPrice,
     };
   }
 }

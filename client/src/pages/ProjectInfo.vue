@@ -32,7 +32,18 @@ const loaded = ref(new Set<string>())
 const error = ref<string | null>(null)
 const currentIndex = ref(0)
 
+const editMode = ref<'area' | 'price' | null>(null)
+
 const expandedUserId = ref<string | null>(null)
+
+const showEdit = ref(false)
+
+const area = ref<number | null>(null)
+const price = ref<number | null>(null)
+
+const EMPLOYER_TAX = 0.3142
+const EMPLOYER_MULTIPLIER = 1.55
+//const MONTH_HOURS = 174
 
 const showDetails = ref<'work' | 'extra' | 'total' | null>(null)
 const loadingDetails = ref(false)  
@@ -49,6 +60,9 @@ async function loadStats() {
   try {
     const { data } = await getProjectStats(props.projectId)
     stats.value = data
+
+    area.value = data.project.areaM2 ?? null
+    price.value = data.project.pricePerM2 ?? null
   } catch (err: any) {
     if (err?.response?.status === 403) {
       error.value = t('errors.accessDenied')
@@ -328,20 +342,113 @@ const filteredDetails = computed(() => {
       : e.type === 'EXTRA'
   )
 })
-/*
-function formatUser(entry: TimeEntry) {
-  const name = entry.user?.name || 'Unknown'
-  const email = entry.user?.email || ''
-  return `${name} (${email})`
-}*/
+
 watch(() => props.isAdmin, (isAdmin) => {
   if (!isAdmin) {
     showDetails.value = null
   }
 })
+
+
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
 const totalAll = computed(() => totalWork.value + totalExtra.value)
+
+
+//const workerCost = workedHours * currentSalary * (1 + EMPLOYER_TAX)
+
+const workersCost = computed(() => {
+  const users = stats.value?.users
+
+  if (!users?.length) return 0
+
+  return users.reduce((sum: number, worker) => {
+    const salary = worker.currentSalary ?? 0
+    const hours = worker.totalHours ?? 0
+
+    const fullCost =
+      hours *
+      salary *
+      //(1 + EMPLOYER_TAX)
+      EMPLOYER_MULTIPLIER
+
+    return sum + fullCost
+  }, 0)
+})/*
+const workersCost = computed(() => {
+  const users = stats.value?.users
+
+  if (!users?.length) return 0
+
+  return users.reduce((sum: number, worker) => {
+    const monthlySalary =
+      worker.currentSalary ?? 0
+
+    const workedHours =
+      worker.totalHours ?? 0
+
+    const hourlyRate =
+      monthlySalary / MONTH_HOURS
+
+    const totalCost =
+      hourlyRate *
+      workedHours *
+      EMPLOYER_MULTIPLIER
+
+    return sum + totalCost
+  }, 0)
+})*/
+/*
+const profit = computed(() => {
+  return totalProjectPrice.value - workersCost.value
+})*/
+
+function getWorkerSalary(worker: any) {
+  const hourlySalary =
+    Number(worker.currentSalary) || 0
+
+  const totalHours =
+    Number(worker.totalHours) || 0
+
+  return hourlySalary * totalHours
+}
+
+function getWorkerSalaryWithTax(worker: any) {
+  return getWorkerSalary(worker) * EMPLOYER_TAX
+}
+const profit = computed(() => {
+  if (!totalProjectPrice.value) return 0
+
+  return totalProjectPrice.value - workersCost.value
+})
+
+async function saveArea() {
+  await projectStore.updateProject(props.projectId, {
+    areaM2: area.value,
+  })
+
+  await loadStats()
+
+  editMode.value = null
+}
+
+async function savePrice() {
+  await projectStore.updateProject(props.projectId, {
+    pricePerM2: price.value,
+  })
+
+  await loadStats()
+
+  editMode.value = null
+}
+//const area = Number(project.areaM2 || 0)
+//const price = Number(project.pricePerM2 || 0)
+const totalProjectPrice = computed(() => {
+  const projectArea = Number(area.value || 0)
+  const projectPrice = Number(price.value || 0)
+
+  return projectArea * projectPrice
+})
 </script>
 
 <template>
@@ -370,6 +477,117 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
         {{ stats.project.city }} – {{ stats.project.address }}
       </h2>
       <div v-if="isAdmin">
+
+        <div class="metrics-header">
+            <h3>{{ t('project.metrics') }}</h3>
+
+            <button
+              v-if="isAdmin"
+              class="edit-project-btn"
+              @click="showEdit = !showEdit"
+            >
+              {{
+                showEdit
+                  ? t('common.close')
+                  : t('project.editProject')
+              }}
+            </button>
+          </div>
+        <div class="metrics-wrapper">
+
+          <div class="metric-card">
+            <div class="metric-title">
+              {{ t('project.totalProjectPrice') }}
+            </div>
+
+            <div class="metric-value">
+              {{ totalProjectPrice.toLocaleString() }} kr
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-title">
+              {{ t('project.workersCost') }}
+            </div>
+
+            <div class="metric-value">
+              {{ workersCost.toLocaleString() }} kr
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-title">
+              {{ t('project.profit') }}
+            </div>
+
+            <div
+              class="metric-value"
+              :class="{ negative: profit < 0 }"
+            >
+              {{ profit.toLocaleString() }} kr
+            </div>
+          </div>
+
+        </div>
+
+        <div v-if="showEdit" class="edit-menu">
+
+          <button @click="editMode = 'area'">
+            {{ t('project.changeArea') }}
+          </button>
+
+          <button @click="editMode = 'price'">
+            {{ t('project.changePricePerM2') }}
+          </button>
+
+        </div>
+
+        <div class="project-small-info">
+          <div>
+            {{ t('project.area') }}:
+            {{ stats.project.areaM2 }} m²
+          </div>
+
+          <div>
+            {{ t('project.pricePerM2') }}:
+            {{ stats.project.pricePerM2 }}
+          </div>
+        </div>
+        <div v-if="editMode === 'area'" class="modal">
+          <div class="modal-content">
+            <label for="area">{{ t('project.area') }}</label>
+            <input
+              v-model="area"
+              type="number"
+              :placeholder="t('project.area')"
+              id="area"
+            >
+
+            <button @click="saveArea">
+              {{ t('project.saveArea') }}
+            </button>
+
+          </div>
+        </div>
+
+        <div v-if="editMode === 'price'" class="modal">
+          <div class="modal-content">
+
+            <label for="price">{{ t('project.pricePerM2') }}</label>
+            <input
+              v-model.number="price"
+              type="number"
+              :placeholder="t('project.pricePerM2')"
+              id="price"
+            >
+
+            <button @click="savePrice">
+              {{ t('project.savePrice') }}
+            </button>
+
+          </div>
+        </div>
+
       <div class="summary">
         <div 
           @click="toggleSummary('work')"
@@ -452,6 +670,18 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
                 <span class="work">{{t('stats.work')}} {{ u.workHours }}h</span>
                 <span class="extra">{{t('stats.extra')}} {{ u.extraHours }}h</span>
                 <span class="total">{{t('stats.total')}} {{ u.totalHours }}h</span>
+
+                <div class="salary-info">
+                  <span>
+                    Salary:
+                    {{ getWorkerSalary(u).toFixed(0) }} kr
+                  </span>
+
+                  <span class="tax">
+                    Employer:
+                    {{ getWorkerSalaryWithTax(u).toFixed(0) }} kr
+                  </span>
+                </div>
               </div>
               
               <button
@@ -596,6 +826,9 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   transition:.2s;
 }
 
+.negative {
+  color: #dc2626;
+}
 .user-card:hover {
   box-shadow:0 4px 12px rgba(0,0,0,.05);
 }
@@ -605,8 +838,6 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
   justify-content:space-between;
   align-items:center;
 }
-
-.email { font-size:12px; color:#777; }
 
 .details {
   margin-top:12px;
@@ -833,13 +1064,95 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 .summary-item.active {
   background: #2563eb;
   /*color: white;*/
-  color: 2563eb;
+  color: #2563eb;
   border-color: #2563eb;
   transform: scale(0.97);
 }
 .user-info {
   display: flex;
   flex-direction: column;
+}
+
+.project-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.metrics-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.metric-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+
+.metric-card.total {
+  background: #eff6ff;
+  border-color: #2563eb;
+}
+
+.metric-label {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.metric-title {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+.metric-value {
+  font-size: 30px;
+  font-weight: 700;
+  color: #111827;
+}
+.project-small-info {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #888;
+
+  display: flex;
+  gap: 16px;
+}
+.metrics-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.edit-project-btn {
+  border:none;
+  background:#2563eb;
+  color:white;
+  padding:8px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.salary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  margin-top: 8px;
+
+  font-size: 12px;
+}
+
+.tax {
+  color: #dc2626;
+  font-weight: 600;
 }
 @media (max-width: 640px) {
 

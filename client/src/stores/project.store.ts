@@ -4,6 +4,8 @@ import type { Project } from '../types/Project.dto'
 import { getProjects } from '../api/project.api'
 import { getProjectDetails } from '../api/project.api'
 import type { TimeEntry } from '../types/TimeEntry.type'
+//import { updateProject } from '../api/project.api'
+import { updateProjectApi } from '../api/project.api'
 
 export const useProjectStore = defineStore('projects', () => {
   const selectedProject = ref<Project | null>(null)
@@ -65,6 +67,47 @@ export const useProjectStore = defineStore('projects', () => {
       loadingDetails.value = false
     }
   }
+/*
+  async function updateProjectData(
+    id: string,
+    data: /*{
+      areaM2?: number | null
+      pricePerM2?: number | null
+    }*//* Partial<Project>
+  ) {
+    const response = await updateProject(id, data)
+
+    const index = projects.value.findIndex(
+      p => p.id === id
+    )
+
+    if (index !== -1) {
+      projects.value[index] = response.data
+    }
+
+    return response.data
+  }
+*/
+  async function updateProject(
+    id: string,
+    data: Partial<Project>,
+  ) {
+    const updated = await updateProjectApi(id, data)
+
+    const index = projects.value.findIndex(
+      p => p.id === id
+    )
+
+    if (index !== -1) {
+      projects.value[index] = updated
+    }
+
+    if (selectedProject.value?.id === id) {
+      selectedProject.value = updated
+    }
+
+    return updated
+  }
 
   return {
     projects,
@@ -79,6 +122,8 @@ export const useProjectStore = defineStore('projects', () => {
     loadDetails,
     projectDetails,
     clear,
-    select
+    select,
+    //updateProjectData,
+    updateProject,
   }
 })

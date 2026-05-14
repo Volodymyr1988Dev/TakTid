@@ -16,6 +16,7 @@ export default {
     edit: 'Edit',
     deleteConfirm: 'Are you sure?',
     registerTime: 'Register time',
+    close: 'Close',
 
   },
 
@@ -32,6 +33,17 @@ export default {
     showImages: 'Show Images',
     hideDetails: 'Hide details',
     showDetails: 'Show details',
+    area: 'Area',
+    pricePerM2: 'Price per m²',
+    totalProjectPrice: 'Total project price',
+    changeArea: 'Change area',
+    changePricePerM2: 'Change price per m²',
+    saveArea: 'Save area',
+    savePrice: 'Save price',
+    workersCost: 'Workers cost',
+    profit: 'Profit',
+    metrics: 'Metrics',
+    editProject: 'Edit project',
   },
 
   auth: {
@@ -176,6 +188,9 @@ export default {
     passwordMatch: 'Passwords do not match',
     confirmPassword: 'Confirm password',
     restore: 'Restore',
+    currentSalary: 'Current salary',
+    editSalary: 'Edit salary',
+    salaryPerHour: 'Salary per hour',
   },
   calendar: {
     week: 'Week',

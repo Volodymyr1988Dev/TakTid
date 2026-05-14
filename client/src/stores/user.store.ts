@@ -39,6 +39,13 @@ export const useUserStore = defineStore('user', () => {
     await fetchUsers()
   }
 
+  async function saveSalary(
+    userId: string,
+    salary: number
+  ) {
+    await userApi.saveSalary(userId, salary)
+  }
+
   return {
     users,
     isLoading,
@@ -46,5 +53,6 @@ export const useUserStore = defineStore('user', () => {
     updateUser,
     deleteUser,
     restoreUser,
+    saveSalary,
   }
 })
