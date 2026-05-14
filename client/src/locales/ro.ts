@@ -36,6 +36,9 @@ export default {
     changePricePerM2: 'Modifică prețul pe m²',
     saveArea: 'Salvează suprafața',
     savePrice: 'Salvează prețul',
+    workersCost: 'Cost muncitori',
+    profit: 'Profit',
+    metrics: 'Metrii',
   },
 
   auth: {

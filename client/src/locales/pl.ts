@@ -36,6 +36,9 @@ export default {
     changePricePerM2: 'Zmień cenę za m²',
     saveArea: 'Zapisz powierzchnię',
     savePrice: 'Zapisz cenę',
+    workersCost: 'Koszt pracowników',
+    profit: 'Zysk',
+    metrics: 'Metryki',
   },
 
   auth: {
