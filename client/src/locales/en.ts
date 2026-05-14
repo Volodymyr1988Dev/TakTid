@@ -16,6 +16,7 @@ export default {
     edit: 'Edit',
     deleteConfirm: 'Are you sure?',
     registerTime: 'Register time',
+    close: 'Close',
 
   },
 
@@ -42,6 +43,7 @@ export default {
     workersCost: 'Workers cost',
     profit: 'Profit',
     metrics: 'Metrics',
+    editProject: 'Edit project',
   },
 
   auth: {
