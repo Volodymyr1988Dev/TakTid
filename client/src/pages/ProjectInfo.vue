@@ -41,6 +41,10 @@ const showEdit = ref(false)
 const area = ref<number | null>(null)
 const price = ref<number | null>(null)
 
+//const EMPLOYER_TAX = 0.3142
+const EMPLOYER_MULTIPLIER = 1.55
+const MONTH_HOURS = 174
+
 const showDetails = ref<'work' | 'extra' | 'total' | null>(null)
 const loadingDetails = ref(false)  
 function onLoad(id: string) {
@@ -350,6 +354,60 @@ const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
 const totalAll = computed(() => totalWork.value + totalExtra.value)
 
+
+//const workerCost = workedHours * currentSalary * (1 + EMPLOYER_TAX)
+/*
+const workersCost = computed(() => {
+  const users = stats.value?.users
+
+  if (!users?.length) return 0
+
+  return users.reduce((sum: number, worker) => {
+    const salary = worker.currentSalary ?? 0
+    const hours = worker.totalHours ?? 0
+
+    const fullCost =
+      hours *
+      salary *
+      //(1 + EMPLOYER_TAX)
+      EMPLOYER_MULTIPLIER
+
+    return sum + fullCost
+  }, 0)
+})*/
+const workersCost = computed(() => {
+  const users = stats.value?.users
+
+  if (!users?.length) return 0
+
+  return users.reduce((sum: number, worker) => {
+    const monthlySalary =
+      worker.currentSalary ?? 0
+
+    const workedHours =
+      worker.totalHours ?? 0
+
+    const hourlyRate =
+      monthlySalary / MONTH_HOURS
+
+    const totalCost =
+      hourlyRate *
+      workedHours *
+      EMPLOYER_MULTIPLIER
+
+    return sum + totalCost
+  }, 0)
+})
+/*
+const profit = computed(() => {
+  return totalProjectPrice.value - workersCost.value
+})*/
+const profit = computed(() => {
+  if (!totalProjectPrice.value) return 0
+
+  return totalProjectPrice.value - workersCost.value
+})
+
 async function saveArea() {
   await projectStore.updateProject(props.projectId, {
     areaM2: area.value,
@@ -421,38 +479,41 @@ const totalProjectPrice = computed(() => {
               }}
             </button>
           </div>
-        <div class="project-metrics">
-
-          
-          <div class="metric-card">
-            <span class="metric-label">
-              {{ t('project.area') }}
-            </span>
-
-            <strong class="metric-value">
-              {{ area || 0 }} m²
-            </strong>
-          </div>
+        <div class="metrics-wrapper">
 
           <div class="metric-card">
-            <span class="metric-label">
-              {{ t('project.pricePerM2') }}
-            </span>
-
-            <strong class="metric-value">
-              {{ price || 0 }} kr
-            </strong>
-          </div>
-
-          <div class="metric-card total">
-            <span class="metric-label">
+            <div class="metric-title">
               {{ t('project.totalProjectPrice') }}
-            </span>
+            </div>
 
-            <strong class="metric-value">
-              {{ totalProjectPrice.toLocaleString() }} kr
-            </strong>
+            <div class="metric-value">
+              {{ totalProjectPrice.toFixed(0) }} kr
+            </div>
           </div>
+
+          <div class="metric-card">
+            <div class="metric-title">
+              {{ t('project.workersCost') }}
+            </div>
+
+            <div class="metric-value">
+              {{ workersCost.toFixed(0) }} kr
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-title">
+              {{ t('project.profit') }}
+            </div>
+
+            <div
+              class="metric-value"
+              :class="{ negative: profit < 0 }"
+            >
+              {{ profit.toFixed(0) }} kr
+            </div>
+          </div>
+
         </div>
 
         <div v-if="showEdit" class="edit-menu">
@@ -467,9 +528,19 @@ const totalProjectPrice = computed(() => {
 
         </div>
 
+        <div class="project-small-info">
+          <div>
+            {{ t('project.area') }}:
+            {{ stats.project.areaM2 }} m²
+          </div>
+
+          <div>
+            {{ t('project.pricePerM2') }}:
+            {{ stats.project.pricePerM2 }}
+          </div>
+        </div>
         <div v-if="editMode === 'area'" class="modal">
           <div class="modal-content">
-
             <label for="area">{{ t('project.area') }}</label>
             <input
               v-model="area"
@@ -729,6 +800,9 @@ const totalProjectPrice = computed(() => {
   transition:.2s;
 }
 
+.negative {
+  color: #dc2626;
+}
 .user-card:hover {
   box-shadow:0 4px 12px rgba(0,0,0,.05);
 }
@@ -738,8 +812,6 @@ const totalProjectPrice = computed(() => {
   justify-content:space-between;
   align-items:center;
 }
-
-.email { font-size:12px; color:#777; }
 
 .details {
   margin-top:12px;
@@ -966,7 +1038,7 @@ const totalProjectPrice = computed(() => {
 .summary-item.active {
   background: #2563eb;
   /*color: white;*/
-  color: 2563eb;
+  color: #2563eb;
   border-color: #2563eb;
   transform: scale(0.97);
 }
@@ -982,15 +1054,19 @@ const totalProjectPrice = computed(() => {
   margin: 20px 0;
 }
 
+.metrics-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
 .metric-card {
   background: white;
+  border-radius: 16px;
+  padding: 20px;
   border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
 }
 
 .metric-card.total {
@@ -1003,12 +1079,24 @@ const totalProjectPrice = computed(() => {
   color: #64748b;
 }
 
+.metric-title {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
 .metric-value {
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 700;
   color: #111827;
 }
+.project-small-info {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #888;
 
+  display: flex;
+  gap: 16px;
+}
 .metrics-header {
   display:flex;
   justify-content:space-between;

@@ -36,6 +36,9 @@ export default {
     changePricePerM2: 'Ändra pris per m²',
     saveArea: 'Spara yta',
     savePrice: 'Spara pris',
+    workersCost: 'Personalkostnad',
+    profit: 'Vinst',
+    metrics: 'Projektdata',
   },
 
   auth: {

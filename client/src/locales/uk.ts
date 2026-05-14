@@ -36,6 +36,9 @@ export default {
     changeArea: 'Змінити площу',
     saveArea: 'Зберегти площу',
     savePrice: 'Зберегти ціну',
+    workersCost: 'Вартість працівників',
+    profit: 'Прибуток',
+    metrics: 'Метрики',
   },
 
   auth: {

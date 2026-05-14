@@ -59,6 +59,8 @@ export class ProjectStatsService {
           workHours: 0,
           extraHours: 0,
           totalHours: 0,
+
+          currentSalary: e.user.currentSalary ?? 0,
         });
       }
 
@@ -79,6 +81,8 @@ export class ProjectStatsService {
           workHours: 0,
           extraHours: 0,
           totalHours: 0,
+
+          currentSalary: e.user.currentSalary ?? 0,
         });
       }
 
