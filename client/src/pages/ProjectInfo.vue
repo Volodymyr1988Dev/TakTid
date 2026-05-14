@@ -43,7 +43,7 @@ const price = ref<number | null>(null)
 
 //const EMPLOYER_TAX = 0.3142
 const EMPLOYER_MULTIPLIER = 1.55
-const MONTH_HOURS = 174
+//const MONTH_HOURS = 174
 
 const showDetails = ref<'work' | 'extra' | 'total' | null>(null)
 const loadingDetails = ref(false)  
@@ -356,7 +356,7 @@ const totalAll = computed(() => totalWork.value + totalExtra.value)
 
 
 //const workerCost = workedHours * currentSalary * (1 + EMPLOYER_TAX)
-/*
+
 const workersCost = computed(() => {
   const users = stats.value?.users
 
@@ -374,7 +374,7 @@ const workersCost = computed(() => {
 
     return sum + fullCost
   }, 0)
-})*/
+})/*
 const workersCost = computed(() => {
   const users = stats.value?.users
 
@@ -397,7 +397,7 @@ const workersCost = computed(() => {
 
     return sum + totalCost
   }, 0)
-})
+})*/
 /*
 const profit = computed(() => {
   return totalProjectPrice.value - workersCost.value
