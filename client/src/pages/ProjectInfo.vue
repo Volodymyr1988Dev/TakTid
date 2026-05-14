@@ -41,7 +41,7 @@ const showEdit = ref(false)
 const area = ref<number | null>(null)
 const price = ref<number | null>(null)
 
-//const EMPLOYER_TAX = 0.3142
+const EMPLOYER_TAX = 0.3142
 const EMPLOYER_MULTIPLIER = 1.55
 //const MONTH_HOURS = 174
 
@@ -402,6 +402,20 @@ const workersCost = computed(() => {
 const profit = computed(() => {
   return totalProjectPrice.value - workersCost.value
 })*/
+
+function getWorkerSalary(worker: any) {
+  const hourlySalary =
+    Number(worker.currentSalary) || 0
+
+  const totalHours =
+    Number(worker.totalHours) || 0
+
+  return hourlySalary * totalHours
+}
+
+function getWorkerSalaryWithTax(worker: any) {
+  return getWorkerSalary(worker) * EMPLOYER_TAX
+}
 const profit = computed(() => {
   if (!totalProjectPrice.value) return 0
 
@@ -487,7 +501,7 @@ const totalProjectPrice = computed(() => {
             </div>
 
             <div class="metric-value">
-              {{ totalProjectPrice.toFixed(0) }} kr
+              {{ totalProjectPrice.toLocaleString() }} kr
             </div>
           </div>
 
@@ -497,7 +511,7 @@ const totalProjectPrice = computed(() => {
             </div>
 
             <div class="metric-value">
-              {{ workersCost.toFixed(0) }} kr
+              {{ workersCost.toLocaleString() }} kr
             </div>
           </div>
 
@@ -510,7 +524,7 @@ const totalProjectPrice = computed(() => {
               class="metric-value"
               :class="{ negative: profit < 0 }"
             >
-              {{ profit.toFixed(0) }} kr
+              {{ profit.toLocaleString() }} kr
             </div>
           </div>
 
@@ -656,6 +670,18 @@ const totalProjectPrice = computed(() => {
                 <span class="work">{{t('stats.work')}} {{ u.workHours }}h</span>
                 <span class="extra">{{t('stats.extra')}} {{ u.extraHours }}h</span>
                 <span class="total">{{t('stats.total')}} {{ u.totalHours }}h</span>
+
+                <div class="salary-info">
+                  <span>
+                    Salary:
+                    {{ getWorkerSalary(u).toFixed(0) }} kr
+                  </span>
+
+                  <span class="tax">
+                    Employer:
+                    {{ getWorkerSalaryWithTax(u).toFixed(0) }} kr
+                  </span>
+                </div>
               </div>
               
               <button
@@ -1112,6 +1138,21 @@ const totalProjectPrice = computed(() => {
   border-radius:10px;
   cursor:pointer;
   font-weight:600;
+}
+
+.salary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  margin-top: 8px;
+
+  font-size: 12px;
+}
+
+.tax {
+  color: #dc2626;
+  font-weight: 600;
 }
 @media (max-width: 640px) {
 
