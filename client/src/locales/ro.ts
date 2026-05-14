@@ -14,6 +14,7 @@ export default {
     edit: 'Editează',
     deleteConfirm: 'Ești sigur?',
     registerTime: 'Înregistrează timp',
+    close: 'Închide',
   },
 
   project: {
@@ -39,6 +40,7 @@ export default {
     workersCost: 'Cost muncitori',
     profit: 'Profit',
     metrics: 'Metrii',
+    editProject: 'Editează proiectul',
   },
 
   auth: {

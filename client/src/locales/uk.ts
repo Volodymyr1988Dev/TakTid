@@ -14,6 +14,7 @@ export default {
     edit: 'Редагувати',
     deleteConfirm: 'Ви впевнені?',
     registerTime: 'Зареєструвати час',
+    close: 'Закрити',
   },
 
   project: {
@@ -39,6 +40,7 @@ export default {
     workersCost: 'Вартість працівників',
     profit: 'Прибуток',
     metrics: 'Метрики',
+    editProject: 'Редагувати проект',
   },
 
   auth: {

@@ -14,6 +14,7 @@ export default {
     edit: 'Redigera',
     deleteConfirm: 'Är du säker?',
     registerTime: 'Registrera tid',
+    close: 'Stäng',
   },
 
   project: {
@@ -39,6 +40,7 @@ export default {
     workersCost: 'Personalkostnad',
     profit: 'Vinst',
     metrics: 'Projektdata',
+    editProject: 'Redigera projekt',
   },
 
   auth: {

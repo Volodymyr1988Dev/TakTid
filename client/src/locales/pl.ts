@@ -14,6 +14,7 @@ export default {
     edit: 'Edytuj',
     deleteConfirm: 'Czy jesteś pewien?',
     registerTime: 'Zarejestruj czas',
+    close: 'Zamknij',
   },
 
   project: {
@@ -39,6 +40,7 @@ export default {
     workersCost: 'Koszt pracowników',
     profit: 'Zysk',
     metrics: 'Metryki',
+    editProject: 'Edytuj projekt',
   },
 
   auth: {
