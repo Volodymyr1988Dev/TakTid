@@ -673,12 +673,12 @@ const totalProjectPrice = computed(() => {
 
                 <div class="salary-info">
                   <span>
-                    {{ t('project.salary') }}:
+                    {{ t('account.salary') }}:
                     {{ getWorkerSalary(u).toFixed(0) }} kr
                   </span>
 
                   <span class="tax">
-                    {{ t('project.employerTax') }}:
+                    {{ t('account.employerTax') }}:
                     {{ getWorkerSalaryWithTax(u).toFixed(0) }} kr
                   </span>
                 </div>
