@@ -37,7 +37,7 @@ export default {
     changePricePerM2: 'Zmień cenę za m²',
     saveArea: 'Zapisz powierzchnię',
     savePrice: 'Zapisz cenę',
-    workersCost: 'Koszt pracowników',
+    workersCost: 'Koszt pracowników przy 55% podatku',
     profit: 'Zysk',
     metrics: 'Metryki',
     editProject: 'Edytuj projekt',
@@ -190,6 +190,8 @@ export default {
     currentSalary: 'Aktualna pensja',
     editSalary: 'Zmień pensję',
     salaryPerHour: 'Pensja netto',
+    employerTax: 'Podatek pracodawcy (55%)',
+    salary: 'Pensja brutto',
   },
 
   calendar: {

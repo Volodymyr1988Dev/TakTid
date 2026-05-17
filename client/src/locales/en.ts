@@ -40,7 +40,7 @@ export default {
     changePricePerM2: 'Change price per m²',
     saveArea: 'Save area',
     savePrice: 'Save price',
-    workersCost: 'Workers cost',
+    workersCost: 'Workers cost at 55% tax rate',
     profit: 'Profit',
     metrics: 'Metrics',
     editProject: 'Edit project',
@@ -191,6 +191,8 @@ export default {
     currentSalary: 'Current salary',
     editSalary: 'Edit salary',
     salaryPerHour: 'Salary per hour',
+    employerTax: 'Employer tax (55%)',
+    salary: 'Salary',
   },
   calendar: {
     week: 'Week',

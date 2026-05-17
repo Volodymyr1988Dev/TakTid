@@ -37,7 +37,7 @@ export default {
     changeArea: 'Змінити площу',
     saveArea: 'Зберегти площу',
     savePrice: 'Зберегти ціну',
-    workersCost: 'Вартість працівників',
+    workersCost: 'Вартість працівників при 55% податку',
     profit: 'Прибуток',
     metrics: 'Метрики',
     editProject: 'Редагувати проект',
@@ -189,6 +189,8 @@ export default {
     currentSalary: 'Поточна зарплата',
     editSalary: 'Змінити зарплату',
     salaryPerHour: 'Зарплата за годину',
+    employerTax: 'Податок работодателя (55%)',
+    salary: 'Зарплата',
   },
 
   calendar: {
