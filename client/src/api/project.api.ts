@@ -6,6 +6,10 @@ export async function getProjects(): Promise<Project[]> {
   return data
 }
 
+export async function deleteProjectApi(id: string): Promise<void> {
+  await api.delete(`/projects/${id}`)
+}
+
 export async function getProjectDetails(projectId: string) {
   const { data } = await api.get(`/projects/${projectId}/details`)
   return data
