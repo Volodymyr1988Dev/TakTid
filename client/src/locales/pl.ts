@@ -191,6 +191,7 @@ export default {
     editSalary: 'Zmień pensję',
     salaryPerHour: 'Pensja netto',
     employerTax: 'Podatek pracodawcy (55%)',
+    employer31Tax: 'Podatek pracodawcy (31,42%)',
     salary: 'Pensja brutto',
   },
 

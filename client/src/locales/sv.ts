@@ -190,6 +190,7 @@ export default {
     editSalary: 'Ändra lön',
     salaryPerHour: 'Lön per timme',
     employerTax: 'Arbetsgivaravgift (55%)',
+    employer31Tax: 'Arbetsgivaravgift (31,42%)',
     salary: 'Lön',
   },
 

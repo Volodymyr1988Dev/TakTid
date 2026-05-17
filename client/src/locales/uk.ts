@@ -190,6 +190,7 @@ export default {
     editSalary: 'Змінити зарплату',
     salaryPerHour: 'Зарплата за годину',
     employerTax: 'Податок работодателя (55%)',
+    employer31Tax: 'Податок работодателя (31,42%)',
     salary: 'Зарплата',
   },
 

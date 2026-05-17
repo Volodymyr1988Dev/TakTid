@@ -416,6 +416,9 @@ function getWorkerSalary(worker: any) {
 function getWorkerSalaryWithTax(worker: any) {
   return getWorkerSalary(worker) * EMPLOYER_TAX
 }
+function getWorkerSalaryWithMultiTax(worker: any) {
+  return getWorkerSalary(worker) * EMPLOYER_MULTIPLIER
+}
 const profit = computed(() => {
   if (!totalProjectPrice.value) return 0
 
@@ -678,8 +681,12 @@ const totalProjectPrice = computed(() => {
                   </span>
 
                   <span class="tax">
-                    {{ t('account.employerTax') }}:
+                    {{ t('account.employer31Tax') }}:
                     {{ getWorkerSalaryWithTax(u).toFixed(0) }} kr
+                  </span>
+                  <span class="tax">
+                    {{ t('account.employerTax') }}:
+                    {{ getWorkerSalaryWithMultiTax(u).toFixed(0) }} kr
                   </span>
                 </div>
               </div>
