@@ -37,7 +37,7 @@ export default {
     changePricePerM2: 'Modifică prețul pe m²',
     saveArea: 'Salvează suprafața',
     savePrice: 'Salvează prețul',
-    workersCost: 'Cost muncitori',
+    workersCost: 'Cost muncitori la 55% taxă',
     profit: 'Profit',
     metrics: 'Metrii',
     editProject: 'Editează proiectul',
@@ -189,6 +189,8 @@ export default {
     currentSalary: 'Salariu curent',
     editSalary: 'Modifică salariul',
     salaryPerHour: 'Salariu pe oră',
+    employerTax: 'Taxă angajator (55%)',
+    salary: 'Salariu brut',
   },
 
   calendar: {
