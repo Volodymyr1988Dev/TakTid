@@ -192,6 +192,7 @@ export default {
     editSalary: 'Edit salary',
     salaryPerHour: 'Salary per hour',
     employerTax: 'Employer tax (55%)',
+    employer31Tax: 'Employer tax (31,42%)',
     salary: 'Salary',
   },
   calendar: {
