@@ -37,7 +37,7 @@ export default {
     changePricePerM2: 'Ändra pris per m²',
     saveArea: 'Spara yta',
     savePrice: 'Spara pris',
-    workersCost: 'Personalkostnad',
+    workersCost: 'Personalkostnad vid 55% skatt',
     profit: 'Vinst',
     metrics: 'Projektdata',
     editProject: 'Redigera projekt',
@@ -189,6 +189,8 @@ export default {
     currentSalary: 'Nuvarande lön',
     editSalary: 'Ändra lön',
     salaryPerHour: 'Lön per timme',
+    employerTax: 'Arbetsgivaravgift (55%)',
+    salary: 'Lön',
   },
 
   calendar: {
