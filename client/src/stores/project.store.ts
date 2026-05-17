@@ -5,7 +5,7 @@ import { getProjects } from '../api/project.api'
 import { getProjectDetails } from '../api/project.api'
 import type { TimeEntry } from '../types/TimeEntry.type'
 //import { updateProject } from '../api/project.api'
-import { updateProjectApi } from '../api/project.api'
+import { updateProjectApi, deleteProjectApi } from '../api/project.api'
 
 export const useProjectStore = defineStore('projects', () => {
   const selectedProject = ref<Project | null>(null)
@@ -55,8 +55,26 @@ export const useProjectStore = defineStore('projects', () => {
     projects.value.unshift(project)
   }
 
-  function removeProject(id: string) {
+  /*function removeProject(id: string) {
     projects.value = projects.value.filter(p => p.id !== id)
+  }*/
+
+  async function removeProject(id: string) {
+    try{
+      await deleteProjectApi(id)
+
+      projects.value = projects.value.filter(
+        p => p.id !== id
+      )
+
+      if (selectedProject.value?.id === id) {
+        selectedProject.value = null
+      }
+    } catch(e) {
+      console.error('Failed to delete project', e)
+      return
+    }
+    
   }
 
   async function loadDetails(projectId: string) {
