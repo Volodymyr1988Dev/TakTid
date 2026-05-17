@@ -417,7 +417,7 @@ function getWorkerSalaryWithTax(worker: any) {
   return getWorkerSalary(worker) * EMPLOYER_TAX
 }
 function getWorkerSalaryWithMultiTax(worker: any) {
-  return getWorkerSalary(worker) * EMPLOYER_MULTIPLIER
+  return getWorkerSalary(worker) * (1 - EMPLOYER_MULTIPLIER)
 }
 const profit = computed(() => {
   if (!totalProjectPrice.value) return 0
