@@ -42,9 +42,9 @@ export default {
     metrics: 'Метрики',
     editProject: 'Редагувати проект',
     pricePerExtraHour: 'Ціна за надгодину',
-    extraHoursIncome: 'Доход от надчасов',
-    changeExtraHourPrice: 'Изменить цену за надчас',
-    saveExtraHourPrice: 'Сохранить цену за надчас',
+    extraHoursIncome: 'Доход з надгодин',
+    changeExtraHourPrice: 'Змінити ціну за надгодину',
+    saveExtraHourPrice: 'Зберегти цену за надгодину',
   },
 
   auth: {
