@@ -43,6 +43,8 @@ export default {
     editProject: 'Edytuj projekt',
     pricePerExtraHour: 'Cena za nadgodzinę',
     extraHoursIncome: 'Dochód z nadgodzin',
+    changeExtraHourPrice: 'Zmień cenę za nadgodzinę',
+    saveExtraHourPrice: 'Zapisz cenę za nadgodzinę',
   },
 
   auth: {

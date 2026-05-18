@@ -43,6 +43,8 @@ export default {
     editProject: 'Редагувати проект',
     pricePerExtraHour: 'Ціна за надгодину',
     extraHoursIncome: 'Доход от надчасов',
+    changeExtraHourPrice: 'Изменить цену за надчас',
+    saveExtraHourPrice: 'Сохранить цену за надчас',
   },
 
   auth: {
