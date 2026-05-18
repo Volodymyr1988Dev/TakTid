@@ -7,4 +7,5 @@ export interface Project {
 
   areaM2?: number | null
   pricePerM2?: number | null
+  pricePerExtraH?: number | null
 }

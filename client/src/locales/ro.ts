@@ -41,6 +41,8 @@ export default {
     profit: 'Profit',
     metrics: 'Metrii',
     editProject: 'Editează proiectul',
+    pricePerExtraHour: 'Preț per oră extra',
+    extraHoursIncome: 'Venit din ore extra',
   },
 
   auth: {

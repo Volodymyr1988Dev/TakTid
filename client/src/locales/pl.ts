@@ -41,6 +41,8 @@ export default {
     profit: 'Zysk',
     metrics: 'Metryki',
     editProject: 'Edytuj projekt',
+    pricePerExtraHour: 'Cena za nadgodzinę',
+    extraHoursIncome: 'Dochód z nadgodzin',
   },
 
   auth: {

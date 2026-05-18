@@ -37,6 +37,9 @@ export class Projects {
   pricePerM2!: number | null;
 
   @Column('decimal', { nullable: true })
+  pricePerExtraH!: number | null;
+
+  @Column('decimal', { nullable: true })
   areaM2!: number | null;
   
   @OneToMany(() => ProjectAssignment, (assignment) => assignment.project)

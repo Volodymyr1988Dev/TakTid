@@ -41,6 +41,8 @@ export default {
     profit: 'Vinst',
     metrics: 'Projektdata',
     editProject: 'Redigera projekt',
+    pricePerExtraHour: 'Pris per extra timme',
+    extraHoursIncome: 'Inkomst från extra timmar',
   },
 
   auth: {
