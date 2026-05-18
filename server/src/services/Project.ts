@@ -101,6 +101,16 @@ export class ProjectsService {
     const totalWork = timeEntries.reduce((sum, e) => sum + Number(e.hours), 0)
     const totalExtra = extraEntries.reduce((sum, e) => sum + Number(e.hours), 0)
 
+    const baseProjectPrice =
+      Number(project.pricePerM2 ?? 0) *
+      Number(project.areaM2 ?? 0)
+
+    const extraHoursPrice =
+      totalExtra *
+      Number(project.pricePerExtraH ?? 0)
+
+    const totalProjectPrice =
+      baseProjectPrice + extraHoursPrice
     return {
       project: {
         id: project.id,
@@ -108,12 +118,16 @@ export class ProjectsService {
         address: project.address,
         areaM2: project.areaM2,
         pricePerM2: project.pricePerM2,
+        pricePerExtraH: project.pricePerExtraH,
       },
       total: {
         work: totalWork,
         extra: totalExtra,
         all: totalWork + totalExtra,
-      }
+      },
+      baseProjectPrice,
+      extraHoursPrice,
+      totalProjectPrice,
     }
   }
 

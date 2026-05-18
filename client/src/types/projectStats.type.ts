@@ -7,6 +7,7 @@ export interface ProjectStats {
     address: string
     areaM2?: number | null
     pricePerM2?: number | null
+    pricePerExtraH?: number | null
   }
 
   users: ProjectUserStat[]
@@ -17,4 +18,6 @@ export interface ProjectStats {
     all: number
   }
   totalProjectPrice: number
+  baseProjectPrice: number
+  extraHoursPrice: number
 }

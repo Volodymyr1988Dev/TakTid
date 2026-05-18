@@ -13,4 +13,9 @@ export class UpdateProjectDto extends PartialType(CreateProjectDto) {
     @IsOptional()
     @IsNumber()
     pricePerM2?: number;
+
+    @ApiProperty({ example: 500, required: false })
+    @IsOptional()
+    @IsNumber()
+    pricePerExtraH?: number;
 }

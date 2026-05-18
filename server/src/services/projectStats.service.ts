@@ -100,7 +100,17 @@ export class ProjectStatsService {
     const totalWork = usersArray.reduce((sum, u) => sum + u.workHours, 0);
     const totalExtra = usersArray.reduce((sum, u) => sum + u.extraHours, 0);
 
-    const totalProjectPrice = Number(project.pricePerM2 ?? 0) * Number(project.areaM2 ?? 0)
+    //const totalProjectPrice = Number(project.pricePerM2 ?? 0) * Number(project.areaM2 ?? 0)
+    const baseProjectPrice =
+      Number(project.pricePerM2 ?? 0) *
+      Number(project.areaM2 ?? 0)
+
+    const extraHoursPrice =
+      totalExtra *
+      Number(project.pricePerExtraH ?? 0)
+
+    const totalProjectPrice =
+      baseProjectPrice + extraHoursPrice
     return {
       project: {
         id: project.id,
@@ -108,6 +118,7 @@ export class ProjectStatsService {
         address: project.address,
         areaM2: project.areaM2,
         pricePerM2: project.pricePerM2,
+        pricePerExtraH: project.pricePerExtraH,
       },
       users: usersArray,
       total: {
@@ -116,6 +127,8 @@ export class ProjectStatsService {
         all: totalWork + totalExtra,
       },
       totalProjectPrice,
+      baseProjectPrice,
+      extraHoursPrice,
     };
   }
 }
