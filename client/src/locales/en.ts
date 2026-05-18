@@ -44,6 +44,10 @@ export default {
     profit: 'Profit',
     metrics: 'Metrics',
     editProject: 'Edit project',
+    pricePerExtraHour: 'Price per extra hour',
+    extraHoursIncome: 'Extra hours income',
+    changeExtraHourPrice: 'Change price per extra hour',
+    saveExtraHourPrice: 'Save price per extra hour',
   },
 
   auth: {

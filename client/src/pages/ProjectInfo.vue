@@ -31,8 +31,9 @@ const loading = ref(true)
 const loaded = ref(new Set<string>())
 const error = ref<string | null>(null)
 const currentIndex = ref(0)
+const extraPrice = ref<number | null>(null)
 
-const editMode = ref<'area' | 'price' | null>(null)
+const editMode = ref<'area' | 'price' | 'extraPrice' | null>(null)
 
 const expandedUserId = ref<string | null>(null)
 
@@ -63,6 +64,8 @@ async function loadStats() {
 
     area.value = data.project.areaM2 ?? null
     price.value = data.project.pricePerM2 ?? null
+
+    extraPrice.value = data.project.pricePerExtraH ?? null
   } catch (err: any) {
     if (err?.response?.status === 403) {
       error.value = t('errors.accessDenied')
@@ -72,6 +75,16 @@ async function loadStats() {
   } finally {
     loading.value = false
   }
+}
+
+async function saveExtraPrice() {
+  await projectStore.updateProject(props.projectId, {
+    pricePerExtraH: extraPrice.value,
+  })
+
+  await loadStats()
+
+  editMode.value = null
 }
 
 watch(() => [props.projectId, props.isAdmin], async ([id, isAdmin]) => {
@@ -446,12 +459,23 @@ async function savePrice() {
 }
 //const area = Number(project.areaM2 || 0)
 //const price = Number(project.pricePerM2 || 0)
+/*
 const totalProjectPrice = computed(() => {
   const projectArea = Number(area.value || 0)
   const projectPrice = Number(price.value || 0)
 
   return projectArea * projectPrice
 })
+*/
+const totalProjectPrice = computed(
+  () => stats.value?.totalProjectPrice ?? 0
+)
+
+const extraHoursPrice = computed(
+  () => stats.value?.extraHoursPrice ?? 0
+)
+
+//const baseProjectPrice = computed( () => stats.value?.baseProjectPrice ?? 0 )
 </script>
 
 <template>
@@ -510,6 +534,16 @@ const totalProjectPrice = computed(() => {
 
           <div class="metric-card">
             <div class="metric-title">
+              {{ t('project.extraHoursIncome') }}
+            </div>
+
+            <div class="metric-value">
+              {{ extraHoursPrice.toLocaleString() }} kr
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-title">
               {{ t('project.workersCost') }}
             </div>
 
@@ -543,6 +577,10 @@ const totalProjectPrice = computed(() => {
             {{ t('project.changePricePerM2') }}
           </button>
 
+          <button @click="editMode = 'extraPrice'">
+            {{ t('project.changeExtraHourPrice') }}
+          </button>
+
         </div>
 
         <div class="project-small-info">
@@ -554,6 +592,16 @@ const totalProjectPrice = computed(() => {
           <div>
             {{ t('project.pricePerM2') }}:
             {{ stats.project.pricePerM2 }}
+          </div>
+
+          <div>
+            {{ t('project.pricePerExtraHour') }}:
+            {{ stats.project.pricePerExtraH }} kr
+          </div>
+
+          <div>
+            {{ t('project.extraHoursIncome') }}:
+            {{ extraHoursPrice.toLocaleString() }} kr
           </div>
         </div>
         <div v-if="editMode === 'area'" class="modal">
@@ -591,6 +639,25 @@ const totalProjectPrice = computed(() => {
           </div>
         </div>
 
+        <div v-if="editMode === 'extraPrice'" class="modal">
+          <div class="modal-content">
+
+            <label for="extraPrice">
+              {{ t('project.pricePerExtraHour') }}
+            </label>
+
+            <input
+              v-model.number="extraPrice"
+              type="number"
+              id="extraPrice"
+            >
+
+            <button @click="saveExtraPrice">
+              {{ t('project.saveExtraHourPrice') }}
+            </button>
+
+          </div>
+        </div>
       <div class="summary">
         <div 
           @click="toggleSummary('work')"
