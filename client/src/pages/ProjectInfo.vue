@@ -475,9 +475,7 @@ const extraHoursPrice = computed(
   () => stats.value?.extraHoursPrice ?? 0
 )
 
-const baseProjectPrice = computed(
-  () => stats.value?.baseProjectPrice ?? 0
-)
+//const baseProjectPrice = computed( () => stats.value?.baseProjectPrice ?? 0 )
 </script>
 
 <template>
@@ -533,7 +531,7 @@ const baseProjectPrice = computed(
               {{ totalProjectPrice.toLocaleString() }} kr
             </div>
           </div>
-          
+
           <div class="metric-card">
             <div class="metric-title">
               {{ t('project.extraHoursIncome') }}
