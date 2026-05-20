@@ -147,7 +147,16 @@ async function load() {
   }
 }
 
+async function ensureAllDetailsLoaded() {
+  await Promise.all(
+    stats.users.map(user =>
+      ensureDetails(user.user.id)
+    )
+  )
+}
+
 async function exportAllExcel() {
+  await ensureAllDetailsLoaded()
   const workbook = new ExcelJS.Workbook()
 
   for (const user of stats.users) {
@@ -170,7 +179,7 @@ async function exportAllExcel() {
     sheet.addRow(['Total', sum.total])
     sheet.addRow([])
 
-    sheet.addRow(['Date','Type','Hours','Project','Comment'])
+    sheet.addRow(['Date','Type','Hours'/*,'Project','Comment'*/])
     const entries = getEntries(user.user.id)
     entries
     .forEach((e: UserDetailsEntry/*: Entry*/) => {
@@ -178,8 +187,8 @@ async function exportAllExcel() {
         e.date,
         e.type,
         e.hours,
-        e.project ? `${e.project.city} - ${e.project.address}` : '',
-        e.comment || ''
+        //e.project ? `${e.project.city} - ${e.project.address}` : '',
+        //e.comment || ''
       ])
     })
   }
@@ -229,7 +238,7 @@ async function exportExcelSingle(user: UserStats) {
   sheet.addRow(['Total+ Red Days', sum.total + sum.redDay])
   sheet.addRow([])
 
-  sheet.addRow(['Date','Type','Hours','Project','Comment'])
+  sheet.addRow(['Date','Type','Hours'/*,'Project','Comment'*/])
   const entries = getEntries(user.user.id)
   entries
   .forEach((e: UserDetailsEntry) => {
@@ -237,8 +246,8 @@ async function exportExcelSingle(user: UserStats) {
       e.date,
       typeLabel(e.type),
       e.hours,
-      e.project ? `${e.project.city} - ${e.project.address}` : '',
-      e.comment || ''
+      //e.project ? `${e.project.city} - ${e.project.address}` : '',
+      //e.comment || ''
     ])
   })
 
@@ -292,12 +301,12 @@ async function exportPDFSingle(user: UserStats) {
 
   autoTable(doc, {
     startY: finalY + 10,
-    head: [['Date','Type','Hours','Project','Comment']],
+    head: [['Date','Type','Hours'/*,'Project','Comment'*/]],
     body: entries.map((e: UserDetailsEntry/*: Entry*/) => [
       e.date,
       typeLabel(e.type),
       e.hours,
-      e.project ? `${e.project.city} - ${e.project.address}` : '',
+      //e.project ? `${e.project.city} - ${e.project.address}` : '',
       e.comment || ''
     ]),
     theme: 'striped',
@@ -307,6 +316,7 @@ async function exportPDFSingle(user: UserStats) {
   doc.save(`${getUserName(user.user)}_${month.value}_${year.value}.pdf`)
 }
 async function exportAllPDF() {
+  await ensureAllDetailsLoaded()
   const doc = new jsPDF()
   for (const user of stats.users) {
     const entries = getEntries(user.user.id)
@@ -336,13 +346,13 @@ async function exportAllPDF() {
             .lastAutoTable?.finalY ?? 30
     autoTable(doc, {
       startY: finalY + 10,
-      head: [['Date','Type','Hours','Project','Comment']],
+      head: [['Date','Type','Hours'/*,'Project','Comment'*/]],
       body: entries.map((e: UserDetailsEntry) => [
         e.date,
         e.type,
         e.hours,
-        e.project ? `${e.project.city} - ${e.project.address}` : '',
-        e.comment || ''
+        //e.project ? `${e.project.city} - ${e.project.address}` : '',
+        //e.comment || ''
       ])
     })
 
