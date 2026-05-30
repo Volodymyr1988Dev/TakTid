@@ -3,6 +3,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ProjectAssignment } from '../Project/ProjectAssignment';
 import { TimeEntry } from '../TimeEntries/TimeEntries';
 import { ProjectImage } from './ProjectImages';
+import { ProjectTask } from './ProjectTask';
+
 @Entity('projects')
 export class Projects {
   @ApiProperty({
@@ -51,4 +53,7 @@ export class Projects {
     onDelete: 'CASCADE',
   })
   images!: ProjectImage[];
+
+  @OneToMany(() => ProjectTask, task => task.project)
+  tasks!: ProjectTask[]
 }

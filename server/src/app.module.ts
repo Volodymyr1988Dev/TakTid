@@ -18,6 +18,7 @@ import { ProjectStatsModule } from './modules/projectStats.module';
 import { StatsModule } from './modules/stat.module';
 import { CleanupModule } from './modules/cleanup.module';
 import { SalaryHistoryModule } from './modules/salary-history.module';
+import { ProjectTaskModule } from './modules/projectTask.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { SalaryHistoryModule } from './modules/salary-history.module';
     StatsModule,
     CleanupModule,
     SalaryHistoryModule,
+    ProjectTaskModule,
   ],
 
   controllers: [AppController],

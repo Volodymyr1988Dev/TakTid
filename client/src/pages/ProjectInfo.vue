@@ -17,6 +17,7 @@ import AppLoader from '../components/ui/AppLoader.vue'
 import type { TimeEntry } from '../types/TimeEntry.type'
 import { useProjectStore } from '../stores/project.store'
 import { useI18n } from 'vue-i18n'
+import ProjectTasks from '../components/ui/ProjectTasks.vue'
 
 const { t } = useI18n()
 const projectStore = useProjectStore()
@@ -25,6 +26,7 @@ const emit = defineEmits<{ (e: 'back'): void }>()
 const imageStore = useProjectImageStore()
 const statsStore = useStatsStore()
 
+const showTasks = ref(false)
 const fullscreenImage = ref<string | null>(null)
 const stats = ref<ProjectStats | null>(null)
 const loading = ref(true)
@@ -821,6 +823,14 @@ const extraHoursPrice = computed(
         </div>
       </div>
     </div>
+    <button @click="showTasks = !showTasks">
+      {{ showTasks ? 'Hide Tasks' : 'Show Tasks' }}
+    </button>
+      <ProjectTasks
+          v-if="showTasks"
+          :project-id="projectId"
+          :is-admin="isAdmin"
+      />
       <!-- IMAGES -->
       <div class="images-section">
         <button @click="showImages = !showImages">
