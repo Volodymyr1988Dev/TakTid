@@ -20,6 +20,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { CleanupModule } from './modules/cleanup.module';
 import { SalaryHistoryModule } from './modules/salary-history.module';
+import { ProjectTaskModule } from './modules/projectTask.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { SalaryHistoryModule } from './modules/salary-history.module';
     StatsModule,
     CleanupModule,
     SalaryHistoryModule,
+    ProjectTaskModule,
   ],
   controllers: [AppController],
   providers: [

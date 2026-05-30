@@ -15,6 +15,7 @@ import { ProjectAssignment } from '../Project/ProjectAssignment';
 import { Session } from '../Sessions/Sessions';
 import { TimeEntry } from '../TimeEntries/TimeEntries';
 import { UserSalaryHistory } from './SallaryHistory';
+import { ProjectTask } from '../Project/ProjectTask';
 
 @Entity('users')
 export class User {
@@ -92,4 +93,6 @@ export class User {
   sessions!: Session[];
   @OneToMany(() => TimeEntry, (timeEntry) => timeEntry.user)
   timeEntries!: TimeEntry[];
+  @OneToMany(() => ProjectTask, (task) => task.completedBy)
+  completedTasks!: ProjectTask[];
 }
