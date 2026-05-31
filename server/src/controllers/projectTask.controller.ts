@@ -20,6 +20,7 @@ import { CreateProjectTaskDto } from '../types/project/create-project-task.dto';
 import { UpdateProjectTaskDto } from '../types/project/update-project-task.dto';
 import { AdminGuard } from '../types/auth/admin.guard';
 //import { AuthRequest } from '../types/auth/auth.request.dto';
+import { memoryStorage } from 'multer';
 
 @Controller('projects')
 export class ProjectTaskController {
@@ -47,30 +48,38 @@ export class ProjectTaskController {
 
     @UseGuards(AdminGuard)
     @Post(':id/import-tasks')
-    @UseInterceptors(
+   @UseInterceptors(
     FilesInterceptor(
         'files',
         10,
+        {
+        storage: memoryStorage(),
+
+        limits: {
+            fileSize: 10 * 1024 * 1024,
+        },
+        },
     ),
     )
     upload(
-    //@UploadedFile() file: Express.Multer.File
-     @Param('id')
-      projectId: string,
+    @Param('id')
+    projectId: string,
 
-      @UploadedFiles()
-      files: Express.Multer.File[],
+    @UploadedFiles()
+    files: Express.Multer.File[],
     ) {
-        if (!files) {
+
+    if (!files?.length) {
         throw new BadRequestException(
-            'No file uploaded'
+        'No files uploaded',
         )
-        }
-    return this.taskService.importTasks(
-        projectId,
-        files
-    )
     }
+
+  return this.taskService.importTasks(
+    projectId,
+    files,
+  )
+}
 
   @UseGuards(AdminGuard)
     @Delete('/tasks/:taskId')

@@ -42,75 +42,81 @@ export class ProjectTaskService {
     }
 
     async importTasks(
-    projectId: string,
-    files: Express.Multer.File[],
+  projectId: string,
+  files: Express.Multer.File[],
+) {
+
+  const allowed = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+  ]
+
+  const allTasks: string[] = []
+
+  for (const file of files) {
+
+    if (
+      !allowed.includes(
+        file.mimetype,
+      )
     ) {
-    const allTasks: string[] = []
-    //return []
-        const allowed = [
-        'image/jpeg',
-        'image/png',
-        'image/webp',
-    ]
+      throw new BadRequestException(
+        `Unsupported file type: ${file.originalname}`,
+      )
+    }
 
-     for (const file of files) {
-        if (
-            !allowed.includes(
-            file.mimetype,
-            )
-        ) {
-            throw new BadRequestException(
-            'Unsupported file type',
-            )
-        }
+    try {
 
-        if (
-            file.size >
-            10 * 1024 * 1024
-        ) {
-            throw new BadRequestException(
-            'File too large',
-            )
-        }
-
-        const text =
-            await this.ocrService.recognize(
-            file.path,
-            )
-            /*
-        const lines = text
-            .split('\n')
-            .map(x => x.trim())
-            .filter(Boolean)
-
-        const tasks = lines.filter(line => {
-
-            return (
-            line.length > 10 &&
-            !line.includes('www') &&
-            !/\d{4}/.test(line)
-            )
-        })*/
-            const tasks = text
-            .split('\n')
-            .map(x => x.trim())
-            .filter(Boolean)
-
-            allTasks.push(...tasks)
-
-        const entities = allTasks.map(
-            title =>
-            this.repo.create({
-                title,
-                project: {
-                id: projectId,
-                },
-            }),
+      const text =
+        await this.ocrService.recognize(
+          file.buffer,
         )
-    return this.repo.save(
-        entities,
+
+      const tasks = text
+        .split('\n')
+        .map(x => x.trim())
+        .filter(Boolean)
+        .filter(
+          x => x.length > 3,
+        )
+
+      allTasks.push(...tasks)
+
+    } catch (error) {
+
+      console.error(
+        `OCR failed for ${file.originalname}`,
+        error,
+      )
+    }
+  }
+
+  const uniqueTasks =
+    [...new Set(allTasks)]
+
+  if (!uniqueTasks.length) {
+
+    throw new BadRequestException(
+      'No tasks detected',
     )
-    }}
+  }
+
+  const entities =
+    uniqueTasks.map(title =>
+      this.repo.create({
+        title,
+
+        project: {
+          id: projectId,
+        },
+      }),
+    )
+
+  return this.repo.save(
+    entities,
+  )
+}
 
     async deleteTask(taskId: string) {
     const task = await this.repo.findOne({
