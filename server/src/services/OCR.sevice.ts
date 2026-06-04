@@ -1,36 +1,60 @@
-import { Injectable, Logger } from '@nestjs/common'
-import Tesseract from 'tesseract.js'
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common'
+
+import {
+  createWorker,
+  Worker,
+} from 'tesseract.js'
+
+import sharp from 'sharp'
 
 @Injectable()
-export class OcrService {
+export class OcrService
+  implements OnModuleInit, OnModuleDestroy {
 
   private readonly logger =
     new Logger(OcrService.name)
 
+  private worker!: Worker
+
+  async onModuleInit() {
+
+    this.worker =
+      await createWorker('swe+eng')
+
+    this.logger.log(
+      'OCR worker initialized',
+    )
+  }
+
+  async onModuleDestroy() {
+
+    if (this.worker) {
+      await this.worker.terminate()
+    }
+  }
+
   async recognize(
-    imageBuffer: Buffer,
+    buffer: Buffer,
   ): Promise<string> {
 
-    try {
+    const processed =
+      await sharp(buffer)
+        .grayscale()
+        .normalize()
+        .sharpen()
+        .png()
+        .toBuffer()
 
-      const result =
-        await Tesseract.recognize(
-          imageBuffer,
-          'swe',
-        )
-
-      return result.data.text
-
-    } catch (error) {
-
-      this.logger.error(
-        'OCR failed',
-        error instanceof Error
-          ? error.stack
-          : String(error),
+    const result =
+      await this.worker.recognize(
+        processed,
       )
 
-      throw error
-    }
+    return result.data.text
   }
 }
