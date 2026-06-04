@@ -8,6 +8,7 @@ import { ProjectTaskController } from '../controllers/projectTask.controller'
 import { ProjectTaskService } from '../services/project-task.service'
 
 import { OcrService } from '../services/OCR.sevice'
+import { TaskExtractionService } from '../services/task-extraction.service'
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { OcrService } from '../services/OCR.sevice'
   providers: [
     ProjectTaskService,
     OcrService,
+    TaskExtractionService,
   ],
 
   exports: [

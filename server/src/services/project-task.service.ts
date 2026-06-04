@@ -6,6 +6,7 @@ import { User } from '../entities/User/User';
 import { CreateProjectTaskDto } from '../types/project/create-project-task.dto';
 import { UpdateProjectTaskDto } from '../types/project/update-project-task.dto';
 import { OcrService } from './OCR.sevice';
+import { TaskExtractionService } from './task-extraction.service';
 
 @Injectable()
 export class ProjectTaskService {
@@ -16,6 +17,8 @@ export class ProjectTaskService {
     @InjectRepository(User)
     private userRepo: Repository<User>,
     private readonly ocrService: OcrService,
+    private readonly taskExtractionService:
+    TaskExtractionService,
     ) {}
 
   async getProjectTasks(projectId: string) {
@@ -66,56 +69,85 @@ export class ProjectTaskService {
       )
     }
 
-    try {
-
-      const text =
-        await this.ocrService.recognize(
-          file.buffer,
-        )
-
-      const tasks = text
-        .split('\n')
-        .map(x => x.trim())
-        .filter(Boolean)
-        .filter(
-          x => x.length > 3,
-        )
-
-      allTasks.push(...tasks)
-
-    } catch (error) {
-
-      console.error(
-        `OCR failed for ${file.originalname}`,
-        error,
+    const text =
+      await this.ocrService.recognize(
+        file.buffer,
       )
-    }
+
+    const tasks =
+      this.taskExtractionService.extractTasks(
+        text,
+      )
+
+    allTasks.push(
+      ...tasks,
+    )
   }
 
   const uniqueTasks =
     [...new Set(allTasks)]
 
-  if (!uniqueTasks.length) {
-
-    throw new BadRequestException(
-      'No tasks detected',
-    )
-  }
-
-  const entities =
-    uniqueTasks.map(title =>
-      this.repo.create({
-        title,
-
+  const existing =
+    await this.repo.find({
+      where: {
         project: {
           id: projectId,
         },
-      }),
+      },
+    })
+
+  const existingTitles =
+    new Set(
+      existing.map(
+        x =>
+          x.title
+            .trim()
+            .toLowerCase(),
+      ),
     )
 
-  return this.repo.save(
+  const newTasks =
+    uniqueTasks.filter(
+      task =>
+        !existingTitles.has(
+          task
+            .trim()
+            .toLowerCase(),
+        ),
+    )
+
+  if (!newTasks.length) {
+
+    return {
+      imported: 0,
+      skipped: uniqueTasks.length,
+    }
+  }
+
+  const entities =
+    newTasks.map(
+      title =>
+        this.repo.create({
+          title,
+
+          project: {
+            id: projectId,
+          },
+        }),
+    )
+
+  await this.repo.save(
     entities,
   )
+
+  return {
+    imported:
+      entities.length,
+
+    skipped:
+      uniqueTasks.length -
+      entities.length,
+  }
 }
 
     async deleteTask(taskId: string) {
