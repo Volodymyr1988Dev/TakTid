@@ -29,12 +29,12 @@ export class TaskExtractionService {
           /\t/g,
           ' ',
         )
-
+        /*
         .replace(
           /\s+/g,
           ' ',
         )
-
+        */
     const lines =
       cleaned
         .split('\n')
@@ -92,6 +92,7 @@ export class TaskExtractionService {
       .map(task =>
         task
           .replace(/\s+/g, ' ')
+
           .trim(),
       )
 

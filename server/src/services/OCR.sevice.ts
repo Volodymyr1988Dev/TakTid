@@ -44,9 +44,11 @@ export class OcrService
 
     const processed =
       await sharp(buffer)
+        .rotate()
         .grayscale()
         .normalize()
         .sharpen()
+        .threshold(160)
         .png()
         .toBuffer()
 
