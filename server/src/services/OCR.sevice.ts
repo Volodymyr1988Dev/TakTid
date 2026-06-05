@@ -25,6 +25,7 @@ export class OcrService
 
     this.worker =
       await createWorker('swe+eng')
+      //await this.worker.setParameters({tessedit_pageseg_mode: '6'})
 
     this.logger.log(
       'OCR worker initialized',
@@ -47,8 +48,9 @@ export class OcrService
         .rotate()
         .grayscale()
         .normalize()
-        .sharpen()
-        .threshold(160)
+        //.sharpen()
+        .sharpen({sigma: 1.5})
+        //.threshold(160)
         .png()
         .toBuffer()
 
@@ -56,7 +58,7 @@ export class OcrService
       await this.worker.recognize(
         processed,
       )
-
+      this.logger.log(`OCR result:\n${result.data.text}`)
     return result.data.text
   }
 }
