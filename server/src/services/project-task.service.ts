@@ -73,12 +73,12 @@ export class ProjectTaskService {
       await this.ocrService.recognize(
         file.buffer,
       )
-
+      console.log(text, 'extracted text')
     const tasks =
       this.taskExtractionService.extractTasks(
         text,
       )
-
+      console.log(tasks, 'extracted tasks')
     allTasks.push(
       ...tasks,
     )
