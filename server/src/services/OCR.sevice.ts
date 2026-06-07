@@ -8,6 +8,7 @@ import {
 import {
   createWorker,
   Worker,
+  PSM,
 } from 'tesseract.js'
 
 import sharp from 'sharp'
@@ -24,8 +25,13 @@ export class OcrService
   async onModuleInit() {
 
     this.worker =
-      await createWorker('swe+eng')
-      //await this.worker.setParameters({tessedit_pageseg_mode: '6'})
+      await createWorker(
+        'swe+eng',
+      )
+
+    await this.worker.setParameters({
+      tessedit_pageseg_mode: PSM.SINGLE_BLOCK,
+    })
 
     this.logger.log(
       'OCR worker initialized',
@@ -51,6 +57,10 @@ export class OcrService
         //.sharpen()
         .sharpen({sigma: 1.5})
         //.threshold(160)
+        .resize({
+          width: 2200,
+          withoutEnlargement: false,
+        })
         .png()
         .toBuffer()
 

@@ -13,6 +13,20 @@ export function deleteTask(taskId: string) {
   return api.delete(`/projects/tasks/${taskId}`)
 }
 
+export function updateTask(
+  taskId: string,
+  dto: {
+    title?: string
+    note?: string | null
+    reminder?: string | null
+  },
+) {
+  return api.patch(
+    `/projects/tasks/${taskId}`,
+    dto,
+  )
+}
+
 export function importTasks(
   projectId: string,
   files: File[],

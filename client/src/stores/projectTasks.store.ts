@@ -6,6 +6,7 @@ import {
   toggleTask,
   deleteTask,
   importTasks,
+  updateTask,
 } from '../api/projectTasks.api'
 import type { ProjectTask } from '../types/ProjectTask'
 
@@ -44,6 +45,32 @@ defineStore('projectTasks', () => {
     tasks.value.push(...data)
     }
 
+    async function updateTaskData(
+    taskId: string,
+    dto: {
+        title: string
+        note: string | null
+        attentionNote: string | null
+    },
+    ) {
+
+    const { data } =
+        await updateTask(
+        taskId,
+        dto,
+        )
+
+    const index =
+        tasks.value.findIndex(
+        t => t.id === taskId,
+        )
+
+    if (index >= 0) {
+        tasks.value[index] =
+        data
+    }
+    }
+
   async function toggle(taskId: string) {
 
     const { data } =
@@ -63,5 +90,6 @@ defineStore('projectTasks', () => {
     toggle,
     remove,
     importFromImages,
+    updateTaskData,
   }
 })

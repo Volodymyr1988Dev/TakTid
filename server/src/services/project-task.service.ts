@@ -36,6 +36,8 @@ export class ProjectTaskService {
 
     const task = this.repo.create({
         title: dto.title,
+        attentionNote: dto.attentionNote || null,
+        note: dto.note || null,
         project: {
         id: projectId,
         },
@@ -75,10 +77,15 @@ export class ProjectTaskService {
       )
       console.log(text, 'extracted text')
     const tasks =
-      this.taskExtractionService.extractTasks(
+      await this.taskExtractionService.extractTasks(
         text,
       )
-      console.log(tasks, 'extracted tasks')
+      //console.log(tasks, 'extracted tasks')
+      if (
+        !Array.isArray(tasks)
+        ) {
+        continue
+        }
     allTasks.push(
       ...tasks,
     )
@@ -129,6 +136,8 @@ export class ProjectTaskService {
       title =>
         this.repo.create({
           title,
+          attentionNote: null,
+          note: null,
 
           project: {
             id: projectId,
