@@ -4,6 +4,7 @@ import {
 } from '@nestjs/common'
 
 import OpenAI from 'openai'
+import { ExtractedTask } from '../types/project/extractedTask.dto'
 
 @Injectable()
 export class TaskExtractionService {
@@ -19,7 +20,7 @@ export class TaskExtractionService {
 
   async extractTasks(
     text: string,
-  ): Promise<string[]> {
+  ): Promise<ExtractedTask []> {
 
     try {
 
@@ -36,18 +37,76 @@ export class TaskExtractionService {
           messages: [
             {
               role: 'system',
-              content: `
-Extract ONLY construction tasks.
+             content: `
+Extract construction tasks.
+
+Return JSON:
+
+{
+  "tasks": [
+    {
+      "title": "",
+      "note": "",
+      "attentionNote": ""
+    }
+  ]
+}
+
+Rules:
+
+1. title:
+   - only the actual work to perform
+   - short task name
+
+2. note:
+   - product names
+   - model names
+   - colors
+   - codes
+   - materials
+   - manufacturers
+   - article numbers
+   - material specifications
+
+3. attentionNote:
+    - installation instructions
+    - requirements
+    - remarks
+    - special conditions
+    - warnings
+    - text placed under tasks
+    - project notes
+    - guarantees
+    - additional information
+
+Examples:
+
+Input:
+
+Montering av tak- samt nockpannor,
+Randers RT823. Naturröd.
+
+Output:
+
+{
+  "title":
+    "Montering av tak- samt nockpannor",
+
+  "note":
+    "Randers RT823 Naturröd",
+
+  "attentionNote":
+    ""
+}
 
 Ignore:
 
-- urls
-- company info
-- guarantees
-- legal text
+- URLs
 - contact information
-- notes
-
+- legal text
+- company presentations
+- company marketing text
+`/*
 Return:
 
 {
@@ -56,7 +115,7 @@ Return:
     "task2"
   ]
 }
-`,
+`,*/
             },
             {
               role: 'user',
@@ -82,9 +141,26 @@ Return:
         return []
       }
 
-      return parsed.tasks
-        .map((x: string) => x.trim())
-        .filter(Boolean)
+      //return parsed.tasks
+        //.map((x: string) => x.trim())
+        //.filter(Boolean)
+        return parsed.tasks
+        .filter(
+            (task: any) =>
+            task?.title,
+        )
+        .map(
+            (task: any) => ({
+            title:
+                task.title?.trim() || '',
+
+            note:
+                task.note?.trim() || '',
+
+            attentionNote:
+                task.attentionNote?.trim() || '',
+            }),
+        )
 
     } catch (error) {
 

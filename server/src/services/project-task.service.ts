@@ -7,6 +7,9 @@ import { CreateProjectTaskDto } from '../types/project/create-project-task.dto';
 import { UpdateProjectTaskDto } from '../types/project/update-project-task.dto';
 import { OcrService } from './OCR.sevice';
 import { TaskExtractionService } from './task-extraction.service';
+import pdfParse from 'pdf-parse'
+//import * as pdfParse from 'pdf-parse'
+import { ExtractedTask } from '../types/project/extractedTask.dto';
 
 @Injectable()
 export class ProjectTaskService {
@@ -55,10 +58,19 @@ export class ProjectTaskService {
     'image/jpeg',
     'image/png',
     'image/webp',
+    'application/pdf',
   ]
 
-  const allTasks: string[] = []
+  //const allTasks: string[] = []
 
+
+const allTasks: ExtractedTask[] = []
+  /*const allTasks: {
+    title: string
+    note: string
+    attentionNote: string
+    }[] = []*/
+     let fullText = ''
   for (const file of files) {
 
     if (
@@ -71,29 +83,67 @@ export class ProjectTaskService {
       )
     }
 
-    const text =
-      await this.ocrService.recognize(
+    let text = ''
+    if (file.mimetype === 'application/pdf') {
+
+    const pdf = await pdfParse(file.buffer)
+
+    if (pdf.text.trim()) {
+        text = pdf.text
+    } else {
+        text =
+        await this.ocrService.recognizePdf(
         file.buffer,
-      )
-      console.log(text, 'extracted text')
+        )
+    }
+
+    } else {
+
+    text =
+        await this.ocrService.recognize(
+        file.buffer,
+        )
+    }
+    fullText += '\n' + text
+    }
+    const MAX_TEXT_LENGTH = 100000
+
+    if (
+    fullText.length >
+    MAX_TEXT_LENGTH
+    ) {
+    fullText =
+        fullText.slice(
+        0,
+        MAX_TEXT_LENGTH,
+        )
+    }
     const tasks =
       await this.taskExtractionService.extractTasks(
-        text,
+        fullText, //text,
       )
       //console.log(tasks, 'extracted tasks')
       if (
-        !Array.isArray(tasks)
-        ) {
-        continue
-        }
-    allTasks.push(
-      ...tasks,
-    )
-  }
+        Array.isArray(tasks)
+        ) { allTasks.push(...tasks)}
+  
+
+  //const uniqueTasks = [...new Set(allTasks)]
 
   const uniqueTasks =
-    [...new Set(allTasks)]
-
+  allTasks.filter(
+    (task, index, array) =>
+      index ===
+      array.findIndex(
+        x =>
+          x.title
+            .trim()
+            .toLowerCase() ===
+          task.title
+            .trim()
+            .toLowerCase(),
+      ),
+  )
   const existing =
     await this.repo.find({
       where: {
@@ -117,7 +167,7 @@ export class ProjectTaskService {
     uniqueTasks.filter(
       task =>
         !existingTitles.has(
-          task
+          task.title
             .trim()
             .toLowerCase(),
         ),
@@ -133,11 +183,11 @@ export class ProjectTaskService {
 
   const entities =
     newTasks.map(
-      title =>
+      task =>
         this.repo.create({
-          title,
-          attentionNote: null,
-          note: null,
+          title: task.title,
+          attentionNote: task.attentionNote || null,
+          note: task.note || null,
 
           project: {
             id: projectId,
