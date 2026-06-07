@@ -90,7 +90,7 @@ export class ProjectTaskController {
     }
 
   @UseGuards(AdminGuard)
-  @Patch(':taskId')
+  @Patch('/tasks/:taskId')
     updateTaskData(
     @Param('taskId') taskId: string,
     @Body() dto: UpdateProjectTaskDto,

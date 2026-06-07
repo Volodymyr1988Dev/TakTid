@@ -4,4 +4,7 @@ export interface ProjectTask {
   done: boolean
   completedByName: string | null
   completedAt: string | null
+  comment: string | null
+  note: string | null
+  attentionNote: string | null
 }

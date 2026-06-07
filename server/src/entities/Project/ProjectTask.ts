@@ -39,6 +39,18 @@ export class ProjectTask {
   })
   photoUrls!: string[] | null
 
+  @Column({
+    nullable: true,
+    type: 'text',
+  })
+  note!: string | null
+
+  @Column({
+    nullable: true,
+    type: 'text',
+  })
+  attentionNote!: string | null
+
   @ManyToOne(() => Projects, project => project.tasks, {
     onDelete: 'CASCADE'
   })

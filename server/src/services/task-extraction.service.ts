@@ -1,125 +1,96 @@
-import { Injectable } from '@nestjs/common'
+import {
+  Injectable,
+  Logger,
+} from '@nestjs/common'
+
+import OpenAI from 'openai'
 
 @Injectable()
 export class TaskExtractionService {
 
-  extractTasks(
+  private readonly logger =
+    new Logger(TaskExtractionService.name)
+
+  private readonly openai =
+    new OpenAI({
+      apiKey:
+        process.env.OPENAI_API_KEY,
+    })
+
+  async extractTasks(
     text: string,
-  ): string[] {
+  ): Promise<string[]> {
 
-    const cleaned =
-      text
+    try {
 
-        .replace(
-          /https?:\/\/\S+/gi,
-          '',
-        )
+      const response =
+        await this.openai.chat.completions.create({
+          model: 'gpt-4.1-mini',
 
-        .replace(
-          /www\.\S+/gi,
-          '',
-        )
+          temperature: 0,
 
-        .replace(
-          /\r/g,
-          '',
-        )
+          response_format: {
+            type: 'json_object',
+          },
 
-        .replace(
-          /\t/g,
-          ' ',
-        )
-        /*
-        .replace(
-          /\s+/g,
-          ' ',
-        )
-        */
-    const lines =
-      cleaned
-        .split('\n')
-        .map(x => x.trim())
-        .filter(Boolean)
+          messages: [
+            {
+              role: 'system',
+              content: `
+Extract ONLY construction tasks.
 
-    const tasks: string[] = []
+Ignore:
 
-    let current = ''
+- urls
+- company info
+- guarantees
+- legal text
+- contact information
+- notes
 
-    for (const line of lines) {
+Return:
 
-      const startsTask =
+{
+  "tasks": [
+    "task1",
+    "task2"
+  ]
+}
+`,
+            },
+            {
+              role: 'user',
+              content: text,
+            },
+          ],
+        })
 
-        /^[\(\[]?[Oo0●○•]/.test(line)
+      const content =
+        response.choices[0].message.content
 
-        ||
-
-        /^[-•]/.test(line)
-
-      if (startsTask) {
-
-        if (
-          current.length > 20
-        ) {
-          tasks.push(
-            current.trim(),
-          )
-        }
-
-        current =
-          line
-            .replace(
-              /^[^A-Za-zÅÄÖåäö]+/,
-              '',
-            )
-            .trim()
-
-        continue
+      if (!content) {
+        return []
       }
 
-      current += ` ${line}`
+      const parsed =
+        JSON.parse(content)
+
+      if (
+        !parsed.tasks ||
+        !Array.isArray(parsed.tasks)
+      ) {
+        return []
+      }
+
+      return parsed.tasks
+        .map((x: string) => x.trim())
+        .filter(Boolean)
+
+    } catch (error) {
+
+      this.logger.error(error)
+
+      return []
     }
-
-    if (
-      current.length > 20
-    ) {
-      tasks.push(
-        current.trim(),
-      )
-    }
-
-    return tasks
-
-      .map(task =>
-        task
-          .replace(/\s+/g, ' ')
-
-          .trim(),
-      )
-
-      .filter(
-        task =>
-          task.length > 15,
-      )
-
-      .filter(
-        task =>
-          !task.includes(
-            'garanti',
-          ),
-      )
-
-      .filter(
-        task =>
-          !task.includes(
-            'www',
-          ),
-      )
-
-      .filter(
-        task =>
-          !task.includes(
-            'Övriga överenskommelser',
-          ),
-      )
   }
 }
