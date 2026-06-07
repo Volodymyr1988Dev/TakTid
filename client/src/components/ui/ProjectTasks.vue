@@ -107,7 +107,7 @@ async function deleteTask(taskId: string) {
 <input
   ref="fileInput"
   type="file"
-  accept="image/*"
+  accept="image/*,.pdf,application/pdf"
   multiple
   hidden
   @change="onFileSelected"
@@ -143,13 +143,13 @@ async function deleteTask(taskId: string) {
         <textarea
           v-model="editingNote"
           class="edit-textarea"
-          placeholder="Note"
+          placeholder="Materials, colors, models"
         />
 
         <textarea
           v-model="editingAttentionNote"
           class="edit-textarea attention"
-          placeholder="Attention note"
+          placeholder="Warnings, guarantees, remarks"
         />
 
         <div class="edit-actions">
