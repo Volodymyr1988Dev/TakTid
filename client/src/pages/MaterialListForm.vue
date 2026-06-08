@@ -17,6 +17,7 @@ const items = reactive([
   { label: 'rännvinkel inner', value: '' },
   { label: 'omvik (omvikningskupa)', value: '' },
   { label: 'stuprör 2.5m', value: '' },
+  { label: 'stuprör 3m', value: '' },
   { label: 'stuprör 4m', value: '' },
   { label: 'stuprör 6m', value: '' },
   { label: 'stuprörssvep', value: '' },
@@ -28,6 +29,9 @@ const items = reactive([
   { label: 'ytterpanelbräda (vindskivor trä) 22x170 4.2m', value: '' },
   { label: 'ytterpanelbräda (vindskivor trä) 22x170 5.4m', value: '' },
   { label: 'ytterpanelbräda (vindskivor trä)', value: '' },
+  { label: 'ytterpanelbräda (vindskivor trä) 22x195 4.8m', value: '' },
+  { label: 'ytterpanelbräda (vindskivor trä) 22x195 5.4m', value: '' },
+  { label: 'ytterpanelbräda (vindskivor trä) 22x195 3.6m', value: '' },
   { label: 'ytterpanelbräda (vindskivor trä) 22x170 22x120 22x195 22x145', value: '' },
   { label: 'vindskiveplåt', value: '' },
   { label: 'bärläktsteg', value: '' },
@@ -43,6 +47,8 @@ const items = reactive([
   { label: 'nails for pistol', value: '' },
   { label: 'screws 55mm', value: '' },
   { label: '33mm plåt skruv', value: '' },
+  { label: '42mm skruv', value: '' },
+  { label: '30mm trä skruv', value: '' },
   { label: 'skruv 120mm', value: '' },
   { label: 'skruv 75+80mm', value: '' },
   { label: 'vindskruva', value: '' },
@@ -57,6 +63,7 @@ const items = reactive([
   { label: 'regel', value: '' },
   { label: 'trash bags', value: '' },
   { label: 'paint', value: '' },
+  { label: 'tejp', value: '' },
 ])
 
 const other = ref('')
