@@ -79,7 +79,7 @@ export class ProjectsService {
     }))
 
     return [...mappedTime, ...mappedExtra].sort(
-      (a, b) => a.date.localeCompare(b.date)
+      (a, b) => b.date.localeCompare(a.date)
     )
   }
 
