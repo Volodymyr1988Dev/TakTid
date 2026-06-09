@@ -43,13 +43,13 @@ export class ProjectsService {
     const timeEntries = await this.timeRepo.find({
       where: { project: { id: projectId } },
       relations: ['user'],
-      order: { date: 'ASC' },
+      order: { date: 'DESC' },
     })
 
     const extraEntries = await this.assignmentRepo.find({
       where: { project: { id: projectId } },
       relations: ['user'],
-      order: { date: 'ASC' },
+      order: { date: 'DESC' },
     })
 
     const mappedTime = timeEntries.map(e => ({
@@ -79,7 +79,7 @@ export class ProjectsService {
     }))
 
     return [...mappedTime, ...mappedExtra].sort(
-      (a, b) => a.date.localeCompare(b.date)
+      (a, b) => b.date.localeCompare(a.date)
     )
   }
 
