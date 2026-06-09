@@ -86,3 +86,9 @@ async function bootstrap() {
   //  📚 Swagger: http://localhost:${process.env.PORT ?? 8080}/api-docs`);
 }
 void bootstrap();
+/* Dockerfile dependencies installation
+RUN apt-get update && apt-get install -y \
+    graphicsmagick \
+    ghostscript \
+    && rm -rf /var/lib/apt/lists/*
+*/

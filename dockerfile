@@ -1,7 +1,7 @@
 # -----------------------------
 # 1️⃣ CLIENT BUILD
 # -----------------------------
-FROM node:20-alpine AS client-build
+FROM node:20-bookworm-slim AS client-build
 
 WORKDIR /app/client
 
@@ -15,7 +15,7 @@ RUN npm run build
 # -----------------------------
 # 2️⃣ SERVER BUILD
 # -----------------------------
-FROM node:20-alpine AS server-build
+FROM node:20-bookworm-slim AS server-build
 
 WORKDIR /app/server
 
@@ -29,7 +29,7 @@ RUN npm run build
 # -----------------------------
 # 3️⃣ PRODUCTION IMAGE
 # -----------------------------
-FROM node:20-alpine
+FROM node:20-bookworm-slim
 
 WORKDIR /app
 

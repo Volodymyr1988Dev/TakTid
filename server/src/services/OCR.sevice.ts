@@ -10,7 +10,7 @@ import {
   Worker,
   PSM,
 } from 'tesseract.js'
-import { fromBuffer } from 'pdf2pic'
+//import { fromBuffer } from 'pdf2pic'
 import sharp from 'sharp'
 import * as fs from 'fs/promises'
 
@@ -24,12 +24,13 @@ export class OcrService
   private worker!: Worker
 
   async onModuleInit() {
-
+    this.logger.log(
+      'Initializing OCR worker...',
+    )
     this.worker =
       await createWorker(
         'swe+eng',
       )
-
     await this.worker.setParameters({
       tessedit_pageseg_mode: PSM.AUTO,
     })
@@ -48,7 +49,7 @@ export class OcrService
   async recognizePdf(
     buffer: Buffer,
   ): Promise<string> {
-
+    /*
     const convert =
       fromBuffer(
         buffer,
@@ -112,6 +113,8 @@ export class OcrService
     }
 
     return fullText
+    */
+      return 'PDF OCR not implemented yet'
   }
   async recognize(
     buffer: Buffer,
