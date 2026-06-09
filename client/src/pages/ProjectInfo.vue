@@ -534,7 +534,7 @@ const extraHoursPrice = computed(
             </div>
           </div>
 
-          <div class="metric-card">
+          <div class="metric-card extra-income">
             <div class="metric-title">
               {{ t('project.extraHoursIncome') }}
             </div>
@@ -544,7 +544,7 @@ const extraHoursPrice = computed(
             </div>
           </div>
 
-          <div class="metric-card">
+          <div class="metric-card workers-cost">
             <div class="metric-title">
               {{ t('project.workersCost') }}
             </div>
@@ -554,7 +554,9 @@ const extraHoursPrice = computed(
             </div>
           </div>
 
-          <div class="metric-card">
+          <div class="metric-card profit-card"
+            :class="profit >= 0 ? 'profit-positive' : 'profit-negative'"
+          >
             <div class="metric-title">
               {{ t('project.profit') }}
             </div>
@@ -1145,10 +1147,27 @@ const extraHoursPrice = computed(
   background: rgb(107, 12, 240);
   transform: translateY(-1px);
 }
+.profit-positive {
+  border: 2px solid #16a34a;
+  background: #f0fdf4;
+}
+
+.profit-negative {
+  border: 2px solid #dc2626;
+  background: #fef2f2;
+}
+
+.profit-positive .metric-value {
+  color: #16a34a;
+}
+
+.profit-negative .metric-value {
+  color: #dc2626;
+}
 .summary-item.active {
   background: #2563eb;
   /*color: white;*/
-  color: #2563eb;
+  color: white;
   border-color: #2563eb;
   transform: scale(0.97);
 }
@@ -1199,6 +1218,26 @@ const extraHoursPrice = computed(
   font-weight: 700;
   color: #111827;
 }
+.workers-cost {
+  background: #fafafa;
+  border: 1px solid #f1f5f9;
+  box-shadow: none;
+}
+
+.workers-cost .metric-value {
+  color: #dc2626;
+  font-size: 24px;
+}
+.extra-income {
+  background: #f8fff9;
+  border: 1px solid #dcfce7;
+  box-shadow: none;
+}
+
+.extra-income .metric-value {
+  color: #16a34a;
+  font-size: 24px;
+}
 .project-small-info {
   margin-top: 12px;
   font-size: 12px;
@@ -1227,16 +1266,23 @@ const extraHoursPrice = computed(
 .salary-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 
-  margin-top: 8px;
+  margin-top: 10px;
 
-  font-size: 12px;
+  font-size: 13px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+}
+.salary-info span:first-child {
+  color: #0f172a;
+  font-weight: 600;
 }
 
 .tax {
-  color: #dc2626;
-  font-weight: 600;
+  color: #ef4444;
+  font-weight: 500;
+  opacity: 0.85;
 }
 @media (max-width: 640px) {
 
