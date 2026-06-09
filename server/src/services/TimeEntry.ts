@@ -152,7 +152,7 @@ export class TimeEntryService {
       .leftJoinAndSelect('t.project', 'project')
       .where('user.id = :userId', { userId })
       .andWhere('t.date BETWEEN :from AND :to', { from, to })
-      .orderBy('t.date', 'ASC')
+      .orderBy('t.date', 'DESC')
       .getMany();
   }
 

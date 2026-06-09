@@ -130,7 +130,7 @@ export class ProjectAssignmentService {
       },
       relations: ['project'],
       order: {
-        date: 'ASC',
+        date: 'DESC', //'ASC',
       },
     });
   }
