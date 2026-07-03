@@ -1080,9 +1080,10 @@ const extraHoursPrice = computed(
 }
 
 .detail-row {
-  display: grid;
-  grid-template-columns: 90px 1fr 70px;
-  gap: 10px;
+  /*display: grid;
+  grid-template-columns: 90px 1fr 70px;*/
+  display: flex;
+  gap: 15px;
   padding: 8px 0;
   border-bottom: 1px solid #eee;
 }
