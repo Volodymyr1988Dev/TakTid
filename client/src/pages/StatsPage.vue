@@ -589,7 +589,7 @@ onMounted(load)
 }
 
 .date-controls {
-  /*display: flex;*/
+  display: flex;
   gap: 20px;
   align-items: flex-end;
 
@@ -694,6 +694,11 @@ button:active {
 }
 
 @media (max-width: 768px) {
+  .date-controls{
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
   .calendar-grid {
     grid-template-columns: repeat(3, 1fr);
   }
