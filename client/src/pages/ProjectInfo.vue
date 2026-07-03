@@ -661,7 +661,7 @@ const extraHoursPrice = computed(
           ]" 
         >
         <!--:class="{ active: showDetails === 'work', disabled: !isAdmin }"-->
-          🛠{{ t('stats.work') }} <strong>{{ totalWork }}h</strong>
+          🛠 {{ t('stats.work') }} <strong>{{ totalWork }}h</strong>
         </div>
 
         <div 
@@ -672,7 +672,7 @@ const extraHoursPrice = computed(
             { active: showDetails === 'extra', clickable: isAdmin }
           ]"
         >
-          💼{{ t('stats.extra') }} <strong>{{ totalExtra }}h</strong>
+          💼 {{ t('stats.extra') }} <strong>{{ totalExtra }}h</strong>
         </div>
         <!--:class="{ active: showDetails === 'extra', disabled: !isAdmin }"-->
 
@@ -684,7 +684,7 @@ const extraHoursPrice = computed(
             { active: showDetails === 'total', clickable: isAdmin }
           ]"
         >
-          {{ t('stats.total') }} <strong>{{ totalAll }}h</strong>
+        ⏱ {{ t('stats.total') }} <strong>{{ totalAll }}h</strong>
         </div>
         <!--:class="{ active: showDetails === 'total', disabled: !isAdmin }"-->
       </div>
@@ -713,12 +713,13 @@ const extraHoursPrice = computed(
             <div class="email">{{ entry.user?.email }}</div>
           </div>
           </div>
-          <div class="detail-hours">{{ entry.hours }}h</div>
+          
           
 
           <div v-if="entry.comment" class="detail-comment">
             {{ entry.comment }}
           </div>
+          <div class="detail-hours">{{ entry.hours }}h</div>
         </div>
         </div>
         <!-- ADMIN VIEW
