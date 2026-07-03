@@ -1,15 +1,22 @@
 .week-row {
-  display: flex;
-  gap: 8px;
+  /*display: flex;
+  gap: 8px;*/
+
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:4px;
+  width:100%;
 }
 
 .week-day {
   flex: 1;
   background: white;
   border-radius: 16px;
-  padding: 12px;
+  padding: 6px /*12px*/;
   text-align: center;
   cursor: pointer;
+
+  min-width: 0;
 }
 
 .week-day:hover {
@@ -17,7 +24,7 @@
 }
 
 .weekday {
-  font-size: 12px;
+  font-size: 10px /*12px*/;
   color: #777;
 }
 .week-day.today {
@@ -29,13 +36,15 @@
   font-weight: 600;
 }
 .date {
-  font-size: 18px;
+  font-size: 15px /*18px*/;
   font-weight: 600;
 }
 
 .hours {
   margin-top: 6px;
   font-weight: 500;
+
+  font-size:11px;
 }
 .fade-slide-enter-active,
 .fade-slide-leave-active {
