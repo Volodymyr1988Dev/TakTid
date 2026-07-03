@@ -588,6 +588,8 @@ onMounted(load)
   display: flex;
   gap: 20px;
   align-items: flex-end;
+
+  box-sizing:border-box;
 }
 .header:hover {
   background: #1d4ed8;
