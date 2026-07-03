@@ -522,7 +522,10 @@ onMounted(load)
 </template>
 
 <style scoped>
-.stats-page { padding:24px; max-width:1200px; margin:auto; }
+.stats-page { padding:24px; /*max-width:1200px;*/ margin:auto; width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+    box-sizing:border-box; }
 .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
 .calendar-cell { border:1px solid #eee; border-radius:8px; padding:6px; min-height:90px; cursor:pointer; }
 .day-number { font-weight:bold; margin-bottom:4px; }
