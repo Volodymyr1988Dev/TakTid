@@ -697,29 +697,44 @@ const extraHoursPrice = computed(
           :key="entry.id"
           class="detail-row"
         >
-          <div class="detail-type">
-            <span
-              class="type-badge"
-              :class="detailBadge(entry.type).class"
-            >
-              {{ detailBadge(entry.type).icon }}
-              {{ detailBadge(entry.type).text }}
-            </span>
-          </div>
-          <div class="detail-date">{{ entry.date }}</div>
-          <div class="detail-user">
-            <div class="user-info">
-            <div class="name">{{ entry.user?.name }}</div>
-            <div class="email">{{ entry.user?.email }}</div>
-          </div>
-          </div>
-          
-          
+          <div class="detail-top">
 
-          <div v-if="entry.comment" class="detail-comment">
-            {{ entry.comment }}
+              <span
+                  class="type-badge"
+                  :class="detailBadge(entry.type).class"
+              >
+                  {{ detailBadge(entry.type).icon }}
+                  {{ detailBadge(entry.type).text }}
+              </span>
+
+              <span class="detail-date">
+                  {{ entry.date }}
+              </span>
+
+              <span class="detail-hours">
+                  {{ entry.hours }}h
+              </span>
+
           </div>
-          <div class="detail-hours">{{ entry.hours }}h</div>
+
+          <div class="user-info">
+
+              <div class="name">
+                  {{ entry.user?.name }}
+              </div>
+
+              <div class="email">
+                  {{ entry.user?.email }}
+              </div>
+
+          </div>
+
+          <div
+              v-if="entry.comment"
+              class="detail-comment"
+          >
+              {{ entry.comment }}
+          </div>
         </div>
         </div>
         <!-- ADMIN VIEW
@@ -1101,9 +1116,12 @@ const extraHoursPrice = computed(
 }
 
 .detail-comment {
-  /*grid-column: span 3;*/
+  /*grid-column: span 3;
    grid-column:1/-1;
-  margin-top:4px;
+  margin-top:4px;*/
+
+  margin-top:8px;
+  word-break:break-word;
 
   font-size: 13px;
   color: #666;
@@ -1187,9 +1205,11 @@ const extraHoursPrice = computed(
   transform: scale(0.97);
 }
 .user-info {
+  margin-top:8px;
+  /*
   display: flex;
   flex-direction: column;
-  min-width:0;
+  min-width:0;*/
 }
 .email,
 .name{
@@ -1312,7 +1332,6 @@ const extraHoursPrice = computed(
 }
 .detail-hours{
     justify-self:end;
-    font-weight:700;
     white-space:nowrap;
 }
 .type-badge {
@@ -1343,6 +1362,14 @@ const extraHoursPrice = computed(
   background: #94a3b8;
   color: white;
 }
+.detail-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
 @media (max-width:768px){
 
 .detail-row{
@@ -1375,12 +1402,13 @@ const extraHoursPrice = computed(
 }
 
 .detail-hours{
-
+/*
     text-align:right;
 
     font-size:18px;
 
-    font-weight:700;
+    font-weight:700;*/
+    align-self:flex-end;
 }
 
 .detail-date{
@@ -1450,6 +1478,10 @@ const extraHoursPrice = computed(
 
     gap:6px;
 }
+.detail-top{
+        flex-direction:column;
+        align-items:flex-start;
+    }
 
 }
 @media (max-width: 640px) {
