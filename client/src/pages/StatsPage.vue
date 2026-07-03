@@ -590,11 +590,19 @@ onMounted(load)
 
 .date-controls {
   display: flex;
-  gap: 20px;
-  align-items: flex-end;
+  gap: 8px;
 
-  box-sizing:border-box;
+  /*align-items: flex-end;
+
+  box-sizing:border-box;*/
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.date-controls::-webkit-scrollbar {
+    display: none;
+}
+
 .header:hover {
   background: #1d4ed8;
 }
@@ -691,6 +699,15 @@ button:hover {
 
 button:active {
   transform: scale(0.97);
+}
+
+.actions {
+    display:flex;
+    gap:8px;
+}
+
+.actions button{
+    flex:1;
 }
 
 @media (max-width: 768px) {
