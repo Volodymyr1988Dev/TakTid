@@ -184,10 +184,14 @@ onMounted(() => {
 }
 
 .row {
-  display: flex;
+  /*display: flex;
   justify-content: space-between;
+  gap: 1px;*/
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 90px;
+  gap:8px;
   align-items: center;
-  gap: 1px;
+  border-bottom:1px dashed #ddd;
 }
 
 .label {
@@ -195,7 +199,12 @@ onMounted(() => {
   flex: 1;
   font-size: 14px;
   color: #333;
-  padding: 1px 6px /*6px 0*/;
+  padding: 1px 6px; 
+  
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  /*6px 0*/;
 /*
   border-radius: 8px;
   border: 1px solid #ccc;
