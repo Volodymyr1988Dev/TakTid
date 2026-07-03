@@ -661,7 +661,7 @@ const extraHoursPrice = computed(
           ]" 
         >
         <!--:class="{ active: showDetails === 'work', disabled: !isAdmin }"-->
-          {{ t('stats.work') }} <strong>{{ totalWork }}h</strong>
+          🛠{{ t('stats.work') }} <strong>{{ totalWork }}h</strong>
         </div>
 
         <div 
@@ -672,7 +672,7 @@ const extraHoursPrice = computed(
             { active: showDetails === 'extra', clickable: isAdmin }
           ]"
         >
-          {{ t('stats.extra') }} <strong>{{ totalExtra }}h</strong>
+          💼{{ t('stats.extra') }} <strong>{{ totalExtra }}h</strong>
         </div>
         <!--:class="{ active: showDetails === 'extra', disabled: !isAdmin }"-->
 
@@ -697,16 +697,6 @@ const extraHoursPrice = computed(
           :key="entry.id"
           class="detail-row"
         >
-          <div class="detail-date">{{ entry.date }}</div>
-          <div class="detail-user">
-            <div class="user-info">
-            <div class="name">{{ entry.user?.name }}</div>
-            <div class="email">{{ entry.user?.email }}</div>
-          </div>
-          </div>
-          <!-- 
-          <div class="detail-hours">{{ entry.hours }}h</div>
-          -->
           <div class="detail-type">
             <span
               class="type-badge"
@@ -715,11 +705,16 @@ const extraHoursPrice = computed(
               {{ detailBadge(entry.type).icon }}
               {{ detailBadge(entry.type).text }}
             </span>
-
-            <span class="hours">
-              {{ entry.hours }}h
-            </span>
           </div>
+          <div class="detail-date">{{ entry.date }}</div>
+          <div class="detail-user">
+            <div class="user-info">
+            <div class="name">{{ entry.user?.name }}</div>
+            <div class="email">{{ entry.user?.email }}</div>
+          </div>
+          </div>
+          <div class="detail-hours">{{ entry.hours }}h</div>
+          
 
           <div v-if="entry.comment" class="detail-comment">
             {{ entry.comment }}
