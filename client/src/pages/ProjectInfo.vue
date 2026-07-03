@@ -1082,15 +1082,29 @@ const extraHoursPrice = computed(
 
 .detail-row {
   /*display: grid;
-  grid-template-columns: 90px 1fr 70px;*/
+  grid-template-columns: 90px 1fr 70px;
   display: flex;
   gap: 15px;
   padding: 8px 0;
+  border-bottom: 1px solid #eee;*/
+  display: grid;
+  grid-template-columns:
+      110px
+      110px
+      minmax(180px,1fr)
+      80px;
+  gap: 12px;
+  align-items: center;
+
+  padding: 12px 0;
   border-bottom: 1px solid #eee;
 }
 
 .detail-comment {
-  grid-column: span 3;
+  /*grid-column: span 3;*/
+   grid-column:1/-1;
+  margin-top:4px;
+
   font-size: 13px;
   color: #666;
 }
@@ -1175,6 +1189,11 @@ const extraHoursPrice = computed(
 .user-info {
   display: flex;
   flex-direction: column;
+  min-width:0;
+}
+.email,
+.name{
+    overflow-wrap:anywhere;
 }
 
 .project-metrics {
@@ -1291,7 +1310,11 @@ const extraHoursPrice = computed(
   align-items: center;
   gap: 12px;
 }
-
+.detail-hours{
+    justify-self:end;
+    font-weight:700;
+    white-space:nowrap;
+}
 .type-badge {
   display: inline-flex;
   align-items: center;
@@ -1319,6 +1342,115 @@ const extraHoursPrice = computed(
 .badge-default {
   background: #94a3b8;
   color: white;
+}
+@media (max-width:768px){
+
+.detail-row{
+
+    display:flex;
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    gap:8px;
+
+    padding:14px;
+
+    margin-bottom:12px;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:12px;
+
+    background:white;
+}
+
+.detail-type,
+.detail-date,
+.detail-user,
+.detail-hours,
+.detail-comment{
+
+    width:100%;
+}
+
+.detail-hours{
+
+    text-align:right;
+
+    font-size:18px;
+
+    font-weight:700;
+}
+
+.detail-date{
+
+    color:#64748b;
+}
+
+.user-info{
+
+    width:100%;
+}
+
+.email{
+
+    word-break:break-word;
+}
+.summary{
+
+    grid-template-columns:1fr;
+}
+
+.summary-item{
+
+    width:100%;
+
+    text-align:center;
+}
+.hours{
+
+    display:grid;
+
+    gap:12px;
+}
+
+.hours-breakdown{
+
+    display:grid;
+
+    grid-template-columns:1fr;
+
+    gap:6px;
+}
+
+.details-btn{
+
+    width:100%;
+}
+.metrics-wrapper{
+
+    grid-template-columns:1fr;
+}
+
+.metric-card{
+
+    padding:16px;
+}
+
+.metric-value{
+
+    font-size:24px;
+}
+.project-small-info{
+
+    display:grid;
+
+    grid-template-columns:1fr;
+
+    gap:6px;
+}
+
 }
 @media (max-width: 640px) {
 
