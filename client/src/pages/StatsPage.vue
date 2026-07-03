@@ -381,38 +381,42 @@ onMounted(load)
   <div class="stats-page">
     <!--class controls-->
     <div class="date-controls">
-      <div class="input-group">
-        <label>{{ t('stats.year') }}</label>
-        <input
-          v-model.number="year"
-          type="number"
-          min="2025"
-          max="2100"
-        >
-      </div>
-
-      <div class="input-group">
-        <label>{{ t('stats.month') }}</label>
-        <select v-model.number="month">
-          <option 
-            v-for="m in 12" 
-            :key="m" 
-            :value="m"
+      <div class='date-group'>
+        <div class="input-group">
+          <label>{{ t('stats.year') }}</label>
+          <input
+            v-model.number="year"
+            type="number"
+            min="2025"
+            max="2100"
           >
-            {{ m }}
-          </option>
-        </select>
-      </div>
+        </div>
+
+        <div class="input-group">
+          <label>{{ t('stats.month') }}</label>
+          <select v-model.number="month">
+            <option 
+              v-for="m in 12" 
+              :key="m" 
+              :value="m"
+            >
+              {{ m }}
+            </option>
+          </select>
+        </div>
+      </div>  
     <!--Load-->
-      <button @click="load">
-        {{ t('stats.load') }}
-      </button>
-      <button @click="exportAllExcel">
-        {{ t('stats.exportExcel') }}
-      </button>
-      <button @click="exportAllPDF">
-        {{ t('stats.exportPDF') }}
-      </button>
+      <div class='button-group'>
+        <button @click="load">
+          {{ t('stats.load') }}
+        </button>
+        <button @click="exportAllExcel">
+          {{ t('stats.exportExcel') }}
+        </button>
+        <button @click="exportAllPDF">
+          {{ t('stats.exportPDF') }}
+        </button>
+      </div>  
     </div>
 
     <div 
@@ -585,7 +589,7 @@ onMounted(load)
 }
 
 .date-controls {
-  display: flex;
+  /*display: flex;*/
   gap: 20px;
   align-items: flex-end;
 
@@ -692,6 +696,14 @@ button:active {
 @media (max-width: 768px) {
   .calendar-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+  .date-group {
+    display: flex;
+    gap: 10px;
+  }
+  .button-group {
+    display: flex;
+    gap: 10px;
   }
 
   .calendar-cell {
