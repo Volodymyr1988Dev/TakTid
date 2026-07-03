@@ -364,10 +364,35 @@ watch(() => props.isAdmin, (isAdmin) => {
   }
 })
 
+function detailBadge(type: string) {
+  switch (type) {
+    case 'WORK':
+      return {
+        icon: '🛠',
+        text: t('stats.work'),
+        class: 'badge-work'
+      }
+
+    case 'EXTRA':
+      return {
+        icon: '💼',
+        text: t('stats.extra'),
+        class: 'badge-extra'
+      }
+
+    default:
+      return {
+        icon: '⏱',
+        text: type,
+        class: 'badge-default'
+      }
+  }
+}
 
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
 const totalAll = computed(() => totalWork.value + totalExtra.value)
+
 
 
 //const workerCost = workedHours * currentSalary * (1 + EMPLOYER_TAX)
@@ -389,34 +414,7 @@ const workersCost = computed(() => {
 
     return sum + fullCost
   }, 0)
-})/*
-const workersCost = computed(() => {
-  const users = stats.value?.users
-
-  if (!users?.length) return 0
-
-  return users.reduce((sum: number, worker) => {
-    const monthlySalary =
-      worker.currentSalary ?? 0
-
-    const workedHours =
-      worker.totalHours ?? 0
-
-    const hourlyRate =
-      monthlySalary / MONTH_HOURS
-
-    const totalCost =
-      hourlyRate *
-      workedHours *
-      EMPLOYER_MULTIPLIER
-
-    return sum + totalCost
-  }, 0)
-})*/
-/*
-const profit = computed(() => {
-  return totalProjectPrice.value - workersCost.value
-})*/
+})
 
 function getWorkerSalary(worker: any) {
   const hourlySalary =
@@ -459,16 +457,7 @@ async function savePrice() {
 
   editMode.value = null
 }
-//const area = Number(project.areaM2 || 0)
-//const price = Number(project.pricePerM2 || 0)
-/*
-const totalProjectPrice = computed(() => {
-  const projectArea = Number(area.value || 0)
-  const projectPrice = Number(price.value || 0)
 
-  return projectArea * projectPrice
-})
-*/
 const totalProjectPrice = computed(
   () => stats.value?.totalProjectPrice ?? 0
 )
@@ -715,7 +704,22 @@ const extraHoursPrice = computed(
             <div class="email">{{ entry.user?.email }}</div>
           </div>
           </div>
+          <!-- 
           <div class="detail-hours">{{ entry.hours }}h</div>
+          -->
+          <div class="detail-type">
+            <span
+              class="type-badge"
+              :class="detailBadge(entry.type).class"
+            >
+              {{ detailBadge(entry.type).icon }}
+              {{ detailBadge(entry.type).text }}
+            </span>
+
+            <span class="hours">
+              {{ entry.hours }}h
+            </span>
+          </div>
 
           <div v-if="entry.comment" class="detail-comment">
             {{ entry.comment }}
@@ -1283,6 +1287,41 @@ const extraHoursPrice = computed(
   color: #ef4444;
   font-weight: 500;
   opacity: 0.85;
+}
+
+.detail-type {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 5px 14px;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+.badge-work {
+  background: #2ecc71;
+  color: white;
+}
+
+.badge-extra {
+  background: #f1c40f;
+  color: black;
+}
+
+.badge-default {
+  background: #94a3b8;
+  color: white;
 }
 @media (max-width: 640px) {
 
