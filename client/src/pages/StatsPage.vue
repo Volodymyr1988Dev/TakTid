@@ -704,5 +704,14 @@ button:active {
   .calendar-grid {
     grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
   }
+  .stats-header{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  .stats-header button{
+      grid-column:span 2;
+  }
 }
 </style>
