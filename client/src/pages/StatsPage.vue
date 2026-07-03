@@ -703,13 +703,20 @@ button:active {
 
 .actions {
     display:flex;
-    gap:8px;
+    gap:20px;
 }
 
 .actions button{
     flex:1;
 }
-
+.date-group {
+    display: flex;
+    gap: 10px;
+  }
+.button-group {
+    display: flex;
+    gap: 10px;
+  }
 @media (max-width: 768px) {
   .date-controls{
     flex-direction: column;
@@ -718,10 +725,6 @@ button:active {
   }
   .calendar-grid {
     grid-template-columns: repeat(3, 1fr);
-  }
-  .date-group {
-    display: flex;
-    gap: 10px;
   }
   .button-group {
     display: flex;
