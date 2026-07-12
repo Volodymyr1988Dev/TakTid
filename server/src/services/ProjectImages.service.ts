@@ -29,25 +29,30 @@ export class ProjectImagesService {
   ): Promise<ProjectImage[]> {
     const project = await this.projectRepo.findOneBy({ id: projectId });
     if (!project) throw new NotFoundException();
-    if (!files || !files.length) {
+    if (!files || files.length === 0) {
       throw new BadRequestException('No files uploaded');
     }
     const limitUpload = pLimit(3);
     const uploads = files.map((file) =>
-      limitUpload(async () => {
-        const uploaded = await this.uploadToCloudinary(
-          file.buffer,
-          projectId,
-        );
-        /*
-        const image = this.imageRepo.create({
-          url: uploaded.secure_url,
-          publicId: uploaded.public_id,
-          project,
-        });
+        limitUpload(async () => {
+          const uploaded = await this.uploadToCloudinary(
+            file.buffer,
+            projectId,
+          );
 
-        return this.imageRepo.save(image);
-      }),*/
+          const image = this.imageRepo.create({
+            url: uploaded.secure_url,
+            publicId: uploaded.public_id,
+            project,
+          } as Partial<ProjectImage>);
+
+          return this.imageRepo.save(image);
+        }),
+      );
+
+      return Promise.all(uploads);
+    }
+      /*
       return this.imageRepo.save(
           this.imageRepo.create({
               url: uploaded.secure_url,
@@ -57,7 +62,7 @@ export class ProjectImagesService {
       );
     );
 
-    return Promise.all(uploads);
+    return Promise.all(uploads);*/
     /*
     const results: ProjectImage[] = [];
 
