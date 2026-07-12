@@ -11,6 +11,7 @@ import cloudinary from '../config/cloudinary.config';
 import { Readable } from 'stream';
 import { UploadApiResponse } from 'cloudinary';
 import { Express } from 'express';
+import pLimit from 'p-limit';
 
 @Injectable()
 export class ProjectImagesService {
@@ -31,6 +32,33 @@ export class ProjectImagesService {
     if (!files || !files.length) {
       throw new BadRequestException('No files uploaded');
     }
+    const limitUpload = pLimit(3);
+    const uploads = files.map((file) =>
+      limitUpload(async () => {
+        const uploaded = await this.uploadToCloudinary(
+          file.buffer,
+          projectId,
+        );
+        /*
+        const image = this.imageRepo.create({
+          url: uploaded.secure_url,
+          publicId: uploaded.public_id,
+          project,
+        });
+
+        return this.imageRepo.save(image);
+      }),*/
+      return this.imageRepo.save(
+          this.imageRepo.create({
+              url: uploaded.secure_url,
+              publicId: uploaded.public_id,
+              project,
+          }),
+      );
+    );
+
+    return Promise.all(uploads);
+    /*
     const results: ProjectImage[] = [];
 
     for (const file of files) {
@@ -50,6 +78,7 @@ export class ProjectImagesService {
 
     return results;
   }
+*/
 
   async getByProject(projectId: string, page: number, limit: number) {
     const [data, total] = await this.imageRepo.findAndCount({
