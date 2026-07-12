@@ -52,38 +52,6 @@ export class ProjectImagesService {
 
       return Promise.all(uploads);
     }
-      /*
-      return this.imageRepo.save(
-          this.imageRepo.create({
-              url: uploaded.secure_url,
-              publicId: uploaded.public_id,
-              project,
-          }),
-      );
-    );
-
-    return Promise.all(uploads);*/
-    /*
-    const results: ProjectImage[] = [];
-
-    for (const file of files) {
-      const uploaded: UploadApiResponse = await this.uploadToCloudinary(
-        file.buffer,
-        projectId,
-      );
-      const image = this.imageRepo.create({
-        url: uploaded.secure_url,
-        publicId: uploaded.public_id,
-        project,
-      } as Partial<ProjectImage>);
-
-      const saved = await this.imageRepo.save(image);
-      results.push(saved);
-    }
-
-    return results;
-  }
-*/
 
   async getByProject(projectId: string, page: number, limit: number) {
     const [data, total] = await this.imageRepo.findAndCount({
