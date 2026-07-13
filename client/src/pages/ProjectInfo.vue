@@ -465,6 +465,42 @@ const totalProjectPrice = computed(
 const extraHoursPrice = computed(
   () => stats.value?.extraHoursPrice ?? 0
 )
+const deletingImage = ref(false)
+
+async function deleteCurrentImage() {
+  if (!props.isAdmin) return
+
+  const current = imageStore.images[currentIndex.value]
+  if (!current) return
+
+  if (!confirm(t('project.confirmDeleteImage'))) {
+    return
+  }
+
+  deletingImage.value = true
+
+  try {
+    await imageStore.remove(current.id)
+
+    if (imageStore.images.length === 0) {
+      closeImage()
+      return
+    }
+
+    if (currentIndex.value >= imageStore.images.length) {
+      currentIndex.value = imageStore.images.length - 1
+    }
+
+    fullscreenImage.value =
+      imageStore.images[currentIndex.value]?.url ?? null
+
+    if (!fullscreenImage.value) {
+      closeImage()
+    }
+  } finally {
+    deletingImage.value = false
+  }
+}
 
 //const baseProjectPrice = computed( () => stats.value?.baseProjectPrice ?? 0 )
 </script>
@@ -900,6 +936,14 @@ const extraHoursPrice = computed(
               @click.stop="closeImage"
             >
               ✕
+            </button>
+            <button
+              v-if="isAdmin"
+              class="image-delete"
+              :disabled="deletingImage"
+              @click.stop="deleteCurrentImage"
+            >
+              🗑
             </button>
           </div>
           <div ref="sentinel" />
@@ -1368,6 +1412,48 @@ const extraHoursPrice = computed(
     align-items:center;
     gap:12px;
     flex-wrap:wrap;
+}
+.image-delete {
+  position: absolute;
+
+  top: 20px;
+  left: 20px;
+
+  width: 48px;
+  height: 48px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(220, 38, 38, 0.95);
+
+  color: white;
+
+  font-size: 22px;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: 0.2s;
+
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+
+.image-delete:hover {
+  background: #b91c1c;
+  transform: scale(1.08);
+}
+
+.image-delete:active {
+  transform: scale(.95);
+}
+
+.image-delete:disabled {
+  opacity: .5;
+  cursor: wait;
 }
 
 @media (max-width:768px){
