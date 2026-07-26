@@ -103,6 +103,7 @@ async function loadStats() {
 
   try {
     const { data } = await getProjectStats(props.projectId)
+    await receiptStore.getCount(props.projectId)
     stats.value = data
 
     area.value = data.project.areaM2 ?? null
@@ -129,22 +130,6 @@ async function saveExtraPrice() {
 
   editMode.value = null
 }
-watch(
-    () => props.projectId,
-    async (id) => {
-
-        if (!id)
-            return
-
-        receiptsLoaded.value = false
-
-        await loadReceipts()
-
-    },
-    {
-        immediate: true,
-    },
-)
 
 watch(() => [props.projectId, props.isAdmin], async ([id, isAdmin]) => {
   if (!id || isAdmin === undefined) return console.log(t('errors.missingProjectId'))
@@ -479,6 +464,7 @@ async function loadProjectDetails() {
 
   try {
     await projectStore.loadDetails(props.projectId)
+    await receiptStore.getCount(props.projectId)
   } finally {
     loadingDetails.value = false
   }
@@ -811,6 +797,23 @@ async function showReceipts() {
 
         showReceiptDialog.value = true
     }
+
+watch(
+    () => props.projectId,
+    async (id) => {
+
+        if (!id)
+            return
+
+        receiptsLoaded.value = false
+
+        await loadReceipts()
+
+    },
+    {
+        immediate: true,
+    },
+)    
 </script>
 
 <template>

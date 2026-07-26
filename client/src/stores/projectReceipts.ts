@@ -6,6 +6,7 @@ import {
   getProjectReceiptsPaginated,
   uploadProjectReceipts,
   removeProjectReceipt,
+  getProjectReceiptsCount,
 } from '../api/projectReceipts'
 
 import type { ProjectReceipt } from '../types/projectReceipts.type'
@@ -71,6 +72,14 @@ export const useProjectReceiptStore = defineStore(
       receipts.value.unshift(...data)
     }
 
+
+    async function getCount(projectId: string) {
+      const { data } = await getProjectReceiptsCount(
+        projectId,
+      )
+      return data.count
+    }
+
     async function remove(
       receiptId: string,
     ) {
@@ -91,6 +100,7 @@ export const useProjectReceiptStore = defineStore(
       loadPaginated,
       upload,
       remove,
+      getCount,
     }
   },
 )

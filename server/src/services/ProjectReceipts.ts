@@ -69,6 +69,14 @@ export class ProjectReceiptsService {
       lastPage: Math.ceil(total / limit),
     };
   }
+
+  async getCount(projectId: string) {
+    const count = await this.receiptRepo.count({
+      where: { project: { id: projectId } },
+    });
+    return { count };
+  }
+
   async removeByProject(projectId: string): Promise<void> {
     const receipts = await this.receiptRepo.find({
       where: { project: { id: projectId } },
