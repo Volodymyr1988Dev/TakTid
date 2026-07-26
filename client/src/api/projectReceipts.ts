@@ -49,3 +49,11 @@ export function removeProjectReceipt(
     `/project-receipts/${receiptId}`,
   )
 }
+
+export function getProjectReceiptsCount(
+  projectId: string,
+) {
+  return api.get<{ count: number }>(
+    `/project-receipts/project/${projectId}/count`,
+  );
+}

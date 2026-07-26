@@ -46,6 +46,10 @@ export class ProjectReceiptsController {
       Number(limit),
     );
   }
+  @Get('project/:projectId/count')
+  getCount(@Param('projectId') projectId: string) {
+    return this.receiptsService.getCount(projectId);
+  }
 
   @UseGuards(AdminGuard)
   @Delete(':receiptId')
