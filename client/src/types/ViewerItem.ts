@@ -3,4 +3,5 @@ export interface ViewerItem {
   url: string
   createdAt?: string
   //type: 'image' | 'receipt'
+  
 }
