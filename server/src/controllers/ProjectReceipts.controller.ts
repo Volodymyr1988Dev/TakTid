@@ -13,14 +13,12 @@ import { AdminGuard } from '../types/auth/admin.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { UploadedFiles } from '@nestjs/common/decorators/http/route-params.decorator';
 import { ProjectReceiptsService } from '../services/ProjectReceipts';
-import { AuthGuard } from '../types/auth/guard';
 
 @ApiTags('Project Receipts')
 @Controller('project-receipts')
 export class ProjectReceiptsController {
 
   constructor(private readonly receiptsService: ProjectReceiptsService) {}
-  @UseGuards(AuthGuard)
   @Post(':projectId')
   @UseInterceptors(
     FilesInterceptor('files', 10, {
