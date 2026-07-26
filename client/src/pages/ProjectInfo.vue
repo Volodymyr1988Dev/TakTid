@@ -12,29 +12,68 @@ import { cloudinary } from '../utils/cloudinary'
 //import { getProjectStats, getProjectSummary } from '../api/projectStats.api'
 import { getProjectStats } from '../api/projectStats.api'
 import { useProjectImageStore } from '../stores/projectImage.store'
+import { useProjectReceiptStore } from '../stores/projectReceipts'
 import { useStatsStore } from '../stores/stats.store'
 import AppLoader from '../components/ui/AppLoader.vue'
 import type { TimeEntry } from '../types/TimeEntry.type'
 import { useProjectStore } from '../stores/project.store'
 import { useI18n } from 'vue-i18n'
 import ProjectTasks from '../components/ui/ProjectTasks.vue'
+import type { ViewerItem } from '../types/ViewerItem'
 
 const { t } = useI18n()
 const projectStore = useProjectStore()
 const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 const emit = defineEmits<{ (e: 'back'): void }>()
 const imageStore = useProjectImageStore()
+const receiptStore = useProjectReceiptStore()
 const statsStore = useStatsStore()
 
 const showTasks = ref(false)
+
+//const viewerItems = ref<ProjectImage[] | ProjectReceipt[]>([]) 
+//const viewerOpen = ref(false)
+/*
 const fullscreenImage = ref<string | null>(null)
+const viewerItems = ref<ViewerItem[]>([])
+const viewerIndex = ref(0)
+const viewerType = ref<'images' | 'receipts'>('images')
+const currentIndex = ref(0)
+const receiptViewer = ref(false)
+const currentReceiptIndex = ref(0)
+*/
+
+const viewerOpen = ref(false)
+
+const viewerType = ref<'images' | 'receipts'>('images')
+
+const viewerItems = ref<ViewerItem[]>([])
+
+const viewerIndex = ref(0)
+
+const currentViewerItem = computed(() => {
+    return viewerItems.value[viewerIndex.value] ?? null
+})
+/*
+const currentImage = computed(() => {
+    const item = currentViewerItem.value
+
+    if (!item)
+        return null
+
+    return item.url
+})
+*/
 const stats = ref<ProjectStats | null>(null)
 const loading = ref(true)
 const loaded = ref(new Set<string>())
 const error = ref<string | null>(null)
-const currentIndex = ref(0)
+
 const extraPrice = ref<number | null>(null)
 
+const showReceiptMenu = ref(false)
+const showReceiptDialog = ref(false)
+const receiptInput = ref<HTMLInputElement>()  
 const editMode = ref<'area' | 'price' | 'extraPrice' | null>(null)
 
 const expandedUserId = ref<string | null>(null)
@@ -136,13 +175,30 @@ watch(showImages, async (val) => {
   await nextTick()
   observeSentinel()
 })
+/*
 watch(currentIndex, (i) => {
   const next = imageStore.images[i + 1]
   if (next) {
     const img = new Image()
     img.src = next.url
   }
-})
+})*/
+watch(
+    viewerIndex,
+    index=>{
+
+        const next=
+            viewerItems.value[index+1]
+
+        if(!next)
+            return
+
+        const img=new Image()
+
+        img.src=next.url
+
+    }
+)
 async function loadImages() {
   if (!hasMore.value || imageStore.loading) return
 
@@ -150,6 +206,12 @@ async function loadImages() {
     props.projectId,
     page.value,
     limit
+  )
+
+  await receiptStore.loadPaginated(
+      props.projectId,
+      1,
+      100,
   )
 
   if (res.page >= res.lastPage) {
@@ -177,25 +239,68 @@ onBeforeUnmount(() => {
   observer?.disconnect() 
   document.body.style = ''
 })
+
+function openViewer(
+    type:'images'|'receipts',
+    items:ViewerItem[],
+    index:number,
+){
+
+    viewerType.value=type
+
+    viewerItems.value=items
+
+    viewerIndex.value=index
+
+    viewerOpen.value=true
+
+    scrollY=window.scrollY
+
+    document.body.style.position='fixed'
+    document.body.style.top=`-${scrollY}px`
+    document.body.style.width='100%'
+
+}
+
 let scrollY = 0
 function openImage(url: string) {
   const index = imageStore.images.findIndex(i => i.url === url)
   if (index === -1) return
-
+  openViewer(
+        'images',
+        imageStore.images,
+        index,
+    )
+  /*
   currentIndex.value = index
   fullscreenImage.value = url
   scrollY = window.scrollY
   document.body.style.position = 'fixed'
   document.body.style.top = `-${scrollY}px`
-  document.body.style.width = '100%'
+  document.body.style.width = '100%'*/
 }
 
+function closeViewer(){
+
+      viewerOpen.value=false
+
+      document.body.style=''
+
+      window.scrollTo(
+          0,
+          scrollY,
+      )
+
+      resetTransform()
+
+  }
+/*
 function closeImage() {
   fullscreenImage.value = null
   document.body.style = ''
   window.scrollTo(0, scrollY)
   resetTransform()
-}
+}*/
 
 const scale = ref(1)
 const lastScale = ref(1)
@@ -287,13 +392,14 @@ function onTouchEnd(e: TouchEvent) {
   const dy = touch.clientY - startY
 
   if (Math.abs(dy) > Math.abs(dx) && dy > 80) {
-    closeImage()
+    //closeImage()
+    closeViewer()
   }
   if (Math.abs(velocityX) > 20) {
-    velocityX < 0 ? nextImage() : prevImage()
+    velocityX < 0 ? /*nextImage()*/ nextViewerItem() : /*prevImage()*/ prevViewerItem()
   }
-    if (dx < -50) nextImage()
-    if (dx > 50) prevImage()
+    if (dx < -50) /*nextImage()*/ nextViewerItem()
+    if (dx > 50) /*prevImage()*/ prevViewerItem()
   isSwiping = false
   isDragging = false
 }
@@ -304,15 +410,28 @@ function getDistance(touches: TouchList): number | undefined {
   const dy = touches[0].clientY - touches[1].clientY
   return Math.sqrt(dx * dx + dy * dy)
 }
-
+/*
 function nextImage() {
   const next = imageStore.images[currentIndex.value + 1]
   if (!next) return
   currentIndex.value++
   fullscreenImage.value = next.url
   resetTransform()
-}
+}*/
+function nextViewerItem(){
 
+    if(
+        viewerIndex.value>=
+        viewerItems.value.length-1
+    )
+        return
+
+    viewerIndex.value++
+
+    resetTransform()
+
+}
+/*
 function prevImage() {
  const prev = imageStore.images[currentIndex.value - 1]
   if (!prev) return
@@ -320,6 +439,18 @@ function prevImage() {
   currentIndex.value--
   fullscreenImage.value = prev.url
   resetTransform()
+}*/
+function prevViewerItem(){
+
+    if(
+        viewerIndex.value<=0
+    )
+        return
+
+    viewerIndex.value--
+
+    resetTransform()
+
 }
 /* ================= COMPUTED ================= */
 
@@ -465,8 +596,84 @@ const totalProjectPrice = computed(
 const extraHoursPrice = computed(
   () => stats.value?.extraHoursPrice ?? 0
 )
-const deletingImage = ref(false)
 
+const deletingImage = ref(false)
+async function deleteCurrentViewerItem() {
+
+    if (!props.isAdmin)
+        return
+
+    const current =
+        currentViewerItem.value
+
+    if (!current)
+        return
+
+    if (
+        !confirm(
+            t('project.confirmDeleteImage')
+        )
+    )
+        return
+
+    deletingImage.value = true
+
+    try {
+
+        if (
+            viewerType.value === 'images'
+        ) {
+
+            await imageStore.remove(
+                current.id
+            )
+
+            viewerItems.value =
+                imageStore.images
+
+        }
+
+        else {
+
+            await receiptStore.remove(
+                current.id
+            )
+
+            viewerItems.value =
+                receiptStore.receipts
+
+        }
+
+        if (
+            viewerItems.value.length === 0
+        ) {
+
+            closeViewer()
+
+            return
+
+        }
+
+        if (
+            viewerIndex.value >=
+            viewerItems.value.length
+        ) {
+
+            viewerIndex.value =
+                viewerItems.value.length - 1
+
+        }
+
+    }
+
+    finally {
+
+        deletingImage.value = false
+
+    }
+
+}
+/*
 async function deleteCurrentImage() {
   if (!props.isAdmin) return
 
@@ -483,7 +690,8 @@ async function deleteCurrentImage() {
     await imageStore.remove(current.id)
 
     if (imageStore.images.length === 0) {
-      closeImage()
+      //closeImage()
+      closeViewer()
       return
     }
 
@@ -501,7 +709,50 @@ async function deleteCurrentImage() {
     deletingImage.value = false
   }
 }
+*/
+async function onReceiptUpload(
+    e: Event,
+){
+    const files=(e.target as HTMLInputElement).files
 
+    if(!files?.length)return
+
+    await receiptStore.upload(
+        props.projectId,
+        [...files],
+    )
+}
+
+function openReceipt(index:number){
+
+openViewer(
+        'receipts',
+        receiptStore.receipts,
+        index,
+    )
+/*    
+viewerItems.value = receiptStore.receipts  
+//currentReceiptIndex.value=index
+currentIndex.value = index
+
+receiptViewer.value=true
+*/
+}
+/*
+async function deleteReceipt(){
+
+const receipt=
+receiptStore.receipts[
+currentReceiptIndex.value
+]
+
+if(!receipt)return
+
+if(!confirm('Delete receipt?')) return
+
+await receiptStore.remove( receipt.id )
+}
+*/
 //const baseProjectPrice = computed( () => stats.value?.baseProjectPrice ?? 0 )
 </script>
 
@@ -914,13 +1165,15 @@ async function deleteCurrentImage() {
               @click="openImage(img.url)"
             >
           </div>
+          <!-- v-if="fullscreenImage"  @click="closeImage" -->
           <div
-            v-if="fullscreenImage"
+            v-if="viewerOpen"
             class="image-modal"
-            @click="closeImage"
+            @click="closeViewer"
           >
+            <!-- :src="fullscreenImage" -->
             <img
-              :src="fullscreenImage"
+              :src="currentViewerItem?.url"
               class="image-modal-content"
               :style="{
                 transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`
@@ -930,18 +1183,19 @@ async function deleteCurrentImage() {
               @touchend="onTouchEnd"
               @touchmove="onTouchMove"
             >
-            <!--@click="onTap"  @touchmove="onTouchMove"-->
+            <!--@click.stop="closeImage"-->
             <button
               class="image-close"
-              @click.stop="closeImage"
+              @click.stop="closeViewer"
             >
               ✕
             </button>
+            <!-- @click.stop="deleteCurrentImage" -->
             <button
               v-if="isAdmin"
               class="image-delete"
               :disabled="deletingImage"
-              @click.stop="deleteCurrentImage"
+              @click.stop="deleteCurrentViewerItem"
             >
               🗑
             </button>
@@ -951,6 +1205,116 @@ async function deleteCurrentImage() {
       </div>
     </div>
   </div>
+
+  <v-menu
+    v-model="showReceiptMenu"
+    location="top"
+  >
+      <template #activator="{ props }">
+
+          <v-btn
+              v-bind="props"
+              class="receipt-fab"
+              icon
+              color="primary"
+          >
+              🧾
+          </v-btn>
+
+      </template>
+
+      <v-list>
+
+          <v-list-item
+              @click="receiptInput?.click()"
+          >
+              ➕ Add
+          </v-list-item>
+
+          <v-list-item
+              @click="showReceiptDialog=true"
+          >
+              🧾 {{ receiptStore.receipts.length }} Show
+          </v-list-item>
+
+      </v-list>
+
+  </v-menu>
+  <input
+    ref="receiptInput"
+    hidden
+    type="file"
+    multiple
+    accept="image/*"
+    @change="onReceiptUpload"
+  />
+
+  <v-dialog
+    v-model="showReceiptDialog"
+    fullscreen
+>
+
+<v-card>
+
+  <v-toolbar>
+
+  <v-btn
+  icon
+  @click="showReceiptDialog=false"
+  >
+
+  ←
+
+  </v-btn>
+
+  <v-toolbar-title>
+
+  Receipts
+
+  </v-toolbar-title>
+
+  </v-toolbar>
+
+  <div class="receipt-grid">
+
+  <div
+  v-for="(receipt,index)
+  in receiptStore.receipts"
+
+  :key="receipt.id"
+
+  class="receipt-card"
+
+  @click="openReceipt(index)"
+  >
+  <!--  @click="deleteReceipt()" @click="deleteCurrentViewerItem()"-->
+    <v-btn
+      v-if="isAdmin"
+      icon
+      class="delete-btn"
+      @click.stop="receiptStore.remove(receipt.id)"
+      >
+
+      🗑
+
+      </v-btn>
+  <img
+  :src="receipt.url"
+  />
+
+  <div class="receipt-date">
+
+  {{ receipt.createdAt }}
+
+  </div>
+
+  </div>
+
+  </div>
+
+  </v-card>
+
+</v-dialog>
 </template>
 
 <style scoped>
@@ -1454,6 +1818,71 @@ async function deleteCurrentImage() {
 .image-delete:disabled {
   opacity: .5;
   cursor: wait;
+}
+
+.receipt-grid{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fill,minmax(160px,1fr));
+
+gap:16px;
+
+padding:16px;
+
+}
+.receipt-card{
+
+cursor:pointer;
+
+border-radius:12px;
+
+overflow:hidden;
+
+box-shadow:0 4px 12px rgba(0,0,0,.15);
+
+}
+
+.receipt-card img{
+
+width:100%;
+
+height:180px;
+
+object-fit:cover;
+
+display:block;
+
+}
+.receipt-date{
+
+padding:8px;
+
+font-size:13px;
+
+text-align:center;
+
+}
+.receipt-fab{
+
+position:fixed;
+
+right:24px;
+
+bottom:24px;
+
+width:60px;
+
+height:60px;
+
+border-radius:50%;
+
+z-index:500;
+
+box-shadow:
+0 8px 24px rgba(0,0,0,.25);
+
 }
 
 @media (max-width:768px){
