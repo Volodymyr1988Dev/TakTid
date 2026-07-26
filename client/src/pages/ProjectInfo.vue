@@ -209,12 +209,12 @@ async function loadImages() {
     page.value,
     limit
   )
-
+  /*
   await receiptStore.loadPaginated(
       props.projectId,
       1,
       100,
-  )
+  )*/
 
   if (res.page >= res.lastPage) {
     hasMore.value = false
@@ -724,14 +724,31 @@ async function onReceiptUpload(
     )
 }
 
-function openReceipt(index:number){
+async function openReceipt(index:number){
+  showReceiptDialog.value = true
 
+    if(receiptStore.receipts.length === 0){
+
+        openViewer(
+        'receipts',
+        receiptStore.receipts,
+        index,
+    )
+
+    }
+/*
 openViewer(
         'receipts',
         receiptStore.receipts,
-        //receiptStore.receipts.map(receipt => ({ ...receipt, type: 'receipt' as const })),
         index,
     )
+        await receiptStore.loadPaginated(
+            props.projectId,
+            1,
+            100
+        )
+            */
+
 /*    
 viewerItems.value = receiptStore.receipts  
 //currentReceiptIndex.value=index
