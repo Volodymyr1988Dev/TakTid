@@ -20,6 +20,8 @@ import { useProjectStore } from '../stores/project.store'
 import { useI18n } from 'vue-i18n'
 import ProjectTasks from '../components/ui/ProjectTasks.vue'
 import type { ViewerItem } from '../types/ViewerItem'
+import type { ProjectImage } from '../types/ProjectImage.type'
+import type { ProjectReceipt } from '../types/projectReceipts.type.ts'
 
 const { t } = useI18n()
 const projectStore = useProjectStore()
@@ -269,6 +271,7 @@ function openImage(url: string) {
   openViewer(
         'images',
         imageStore.images,
+        //imageStore.images.map(img => ({ ...img, type: 'image' as const })),
         index,
     )
   /*
@@ -598,13 +601,13 @@ const extraHoursPrice = computed(
 )
 
 const deletingImage = ref(false)
-async function deleteCurrentViewerItem() {
+async function deleteCurrentViewerItem(item?: ProjectImage | ProjectReceipt) {
 
     if (!props.isAdmin)
         return
 
-    const current =
-        currentViewerItem.value
+    const current = item ?? currentViewerItem.value
+        //currentViewerItem.value
 
     if (!current)
         return
@@ -624,9 +627,7 @@ async function deleteCurrentViewerItem() {
             viewerType.value === 'images'
         ) {
 
-            await imageStore.remove(
-                current.id
-            )
+            await imageStore.remove(current.id)
 
             viewerItems.value =
                 imageStore.images
@@ -728,6 +729,7 @@ function openReceipt(index:number){
 openViewer(
         'receipts',
         receiptStore.receipts,
+        //receiptStore.receipts.map(receipt => ({ ...receipt, type: 'receipt' as const })),
         index,
     )
 /*    
@@ -1195,7 +1197,7 @@ await receiptStore.remove( receipt.id )
               v-if="isAdmin"
               class="image-delete"
               :disabled="deletingImage"
-              @click.stop="deleteCurrentViewerItem"
+              @click.stop="deleteCurrentViewerItem()"
             >
               🗑
             </button>
@@ -1287,12 +1289,12 @@ await receiptStore.remove( receipt.id )
 
   @click="openReceipt(index)"
   >
-  <!--  @click="deleteReceipt()" @click="deleteCurrentViewerItem()"-->
+  <!--  @click="deleteReceipt()" @click="deleteCurrentViewerItem()"  @click.stop="receiptStore.remove(receipt.id)" @click.stop="deleteCurrentViewerItem(receipt)"  @click.stop="deleteCurrentViewerItem({...receipt, type: 'receipt'})"-->
     <v-btn
       v-if="isAdmin"
       icon
       class="delete-btn"
-      @click.stop="receiptStore.remove(receipt.id)"
+      @click.stop="deleteCurrentViewerItem(receipt)"
       >
 
       🗑
