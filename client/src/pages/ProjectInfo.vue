@@ -129,6 +129,22 @@ async function saveExtraPrice() {
 
   editMode.value = null
 }
+watch(
+    () => props.projectId,
+    async (id) => {
+
+        if (!id)
+            return
+
+        receiptsLoaded.value = false
+
+        await loadReceipts()
+
+    },
+    {
+        immediate: true,
+    },
+)
 
 watch(() => [props.projectId, props.isAdmin], async ([id, isAdmin]) => {
   if (!id || isAdmin === undefined) return console.log(t('errors.missingProjectId'))
@@ -725,17 +741,18 @@ async function onReceiptUpload(
 }
 
 async function openReceipt(index:number){
-  showReceiptDialog.value = true
+  await loadReceipts()
+  //showReceiptDialog.value = true
 
-    if(receiptStore.receipts.length === 0){
+    //if(receiptStore.receipts.length === 0){
 
         openViewer(
         'receipts',
         receiptStore.receipts,
         index,
-    )
+        )
 
-    }
+   // }
 /*
 openViewer(
         'receipts',
@@ -773,6 +790,27 @@ await receiptStore.remove( receipt.id )
 }
 */
 //const baseProjectPrice = computed( () => stats.value?.baseProjectPrice ?? 0 )
+const receiptsLoaded = ref(false)
+
+async function loadReceipts() {
+
+    if (receiptsLoaded.value)
+        return
+
+    await receiptStore.loadPaginated(
+        props.projectId,
+        1,
+        100,
+    )
+
+    receiptsLoaded.value = true
+}
+async function showReceipts() {
+
+        await loadReceipts()
+
+        showReceiptDialog.value = true
+    }
 </script>
 
 <template>
@@ -1251,7 +1289,7 @@ await receiptStore.remove( receipt.id )
           </v-list-item>
 
           <v-list-item
-              @click="showReceiptDialog=true"
+              @click="showReceipts"
           >
               🧾 {{ receiptStore.receipts.length }} Show
           </v-list-item>
@@ -1275,7 +1313,10 @@ await receiptStore.remove( receipt.id )
 
 <v-card>
 
-  <v-toolbar>
+  <v-toolbar
+    color="primary"
+    dark
+  >
 
   <v-btn
   icon
@@ -1288,14 +1329,21 @@ await receiptStore.remove( receipt.id )
 
   <v-toolbar-title>
 
-  Receipts
+  🧾 Receipts
+  ({{ receiptStore.receipts.length }})
 
   </v-toolbar-title>
 
   </v-toolbar>
+  <div
+      v-if="receiptStore.loading"
+      class="receipt-loading"
+  >
 
+      Loading receipts...
+  </div>
   <div class="receipt-grid">
-
+    
   <div
   v-for="(receipt,index)
   in receiptStore.receipts"
@@ -1844,14 +1892,15 @@ await receiptStore.remove( receipt.id )
 display:grid;
 
 grid-template-columns:
-repeat(auto-fill,minmax(160px,1fr));
+repeat(auto-fill,minmax(180px,1fr));
 
-gap:16px;
+gap:18px;
 
-padding:16px;
+padding:20px;
 
 }
 .receipt-card{
+position:relative;  
 
 cursor:pointer;
 
@@ -1859,14 +1908,21 @@ border-radius:12px;
 
 overflow:hidden;
 
-box-shadow:0 4px 12px rgba(0,0,0,.15);
+box-shadow:0 10px 30px rgba(0,0,0,.08);
 
 }
+.receipt-card:hover{
 
+    transform:translateY(-6px);
+
+    box-shadow:
+        0 18px 40px rgba(0,0,0,.18);
+
+}
 .receipt-card img{
 
 width:100%;
-
+aspect-ratio:4/5;
 height:180px;
 
 object-fit:cover;
@@ -1876,11 +1932,12 @@ display:block;
 }
 .receipt-date{
 
-padding:8px;
-
+padding:12px;
+color:#64748b;
 font-size:13px;
 
 text-align:center;
+border-top:1px solid #eee;
 
 }
 .receipt-fab{
@@ -1903,7 +1960,31 @@ box-shadow:
 0 8px 24px rgba(0,0,0,.25);
 
 }
+.delete-btn{
 
+    position:absolute;
+
+    top:10px;
+
+    right:10px;
+
+    z-index:10;
+
+    background:rgba(220,38,38,.9)!important;
+
+    color:white!important;
+
+}
+
+.receipt-loading{
+
+    padding:40px;
+
+    text-align:center;
+
+    font-size:18px;
+
+}
 @media (max-width:768px){
 
 .detail-row{
