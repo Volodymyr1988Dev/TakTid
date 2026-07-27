@@ -1203,12 +1203,7 @@ watch(
             >
               🗑
             </button>
-          <div
-            v-if="viewerOpen"
-            class="image-modal"
-            @click="closeViewer"
-          >  
-          </div>
+          
           <div ref="sentinel" />
         </div>
       </div>
@@ -1279,13 +1274,6 @@ watch(
 
   </v-btn>
 
-  <v-toolbar-title>
-
-  🧾 Receipts
-  ({{ receiptStore.count }})
-
-  </v-toolbar-title>
-
   </v-toolbar>
   <div
       v-if="receiptStore.loading"
@@ -1334,6 +1322,12 @@ watch(
   </v-card>
 
 </v-dialog>
+<div
+            v-if="viewerOpen"
+            class="image-modal"
+            @click="closeViewer"
+          >  
+          </div>
 </template>
 
 <style scoped>
