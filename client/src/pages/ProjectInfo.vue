@@ -91,6 +91,8 @@ const EMPLOYER_MULTIPLIER = 1.55
 
 const showDetails = ref<'work' | 'extra' | 'total' | null>(null)
 const loadingDetails = ref(false)  
+const receiptCount = ref(0)
+
 function onLoad(id: string) {
   loaded.value.add(id)
 }
@@ -251,7 +253,8 @@ function openViewer(
 
     viewerType.value=type
 
-    viewerItems.value=items
+    //viewerItems.value=items
+    viewerItems.value = [...items]
 
     viewerIndex.value=index
 
@@ -638,13 +641,10 @@ async function deleteCurrentViewerItem(item?: ProjectImage | ProjectReceipt) {
 
         else {
 
-            await receiptStore.remove(
-                current.id
-            )
+            await receiptStore.remove( current.id )
 
-            viewerItems.value =
-                receiptStore.receipts
-
+            viewerItems.value = receiptStore.receipts
+            await loadReceiptCount()
         }
 
         if (
@@ -724,9 +724,13 @@ async function onReceiptUpload(
         props.projectId,
         [...files],
     )
+    await loadReceiptCount()
 }
 
 async function openReceipt(index:number){
+  //showReceiptDialog.value=false
+
+  //await nextTick()
   await loadReceipts()
   //showReceiptDialog.value = true
 
@@ -778,6 +782,11 @@ await receiptStore.remove( receipt.id )
 //const baseProjectPrice = computed( () => stats.value?.baseProjectPrice ?? 0 )
 const receiptsLoaded = ref(false)
 
+async function loadReceiptCount() {
+    receiptCount.value =
+        await receiptStore.getCount(props.projectId)
+}
+
 async function loadReceipts() {
 
     if (receiptsLoaded.value)
@@ -807,7 +816,9 @@ watch(
 
         receiptsLoaded.value = false
 
-        await loadReceipts()
+        receiptStore.receipts = []
+
+        await loadReceiptCount()
 
     },
     {
@@ -1294,7 +1305,7 @@ watch(
           <v-list-item
               @click="showReceipts"
           >
-              🧾 {{ receiptStore.receipts.length }} Show
+              🧾 {{ receiptStore.loadCount }} Show
           </v-list-item>
 
       </v-list>
@@ -1333,7 +1344,7 @@ watch(
   <v-toolbar-title>
 
   🧾 Receipts
-  ({{ receiptStore.receipts.length }})
+  ({{ receiptStore.loadCount }})
 
   </v-toolbar-title>
 
@@ -2158,7 +2169,7 @@ box-shadow:
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 8999;
   backdrop-filter: blur(8px);
   animation: fadeIn 0.2s ease;
 }

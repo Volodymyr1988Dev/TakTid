@@ -16,6 +16,14 @@ export const useProjectReceiptStore = defineStore(
   () => {
     const receipts = ref<ProjectReceipt[]>([])
     const loading = ref(false)
+    const count = ref(0)
+
+    async function loadCount(projectId:string){
+
+        const {data}=await getProjectReceiptsCount(projectId)
+
+        count.value=data.count
+    }
 
     async function load(projectId: string) {
       loading.value = true
@@ -94,6 +102,7 @@ export const useProjectReceiptStore = defineStore(
     }
 
     return {
+      loadCount,
       receipts,
       loading,
       load,
