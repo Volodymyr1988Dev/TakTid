@@ -1175,6 +1175,84 @@ watch(
           </div>
           <!-- v-if="fullscreenImage"  @click="closeImage" -->
           
+          <div ref="sentinel" />
+        </div>
+      </div>
+      <v-dialog
+        v-model="showReceiptDialog"
+        fullscreen
+    >
+
+    <v-card>
+
+      <v-toolbar
+        color="primary"
+        dark
+      >
+
+      <v-btn
+      icon
+      @click="showReceiptDialog=false"
+      >
+
+      ←
+
+      </v-btn>
+
+      </v-toolbar>
+      <div
+          v-if="receiptStore.loading"
+          class="receipt-loading"
+      >
+
+          Loading receipts...
+      </div>
+      <div class="receipt-grid">
+        
+      <div
+      v-for="(receipt,index)
+      in receiptStore.receipts"
+
+      :key="receipt.id"
+
+      class="receipt-card"
+
+      @click="openReceipt(index)"
+      >
+      <!--  @click="deleteReceipt()" @click="deleteCurrentViewerItem()"  @click.stop="receiptStore.remove(receipt.id)" @click.stop="deleteCurrentViewerItem(receipt)"  @click.stop="deleteCurrentViewerItem({...receipt, type: 'receipt'})"-->
+        <v-btn
+          v-if="isAdmin"
+          icon
+          class="delete-btn"
+          @click.stop="deleteCurrentViewerItem(receipt)"
+          >
+
+          🗑
+
+          </v-btn>
+      <img
+      :src="receipt.url"
+      />
+
+      <div class="receipt-date">
+
+      {{ receipt.createdAt }}
+
+      </div>
+
+      </div>
+
+      </div>
+
+      </v-card>
+
+    </v-dialog>
+
+    <div
+            v-if="viewerOpen"
+            class="image-modal"
+            @click="closeViewer"
+          >
             <!-- :src="fullscreenImage" -->
             <img
               :src="currentViewerItem?.url"
@@ -1203,10 +1281,7 @@ watch(
             >
               🗑
             </button>
-          
-          <div ref="sentinel" />
-        </div>
-      </div>
+          </div>
     </div>
   </div>
 
@@ -1253,81 +1328,7 @@ watch(
     @change="onReceiptUpload"
   />
 
-  <v-dialog
-    v-model="showReceiptDialog"
-    fullscreen
->
-
-<v-card>
-
-  <v-toolbar
-    color="primary"
-    dark
-  >
-
-  <v-btn
-  icon
-  @click="showReceiptDialog=false"
-  >
-
-  ←
-
-  </v-btn>
-
-  </v-toolbar>
-  <div
-      v-if="receiptStore.loading"
-      class="receipt-loading"
-  >
-
-      Loading receipts...
-  </div>
-  <div class="receipt-grid">
-    
-  <div
-  v-for="(receipt,index)
-  in receiptStore.receipts"
-
-  :key="receipt.id"
-
-  class="receipt-card"
-
-  @click="openReceipt(index)"
-  >
-  <!--  @click="deleteReceipt()" @click="deleteCurrentViewerItem()"  @click.stop="receiptStore.remove(receipt.id)" @click.stop="deleteCurrentViewerItem(receipt)"  @click.stop="deleteCurrentViewerItem({...receipt, type: 'receipt'})"-->
-    <v-btn
-      v-if="isAdmin"
-      icon
-      class="delete-btn"
-      @click.stop="deleteCurrentViewerItem(receipt)"
-      >
-
-      🗑
-
-      </v-btn>
-  <img
-  :src="receipt.url"
-  />
-
-  <div class="receipt-date">
-
-  {{ receipt.createdAt }}
-
-  </div>
-
-  </div>
-
-  </div>
-
-  </v-card>
-
-</v-dialog>
-<div
-            v-if="viewerOpen"
-            class="image-modal"
-            @click="closeViewer"
-          >  
-          </div>
+  
 </template>
 
 <style scoped>
@@ -2118,6 +2119,8 @@ box-shadow:
   touch-action: none;
   cursor: grab;
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+
+  object-fit:contain;
 }
 @keyframes fadeIn {
   from { opacity: 0 }
