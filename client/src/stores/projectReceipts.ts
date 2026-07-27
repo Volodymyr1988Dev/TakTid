@@ -103,6 +103,7 @@ export const useProjectReceiptStore = defineStore(
 
     return {
       loadCount,
+      count,
       receipts,
       loading,
       load,
