@@ -105,7 +105,8 @@ async function loadStats() {
 
   try {
     const { data } = await getProjectStats(props.projectId)
-    await receiptStore.getCount(props.projectId)
+    //await receiptStore.getCount(props.projectId)
+    await loadReceiptCount()
     stats.value = data
 
     area.value = data.project.areaM2 ?? null
@@ -467,7 +468,8 @@ async function loadProjectDetails() {
 
   try {
     await projectStore.loadDetails(props.projectId)
-    await receiptStore.getCount(props.projectId)
+    //await receiptStore.getCount(props.projectId)
+    await loadReceiptCount()
   } finally {
     loadingDetails.value = false
   }
@@ -1305,7 +1307,7 @@ watch(
           <v-list-item
               @click="showReceipts"
           >
-              🧾 {{ receiptStore.count }} Show
+              🧾 {{ loadReceiptCount }} Show
           </v-list-item>
 
       </v-list>
@@ -1344,7 +1346,7 @@ watch(
   <v-toolbar-title>
 
   🧾 Receipts
-  ({{ receiptStore.count }})
+  ({{ loadReceiptCount }})
 
   </v-toolbar-title>
 
