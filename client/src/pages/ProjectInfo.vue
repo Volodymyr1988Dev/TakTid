@@ -1305,7 +1305,7 @@ watch(
           <v-list-item
               @click="showReceipts"
           >
-              🧾 {{ receiptStore.loadCount }} Show
+              🧾 {{ receiptStore.count }} Show
           </v-list-item>
 
       </v-list>
@@ -1344,7 +1344,7 @@ watch(
   <v-toolbar-title>
 
   🧾 Receipts
-  ({{ receiptStore.loadCount }})
+  ({{ receiptStore.count }})
 
   </v-toolbar-title>
 
