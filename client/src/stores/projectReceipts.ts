@@ -20,7 +20,7 @@ export const useProjectReceiptStore = defineStore(
 
     async function loadCount(projectId:string){
 
-        const {data}=await getProjectReceiptsCount(projectId)
+        const {data} = await getProjectReceiptsCount(projectId)
 
         count.value=data.count
     }

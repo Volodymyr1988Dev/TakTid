@@ -91,7 +91,7 @@ const EMPLOYER_MULTIPLIER = 1.55
 
 const showDetails = ref<'work' | 'extra' | 'total' | null>(null)
 const loadingDetails = ref(false)  
-const receiptCount = ref(0)
+//const receiptCount = ref(0)
 
 function onLoad(id: string) {
   loaded.value.add(id)
@@ -106,7 +106,7 @@ async function loadStats() {
   try {
     const { data } = await getProjectStats(props.projectId)
     //await receiptStore.getCount(props.projectId)
-    await loadReceiptCount()
+    await receiptStore.loadCount(props.projectId)
     stats.value = data
 
     area.value = data.project.areaM2 ?? null
@@ -279,13 +279,6 @@ function openImage(url: string) {
         //imageStore.images.map(img => ({ ...img, type: 'image' as const })),
         index,
     )
-  /*
-  currentIndex.value = index
-  fullscreenImage.value = url
-  scrollY = window.scrollY
-  document.body.style.position = 'fixed'
-  document.body.style.top = `-${scrollY}px`
-  document.body.style.width = '100%'*/
 }
 
 function closeViewer(){
@@ -302,13 +295,6 @@ function closeViewer(){
       resetTransform()
 
   }
-/*
-function closeImage() {
-  fullscreenImage.value = null
-  document.body.style = ''
-  window.scrollTo(0, scrollY)
-  resetTransform()
-}*/
 
 const scale = ref(1)
 const lastScale = ref(1)
@@ -418,14 +404,7 @@ function getDistance(touches: TouchList): number | undefined {
   const dy = touches[0].clientY - touches[1].clientY
   return Math.sqrt(dx * dx + dy * dy)
 }
-/*
-function nextImage() {
-  const next = imageStore.images[currentIndex.value + 1]
-  if (!next) return
-  currentIndex.value++
-  fullscreenImage.value = next.url
-  resetTransform()
-}*/
+
 function nextViewerItem(){
 
     if(
@@ -439,15 +418,7 @@ function nextViewerItem(){
     resetTransform()
 
 }
-/*
-function prevImage() {
- const prev = imageStore.images[currentIndex.value - 1]
-  if (!prev) return
 
-  currentIndex.value--
-  fullscreenImage.value = prev.url
-  resetTransform()
-}*/
 function prevViewerItem(){
 
     if(
@@ -469,7 +440,7 @@ async function loadProjectDetails() {
   try {
     await projectStore.loadDetails(props.projectId)
     //await receiptStore.getCount(props.projectId)
-    await loadReceiptCount()
+    await receiptStore.loadCount(props.projectId)
   } finally {
     loadingDetails.value = false
   }
@@ -646,7 +617,7 @@ async function deleteCurrentViewerItem(item?: ProjectImage | ProjectReceipt) {
             await receiptStore.remove( current.id )
 
             viewerItems.value = receiptStore.receipts
-            await loadReceiptCount()
+            await receiptStore.loadCount(props.projectId)
         }
 
         if (
@@ -678,43 +649,7 @@ async function deleteCurrentViewerItem(item?: ProjectImage | ProjectReceipt) {
     }
 
 }
-/*
-async function deleteCurrentImage() {
-  if (!props.isAdmin) return
 
-  const current = imageStore.images[currentIndex.value]
-  if (!current) return
-
-  if (!confirm(t('project.confirmDeleteImage'))) {
-    return
-  }
-
-  deletingImage.value = true
-
-  try {
-    await imageStore.remove(current.id)
-
-    if (imageStore.images.length === 0) {
-      //closeImage()
-      closeViewer()
-      return
-    }
-
-    if (currentIndex.value >= imageStore.images.length) {
-      currentIndex.value = imageStore.images.length - 1
-    }
-
-    fullscreenImage.value =
-      imageStore.images[currentIndex.value]?.url ?? null
-
-    if (!fullscreenImage.value) {
-      closeImage()
-    }
-  } finally {
-    deletingImage.value = false
-  }
-}
-*/
 async function onReceiptUpload(
     e: Event,
 ){
@@ -726,16 +661,16 @@ async function onReceiptUpload(
         props.projectId,
         [...files],
     )
-    await loadReceiptCount()
+    await receiptStore.loadCount(props.projectId)
 }
 
 async function openReceipt(index:number){
   //showReceiptDialog.value=false
-
+  console.log('receipt clicked')
   //await nextTick()
   await loadReceipts()
   //showReceiptDialog.value = true
-
+  console.log(receiptStore.receipts)
     //if(receiptStore.receipts.length === 0){
 
         openViewer(
@@ -743,7 +678,7 @@ async function openReceipt(index:number){
         receiptStore.receipts,
         index,
         )
-
+      console.log(viewerOpen.value)
    // }
 /*
 openViewer(
@@ -783,11 +718,11 @@ await receiptStore.remove( receipt.id )
 */
 //const baseProjectPrice = computed( () => stats.value?.baseProjectPrice ?? 0 )
 const receiptsLoaded = ref(false)
-
+/*
 async function loadReceiptCount() {
     receiptCount.value =
         await receiptStore.getCount(props.projectId)
-}
+}*/
 
 async function loadReceipts() {
 
@@ -820,7 +755,7 @@ watch(
 
         receiptStore.receipts = []
 
-        await loadReceiptCount()
+        await receiptStore.loadCount(id)
 
     },
     {
@@ -1239,11 +1174,7 @@ watch(
             >
           </div>
           <!-- v-if="fullscreenImage"  @click="closeImage" -->
-          <div
-            v-if="viewerOpen"
-            class="image-modal"
-            @click="closeViewer"
-          >
+          
             <!-- :src="fullscreenImage" -->
             <img
               :src="currentViewerItem?.url"
@@ -1272,6 +1203,11 @@ watch(
             >
               🗑
             </button>
+          <div
+            v-if="viewerOpen"
+            class="image-modal"
+            @click="closeViewer"
+          >  
           </div>
           <div ref="sentinel" />
         </div>
@@ -1307,7 +1243,7 @@ watch(
           <v-list-item
               @click="showReceipts"
           >
-              🧾 {{ loadReceiptCount }} Show
+              🧾 {{ receiptStore.count }} Show
           </v-list-item>
 
       </v-list>
@@ -1346,7 +1282,7 @@ watch(
   <v-toolbar-title>
 
   🧾 Receipts
-  ({{ loadReceiptCount }})
+  ({{ receiptStore.count }})
 
   </v-toolbar-title>
 
