@@ -32,7 +32,7 @@ const receiptStore = useProjectReceiptStore()
 const statsStore = useStatsStore()
 
 const showTasks = ref(false)
-
+const showReceipts = ref(false)
 //const viewerItems = ref<ProjectImage[] | ProjectReceipt[]>([]) 
 //const viewerOpen = ref(false)
 /*
@@ -74,7 +74,7 @@ const error = ref<string | null>(null)
 const extraPrice = ref<number | null>(null)
 
 const showReceiptMenu = ref(false)
-const showReceiptDialog = ref(false)
+//const showReceiptDialog = ref(false)
 const receiptInput = ref<HTMLInputElement>()  
 const editMode = ref<'area' | 'price' | 'extraPrice' | null>(null)
 
@@ -737,13 +737,25 @@ async function loadReceipts() {
 
     receiptsLoaded.value = true
 }
+/*
 async function showReceipts() {
 
         await loadReceipts()
 
         showReceiptDialog.value = true
     }
+*/
+async function toggleReceipts() {
 
+    showReceipts.value = !showReceipts.value
+
+    if (
+        showReceipts.value &&
+        !receiptsLoaded.value
+    ) {
+        await loadReceipts()
+    }
+}
 watch(
     () => props.projectId,
     async (id) => {
@@ -1178,75 +1190,70 @@ watch(
           <div ref="sentinel" />
         </div>
       </div>
-      <v-dialog
-        v-model="showReceiptDialog"
-        fullscreen
-    >
 
-    <v-card>
+      <div class="receipts-section">
 
-      <v-toolbar
-        color="primary"
-        dark
-      >
+          <button
+              @click="toggleReceipts"
+          >
+              {{ showReceipts
+                  ? t('project.hideReceipts')
+                  : t('project.showReceipts')
+              }}
 
-      <v-btn
-      icon
-      @click="showReceiptDialog=false"
-      >
+              ({{ receiptStore.count }})
+          </button>
 
-      ←
-
-      </v-btn>
-
-      </v-toolbar>
-      <div
-          v-if="receiptStore.loading"
-          class="receipt-loading"
-      >
-
-          Loading receipts...
-      </div>
-      <div class="receipt-grid">
-        
-      <div
-      v-for="(receipt,index)
-      in receiptStore.receipts"
-
-      :key="receipt.id"
-
-      class="receipt-card"
-
-      @click="openReceipt(index)"
-      >
-      <!--  @click="deleteReceipt()" @click="deleteCurrentViewerItem()"  @click.stop="receiptStore.remove(receipt.id)" @click.stop="deleteCurrentViewerItem(receipt)"  @click.stop="deleteCurrentViewerItem({...receipt, type: 'receipt'})"-->
-        <v-btn
-          v-if="isAdmin"
-          icon
-          class="delete-btn"
-          @click.stop="deleteCurrentViewerItem(receipt)"
+          <div
+              v-if="showReceipts"
+              class="receipt-grid"
+          >
+          <div
+              v-if="receiptStore.loading"
+              class="receipt-loading"
           >
 
-          🗑
+              Loading receipts...
+          </div>
 
-          </v-btn>
-      <img
-      :src="receipt.url"
-      />
+              <div
+                v-for="(receipt,index)
+                in receiptStore.receipts"
 
-      <div class="receipt-date">
+                :key="receipt.id"
 
-      {{ receipt.createdAt }}
+                class="receipt-card"
+
+                @click="openReceipt(index)"
+                >
+                <!--  @click="deleteReceipt()" @click="deleteCurrentViewerItem()"  @click.stop="receiptStore.remove(receipt.id)" @click.stop="deleteCurrentViewerItem(receipt)"  @click.stop="deleteCurrentViewerItem({...receipt, type: 'receipt'})"-->
+                  <v-btn
+                    v-if="isAdmin"
+                    icon
+                    class="delete-btn"
+                    @click.stop="deleteCurrentViewerItem(receipt)"
+                    >
+
+                    🗑
+
+                    </v-btn>
+                <img
+                :src="receipt.url"
+                />
+
+                <div class="receipt-date">
+
+                {{ receipt.createdAt }}
+
+                </div>
+
+              </div>
+
+          </div>
 
       </div>
 
-      </div>
-
-      </div>
-
-      </v-card>
-
-    </v-dialog>
+      
 
     <div
             v-if="viewerOpen"
@@ -1311,9 +1318,12 @@ watch(
           </v-list-item>
 
           <v-list-item
-              @click="showReceipts"
+              @click="toggleReceipts"
           >
-              🧾 {{ receiptStore.count }} Show
+              🧾 {{ receiptStore.count }} {{ showReceipts
+                  ? t('project.hideReceipts')
+                  : t('project.showReceipts')
+              }}
           </v-list-item>
 
       </v-list>
