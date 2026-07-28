@@ -389,5 +389,12 @@ async function deleteTask(taskId: string) {
 }
 .import-btn{
   margin-top: 20px;
+  border:none;
+  background:#2563eb;
+  color:white;
+  padding:8px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
 } 
 </style>

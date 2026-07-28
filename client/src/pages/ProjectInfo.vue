@@ -1937,6 +1937,16 @@ border-top:1px solid #ececec;
 .toggle-images-btn {
   margin-top: 40px;
 }
+.edit-menu{
+
+    display:flex;
+
+    gap:12px;
+
+    flex-wrap:wrap;
+
+    margin-bottom:20px;
+}
 @media (max-width:768px){
 
 .detail-row{
