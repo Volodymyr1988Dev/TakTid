@@ -12,29 +12,70 @@ import { cloudinary } from '../utils/cloudinary'
 //import { getProjectStats, getProjectSummary } from '../api/projectStats.api'
 import { getProjectStats } from '../api/projectStats.api'
 import { useProjectImageStore } from '../stores/projectImage.store'
+import { useProjectReceiptStore } from '../stores/projectReceipts'
 import { useStatsStore } from '../stores/stats.store'
 import AppLoader from '../components/ui/AppLoader.vue'
 import type { TimeEntry } from '../types/TimeEntry.type'
 import { useProjectStore } from '../stores/project.store'
 import { useI18n } from 'vue-i18n'
 import ProjectTasks from '../components/ui/ProjectTasks.vue'
+import type { ViewerItem } from '../types/ViewerItem'
+import type { ProjectImage } from '../types/ProjectImage.type'
+import type { ProjectReceipt } from '../types/projectReceipts.type.ts'
 
 const { t } = useI18n()
 const projectStore = useProjectStore()
 const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 const emit = defineEmits<{ (e: 'back'): void }>()
 const imageStore = useProjectImageStore()
+const receiptStore = useProjectReceiptStore()
 const statsStore = useStatsStore()
 
 const showTasks = ref(false)
+const showReceipts = ref(false)
+//const viewerItems = ref<ProjectImage[] | ProjectReceipt[]>([]) 
+//const viewerOpen = ref(false)
+/*
 const fullscreenImage = ref<string | null>(null)
+const viewerItems = ref<ViewerItem[]>([])
+const viewerIndex = ref(0)
+const viewerType = ref<'images' | 'receipts'>('images')
+const currentIndex = ref(0)
+const receiptViewer = ref(false)
+const currentReceiptIndex = ref(0)
+*/
+
+const viewerOpen = ref(false)
+
+const viewerType = ref<'images' | 'receipts'>('images')
+
+const viewerItems = ref<ViewerItem[]>([])
+
+const viewerIndex = ref(0)
+
+const currentViewerItem = computed(() => {
+    return viewerItems.value[viewerIndex.value] ?? null
+})
+/*
+const currentImage = computed(() => {
+    const item = currentViewerItem.value
+
+    if (!item)
+        return null
+
+    return item.url
+})
+*/
 const stats = ref<ProjectStats | null>(null)
 const loading = ref(true)
 const loaded = ref(new Set<string>())
 const error = ref<string | null>(null)
-const currentIndex = ref(0)
+
 const extraPrice = ref<number | null>(null)
 
+//const showReceiptMenu = ref(false)
+//const showReceiptDialog = ref(false)
+const receiptInput = ref<HTMLInputElement>()  
 const editMode = ref<'area' | 'price' | 'extraPrice' | null>(null)
 
 const expandedUserId = ref<string | null>(null)
@@ -50,6 +91,8 @@ const EMPLOYER_MULTIPLIER = 1.55
 
 const showDetails = ref<'work' | 'extra' | 'total' | null>(null)
 const loadingDetails = ref(false)  
+//const receiptCount = ref(0)
+
 function onLoad(id: string) {
   loaded.value.add(id)
 }
@@ -62,6 +105,8 @@ async function loadStats() {
 
   try {
     const { data } = await getProjectStats(props.projectId)
+    //await receiptStore.getCount(props.projectId)
+    await receiptStore.loadCount(props.projectId)
     stats.value = data
 
     area.value = data.project.areaM2 ?? null
@@ -136,13 +181,30 @@ watch(showImages, async (val) => {
   await nextTick()
   observeSentinel()
 })
+/*
 watch(currentIndex, (i) => {
   const next = imageStore.images[i + 1]
   if (next) {
     const img = new Image()
     img.src = next.url
   }
-})
+})*/
+watch(
+    viewerIndex,
+    index=>{
+
+        const next=
+            viewerItems.value[index+1]
+
+        if(!next)
+            return
+
+        const img=new Image()
+
+        img.src=next.url
+
+    }
+)
 async function loadImages() {
   if (!hasMore.value || imageStore.loading) return
 
@@ -151,6 +213,12 @@ async function loadImages() {
     page.value,
     limit
   )
+  /*
+  await receiptStore.loadPaginated(
+      props.projectId,
+      1,
+      100,
+  )*/
 
   if (res.page >= res.lastPage) {
     hasMore.value = false
@@ -177,25 +245,56 @@ onBeforeUnmount(() => {
   observer?.disconnect() 
   document.body.style = ''
 })
+
+function openViewer(
+    type:'images'|'receipts',
+    items:ViewerItem[],
+    index:number,
+){
+
+    viewerType.value=type
+
+    //viewerItems.value=items
+    viewerItems.value = [...items]
+
+    viewerIndex.value=index
+
+    viewerOpen.value=true
+
+    scrollY=window.scrollY
+
+    document.body.style.position='fixed'
+    document.body.style.top=`-${scrollY}px`
+    document.body.style.width='100%'
+
+}
+
 let scrollY = 0
 function openImage(url: string) {
   const index = imageStore.images.findIndex(i => i.url === url)
   if (index === -1) return
-
-  currentIndex.value = index
-  fullscreenImage.value = url
-  scrollY = window.scrollY
-  document.body.style.position = 'fixed'
-  document.body.style.top = `-${scrollY}px`
-  document.body.style.width = '100%'
+  openViewer(
+        'images',
+        imageStore.images,
+        //imageStore.images.map(img => ({ ...img, type: 'image' as const })),
+        index,
+    )
 }
 
-function closeImage() {
-  fullscreenImage.value = null
-  document.body.style = ''
-  window.scrollTo(0, scrollY)
-  resetTransform()
-}
+function closeViewer(){
+
+      viewerOpen.value=false
+
+      document.body.style=''
+
+      window.scrollTo(
+          0,
+          scrollY,
+      )
+
+      resetTransform()
+
+  }
 
 const scale = ref(1)
 const lastScale = ref(1)
@@ -287,13 +386,14 @@ function onTouchEnd(e: TouchEvent) {
   const dy = touch.clientY - startY
 
   if (Math.abs(dy) > Math.abs(dx) && dy > 80) {
-    closeImage()
+    //closeImage()
+    closeViewer()
   }
   if (Math.abs(velocityX) > 20) {
-    velocityX < 0 ? nextImage() : prevImage()
+    velocityX < 0 ? /*nextImage()*/ nextViewerItem() : /*prevImage()*/ prevViewerItem()
   }
-    if (dx < -50) nextImage()
-    if (dx > 50) prevImage()
+    if (dx < -50) /*nextImage()*/ nextViewerItem()
+    if (dx > 50) /*prevImage()*/ prevViewerItem()
   isSwiping = false
   isDragging = false
 }
@@ -305,21 +405,31 @@ function getDistance(touches: TouchList): number | undefined {
   return Math.sqrt(dx * dx + dy * dy)
 }
 
-function nextImage() {
-  const next = imageStore.images[currentIndex.value + 1]
-  if (!next) return
-  currentIndex.value++
-  fullscreenImage.value = next.url
-  resetTransform()
+function nextViewerItem(){
+
+    if(
+        viewerIndex.value>=
+        viewerItems.value.length-1
+    )
+        return
+
+    viewerIndex.value++
+
+    resetTransform()
+
 }
 
-function prevImage() {
- const prev = imageStore.images[currentIndex.value - 1]
-  if (!prev) return
+function prevViewerItem(){
 
-  currentIndex.value--
-  fullscreenImage.value = prev.url
-  resetTransform()
+    if(
+        viewerIndex.value<=0
+    )
+        return
+
+    viewerIndex.value--
+
+    resetTransform()
+
 }
 /* ================= COMPUTED ================= */
 
@@ -329,6 +439,8 @@ async function loadProjectDetails() {
 
   try {
     await projectStore.loadDetails(props.projectId)
+    //await receiptStore.getCount(props.projectId)
+    await receiptStore.loadCount(props.projectId)
   } finally {
     loadingDetails.value = false
   }
@@ -364,10 +476,35 @@ watch(() => props.isAdmin, (isAdmin) => {
   }
 })
 
+function detailBadge(type: string) {
+  switch (type) {
+    case 'WORK':
+      return {
+        icon: '🛠',
+        text: t('stats.work'),
+        class: 'badge-work'
+      }
+
+    case 'EXTRA':
+      return {
+        icon: '💼',
+        text: t('stats.extra'),
+        class: 'badge-extra'
+      }
+
+    default:
+      return {
+        icon: '⏱',
+        text: type,
+        class: 'badge-default'
+      }
+  }
+}
 
 const totalWork = computed(() => stats.value?.total.work ?? 0)
 const totalExtra = computed(() => stats.value?.total.extra ?? 0)
 const totalAll = computed(() => totalWork.value + totalExtra.value)
+
 
 
 //const workerCost = workedHours * currentSalary * (1 + EMPLOYER_TAX)
@@ -389,34 +526,7 @@ const workersCost = computed(() => {
 
     return sum + fullCost
   }, 0)
-})/*
-const workersCost = computed(() => {
-  const users = stats.value?.users
-
-  if (!users?.length) return 0
-
-  return users.reduce((sum: number, worker) => {
-    const monthlySalary =
-      worker.currentSalary ?? 0
-
-    const workedHours =
-      worker.totalHours ?? 0
-
-    const hourlyRate =
-      monthlySalary / MONTH_HOURS
-
-    const totalCost =
-      hourlyRate *
-      workedHours *
-      EMPLOYER_MULTIPLIER
-
-    return sum + totalCost
-  }, 0)
-})*/
-/*
-const profit = computed(() => {
-  return totalProjectPrice.value - workersCost.value
-})*/
+})
 
 function getWorkerSalary(worker: any) {
   const hourlySalary =
@@ -459,16 +569,7 @@ async function savePrice() {
 
   editMode.value = null
 }
-//const area = Number(project.areaM2 || 0)
-//const price = Number(project.pricePerM2 || 0)
-/*
-const totalProjectPrice = computed(() => {
-  const projectArea = Number(area.value || 0)
-  const projectPrice = Number(price.value || 0)
 
-  return projectArea * projectPrice
-})
-*/
 const totalProjectPrice = computed(
   () => stats.value?.totalProjectPrice ?? 0
 )
@@ -477,7 +578,202 @@ const extraHoursPrice = computed(
   () => stats.value?.extraHoursPrice ?? 0
 )
 
+const deletingImage = ref(false)
+async function deleteCurrentViewerItem(item?: ProjectImage | ProjectReceipt) {
+
+    if (!props.isAdmin)
+        return
+
+    const current = item ?? currentViewerItem.value
+        //currentViewerItem.value
+
+    if (!current)
+        return
+
+    if (
+        !confirm(
+            t('project.confirmDeleteImage')
+        )
+    )
+        return
+
+    deletingImage.value = true
+
+    try {
+
+        if (
+            viewerType.value === 'images'
+        ) {
+
+            await imageStore.remove(current.id)
+
+            viewerItems.value =
+                imageStore.images
+
+        }
+
+        else {
+
+            await receiptStore.remove( current.id )
+
+            viewerItems.value = receiptStore.receipts
+            await receiptStore.loadCount(props.projectId)
+        }
+
+        if (
+            viewerItems.value.length === 0
+        ) {
+
+            closeViewer()
+
+            return
+
+        }
+
+        if (
+            viewerIndex.value >=
+            viewerItems.value.length
+        ) {
+
+            viewerIndex.value =
+                viewerItems.value.length - 1
+
+        }
+
+    }
+
+    finally {
+
+        deletingImage.value = false
+
+    }
+
+}
+
+async function onReceiptUpload(
+    e: Event,
+){
+    const files=(e.target as HTMLInputElement).files
+
+    if(!files?.length)return
+
+    await receiptStore.upload(
+        props.projectId,
+        [...files],
+    )
+    await receiptStore.loadCount(props.projectId)
+}
+
+async function openReceipt(index:number){
+  //showReceiptDialog.value=false
+  console.log('receipt clicked')
+  //await nextTick()
+  await loadReceipts()
+  //showReceiptDialog.value = true
+  console.log(receiptStore.receipts)
+    //if(receiptStore.receipts.length === 0){
+
+        openViewer(
+        'receipts',
+        receiptStore.receipts,
+        index,
+        )
+      console.log(viewerOpen.value)
+   // }
+/*
+openViewer(
+        'receipts',
+        receiptStore.receipts,
+        index,
+    )
+        await receiptStore.loadPaginated(
+            props.projectId,
+            1,
+            100
+        )
+            */
+
+/*    
+viewerItems.value = receiptStore.receipts  
+//currentReceiptIndex.value=index
+currentIndex.value = index
+
+receiptViewer.value=true
+*/
+}
+/*
+async function deleteReceipt(){
+
+const receipt=
+receiptStore.receipts[
+currentReceiptIndex.value
+]
+
+if(!receipt)return
+
+if(!confirm('Delete receipt?')) return
+
+await receiptStore.remove( receipt.id )
+}
+*/
 //const baseProjectPrice = computed( () => stats.value?.baseProjectPrice ?? 0 )
+const receiptsLoaded = ref(false)
+/*
+async function loadReceiptCount() {
+    receiptCount.value =
+        await receiptStore.getCount(props.projectId)
+}*/
+
+async function loadReceipts() {
+
+    if (receiptsLoaded.value)
+        return
+
+    await receiptStore.loadPaginated(
+        props.projectId,
+        1,
+        100,
+    )
+
+    receiptsLoaded.value = true
+}
+/*
+async function showReceipts() {
+
+        await loadReceipts()
+
+        showReceiptDialog.value = true
+    }
+*/
+async function toggleReceipts() {
+
+    showReceipts.value = !showReceipts.value
+
+    if (
+        showReceipts.value &&
+        !receiptsLoaded.value
+    ) {
+        await loadReceipts()
+    }
+}
+watch(
+    () => props.projectId,
+    async (id) => {
+
+        if (!id)
+            return
+
+        receiptsLoaded.value = false
+
+        receiptStore.receipts = []
+
+        await receiptStore.loadCount(id)
+
+    },
+    {
+        immediate: true,
+    },
+)    
 </script>
 
 <template>
@@ -672,7 +968,7 @@ const extraHoursPrice = computed(
           ]" 
         >
         <!--:class="{ active: showDetails === 'work', disabled: !isAdmin }"-->
-          {{ t('stats.work') }} <strong>{{ totalWork }}h</strong>
+          🛠 {{ t('stats.work') }} <strong>{{ totalWork }}h</strong>
         </div>
 
         <div 
@@ -683,7 +979,7 @@ const extraHoursPrice = computed(
             { active: showDetails === 'extra', clickable: isAdmin }
           ]"
         >
-          {{ t('stats.extra') }} <strong>{{ totalExtra }}h</strong>
+          💼 {{ t('stats.extra') }} <strong>{{ totalExtra }}h</strong>
         </div>
         <!--:class="{ active: showDetails === 'extra', disabled: !isAdmin }"-->
 
@@ -695,7 +991,7 @@ const extraHoursPrice = computed(
             { active: showDetails === 'total', clickable: isAdmin }
           ]"
         >
-          {{ t('stats.total') }} <strong>{{ totalAll }}h</strong>
+        ⏱ {{ t('stats.total') }} <strong>{{ totalAll }}h</strong>
         </div>
         <!--:class="{ active: showDetails === 'total', disabled: !isAdmin }"-->
       </div>
@@ -708,17 +1004,43 @@ const extraHoursPrice = computed(
           :key="entry.id"
           class="detail-row"
         >
-          <div class="detail-date">{{ entry.date }}</div>
-          <div class="detail-user">
-            <div class="user-info">
-            <div class="name">{{ entry.user?.name }}</div>
-            <div class="email">{{ entry.user?.email }}</div>
-          </div>
-          </div>
-          <div class="detail-hours">{{ entry.hours }}h</div>
+          <div class="detail-top">
 
-          <div v-if="entry.comment" class="detail-comment">
-            {{ entry.comment }}
+              <span
+                  class="type-badge"
+                  :class="detailBadge(entry.type).class"
+              >
+                  {{ detailBadge(entry.type).icon }}
+                  {{ detailBadge(entry.type).text }}
+              </span>
+
+              <span class="detail-date">
+                  {{ entry.date }}
+              </span>
+
+              <span class="detail-hours">
+                  {{ entry.hours }}h
+              </span>
+
+          </div>
+
+          <div class="user-info">
+
+              <div class="name">
+                  {{ entry.user?.name }}
+              </div>
+
+              <div class="email">
+                  {{ entry.user?.email }}
+              </div>
+
+          </div>
+
+          <div
+              v-if="entry.comment"
+              class="detail-comment"
+          >
+              {{ entry.comment }}
           </div>
         </div>
         </div>
@@ -825,8 +1147,11 @@ const extraHoursPrice = computed(
         </div>
       </div>
     </div>
-    <button @click="showTasks = !showTasks">
-      {{ showTasks ? 'Hide Tasks' : 'Show Tasks' }}
+    <button 
+      class="toggle-tasks-btn receipt-btn receipt-btn"
+      @click="showTasks = !showTasks"
+    >
+      {{ showTasks ? t('project.hideTasks') : t('project.showTasks') }}
     </button>
       <ProjectTasks
           v-if="showTasks"
@@ -835,7 +1160,10 @@ const extraHoursPrice = computed(
       />
       <!-- IMAGES -->
       <div class="images-section">
-        <button @click="showImages = !showImages">
+        <button 
+          class="toggle-images-btn receipt-btn"
+          @click="showImages = !showImages"
+        >
           {{ showImages ? t('project.hideImages') : t('project.showImages') }}
         </button>
 
@@ -863,13 +1191,78 @@ const extraHoursPrice = computed(
               @click="openImage(img.url)"
             >
           </div>
-          <div
-            v-if="fullscreenImage"
-            class="image-modal"
-            @click="closeImage"
+          <!-- v-if="fullscreenImage"  @click="closeImage" -->
+          
+          <div ref="sentinel" />
+        </div>
+      </div>
+
+      <div class="receipts-section">
+        <div class="receipts-header">
+          <button
+            class="receipt-btn"
+            @click="toggleReceipts"
           >
+              🧾 {{ showReceipts
+                  ? t('project.hideReceipts')
+                  : t('project.showReceipts')
+              }} ({{ receiptStore.count }})
+          </button>
+          <button
+              class="add-receipt-btn"
+              @click="receiptInput?.click()"
+          >
+              ➕ {{ t('project.addReceipt') }}
+          </button>
+        </div>
+          <div
+              v-if="showReceipts"
+              class="receipt-grid"
+          >
+          <div
+              v-if="receiptStore.loading"
+              class="receipt-loading"
+          >
+
+              {{ t('project.loadingReceipts') }}
+          </div>
+
+              <div
+                v-for="(receipt,index) in receiptStore.receipts"
+                :key="receipt.id"
+                class="receipt-card"
+                @click="openReceipt(index)"
+                >
+                  <v-btn
+                    v-if="isAdmin"
+                    icon
+                    class="delete-btn"
+                    @click.stop="deleteCurrentViewerItem(receipt)"
+                    >
+
+                    🗑
+
+                    </v-btn>
+                <img
+                :src="receipt.url"
+                loading="lazy"
+                />
+                <div class="receipt-date">
+                {{ receipt.createdAt }}
+                </div>
+              </div>
+          </div>
+      </div>
+      
+
+    <div
+            v-if="viewerOpen"
+            class="image-modal"
+            @click="closeViewer"
+          >
+            <!-- :src="fullscreenImage" -->
             <img
-              :src="fullscreenImage"
+              :src="currentViewerItem?.url"
               class="image-modal-content"
               :style="{
                 transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`
@@ -879,19 +1272,35 @@ const extraHoursPrice = computed(
               @touchend="onTouchEnd"
               @touchmove="onTouchMove"
             >
-            <!--@click="onTap"  @touchmove="onTouchMove"-->
+            <!--@click.stop="closeImage"-->
             <button
               class="image-close"
-              @click.stop="closeImage"
+              @click.stop="closeViewer"
             >
               ✕
             </button>
+            <!-- @click.stop="deleteCurrentImage" -->
+            <button
+              v-if="isAdmin"
+              class="image-delete"
+              :disabled="deletingImage"
+              @click.stop="deleteCurrentViewerItem()"
+            >
+              🗑
+            </button>
           </div>
-          <div ref="sentinel" />
-        </div>
-      </div>
     </div>
   </div>
+  <input
+    ref="receiptInput"
+    hidden
+    type="file"
+    multiple
+    accept="image/*"
+    @change="onReceiptUpload"
+  />
+
+  
 </template>
 
 <style scoped>
@@ -1081,15 +1490,33 @@ const extraHoursPrice = computed(
 }
 
 .detail-row {
-  display: grid;
+  /*display: grid;
   grid-template-columns: 90px 1fr 70px;
-  gap: 10px;
+  display: flex;
+  gap: 15px;
   padding: 8px 0;
+  border-bottom: 1px solid #eee;*/
+  display: grid;
+  grid-template-columns:
+      110px
+      110px
+      minmax(180px,1fr)
+      80px;
+  gap: 12px;
+  align-items: center;
+
+  padding: 12px 0;
   border-bottom: 1px solid #eee;
 }
 
 .detail-comment {
-  grid-column: span 3;
+  /*grid-column: span 3;
+   grid-column:1/-1;
+  margin-top:4px;*/
+
+  margin-top:8px;
+  word-break:break-word;
+
   font-size: 13px;
   color: #666;
 }
@@ -1172,8 +1599,15 @@ const extraHoursPrice = computed(
   transform: scale(0.97);
 }
 .user-info {
+  margin-top:8px;
+  /*
   display: flex;
   flex-direction: column;
+  min-width:0;*/
+}
+.email,
+.name{
+    overflow-wrap:anywhere;
 }
 
 .project-metrics {
@@ -1284,6 +1718,422 @@ const extraHoursPrice = computed(
   font-weight: 500;
   opacity: 0.85;
 }
+
+.detail-type {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.detail-hours{
+    justify-self:end;
+    white-space:nowrap;
+}
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 5px 14px;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+.badge-work {
+  background: #2ecc71;
+  color: white;
+}
+
+.badge-extra {
+  background: #f1c40f;
+  color: black;
+}
+
+.badge-default {
+  background: #94a3b8;
+  color: white;
+}
+.detail-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+.image-delete {
+  position: absolute;
+
+  top: 20px;
+  left: 20px;
+
+  width: 48px;
+  height: 48px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(220, 38, 38, 0.95);
+
+  color: white;
+
+  font-size: 22px;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: 0.2s;
+
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+
+.image-delete:hover {
+  background: #b91c1c;
+  transform: scale(1.08);
+}
+
+.image-delete:active {
+  transform: scale(.95);
+}
+
+.image-delete:disabled {
+  opacity: .5;
+  cursor: wait;
+}
+.receipts-section{
+
+    margin-top:40px;
+
+    padding-top:24px;
+
+    border-top:1px solid #e5e7eb;
+
+}
+.receipt-grid{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fill,minmax(220px,1fr));
+
+gap:22px;
+
+}
+.receipt-card{
+position:relative;  
+
+cursor:pointer;
+
+border-radius:16px;
+
+overflow:hidden;
+
+box-shadow:0 10px 30px rgba(0,0,0,.08);
+background:white;
+transition:.25s;
+
+}
+.receipt-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:
+        0 18px 40px rgba(0,0,0,.16);
+
+}
+.receipt-card img{
+
+width:100%;
+aspect-ratio:4/5;
+height:180px;
+
+object-fit:cover;
+
+display:block;
+
+}
+.receipt-date{
+
+padding:12px;
+color:#64748b;
+font-size:13px;
+
+text-align:center;
+/*border-top:1px solid #eee;*/
+border-top:1px solid #ececec;
+
+}
+
+.delete-btn{
+
+    position:absolute;
+
+    top:12px;
+
+    right:12px;
+
+    z-index:20;
+
+    background:rgba(220,38,38,.9)!important;
+
+    color:white!important;
+
+}
+
+.receipt-loading{
+
+    grid-column:1/-1;
+
+    text-align:center;
+
+    padding:50px;
+
+    font-size:18px;
+
+    color:#64748b;
+
+}
+.receipts-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:16px;
+
+    flex-wrap:wrap;
+
+    margin-bottom:22px;
+
+}
+.receipt-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:12px 22px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#2563eb;
+
+    color:white;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    box-shadow:0 6px 20px rgba(37,99,235,.25);
+
+}
+.receipt-btn:hover{
+
+    transform:translateY(-2px);
+
+    background:#1d4ed8;
+
+}
+.add-receipt-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:12px 22px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#16a34a;
+
+    color:white;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    box-shadow:0 6px 20px rgba(22,163,74,.25);
+
+}
+
+.add-receipt-btn:hover{
+
+    transform:translateY(-2px);
+
+    background:#15803d;
+
+}
+.toggle-tasks-btn {
+  margin-top: 40px;
+  padding-top: 20px;
+}
+.toggle-images-btn {
+  margin-top: 40px;
+  padding-top: 20px;
+}
+@media (max-width:768px){
+
+.detail-row{
+
+    display:flex;
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    gap:8px;
+
+    padding:14px;
+
+    margin-bottom:12px;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:12px;
+
+    background:white;
+}
+
+.detail-type,
+.detail-date,
+.detail-user,
+.detail-hours,
+.detail-comment{
+
+    width:100%;
+}
+
+.detail-hours{
+/*
+    text-align:right;
+
+    font-size:18px;
+
+    font-weight:700;*/
+    align-self:flex-end;
+}
+
+.detail-date{
+
+    color:#64748b;
+}
+
+.user-info{
+
+    width:100%;
+}
+
+.email{
+
+    word-break:break-word;
+}
+.summary{
+
+    grid-template-columns:1fr;
+}
+
+.summary-item{
+
+    width:100%;
+
+    text-align:center;
+}
+.hours{
+
+    display:grid;
+
+    gap:12px;
+}
+
+.hours-breakdown{
+
+    display:grid;
+
+    grid-template-columns:1fr;
+
+    gap:6px;
+}
+
+.details-btn{
+
+    width:100%;
+}
+.metrics-wrapper{
+
+    grid-template-columns:1fr;
+}
+
+.metric-card{
+
+    padding:16px;
+}
+
+.metric-value{
+
+    font-size:24px;
+}
+.project-small-info{
+
+    display:grid;
+
+    grid-template-columns:1fr;
+
+    gap:6px;
+}
+.detail-top{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+.receipts-header{
+
+        /*flex-direction:column;
+        align-items:stretch;*/
+        align-items: center;
+
+    }
+
+    .receipt-btn,
+    .add-receipt-btn{
+
+        width:100%;
+
+        justify-content:center;
+
+    }
+
+    .receipt-grid{
+
+        grid-template-columns:
+        repeat(auto-fill,minmax(160px,1fr));
+
+        gap:16px;
+
+    }
+
+
+}
 @media (max-width: 640px) {
 
   .detail-row {
@@ -1340,7 +2190,7 @@ const extraHoursPrice = computed(
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 8999;
   backdrop-filter: blur(8px);
   animation: fadeIn 0.2s ease;
 }
@@ -1357,6 +2207,8 @@ const extraHoursPrice = computed(
   touch-action: none;
   cursor: grab;
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+
+  object-fit:contain;
 }
 @keyframes fadeIn {
   from { opacity: 0 }

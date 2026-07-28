@@ -378,38 +378,42 @@ onMounted(load)
   </div>
   <div class="stats-page">
     <div class="date-controls">
-      <div class="input-group">
-        <label>{{ t('stats.year') }}</label>
-        <input
-          v-model.number="year"
-          type="number"
-          min="2025"
-          max="2100"
-        >
-      </div>
-
-      <div class="input-group">
-        <label>{{ t('stats.month') }}</label>
-        <select v-model.number="month">
-          <option 
-            v-for="m in 12" 
-            :key="m" 
-            :value="m"
+      <div class='date-group'>
+        <div class="input-group">
+          <label>{{ t('stats.year') }}</label>
+          <input
+            v-model.number="year"
+            type="number"
+            min="2025"
+            max="2100"
           >
-            {{ m }}
-          </option>
-        </select>
-      </div>
+        </div>
+
+        <div class="input-group">
+          <label>{{ t('stats.month') }}</label>
+          <select v-model.number="month">
+            <option 
+              v-for="m in 12" 
+              :key="m" 
+              :value="m"
+            >
+              {{ m }}
+            </option>
+          </select>
+        </div>
+      </div>  
     <!--Load-->
-      <button @click="load">
-        {{ t('stats.load') }}
-      </button>
-      <button @click="exportAllExcel">
-        {{ t('stats.exportExcel') }}
-      </button>
-      <button @click="exportAllPDF">
-        {{ t('stats.exportPDF') }}
-      </button>
+      <div class='button-group'>
+        <button @click="load">
+          {{ t('stats.load') }}
+        </button>
+        <button @click="exportAllExcel">
+          {{ t('stats.exportExcel') }}
+        </button>
+        <button @click="exportAllPDF">
+          {{ t('stats.exportPDF') }}
+        </button>
+      </div>  
     </div>
 
     <div 
@@ -519,7 +523,10 @@ onMounted(load)
 </template>
 
 <style scoped>
-.stats-page { padding:24px; max-width:1200px; margin:auto; }
+.stats-page { padding:24px; /*max-width:1200px;*/ margin:auto; width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+    box-sizing:border-box; }
 .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
 .calendar-cell { border:1px solid #eee; border-radius:8px; padding:6px; min-height:90px; cursor:pointer; }
 .day-number { font-weight:bold; margin-bottom:4px; }
@@ -580,9 +587,19 @@ onMounted(load)
 
 .date-controls {
   display: flex;
-  gap: 20px;
-  align-items: flex-end;
+  gap: 8px;
+
+  /*align-items: flex-end;
+
+  box-sizing:border-box;*/
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.date-controls::-webkit-scrollbar {
+    display: none;
+}
+
 .header:hover {
   background: #1d4ed8;
 }
@@ -680,9 +697,34 @@ button:active {
   transform: scale(0.97);
 }
 
+.actions {
+    display:flex;
+    gap:20px;
+}
+
+.actions button{
+    flex:1;
+}
+.date-group {
+    display: flex;
+    gap: 10px;
+  }
+.button-group {
+    display: flex;
+    gap: 10px;
+  }
 @media (max-width: 768px) {
+  .date-controls{
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
   .calendar-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+  .button-group {
+    display: flex;
+    gap: 10px;
   }
 
   .calendar-cell {
@@ -698,6 +740,15 @@ button:active {
 @media (max-width: 600px) {
   .calendar-grid {
     grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  }
+  .stats-header{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  .stats-header button{
+      grid-column:span 2;
   }
 }
 </style>

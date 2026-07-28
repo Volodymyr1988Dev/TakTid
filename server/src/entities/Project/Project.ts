@@ -4,6 +4,7 @@ import { ProjectAssignment } from '../Project/ProjectAssignment';
 import { TimeEntry } from '../TimeEntries/TimeEntries';
 import { ProjectImage } from './ProjectImages';
 import { ProjectTask } from './ProjectTask';
+import { ProjectReceipt } from './ProjectReceipt';
 
 @Entity('projects')
 export class Projects {
@@ -56,4 +57,7 @@ export class Projects {
 
   @OneToMany(() => ProjectTask, task => task.project)
   tasks!: ProjectTask[]
+
+  @OneToMany(() => ProjectReceipt, receipt => receipt.project)
+  receipts!: ProjectReceipt[]
 }

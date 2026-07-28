@@ -12,12 +12,13 @@ import { Readable } from 'stream';
 import { UploadApiResponse } from 'cloudinary';
 import { Express } from 'express';
 import pLimit from 'p-limit';
+import { ProjectReceipt } from '../entities/Project/ProjectReceipt';
 
 @Injectable()
-export class ProjectImagesService {
+export class ProjectReceiptsService {
   constructor(
-    @InjectRepository(ProjectImage)
-    private readonly imageRepo: Repository<ProjectImage>,
+    @InjectRepository(ProjectReceipt)
+    private readonly receiptRepo: Repository<ProjectReceipt>,
 
     @InjectRepository(Projects)
     private readonly projectRepo: Repository<Projects>,
@@ -26,7 +27,7 @@ export class ProjectImagesService {
   async uploadMultiple(
     projectId: string,
     files: Express.Multer.File[],
-  ): Promise<ProjectImage[]> {
+  ): Promise<ProjectReceipt[]> {
     const project = await this.projectRepo.findOneBy({ id: projectId });
     if (!project) throw new NotFoundException();
     if (!files || files.length === 0) {
@@ -40,13 +41,13 @@ export class ProjectImagesService {
             projectId,
           );
 
-          const image = this.imageRepo.create({
+          const receipt = this.receiptRepo.create({
             url: uploaded.secure_url,
             publicId: uploaded.public_id,
             project,
-          } as Partial<ProjectImage>);
+          } as Partial<ProjectReceipt>);
 
-          return this.imageRepo.save(image);
+          return this.receiptRepo.save(receipt);
         }),
       );
 
@@ -54,7 +55,7 @@ export class ProjectImagesService {
     }
 
   async getByProject(projectId: string, page: number, limit: number) {
-    const [data, total] = await this.imageRepo.findAndCount({
+    const [data, total] = await this.receiptRepo.findAndCount({
       where: { project: { id: projectId } },
       order: { createdAt: 'DESC' },
       take: limit,
@@ -68,39 +69,47 @@ export class ProjectImagesService {
       lastPage: Math.ceil(total / limit),
     };
   }
+
+  async getCount(projectId: string) {
+    const count = await this.receiptRepo.count({
+      where: { project: { id: projectId } },
+    });
+    return { count };
+  }
+
   async removeByProject(projectId: string): Promise<void> {
-    const images = await this.imageRepo.find({
+    const receipts = await this.receiptRepo.find({
       where: { project: { id: projectId } },
     });
 
     await Promise.all(
-      images.map(async (image) => {
+      receipts.map(async (receipt) => {
         try {
-          await cloudinary.uploader.destroy(image.publicId);
+          await cloudinary.uploader.destroy(receipt.publicId);
         } catch (e) {
-          console.warn('Cloudinary delete failed:', image.publicId, e);
+          console.warn('Cloudinary delete failed:', receipt.publicId, e);
         }
       }),
     );
 
-    await this.imageRepo.remove(images);
+    await this.receiptRepo.remove(receipts);
   }
-  async remove(imageId: string) {
-    const image = await this.imageRepo.findOne({
-      where: { id: imageId },
+  async remove(receiptId: string) {
+    const receipt = await this.receiptRepo.findOne({
+      where: { id: receiptId },
     });
 
-    //if (!image) { throw new NotFoundException('Image not found')}
-    if (!image) return;
+    if (!receipt) { throw new NotFoundException('Receipt not found')}
+    //if (!receipt) return;
 
-    //await cloudinary.uploader.destroy(image.publicId);
+    //await cloudinary.uploader.destroy(receipt.publicId);
     try {
-      await cloudinary.uploader.destroy(image.publicId);
+      await cloudinary.uploader.destroy(receipt.publicId);
     } catch (e) {
-      console.warn('Cloudinary delete failed:', image.publicId, e);
+      console.warn('Cloudinary delete failed:', receipt.publicId, e);
     }
 
-    await this.imageRepo.remove(image);
+    await this.receiptRepo.remove(receipt);
   }
   private uploadToCloudinary(
     buffer: Buffer,
@@ -109,7 +118,7 @@ export class ProjectImagesService {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: `projects/${projectId}`,
+          folder: `projects/${projectId}/receipts`,
           transformation: [
             {
               width: 1600,
