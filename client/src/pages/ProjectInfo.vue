@@ -1147,7 +1147,10 @@ watch(
         </div>
       </div>
     </div>
-    <button @click="showTasks = !showTasks">
+    <button 
+      class="toggle-tasks-btn receipt-btn receipt-btn"
+      @click="showTasks = !showTasks"
+    >
       {{ showTasks ? t('project.hideTasks') : t('project.showTasks') }}
     </button>
       <ProjectTasks
@@ -1157,7 +1160,10 @@ watch(
       />
       <!-- IMAGES -->
       <div class="images-section">
-        <button @click="showImages = !showImages">
+        <button 
+          class="toggle-images-btn receipt-btn"
+          @click="showImages = !showImages"
+        >
           {{ showImages ? t('project.hideImages') : t('project.showImages') }}
         </button>
 
@@ -1202,14 +1208,13 @@ watch(
                   : t('project.showReceipts')
               }} ({{ receiptStore.count }})
           </button>
-        </div>
           <button
               class="add-receipt-btn"
               @click="receiptInput?.click()"
           >
               ➕ {{ t('project.addReceipt') }}
           </button>
-
+        </div>
           <div
               v-if="showReceipts"
               class="receipt-grid"
