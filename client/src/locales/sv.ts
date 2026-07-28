@@ -28,6 +28,8 @@ export default {
     back: 'Tillbaka',
     hideImages: 'Dölj bilder',
     showImages: 'Visa bilder',
+    hideReceipts: 'Dölj paragony',
+    showReceipts: 'Visa paragony',
     hideDetails: 'Dölj detaljer',
     showDetails: 'Visa detaljer',
     area: 'Yta',

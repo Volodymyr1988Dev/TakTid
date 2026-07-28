@@ -28,6 +28,8 @@ export default {
     back: 'Înapoi',
     hideImages: 'Ascunde imagini',
     showImages: 'Arată imagini',
+    hideReceipts: 'Ascunde paragone',
+    showReceipts: 'Arată paragone',
     hideDetails: 'Ascunde detaliile',
     showDetails: 'Arată detaliile',
     area: 'Suprafață',

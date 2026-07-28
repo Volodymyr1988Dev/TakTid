@@ -1192,16 +1192,21 @@ watch(
       </div>
 
       <div class="receipts-section">
-
+        <div class="receipts-header">
           <button
               @click="toggleReceipts"
           >
-              {{ showReceipts
+              🧾 {{ receiptStore.count }} {{ showReceipts
                   ? t('project.hideReceipts')
                   : t('project.showReceipts')
               }}
-
-              ({{ receiptStore.count }})
+          </button>
+        </div>
+          <button
+              class="add-receipt-btn"
+              @click="receiptInput?.click()"
+          >
+              ➕ Add
           </button>
 
           <div
@@ -1315,15 +1320,6 @@ watch(
               @click="receiptInput?.click()"
           >
               ➕ Add
-          </v-list-item>
-
-          <v-list-item
-              @click="toggleReceipts"
-          >
-              🧾 {{ receiptStore.count }} {{ showReceipts
-                  ? t('project.hideReceipts')
-                  : t('project.showReceipts')
-              }}
           </v-list-item>
 
       </v-list>
@@ -1941,6 +1937,16 @@ box-shadow:
 
     font-size:18px;
 
+}
+.receipts-header {
+  
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-top:20px;
 }
 @media (max-width:768px){
 

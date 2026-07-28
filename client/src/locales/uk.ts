@@ -28,6 +28,8 @@ export default {
     back: 'Назад',
     hideImages: 'Сховати зображення',
     showImages: 'Показати зображення',
+    hideReceipts: 'Сховати paragony',
+    showReceipts: 'Показати paragony',
     hideDetails: 'Сховати деталі',
     showDetails: 'Показати деталі',
     area: 'Площа',
