@@ -33,6 +33,8 @@ export default {
     showImages: 'Show Images',
     hideDetails: 'Hide details',
     showDetails: 'Show details',
+    hideReceipts: 'Hide Receipts',
+    showReceipts: 'Show Receipts',
     area: 'Area',
     pricePerM2: 'Price per m²',
     totalProjectPrice: 'Total project price',

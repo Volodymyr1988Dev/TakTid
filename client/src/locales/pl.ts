@@ -28,6 +28,8 @@ export default {
     back: 'Wstecz',
     hideImages: 'Ukryj obrazy',
     showImages: 'Pokaż obrazy',
+    hideReceipts: 'Ukryj paragony',
+    showReceipts: 'Pokaż paragony',
     hideDetails: 'Ukryj szczegóły',
     showDetails: 'Pokaż szczegóły',
     area: 'Powierzchnia',
