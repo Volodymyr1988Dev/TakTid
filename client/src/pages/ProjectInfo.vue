@@ -73,7 +73,7 @@ const error = ref<string | null>(null)
 
 const extraPrice = ref<number | null>(null)
 
-const showReceiptMenu = ref(false)
+//const showReceiptMenu = ref(false)
 //const showReceiptDialog = ref(false)
 const receiptInput = ref<HTMLInputElement>()  
 const editMode = ref<'area' | 'price' | 'extraPrice' | null>(null)
@@ -1148,7 +1148,7 @@ watch(
       </div>
     </div>
     <button @click="showTasks = !showTasks">
-      {{ showTasks ? 'Hide Tasks' : 'Show Tasks' }}
+      {{ showTasks ? t('project.hideTasks') : t('project.showTasks') }}
     </button>
       <ProjectTasks
           v-if="showTasks"
@@ -1194,19 +1194,20 @@ watch(
       <div class="receipts-section">
         <div class="receipts-header">
           <button
-              @click="toggleReceipts"
+            class="receipt-btn"
+            @click="toggleReceipts"
           >
-              🧾 {{ receiptStore.count }} {{ showReceipts
+              🧾 {{ showReceipts
                   ? t('project.hideReceipts')
                   : t('project.showReceipts')
-              }}
+              }} ({{ receiptStore.count }})
           </button>
         </div>
           <button
               class="add-receipt-btn"
               @click="receiptInput?.click()"
           >
-              ➕ Add
+              ➕ {{ t('project.addReceipt') }}
           </button>
 
           <div
@@ -1218,20 +1219,15 @@ watch(
               class="receipt-loading"
           >
 
-              Loading receipts...
+              {{ t('project.loadingReceipts') }}
           </div>
 
               <div
-                v-for="(receipt,index)
-                in receiptStore.receipts"
-
+                v-for="(receipt,index) in receiptStore.receipts"
                 :key="receipt.id"
-
                 class="receipt-card"
-
                 @click="openReceipt(index)"
                 >
-                <!--  @click="deleteReceipt()" @click="deleteCurrentViewerItem()"  @click.stop="receiptStore.remove(receipt.id)" @click.stop="deleteCurrentViewerItem(receipt)"  @click.stop="deleteCurrentViewerItem({...receipt, type: 'receipt'})"-->
                   <v-btn
                     v-if="isAdmin"
                     icon
@@ -1244,20 +1240,14 @@ watch(
                     </v-btn>
                 <img
                 :src="receipt.url"
+                loading="lazy"
                 />
-
                 <div class="receipt-date">
-
                 {{ receipt.createdAt }}
-
                 </div>
-
               </div>
-
           </div>
-
       </div>
-
       
 
     <div
@@ -1296,35 +1286,6 @@ watch(
           </div>
     </div>
   </div>
-
-  <v-menu
-    v-model="showReceiptMenu"
-    location="top"
-  >
-      <template #activator="{ props }">
-
-          <v-btn
-              v-bind="props"
-              class="receipt-fab"
-              icon
-              color="primary"
-          >
-              🧾
-          </v-btn>
-
-      </template>
-
-      <v-list>
-
-          <v-list-item
-              @click="receiptInput?.click()"
-          >
-              ➕ Add
-          </v-list-item>
-
-      </v-list>
-
-  </v-menu>
   <input
     ref="receiptInput"
     hidden
@@ -1839,17 +1800,23 @@ watch(
   opacity: .5;
   cursor: wait;
 }
+.receipts-section{
 
+    margin-top:40px;
+
+    padding-top:24px;
+
+    border-top:1px solid #e5e7eb;
+
+}
 .receipt-grid{
 
 display:grid;
 
 grid-template-columns:
-repeat(auto-fill,minmax(180px,1fr));
+repeat(auto-fill,minmax(220px,1fr));
 
-gap:18px;
-
-padding:20px;
+gap:22px;
 
 }
 .receipt-card{
@@ -1857,11 +1824,13 @@ position:relative;
 
 cursor:pointer;
 
-border-radius:12px;
+border-radius:16px;
 
 overflow:hidden;
 
 box-shadow:0 10px 30px rgba(0,0,0,.08);
+background:white;
+transition:.25s;
 
 }
 .receipt-card:hover{
@@ -1869,7 +1838,7 @@ box-shadow:0 10px 30px rgba(0,0,0,.08);
     transform:translateY(-6px);
 
     box-shadow:
-        0 18px 40px rgba(0,0,0,.18);
+        0 18px 40px rgba(0,0,0,.16);
 
 }
 .receipt-card img{
@@ -1890,38 +1859,20 @@ color:#64748b;
 font-size:13px;
 
 text-align:center;
-border-top:1px solid #eee;
+/*border-top:1px solid #eee;*/
+border-top:1px solid #ececec;
 
 }
-.receipt-fab{
 
-position:fixed;
-
-right:24px;
-
-bottom:24px;
-
-width:60px;
-
-height:60px;
-
-border-radius:50%;
-
-z-index:500;
-
-box-shadow:
-0 8px 24px rgba(0,0,0,.25);
-
-}
 .delete-btn{
 
     position:absolute;
 
-    top:10px;
+    top:12px;
 
-    right:10px;
+    right:12px;
 
-    z-index:10;
+    z-index:20;
 
     background:rgba(220,38,38,.9)!important;
 
@@ -1931,22 +1882,104 @@ box-shadow:
 
 .receipt-loading{
 
-    padding:40px;
+    grid-column:1/-1;
 
     text-align:center;
 
+    padding:50px;
+
     font-size:18px;
 
+    color:#64748b;
+
 }
-.receipts-header {
-  
+.receipts-header{
+
     display:flex;
 
     justify-content:space-between;
 
     align-items:center;
 
-    margin-top:20px;
+    gap:16px;
+
+    flex-wrap:wrap;
+
+    margin-bottom:22px;
+
+}
+.receipt-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:12px 22px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#2563eb;
+
+    color:white;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    box-shadow:0 6px 20px rgba(37,99,235,.25);
+
+}
+.receipt-btn:hover{
+
+    transform:translateY(-2px);
+
+    background:#1d4ed8;
+
+}
+.add-receipt-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:12px 22px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#16a34a;
+
+    color:white;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    box-shadow:0 6px 20px rgba(22,163,74,.25);
+
+}
+
+.add-receipt-btn:hover{
+
+    transform:translateY(-2px);
+
+    background:#15803d;
+
 }
 @media (max-width:768px){
 
@@ -2060,6 +2093,32 @@ box-shadow:
         flex-direction:column;
         align-items:flex-start;
     }
+.receipts-header{
+
+        flex-direction:column;
+
+        align-items:stretch;
+
+    }
+
+    .receipt-btn,
+    .add-receipt-btn{
+
+        width:100%;
+
+        justify-content:center;
+
+    }
+
+    .receipt-grid{
+
+        grid-template-columns:
+        repeat(auto-fill,minmax(160px,1fr));
+
+        gap:16px;
+
+    }
+
 
 }
 @media (max-width: 640px) {
