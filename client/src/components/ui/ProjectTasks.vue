@@ -99,6 +99,7 @@ async function deleteTask(taskId: string) {
 
 <div class="tasks-panel">
 <button
+  class="import-btn edit-project-btn"
   v-if="isAdmin"
   @click="importTasks"
 >
@@ -386,5 +387,7 @@ async function deleteTask(taskId: string) {
 
   cursor: pointer;
 }
-
+.import-btn{
+  margin-top: 20px;
+} 
 </style>

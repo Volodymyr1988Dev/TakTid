@@ -30,42 +30,12 @@ const emit = defineEmits<{ (e: 'back'): void }>()
 const imageStore = useProjectImageStore()
 const receiptStore = useProjectReceiptStore()
 const statsStore = useStatsStore()
-
 const showTasks = ref(false)
 const showReceipts = ref(false)
-//const viewerItems = ref<ProjectImage[] | ProjectReceipt[]>([]) 
-//const viewerOpen = ref(false)
-/*
-const fullscreenImage = ref<string | null>(null)
-const viewerItems = ref<ViewerItem[]>([])
-const viewerIndex = ref(0)
-const viewerType = ref<'images' | 'receipts'>('images')
-const currentIndex = ref(0)
-const receiptViewer = ref(false)
-const currentReceiptIndex = ref(0)
-*/
-
 const viewerOpen = ref(false)
-
 const viewerType = ref<'images' | 'receipts'>('images')
-
 const viewerItems = ref<ViewerItem[]>([])
-
 const viewerIndex = ref(0)
-
-const currentViewerItem = computed(() => {
-    return viewerItems.value[viewerIndex.value] ?? null
-})
-/*
-const currentImage = computed(() => {
-    const item = currentViewerItem.value
-
-    if (!item)
-        return null
-
-    return item.url
-})
-*/
 const stats = ref<ProjectStats | null>(null)
 const loading = ref(true)
 const loaded = ref(new Set<string>())
@@ -92,6 +62,10 @@ const EMPLOYER_MULTIPLIER = 1.55
 const showDetails = ref<'work' | 'extra' | 'total' | null>(null)
 const loadingDetails = ref(false)  
 //const receiptCount = ref(0)
+
+const currentViewerItem = computed(() => {
+    return viewerItems.value[viewerIndex.value] ?? null
+})
 
 function onLoad(id: string) {
   loaded.value.add(id)
@@ -680,49 +654,9 @@ async function openReceipt(index:number){
         )
       console.log(viewerOpen.value)
    // }
-/*
-openViewer(
-        'receipts',
-        receiptStore.receipts,
-        index,
-    )
-        await receiptStore.loadPaginated(
-            props.projectId,
-            1,
-            100
-        )
-            */
-
-/*    
-viewerItems.value = receiptStore.receipts  
-//currentReceiptIndex.value=index
-currentIndex.value = index
-
-receiptViewer.value=true
-*/
 }
-/*
-async function deleteReceipt(){
 
-const receipt=
-receiptStore.receipts[
-currentReceiptIndex.value
-]
-
-if(!receipt)return
-
-if(!confirm('Delete receipt?')) return
-
-await receiptStore.remove( receipt.id )
-}
-*/
-//const baseProjectPrice = computed( () => stats.value?.baseProjectPrice ?? 0 )
 const receiptsLoaded = ref(false)
-/*
-async function loadReceiptCount() {
-    receiptCount.value =
-        await receiptStore.getCount(props.projectId)
-}*/
 
 async function loadReceipts() {
 
@@ -737,14 +671,7 @@ async function loadReceipts() {
 
     receiptsLoaded.value = true
 }
-/*
-async function showReceipts() {
 
-        await loadReceipts()
-
-        showReceiptDialog.value = true
-    }
-*/
 async function toggleReceipts() {
 
     showReceipts.value = !showReceipts.value
@@ -869,15 +796,24 @@ watch(
 
         <div v-if="showEdit" class="edit-menu">
 
-          <button @click="editMode = 'area'">
+          <button 
+            class="edit-btn edit-project-btn"
+            @click="editMode = 'area'"
+          >
             {{ t('project.changeArea') }}
           </button>
 
-          <button @click="editMode = 'price'">
+          <button 
+            class="edit-btn edit-project-btn"
+            @click="editMode = 'price'"
+          >
             {{ t('project.changePricePerM2') }}
           </button>
 
-          <button @click="editMode = 'extraPrice'">
+          <button 
+            class="edit-btn edit-project-btn"
+            @click="editMode = 'extraPrice'"
+          >
             {{ t('project.changeExtraHourPrice') }}
           </button>
 
@@ -914,7 +850,10 @@ watch(
               id="area"
             >
 
-            <button @click="saveArea">
+            <button 
+              class="edit-btn edit-project-btn"
+              @click="saveArea"
+            >
               {{ t('project.saveArea') }}
             </button>
 
@@ -932,7 +871,10 @@ watch(
               id="price"
             >
 
-            <button @click="savePrice">
+            <button 
+              class="edit-btn edit-project-btn"
+              @click="savePrice"
+            >
               {{ t('project.savePrice') }}
             </button>
 
@@ -952,7 +894,10 @@ watch(
               id="extraPrice"
             >
 
-            <button @click="saveExtraPrice">
+            <button 
+              class="edit-btn edit-project-btn"
+              @click="saveExtraPrice"
+            >
               {{ t('project.saveExtraHourPrice') }}
             </button>
 
@@ -1148,7 +1093,7 @@ watch(
       </div>
     </div>
     <button 
-      class="toggle-tasks-btn receipt-btn receipt-btn"
+      class="toggle-tasks-btn receipt-btn"
       @click="showTasks = !showTasks"
     >
       {{ showTasks ? t('project.hideTasks') : t('project.showTasks') }}
@@ -1988,11 +1933,9 @@ border-top:1px solid #ececec;
 }
 .toggle-tasks-btn {
   margin-top: 40px;
-  padding-top: 20px;
 }
 .toggle-images-btn {
   margin-top: 40px;
-  padding-top: 20px;
 }
 @media (max-width:768px){
 
