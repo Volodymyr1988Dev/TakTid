@@ -1986,6 +1986,14 @@ border-top:1px solid #ececec;
     background:#15803d;
 
 }
+.toggle-tasks-btn {
+  margin-top: 40px;
+  padding-top: 20px;
+}
+.toggle-images-btn {
+  margin-top: 40px;
+  padding-top: 20px;
+}
 @media (max-width:768px){
 
 .detail-row{
@@ -2100,9 +2108,9 @@ border-top:1px solid #ececec;
     }
 .receipts-header{
 
-        flex-direction:column;
-
-        align-items:stretch;
+        /*flex-direction:column;
+        align-items:stretch;*/
+        align-items: center;
 
     }
 
