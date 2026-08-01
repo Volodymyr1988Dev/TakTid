@@ -197,7 +197,7 @@ onMounted(() => {
 .label {
   /*flex: 2;*/
   flex: 1;
-  font-size: 14px;
+  font-size: 13px;
   color: #333;
   padding: 1px 6px; 
   
@@ -263,7 +263,7 @@ button:hover {
   }
 
   .label {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .row input {
