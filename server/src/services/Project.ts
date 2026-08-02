@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Projects } from '../entities/Project/Project';
 import { CreateProjectDto, UpdateProjectDto } from '../types/index';
 import { ProjectImagesService } from './ProjectImages.service';
-import { TimeEntry } from '../entities/TimeEntries/TimeEntries'
+import { TimeEntry } from '../entities/TimeEntries/TimeEntries';
 import { ProjectAssignment } from '../entities';
 
 @Injectable()
@@ -18,8 +18,6 @@ export class ProjectsService {
     private readonly timeRepo: Repository<TimeEntry>,
     @InjectRepository(ProjectAssignment)
     private readonly assignmentRepo: Repository<ProjectAssignment>,
-
-    
   ) {}
   async create(dto: CreateProjectDto): Promise<Projects> {
     const project = this.projectRepo.create(dto);
@@ -34,25 +32,25 @@ export class ProjectsService {
   }
 
   async getProjectDetails(projectId: string) {
-    const project = await this.projectRepo.findOneBy({ id: projectId })
+    const project = await this.projectRepo.findOneBy({ id: projectId });
 
     if (!project) {
-      throw new NotFoundException('Project not found')
+      throw new NotFoundException('Project not found');
     }
 
     const timeEntries = await this.timeRepo.find({
       where: { project: { id: projectId } },
       relations: ['user'],
       order: { date: 'DESC' },
-    })
+    });
 
     const extraEntries = await this.assignmentRepo.find({
       where: { project: { id: projectId } },
       relations: ['user'],
       order: { date: 'DESC' },
-    })
+    });
 
-    const mappedTime = timeEntries.map(e => ({
+    const mappedTime = timeEntries.map((e) => ({
       id: e.id,
       date: e.date,
       hours: e.hours,
@@ -62,10 +60,10 @@ export class ProjectsService {
         id: e.user.id,
         email: e.user.email,
         name: e.user.name,
-      }
-    }))
+      },
+    }));
 
-    const mappedExtra = extraEntries.map(e => ({
+    const mappedExtra = extraEntries.map((e) => ({
       id: e.id,
       date: e.date,
       hours: e.hours,
@@ -75,42 +73,41 @@ export class ProjectsService {
         id: e.user.id,
         email: e.user.email,
         name: e.user.name,
-      }
-    }))
+      },
+    }));
 
-    return [...mappedTime, ...mappedExtra].sort(
-      (a, b) => b.date.localeCompare(a.date)
-    )
+    return [...mappedTime, ...mappedExtra].sort((a, b) =>
+      b.date.localeCompare(a.date),
+    );
   }
 
   async getProjectSummary(projectId: string) {
-    const project = await this.projectRepo.findOneBy({ id: projectId })
+    const project = await this.projectRepo.findOneBy({ id: projectId });
 
     if (!project) {
-      throw new NotFoundException('Project not found')
+      throw new NotFoundException('Project not found');
     }
 
     const timeEntries = await this.timeRepo.find({
       where: { project: { id: projectId } },
-    })
+    });
 
     const extraEntries = await this.assignmentRepo.find({
       where: { project: { id: projectId } },
-    })
+    });
 
-    const totalWork = timeEntries.reduce((sum, e) => sum + Number(e.hours), 0)
-    const totalExtra = extraEntries.reduce((sum, e) => sum + Number(e.hours), 0)
+    const totalWork = timeEntries.reduce((sum, e) => sum + Number(e.hours), 0);
+    const totalExtra = extraEntries.reduce(
+      (sum, e) => sum + Number(e.hours),
+      0,
+    );
 
     const baseProjectPrice =
-      Number(project.pricePerM2 ?? 0) *
-      Number(project.areaM2 ?? 0)
+      Number(project.pricePerM2 ?? 0) * Number(project.areaM2 ?? 0);
 
-    const extraHoursPrice =
-      totalExtra *
-      Number(project.pricePerExtraH ?? 0)
+    const extraHoursPrice = totalExtra * Number(project.pricePerExtraH ?? 0);
 
-    const totalProjectPrice =
-      baseProjectPrice + extraHoursPrice
+    const totalProjectPrice = baseProjectPrice + extraHoursPrice;
     return {
       project: {
         id: project.id,
@@ -128,7 +125,7 @@ export class ProjectsService {
       baseProjectPrice,
       extraHoursPrice,
       totalProjectPrice,
-    }
+    };
   }
 
   async findOne(id: string): Promise<Projects> {

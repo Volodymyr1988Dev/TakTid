@@ -84,7 +84,7 @@ export class User {
 
   @Column({ nullable: true })
   currentSalary?: number;
-  
+
   @OneToMany(() => UserSalaryHistory, (s) => s.user)
   salaryHistory!: UserSalaryHistory[];
   @OneToMany(() => ProjectAssignment, (assignment) => assignment.user)

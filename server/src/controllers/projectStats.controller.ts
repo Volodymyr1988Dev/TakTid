@@ -1,4 +1,10 @@
-import { Controller, Get, Param, Req, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ProjectStatsService } from '../services/projectStats.service';
 import { ApiTags } from '@nestjs/swagger';
 import type { AuthRequest } from '../types/index';
@@ -18,10 +24,10 @@ export class ProjectStatsController {
   @Get(':id/stats')
   getStats(@Param('id') id: string, @Req() req: AuthRequest) {
     if (!req.user) {
-      throw new UnauthorizedException()
+      throw new UnauthorizedException();
     }
     if (req.user.isAdmin) {
-      return this.statsService.getProjectStats(id)
+      return this.statsService.getProjectStats(id);
     }
 
     return this.projectsService.getProjectSummary(id);
