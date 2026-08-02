@@ -23,7 +23,7 @@ const textareaRef = ref<HTMLTextAreaElement>()
 
 const materialForm = reactive<CreateMaterialListDto>({
   projectId: '',
-  title: '',
+  //title: '',
   other: '',
   items: MATERIAL_CATALOG.map(label => ({
     label,
@@ -64,7 +64,7 @@ watch(
   () => materialForm.projectId,
   async id => {
     if (!id) {
-      materialForm.title = ''
+      //materialForm.title = ''
       materialForm.other = ''
       materialForm.items = MATERIAL_CATALOG.map(label => ({
         label,
@@ -74,12 +74,12 @@ watch(
       }))
       return
     }
-
+    //await materialStore.load(materialForm.projectId)
     await materialStore.load(id)
 
     const list = materialStore.materialList
 
-    materialForm.title = list?.title ?? ''
+    //materialForm.title = list?.title ?? ''
     materialForm.other = list?.other ?? ''
     //materialForm.title = materialStore.materialList?.title ?? ''
 
@@ -88,7 +88,7 @@ watch(
     materialForm.items =
       MATERIAL_CATALOG.map(label => {
         //const existing =materialStore.materialList?.items.find((i: MaterialItem) => i.label === label)
-        const existing = list?.items.find((i: MaterialItem) => i.label === label)
+        const existing = list?.items?.find((i: MaterialItem) => i.label === label)
         return {
           label,
           quantity: existing?.quantity ?? null,
@@ -104,14 +104,21 @@ watch(
 async function save() {
   const payload: CreateMaterialListDto = {
       projectId: materialForm.projectId,
-      title: materialForm.title,
-      other: materialForm.other,
-      items: materialForm.items.filter(
-          item =>
-              item.quantity !== null &&
-              !Number.isNaN(item.quantity) &&
-              item.quantity !== 0,
-      ),
+      //title: materialForm.title,
+      other: materialForm.other?.trim() || '',
+      items: materialForm.items
+        .filter(
+            item =>
+                item.quantity !== null &&
+                item.quantity !== 0 &&
+                !Number.isNaN(item.quantity),
+        )
+        .map(item => ({
+            label: item.label,
+            quantity: item.quantity,
+            price: item.price,
+            unit: item.unit,
+        })),
   }
 /*
   const payload: CreateMaterialListDto = {
@@ -134,7 +141,7 @@ async function save() {
 
   materialForm.items = MATERIAL_CATALOG.map(label => {
     const existing =
-      materialStore.materialList?.items.find(
+      materialStore.materialList?.items?.find(
         (i: MaterialItem) => i.label === label,
       )
 
@@ -211,13 +218,14 @@ function edit() {
         {{ project.address }}
       </option>
     </select>
-
+    <!--
     <input
       v-model="materialForm.title"
       class="title-input"
       :disabled="!isEditing"
       :placeholder="t('common.title')"
     >
+    -->
 
     <div
       v-if="isEditing || visibleItems.length"
