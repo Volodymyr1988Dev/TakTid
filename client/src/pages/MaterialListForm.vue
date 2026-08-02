@@ -215,7 +215,7 @@ function edit() {
         :key="project.id"
         :value="project.id"
       >
-        {{ project.address }}
+        {{project.city}}  ➤  {{ project.address }}
       </option>
     </select>
     <!--
