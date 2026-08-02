@@ -35,24 +35,21 @@ export class ProjectReceiptsService {
     }
     const limitUpload = pLimit(3);
     const uploads = files.map((file) =>
-        limitUpload(async () => {
-          const uploaded = await this.uploadToCloudinary(
-            file.buffer,
-            projectId,
-          );
+      limitUpload(async () => {
+        const uploaded = await this.uploadToCloudinary(file.buffer, projectId);
 
-          const receipt = this.receiptRepo.create({
-            url: uploaded.secure_url,
-            publicId: uploaded.public_id,
-            project,
-          } as Partial<ProjectReceipt>);
+        const receipt = this.receiptRepo.create({
+          url: uploaded.secure_url,
+          publicId: uploaded.public_id,
+          project,
+        } as Partial<ProjectReceipt>);
 
-          return this.receiptRepo.save(receipt);
-        }),
-      );
+        return this.receiptRepo.save(receipt);
+      }),
+    );
 
-      return Promise.all(uploads);
-    }
+    return Promise.all(uploads);
+  }
 
   async getByProject(projectId: string, page: number, limit: number) {
     const [data, total] = await this.receiptRepo.findAndCount({
@@ -99,7 +96,9 @@ export class ProjectReceiptsService {
       where: { id: receiptId },
     });
 
-    if (!receipt) { throw new NotFoundException('Receipt not found')}
+    if (!receipt) {
+      throw new NotFoundException('Receipt not found');
+    }
     //if (!receipt) return;
 
     //await cloudinary.uploader.destroy(receipt.publicId);

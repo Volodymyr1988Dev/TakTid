@@ -1,5 +1,5 @@
 import {
-    BadRequestException,
+  BadRequestException,
   Controller,
   Get,
   Param,
@@ -24,96 +24,72 @@ import { memoryStorage } from 'multer';
 
 @Controller('projects')
 export class ProjectTaskController {
-
-  constructor(
-    private readonly taskService: ProjectTaskService
-  ) {}
+  constructor(private readonly taskService: ProjectTaskService) {}
 
   @Get(':id/tasks')
   getTasks(@Param('id') id: string) {
-    return this.taskService.getProjectTasks(id)
+    return this.taskService.getProjectTasks(id);
   }
 
   @UseGuards(AdminGuard)
   @Post(':id/tasks')
-    createTask(
+  createTask(
     @Param('id') projectId: string,
     @Body() dto: CreateProjectTaskDto,
-    ) {
-    return this.taskService.createTask(
-        projectId,
-        dto,
-    )
-    }
+  ) {
+    return this.taskService.createTask(projectId, dto);
+  }
 
-    @UseGuards(AdminGuard)
-    @Post(':id/import-tasks')
-   @UseInterceptors(
-    FilesInterceptor(
-        'files',
-        10,
-        {
-        storage: memoryStorage(),
+  @UseGuards(AdminGuard)
+  @Post(':id/import-tasks')
+  @UseInterceptors(
+    FilesInterceptor('files', 10, {
+      storage: memoryStorage(),
 
-        limits: {
-            fileSize: 10 * 1024 * 1024,
-        },
-        },
-    ),
-    )
-    upload(
+      limits: {
+        fileSize: 10 * 1024 * 1024,
+      },
+    }),
+  )
+  upload(
     @Param('id')
     projectId: string,
 
     @UploadedFiles()
     files: Express.Multer.File[],
-    ) {
-
+  ) {
     if (!files?.length) {
-        throw new BadRequestException(
-        'No files uploaded',
-        )
+      throw new BadRequestException('No files uploaded');
     }
 
-  return this.taskService.importTasks(
-    projectId,
-    files,
-  )
-}
+    return this.taskService.importTasks(projectId, files);
+  }
 
   @UseGuards(AdminGuard)
-    @Delete('/tasks/:taskId')
-    deleteTask(
-    @Param('taskId') taskId: string,
-    ) {
-    return this.taskService.deleteTask(taskId)
-    }
+  @Delete('/tasks/:taskId')
+  deleteTask(@Param('taskId') taskId: string) {
+    return this.taskService.deleteTask(taskId);
+  }
 
   @UseGuards(AdminGuard)
   @Patch('/tasks/:taskId')
-    updateTaskData(
+  updateTaskData(
     @Param('taskId') taskId: string,
     @Body() dto: UpdateProjectTaskDto,
-    ) {
-    return this.taskService.updateTaskData(
-        taskId,
-        dto,
-    )
-    }
+  ) {
+    return this.taskService.updateTaskData(taskId, dto);
+  }
 
   @UseGuards(AdminGuard)
   @Patch('/tasks/:taskId/toggle')
-  toggle(
-    @Param('taskId') taskId: string,
-    @Req() req: AuthRequest
-  ) {
+  toggle(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
     if (!req.user) {
-        throw new UnauthorizedException()
+      throw new UnauthorizedException();
     }
     return this.taskService.updateTask(
       taskId,
       req.user.id,
       //authUser: AuthUser,
-    )
+    );
   }
 }

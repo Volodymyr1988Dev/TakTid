@@ -8,12 +8,7 @@ import { SalaryHistoryService } from '../services/salary-history.service';
 import { SalaryHistoryController } from '../controllers/salary-history.controller';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      User,
-      UserSalaryHistory,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([User, UserSalaryHistory])],
   providers: [SalaryHistoryService],
   controllers: [SalaryHistoryController],
   exports: [SalaryHistoryService],

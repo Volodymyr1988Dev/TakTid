@@ -4,60 +4,59 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
-} from 'typeorm'
+} from 'typeorm';
 
-import { Projects } from './Project'
-import { User } from '../User/User'
+import { Projects } from './Project';
+import { User } from '../User/User';
 
 @Entity()
 export class ProjectTask {
-
   @PrimaryGeneratedColumn('uuid')
-  id!: string
+  id!: string;
 
   @Column()
-  title!: string
+  title!: string;
 
   @Column({ default: false })
-  done!: boolean
+  done!: boolean;
 
   @Column({ type: 'text', nullable: true })
-  completedByName!: string | null
+  completedByName!: string | null;
 
   @CreateDateColumn()
-  createdAt!: Date
+  createdAt!: Date;
 
   @Column({ type: 'timestamp', nullable: true })
-  completedAt!: Date | null
+  completedAt!: Date | null;
 
   @Column({ type: 'text', nullable: true })
-    comment!: string | null
+  comment!: string | null;
 
   @Column('text', {
-  array: true,
-  nullable: true,
+    array: true,
+    nullable: true,
   })
-  photoUrls!: string[] | null
+  photoUrls!: string[] | null;
 
   @Column({
     nullable: true,
     type: 'text',
   })
-  note!: string | null
+  note!: string | null;
 
   @Column({
     nullable: true,
     type: 'text',
   })
-  attentionNote!: string | null
+  attentionNote!: string | null;
 
-  @ManyToOne(() => Projects, project => project.tasks, {
-    onDelete: 'CASCADE'
+  @ManyToOne(() => Projects, (project) => project.tasks, {
+    onDelete: 'CASCADE',
   })
-  project!: Projects
+  project!: Projects;
 
   @ManyToOne(() => User, {
-    nullable: true
+    nullable: true,
   })
-  completedBy!: User | null
+  completedBy!: User | null;
 }

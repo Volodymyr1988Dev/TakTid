@@ -1,276 +1,374 @@
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { reactive, ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { MATERIAL_CATALOG } from '../const/MaterialCatalog'
+
+import type {
+  CreateMaterialListDto,
+  MaterialItem,
+} from '../types/Material'
+
+import { useProjectStore } from '../stores/project.store'
+import { useProjectMaterialStore } from '../stores/projectMaterial.store'
+
 const { t } = useI18n()
+
+const projectStore = useProjectStore()
+const materialStore = useProjectMaterialStore()
+
 const isEditing = ref(true)
-const title = ref('')
 
-const items = reactive([
-  { label: 'hängränna 6m', value: '' },
-  { label: 'hängränna 4m', value: '' },
-  { label: 'hängränna 3m', value: '' },
-  { label: 'rännkrok', value: '' },
-  { label: 'ränngavel', value: '' },
-  { label: 'rännskarv', value: '' },
-  { label: 'rännvinkel ytter', value: '' },
-  { label: 'rännvinkel inner', value: '' },
-  { label: 'omvik (omvikningskupa)', value: '' },
-  { label: 'stuprör 2.5m', value: '' },
-  { label: 'stuprör 3m', value: '' },
-  { label: 'stuprör 4m', value: '' },
-  { label: 'stuprör 6m', value: '' },
-  { label: 'stuprörssvep', value: '' },
-  { label: 'lövsil', value: '' },
-  { label: 'rörvinkel', value: '' },
-  { label: 'utkastare', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x170 3.6m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x170 4.8m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x170 4.2m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x170 5.4m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä)', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x195 4.8m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x195 5.4m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x195 3.6m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x170 22x120 22x195 22x145', value: '' },
-  { label: 'vindskiveplåt', value: '' },
-  { label: 'bärläktsteg', value: '' },
-  { label: 'glidskydd', value: '' },
-  { label: 'råspontlucka 23X540 3.6m', value: '' },
-  { label: 'råspontlucka 23X540 4.2m', value: '' },
-  { label: 'råspontlucka 20X540 3.6m', value: '' },
-  { label: 'råspontlucka 20X540 4.2m', value: '' },
-  { label: 'råspontlucka 20X540 4.8m', value: '' },
-  { label: 'råspont 17mm single', value: '' },
-  { label: 'råspont 19mm single', value: '' },
-  { label: 'tek7/silicone', value: '' },
-  { label: 'nails for pistol', value: '' },
-  { label: 'screws 55mm', value: '' },
-  { label: '33mm plåt skruv', value: '' },
-  { label: '42mm skruv', value: '' },
-  { label: '30mm trä skruv', value: '' },
-  { label: 'skruv 120mm', value: '' },
-  { label: 'skruv 75+80mm', value: '' },
-  { label: 'vindskruva', value: '' },
-  { label: 'farmarskruv', value: '' },
-  { label: 'clips', value: '' },
-  { label: 'nokband', value: '' },
-  { label: 'fågelband', value: '' },
-  { label: 'fotplåt 2m', value: '' },
-  { label: 'läkts standart 25x48', value: '' },
-  { label: 'läkts thin 12x50', value: '' },
-  { label: 'trekantsläkt', value: '' },
-  { label: 'regel', value: '' },
-  { label: 'GRAN HYVLAD REGEL O/S V 45X45 4,8 M', value: '' },
-  { label: 'GRAN HYVLAD REGEL O/S V 45X45 3,6 M', value: '' },
-  { label: 'GRAN VILMAREGEL KORTREGEL 45X45 2.5 M', value: '' },
-  { label: 'trash bags', value: '' },
-  { label: 'paint', value: '' },
-  { label: 'tejp', value: '' },
-])
+const textareaRef = ref<HTMLTextAreaElement>()
 
-const other = ref('')
+const materialForm = reactive<CreateMaterialListDto>({
+  projectId: '',
+  title: '',
+  other: '',
+  items: MATERIAL_CATALOG.map(label => ({
+    label,
+    quantity: null,
+    price: null,
+    unit: 'pcs',
+  })),
+})
 
-const hasOther = computed(() => other.value.trim().length > 0)
+const hasOther = computed(() => materialForm.other.trim().length > 0)
 
-//const visibleItems = ref<typeof items>([])
+const visibleItems = computed(() =>
+  materialForm.items.filter(i => i.quantity !== null && i.quantity !== 0),
+)
 
-const visibleItems = computed(() => items.filter(i => i.value?.trim()))
-function save() {
-  /*visibleItems.value = items.filter(
-    (item) => item.value !== '' && item.value !== null
-  )*/
-  isEditing.value = false
-  setTimeout(autoResize)
+function autoResize() {
+  nextTick(() => {
+    if (!textareaRef.value) return
+
+    textareaRef.value.style.height = 'auto'
+    textareaRef.value.style.height =
+      textareaRef.value.scrollHeight + 'px'
+  })
 }
+
+watch(
+  () => materialForm.other,
+  autoResize,
+)
+
+onMounted(async () => {
+  autoResize()
+
+  await projectStore.load()
+})
+
+watch(
+  () => materialForm.projectId,
+  async id => {
+    if (!id) {
+      materialForm.title = ''
+      materialForm.other = ''
+      materialForm.items = MATERIAL_CATALOG.map(label => ({
+        label,
+        quantity: null,
+        price: null,
+        unit: 'pcs',
+      }))
+      return
+    }
+
+    await materialStore.load(id)
+
+    const list = materialStore.materialList
+
+    materialForm.title = list?.title ?? ''
+    materialForm.other = list?.other ?? ''
+    //materialForm.title = materialStore.materialList?.title ?? ''
+
+    //materialForm.other = materialStore.materialList?.other ?? ''
+
+    materialForm.items =
+      MATERIAL_CATALOG.map(label => {
+        //const existing =materialStore.materialList?.items.find((i: MaterialItem) => i.label === label)
+        const existing = list?.items.find((i: MaterialItem) => i.label === label)
+        return {
+          label,
+          quantity: existing?.quantity ?? null,
+          price: existing?.price ?? null,
+          unit: existing?.unit ?? 'pcs',
+        }
+      })
+
+    autoResize()
+  },
+)
+
+async function save() {
+  const payload: CreateMaterialListDto = {
+      projectId: materialForm.projectId,
+      title: materialForm.title,
+      other: materialForm.other,
+      items: materialForm.items.filter(
+          item =>
+              item.quantity !== null &&
+              !Number.isNaN(item.quantity) &&
+              item.quantity !== 0,
+      ),
+  }
+/*
+  const payload: CreateMaterialListDto = {
+    ...materialForm,
+    items: materialForm.items.filter(
+      item =>
+        item.quantity !== null &&
+        !Number.isNaN(item.quantity) &&
+        item.quantity !== 0,
+    ),
+  }*/
+
+  await materialStore.save(payload)
+  /*
+  materialForm.items = materialForm.items.filter(
+    i => i.quantity !== null && i.quantity !== 0,
+  )
+
+  await materialStore.save(materialForm)*/
+
+  materialForm.items = MATERIAL_CATALOG.map(label => {
+    const existing =
+      materialStore.materialList?.items.find(
+        (i: MaterialItem) => i.label === label,
+      )
+
+    return {
+      label,
+      quantity: existing?.quantity ?? null,
+      price: existing?.price ?? null,
+      unit: existing?.unit ?? 'pcs',
+    }
+  })
+
+  isEditing.value = false
+  }
 
 function edit() {
   isEditing.value = true
-  setTimeout(autoResize)
-}
+/*
+  if (materialStore.materialList) {
+    materialForm.items =
+      MATERIAL_CATALOG.map(label => {
+        const existing =
+          materialStore.materialList.items.find(
+            (i: MaterialItem) => i.label === label,
+          )
 
-const textareaRef = ref<HTMLTextAreaElement | null>(null)
+        return {
+          label,
+          quantity: existing?.quantity ?? null,
+          price: existing?.price ?? null,
+          unit: existing?.unit ?? 'pcs',
+        }
+      })
 
-function autoResize() {
-  const el = textareaRef.value
-  if (!el) return
-  el.style.height = 'auto'
-  el.style.height = el.scrollHeight + 'px'
-}
-watch(other, () => {
-  setTimeout(autoResize)
-})
+  }
+*/ 
+  const list = materialStore.materialList
 
-onMounted(() => {
+  if (!list)
+      return
+
+  materialForm.items =
+      MATERIAL_CATALOG.map(label => {
+
+          const existing =
+              list.items.find(
+                  (i: MaterialItem) =>
+                      i.label === label,
+              )
+
+          return {
+              label,
+              quantity: existing?.quantity ?? null,
+              price: existing?.price ?? null,
+              unit: existing?.unit ?? 'pcs',
+          }
+      })
   autoResize()
-})
+}
 </script>
+
 <template>
-  <div 
-    class="material-form"
-  >
+  <div class="material-form">
+
+    <select v-model="materialForm.projectId">
+      <option value="">
+        {{ t('common.selectProject') }}
+      </option>
+
+      <option
+        v-for="project in projectStore.projects"
+        :key="project.id"
+        :value="project.id"
+      >
+        {{ project.address }}
+      </option>
+    </select>
+
     <input
-      v-model="title"
-      :placeholder="t('common.title')"
+      v-model="materialForm.title"
       class="title-input"
       :disabled="!isEditing"
+      :placeholder="t('common.title')"
     >
-    <!--item in items-->
+
     <div
       v-if="isEditing || visibleItems.length"
-      class="grid">
-      <div v-if="!isEditing && !visibleItems.length && !hasOther">
-        No data
-      </div>
+      class="grid"
+    >
+
       <div
-        v-for=" item in (isEditing ? items : visibleItems)"
+        v-for="item in (isEditing ? materialForm.items : visibleItems)"
         :key="item.label"
         class="row"
       >
+
         <div class="label">
           {{ item.label }}
         </div>
 
         <input
-          v-model="item.value"
+          v-model.number="item.quantity"
+          type="number"
+          step="0.01"
           :disabled="!isEditing"
-          placeholder="st / pack / number"
+        >
+
+        <input
+          v-if="isEditing"
+          v-model.number="item.price"
+          class="price"
+          type="number"
+          step="0.01"
+          placeholder="Price"
         >
       </div>
-      <div 
+
+      <div
         v-if="isEditing || hasOther"
         class="other-section"
       >
-        <label>Other</label>
+
+        <label>
+          Other
+        </label>
+
         <textarea
           ref="textareaRef"
-          @input="autoResize"
-          v-model="other"
-          :disabled="!isEditing"
+          v-model="materialForm.other"
           rows="1"
+          :disabled="!isEditing"
+          @input="autoResize"
         />
-        <!--rows="3"-->
+
       </div>
+
     </div>
 
-    <button 
-      v-if="isEditing" 
+    <button
+      v-if="isEditing"
       @click="save"
     >
       {{ t('common.save') }}
     </button>
 
-    <button 
-      v-else 
+    <button
+      v-else
       @click="edit"
     >
       {{ t('common.edit') }}
     </button>
+
   </div>
 </template>
+
 <style scoped>
-.material-form {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 10px;
+
+.material-form{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding:12px;
 }
 
-.title-input {
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  font-weight: 600;
-  padding: 1px;
+.title-input{
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:8px;
 }
 
-.row {
-  /*display: flex;
-  justify-content: space-between;
-  gap: 1px;*/
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 90px;
-  gap:8px;
-  align-items: center;
-  border-bottom:1px dashed #ddd;
+.grid{
+    display:grid;
+    gap:6px;
 }
 
-.label {
-  /*flex: 2;*/
-  flex: 1;
-  font-size: 13px;
-  color: #333;
-  padding: 1px 6px; 
-  
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  /*6px 0*/;
-/*
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  padding: 6px;
-  font-size: 14px;
-  color: #333;*/
+.row{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 90px 90px;
+    gap:8px;
+    align-items:center;
 }
 
-.row input {
-  flex: 1;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+.label{
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
 }
 
-textarea {
-  width: 100%;
-  resize: /*vertical*/none;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  overflow: hidden;
-  padding: 1px;
-}
-.other-section {
-  grid-column: span 2;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.row input{
+    border:1px solid #ccc;
+    border-radius:8px;
+    padding:5px;
 }
 
-button {
-  margin-top: 10px;
-  border-radius: 10px;
-  border: none;
-  background: #2563eb;
-  color: white;
-  font-weight: 600;
-  padding: 10px;
+.price{
+    width:90px;
 }
-button:hover {
-  opacity: 0.9;
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1px /*8px 16px*/;
-}
-@media (max-width: 600px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
 
-  .row {
-    /*flex-direction: column;*/
-    align-items: flex-start;
-    /*gap: 4px;*/
-  }
-
-  .label {
-    font-size: 12px;
-  }
-
-  .row input {
-    width: 100%;
-  }
-  .other-section {
-    grid-column: span 1;
-  }
+.other-section{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
 }
+
+textarea{
+    resize:none;
+    overflow:hidden;
+    border:1px solid #ccc;
+    border-radius:8px;
+    padding:8px;
+}
+
+button{
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    background:#2563eb;
+    color:white;
+    font-weight:600;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+@media(max-width:700px){
+
+.row{
+    grid-template-columns:1fr;
+}
+
+.price{
+    width:100%;
+}
+
+}
+
 </style>

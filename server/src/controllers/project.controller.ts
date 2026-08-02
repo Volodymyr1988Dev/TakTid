@@ -43,11 +43,11 @@ export class ProjectsController {
   @UseGuards(AdminGuard)
   @Get(':projectId/details')
   getProjectDetails(@Param('projectId') projectId: string) {
-    return this.projectsService.getProjectDetails(projectId)
+    return this.projectsService.getProjectDetails(projectId);
   }
   @Get(':projectId/summary')
   getSummary(@Param('projectId') projectId: string) {
-    return this.projectsService.getProjectSummary(projectId)
+    return this.projectsService.getProjectSummary(projectId);
   }
 
   @Patch(':id')

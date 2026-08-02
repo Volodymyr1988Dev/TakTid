@@ -8,7 +8,10 @@ import { ProjectStatsController } from '../controllers/projectStats.controller';
 import { ProjectsModule } from './project.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Projects, TimeEntry, ProjectAssignment]), ProjectsModule],
+  imports: [
+    TypeOrmModule.forFeature([Projects, TimeEntry, ProjectAssignment]),
+    ProjectsModule,
+  ],
   providers: [ProjectStatsService],
   controllers: [ProjectStatsController],
 })
