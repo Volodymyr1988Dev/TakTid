@@ -25,6 +25,7 @@ const showPriceDialog = ref(false)
 
 const textareaRef = ref<HTMLTextAreaElement>()
 const selectedProject = ref<Project | null>(null)
+const priceDialog = ref(false)
 
 const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 
@@ -96,6 +97,7 @@ watch(
     //await materialStore.load(materialForm.projectId)
     await materialStore.load(id)
 
+    //selectedProject.value = projectStore.projects.find(p => p.id === id) ?? null
     const list = materialStore.materialList
 
     //materialForm.title = list?.title ?? ''
@@ -195,7 +197,10 @@ watch(other, () => {
 
 onMounted(() => {
   autoResize()
-})
+}
+function openPriceModal() {
+  priceDialog.value = true
+}
 </script>
 <template>
   <div class="material-form">
@@ -209,15 +214,15 @@ onMounted(() => {
       @complete="searchProjects"
     >
       <template #option="{ option }">
-
+        {{ t('common.selectProject') }}
         <div class="project-option">
 
           <strong>
-            {{ option.city }}
+            {{ option.city }} 
           </strong>
 
           <span>
-            {{ option.address }}
+            ➜  {{ option.address }}
           </span>
 
         </div>
@@ -286,7 +291,11 @@ onMounted(() => {
         v-if="isEditing || hasOther"
         class="other-section"
       >
-        <label>Other</label>
+
+        <label>
+          {{ t('common.other') }}
+        </label>
+
         <textarea
           ref="textareaRef"
           @input="autoResize"
@@ -312,6 +321,7 @@ onMounted(() => {
     >
       {{ t('common.edit') }}
     </button>
+    <!--
     <Button
       v-if="isAdmin"
       icon="pi pi-dollar"
@@ -319,6 +329,44 @@ onMounted(() => {
       severity="secondary"
       @click="showPriceDialog = true"
     />
+  -->
+    <button
+      v-if="isEditing && isAdmin"
+      class="edit-prices-btn"
+      @click="openPriceModal"
+    >
+      <i class="pi pi-pencil"></i>
+      {{ t('common.editPrices') }}
+    </button>
+    <Dialog
+      v-model:visible="priceDialog"
+      modal
+      header="Material Prices"
+      :style="{ width: '700px', maxWidth: '95vw' }"
+    >
+      <div class="price-list">
+        <div
+          v-for="item in materialForm.items"
+          :key="item.label"
+          class="price-row"
+        >
+          <span>{{ item.label }}</span>
+          <input
+            v-model.number="item.price"
+            type="number"
+            step="0.01"
+            placeholder="0.00"
+          >
+        </div>
+      </div>
+
+      <template #footer>
+        <button @click="priceDialog = false">
+          {{ t('common.done') }}
+        </button>
+      </template>
+    </Dialog>
+    <!--
     <Dialog
       v-model:visible="showPriceDialog"
       modal
@@ -341,6 +389,7 @@ onMounted(() => {
         >
       </div>
     </Dialog>
+    -->
   </div>
 </template>
 <style scoped>
@@ -436,6 +485,21 @@ button:hover {
     height:48px;
 }
 
+.price-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-height:60vh;
+  overflow:auto;
+}
+
+.price-row{
+  display:grid;
+  grid-template-columns:1fr 120px;
+  gap:10px;
+  align-items:center;
+}
+
 @media(max-width:700px){
 .row input{
   width:70px;
@@ -468,5 +532,36 @@ button:hover {
     font-size:13px;
     line-height:1.2;
 }
+
+
+.row{
+    display:grid;
+    grid-template-columns:1fr 72px 40px;
+    gap:8px;
+    align-items:center;
+  }
+
+  .label{
+    font-size:13px;
+    line-height:1.2;
+    white-space:normal;
+    word-break:break-word;
+  }
+
+  .row input{
+    width:72px;
+    text-align:center;
+    padding:6px 4px;
+  }
+
+  .price-btn{
+    width:40px;
+    height:40px;
+  }
+
+  .material-form{
+    padding:10px;
+  }
 }
+
 </style>

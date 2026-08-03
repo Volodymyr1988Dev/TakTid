@@ -15,6 +15,10 @@ export default {
     deleteConfirm: 'Czy jesteś pewien?',
     registerTime: 'Zarejestruj czas',
     close: 'Zamknij',
+    selectProject: 'Wybierz projekt',
+    other: 'Inne',
+    editPrices: 'Edytuj ceny',
+    done: 'Gotowe',
   },
 
   project: {

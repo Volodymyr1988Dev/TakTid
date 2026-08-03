@@ -15,6 +15,10 @@ export default {
     deleteConfirm: 'Är du säker?',
     registerTime: 'Registrera tid',
     close: 'Stäng',
+    selectProject: 'Välj projekt',
+    other: 'Other',
+    editPrices: 'Redigera priser',
+    done: 'Klar',
   },
 
   project: {
