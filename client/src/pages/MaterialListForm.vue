@@ -112,10 +112,19 @@ watch(
         const existing = list?.items?.find((i: MaterialItem) => i.label === label)
         return {
           label,
-          quantity: existing?.quantity ?? null,
-          price: existing?.price ?? null,
+          //quantity: existing?.quantity ?? null,
+          //price: existing?.price ?? null,
+          quantity:
+              existing?.quantity == null
+                  ? null
+                  : Number(existing.quantity),
+
+          price:
+              existing?.price == null
+                  ? null
+                  : Number(existing.price),
           unit: existing?.unit ?? 'pcs',
-        }
+          }
       })
 
     autoResize()
@@ -442,6 +451,8 @@ function openPriceModal() {
     flex-direction:column;
     gap:10px;
     padding:12px;
+
+    color:#111827;
 }
 
 .title-input{
