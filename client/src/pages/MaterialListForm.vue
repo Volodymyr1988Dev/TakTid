@@ -1,85 +1,177 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { Project } from '../types/Project.dto'
+import { MATERIAL_CATALOG } from '../const/MaterialCatalog'
+import AutoComplete from 'primevue/autocomplete'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
+import type {
+  CreateMaterialListDto,
+  MaterialItem,
+} from '../types/Material'
+
+import { useProjectStore } from '../stores/project.store'
+import { useProjectMaterialStore } from '../stores/projectMaterial.store'
+import 'primeicons/primeicons.css'
 
 const { t } = useI18n()
+const filteredProjects = ref<Project[]>([])
+const projectStore = useProjectStore()
+const materialStore = useProjectMaterialStore()
+
 const isEditing = ref(true)
-const title = ref('')
+const showPriceDialog = ref(false)
 
-const items = reactive([
-  { label: 'hängränna 6m', value: '' },
-  { label: 'hängränna 4m', value: '' },
-  { label: 'hängränna 3m', value: '' },
-  { label: 'rännkrok', value: '' },
-  { label: 'ränngavel', value: '' },
-  { label: 'rännskarv', value: '' },
-  { label: 'rännvinkel ytter', value: '' },
-  { label: 'rännvinkel inner', value: '' },
-  { label: 'omvik (omvikningskupa)', value: '' },
-  { label: 'stuprör 2.5m', value: '' },
-  { label: 'stuprör 3m', value: '' },
-  { label: 'stuprör 4m', value: '' },
-  { label: 'stuprör 6m', value: '' },
-  { label: 'stuprörssvep', value: '' },
-  { label: 'lövsil', value: '' },
-  { label: 'rörvinkel', value: '' },
-  { label: 'utkastare', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x170 3.6m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x170 4.8m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x170 4.2m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x170 5.4m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä)', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x195 4.8m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x195 5.4m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x195 3.6m', value: '' },
-  { label: 'ytterpanelbräda (vindskivor trä) 22x170 22x120 22x195 22x145', value: '' },
-  { label: 'vindskiveplåt', value: '' },
-  { label: 'bärläktsteg', value: '' },
-  { label: 'glidskydd', value: '' },
-  { label: 'råspontlucka 23X540 3.6m', value: '' },
-  { label: 'råspontlucka 23X540 4.2m', value: '' },
-  { label: 'råspontlucka 20X540 3.6m', value: '' },
-  { label: 'råspontlucka 20X540 4.2m', value: '' },
-  { label: 'råspontlucka 20X540 4.8m', value: '' },
-  { label: 'råspont 17mm single', value: '' },
-  { label: 'råspont 19mm single', value: '' },
-  { label: 'tek7/silicone', value: '' },
-  { label: 'nails for pistol', value: '' },
-  { label: 'screws 55mm', value: '' },
-  { label: '33mm plåt skruv', value: '' },
-  { label: '42mm skruv', value: '' },
-  { label: '30mm trä skruv', value: '' },
-  { label: 'skruv 120mm', value: '' },
-  { label: 'skruv 75+80mm', value: '' },
-  { label: 'vindskruva', value: '' },
-  { label: 'farmarskruv', value: '' },
-  { label: 'clips', value: '' },
-  { label: 'nokband', value: '' },
-  { label: 'fågelband', value: '' },
-  { label: 'fotplåt 2m', value: '' },
-  { label: 'läkts standart 25x48', value: '' },
-  { label: 'läkts thin 12x50', value: '' },
-  { label: 'trekantsläkt', value: '' },
-  { label: 'regel', value: '' },
-  { label: 'GRAN HYVLAD REGEL O/S V 45X45 4,8 M', value: '' },
-  { label: 'GRAN HYVLAD REGEL O/S V 45X45 3,6 M', value: '' },
-  { label: 'GRAN VILMAREGEL KORTREGEL 45X45 2.5 M', value: '' },
-  { label: 'trash bags', value: '' },
-  { label: 'paint', value: '' },
-  { label: 'tejp', value: '' },
-])
+const textareaRef = ref<HTMLTextAreaElement>()
+const selectedProject = ref<Project | null>(null)
 
-const other = ref('')
+const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 
-const hasOther = computed(() => other.value.trim().length > 0)
+watch(selectedProject, project => {
+  materialForm.projectId = project?.id ?? ''
+})
+const materialForm = reactive<CreateMaterialListDto>({
+  projectId: '',
+  //title: '',
+  other: '',
+  items: MATERIAL_CATALOG.map(label => ({
+    label,
+    quantity: null,
+    price: null,
+    unit: 'pcs',
+  })),
+})
 
-//const visibleItems = ref<typeof items>([])
+const hasOther = computed(() => materialForm.other.trim().length > 0)
 
-const visibleItems = computed(() => items.filter(i => i.value?.trim()))
-function save() {
-  /*visibleItems.value = items.filter(
-    (item) => item.value !== '' && item.value !== null
-  )*/
+const visibleItems = computed(() =>
+  materialForm.items.filter(i => i.quantity !== null && i.quantity !== 0),
+)
+
+function searchProjects(event: { query: string }) {
+  const query = event.query.toLowerCase()
+
+  filteredProjects.value = projectStore.projects.filter(project =>
+    project.address.toLowerCase().includes(query) ||
+    project.city.toLowerCase().includes(query),
+  )
+}
+
+function autoResize() {
+  nextTick(() => {
+    if (!textareaRef.value) return
+
+    textareaRef.value.style.height = 'auto'
+    textareaRef.value.style.height =
+      textareaRef.value.scrollHeight + 'px'
+  })
+}
+
+watch(
+  () => materialForm.other,
+  autoResize,
+)
+
+onMounted(async () => {
+  autoResize()
+
+  await projectStore.load()
+})
+
+watch(
+  () => materialForm.projectId,
+  async id => {
+    if (!id) {
+      //materialForm.title = ''
+      materialForm.other = ''
+      materialForm.items = MATERIAL_CATALOG.map(label => ({
+        label,
+        quantity: null,
+        price: null,
+        unit: 'pcs',
+      }))
+      return
+    }
+    //await materialStore.load(materialForm.projectId)
+    await materialStore.load(id)
+
+    const list = materialStore.materialList
+
+    //materialForm.title = list?.title ?? ''
+    materialForm.other = list?.other ?? ''
+    //materialForm.title = materialStore.materialList?.title ?? ''
+
+    //materialForm.other = materialStore.materialList?.other ?? ''
+
+    materialForm.items =
+      MATERIAL_CATALOG.map(label => {
+        //const existing =materialStore.materialList?.items.find((i: MaterialItem) => i.label === label)
+        const existing = list?.items?.find((i: MaterialItem) => i.label === label)
+        return {
+          label,
+          quantity: existing?.quantity ?? null,
+          price: existing?.price ?? null,
+          unit: existing?.unit ?? 'pcs',
+        }
+      })
+
+    autoResize()
+  },
+)
+
+async function save() {
+  const payload: CreateMaterialListDto = {
+      projectId: materialForm.projectId,
+      //title: materialForm.title,
+      other: materialForm.other?.trim() || '',
+      items: materialForm.items
+        .filter(
+            item =>
+                item.quantity !== null &&
+                item.quantity !== 0 &&
+                !Number.isNaN(item.quantity),
+        )
+        .map(item => ({
+            label: item.label,
+            quantity: item.quantity,
+            price: item.price,
+            unit: item.unit,
+        })),
+  }
+/*
+  const payload: CreateMaterialListDto = {
+    ...materialForm,
+    items: materialForm.items.filter(
+      item =>
+        item.quantity !== null &&
+        !Number.isNaN(item.quantity) &&
+        item.quantity !== 0,
+    ),
+  }*/
+
+  await materialStore.save(payload)
+  /*
+  materialForm.items = materialForm.items.filter(
+    i => i.quantity !== null && i.quantity !== 0,
+  )
+
+  await materialStore.save(materialForm)*/
+
+  materialForm.items = MATERIAL_CATALOG.map(label => {
+    const existing =
+      materialStore.materialList?.items?.find(
+        (i: MaterialItem) => i.label === label,
+      )
+
+    return {
+      label,
+      quantity: existing?.quantity ?? null,
+      price: existing?.price ?? null,
+      unit: existing?.unit ?? 'pcs',
+    }
+  })
+
   isEditing.value = false
   setTimeout(autoResize)
 }
@@ -106,9 +198,63 @@ onMounted(() => {
 })
 </script>
 <template>
-  <div 
-    class="material-form"
-  >
+  <div class="material-form">
+
+    <AutoComplete
+      v-model="selectedProject"
+      :suggestions="filteredProjects"
+      optionLabel="address"
+      dropdown
+      forceSelection
+      @complete="searchProjects"
+    >
+      <template #option="{ option }">
+
+        <div class="project-option">
+
+          <strong>
+            {{ option.city }}
+          </strong>
+
+          <span>
+            {{ option.address }}
+          </span>
+
+        </div>
+
+      </template>
+
+    </AutoComplete>
+    <!--
+    <select v-model="materialForm.projectId">
+      <option value="">
+        {{ t('common.selectProject') }}
+      </option>
+
+      <option
+        v-for="project in projectStore.projects"
+        :key="project.id"
+        :value="project.id"
+      >
+        <div>
+
+        <strong>
+
+        {{project.city}}
+
+        </strong>
+
+        ➜
+
+        {{project.address}}
+
+        </div>-->
+        <!--{{project.city}}  ➤  {{ project.address }}-->
+      <!--  
+      </option>
+    </select>
+  -->
+    <!--
     <input
       v-model="title"
       :placeholder="t('common.title')"
@@ -134,7 +280,6 @@ onMounted(() => {
         <input
           v-model="item.value"
           :disabled="!isEditing"
-          placeholder="st / pack / number"
         >
       </div>
       <div 
@@ -153,19 +298,49 @@ onMounted(() => {
       </div>
     </div>
 
-    <button 
-      v-if="isEditing" 
-      @click="save"
+    <div
+      v-if="isEditing"
+      class="sticky-actions"
     >
-      {{ t('common.save') }}
-    </button>
-
-    <button 
-      v-else 
+      <button @click="save">
+        {{ t('common.save') }}
+      </button>
+    </div>
+    <button
+      v-else
       @click="edit"
     >
       {{ t('common.edit') }}
     </button>
+    <Button
+      v-if="props.isAdmin"
+      icon="pi pi-dollar"
+      label="Edit prices"
+      severity="secondary"
+      @click="showPriceDialog = true"
+    />
+    <Dialog
+      v-model:visible="showPriceDialog"
+      modal
+      header="Material Prices"
+      :style="{ width: '700px' }"
+    >
+      <div
+        v-for="item in materialForm.items"
+        :key="item.label"
+        class="price-row"
+      >
+        <span>
+          {{ item.label }}
+        </span>
+
+        <input
+          v-model.number="item.price"
+          type="number"
+          step="0.01"
+        >
+      </div>
+    </Dialog>
   </div>
 </template>
 <style scoped>
@@ -242,26 +417,56 @@ button:hover {
   grid-template-columns: repeat(2, 1fr);
   gap: 1px /*8px 16px*/;
 }
-@media (max-width: 600px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
+.sticky-actions{
+    position:sticky;
+    bottom:0;
+    z-index:50;
 
-  .row {
-    /*flex-direction: column;*/
-    align-items: flex-start;
-    /*gap: 4px;*/
-  }
+    background:white;
 
-  .label {
-    font-size: 12px;
-  }
+    padding:12px;
 
-  .row input {
-    width: 100%;
-  }
-  .other-section {
-    grid-column: span 1;
-  }
+    margin-top:12px;
+
+    border-top:1px solid #e5e7eb;
+}
+
+.sticky-actions button{
+    width:100%;
+    height:48px;
+}
+
+@media(max-width:700px){
+.row input{
+  width:70px;
+  text-align:center;
+  padding:2px;
+}
+.row{
+    /*grid-template-columns:1fr;
+    font-size:11px;*/
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.price{
+    width:100%;
+}
+.price-btn{
+    width:36px;
+    height:36px;
+}
+.material-form{
+    padding:8px;
+}
+.label{
+    flex:1;
+    white-space:normal;
+    word-break:break-word;
+    font-size:13px;
+    line-height:1.2;
+}
 }
 </style>
