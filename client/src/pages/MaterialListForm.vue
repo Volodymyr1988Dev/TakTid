@@ -5,7 +5,7 @@ import type { Project } from '../types/Project.dto'
 import { MATERIAL_CATALOG } from '../const/MaterialCatalog'
 import AutoComplete from 'primevue/autocomplete'
 import Dialog from 'primevue/dialog'
-import Button from 'primevue/button'
+//import Button from 'primevue/button'
 import type {
   CreateMaterialListDto,
   MaterialItem,
@@ -21,7 +21,7 @@ const projectStore = useProjectStore()
 const materialStore = useProjectMaterialStore()
 
 const isEditing = ref(true)
-const showPriceDialog = ref(false)
+//const showPriceDialog = ref(false)
 
 const textareaRef = ref<HTMLTextAreaElement>()
 const selectedProject = ref<Project | null>(null)
