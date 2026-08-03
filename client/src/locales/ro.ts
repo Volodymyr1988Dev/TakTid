@@ -16,6 +16,9 @@ export default {
     registerTime: 'Înregistrează timp',
     close: 'Închide',
     selectProject: 'Selectează proiect',
+    other: 'Altele',
+    editPrices: 'Editează prețuri',
+    done: 'Gata',
   },
 
   project: {

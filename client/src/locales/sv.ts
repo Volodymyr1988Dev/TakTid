@@ -16,6 +16,9 @@ export default {
     registerTime: 'Registrera tid',
     close: 'Stäng',
     selectProject: 'Välj projekt',
+    other: 'Other',
+    editPrices: 'Redigera priser',
+    done: 'Klar',
   },
 
   project: {

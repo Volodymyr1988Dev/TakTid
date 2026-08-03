@@ -18,6 +18,9 @@ export default {
     registerTime: 'Register time',
     close: 'Close',
     selectProject: 'Select project',
+    other: 'Other',
+    editPrices: 'Edit Prices',
+    done: 'Done',
 
   },
 
