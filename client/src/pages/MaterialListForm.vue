@@ -298,7 +298,15 @@ function edit() {
 </template>
 
 <style scoped>
-
+.select{
+    width:100%;
+    padding:10px 14px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+    background:white;
+    font-size:14px;
+    max-height:300px;
+}
 .material-form{
     display:flex;
     flex-direction:column;
@@ -324,10 +332,13 @@ function edit() {
     align-items:center;
 }
 
-.label{
+.label{/*
     overflow:hidden;
-    white-space:nowrap;
-    text-overflow:ellipsis;
+    text-overflow:ellipsis;*/
+
+    flex:1;
+    white-space:normal;
+    word-break:break-word;
 }
 
 .row input{
@@ -366,17 +377,43 @@ button{
 button:hover{
     opacity:.9;
 }
+.quantity{
+    width:72px;
+    text-align:center;
+}
 
 @media(max-width:700px){
-
+.row input{
+  width:70px;
+  text-align:center;
+  padding:2px;
+}
 .row{
-    grid-template-columns:1fr;
+    /*grid-template-columns:1fr;
+    font-size:11px;*/
+
+    display:flex;
+    align-items:center;
+    gap:8px;
 }
 
 .price{
     width:100%;
 }
-
+.price-btn{
+    width:36px;
+    height:36px;
+}
+.material-form{
+    padding:8px;
+}
+.label{
+    flex:1;
+    white-space:normal;
+    word-break:break-word;
+    font-size:13px;
+    line-height:1.2;
+}
 }
 
 </style>

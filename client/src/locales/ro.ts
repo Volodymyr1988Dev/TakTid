@@ -15,6 +15,7 @@ export default {
     deleteConfirm: 'Ești sigur?',
     registerTime: 'Înregistrează timp',
     close: 'Închide',
+    selectProject: 'Selectează proiect',
   },
 
   project: {

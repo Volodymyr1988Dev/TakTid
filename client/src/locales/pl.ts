@@ -15,6 +15,7 @@ export default {
     deleteConfirm: 'Czy jesteś pewien?',
     registerTime: 'Zarejestruj czas',
     close: 'Zamknij',
+    selectProject: 'Wybierz projekt',
   },
 
   project: {

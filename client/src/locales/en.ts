@@ -17,6 +17,7 @@ export default {
     deleteConfirm: 'Are you sure?',
     registerTime: 'Register time',
     close: 'Close',
+    selectProject: 'Select project',
 
   },
 
