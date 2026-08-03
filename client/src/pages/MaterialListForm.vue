@@ -313,7 +313,7 @@ onMounted(() => {
       {{ t('common.edit') }}
     </button>
     <Button
-      v-if="props.isAdmin"
+      v-if="isAdmin"
       icon="pi pi-dollar"
       label="Edit prices"
       severity="secondary"
