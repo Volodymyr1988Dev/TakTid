@@ -189,22 +189,45 @@ async function save() {
 
 function edit() {
   isEditing.value = true
-  setTimeout(autoResize)
-}
+/*
+  if (materialStore.materialList) {
+    materialForm.items =
+      MATERIAL_CATALOG.map(label => {
+        const existing =
+          materialStore.materialList.items.find(
+            (i: MaterialItem) => i.label === label,
+          )
 
-const textareaRef = ref<HTMLTextAreaElement | null>(null)
+        return {
+          label,
+          quantity: existing?.quantity ?? null,
+          price: existing?.price ?? null,
+          unit: existing?.unit ?? 'pcs',
+        }
+      })
 
-function autoResize() {
-  const el = textareaRef.value
-  if (!el) return
-  el.style.height = 'auto'
-  el.style.height = el.scrollHeight + 'px'
-}
-watch(other, () => {
-  setTimeout(autoResize)
-})
+  }
+*/ 
+  const list = materialStore.materialList
 
-onMounted(() => {
+  if (!list) return
+
+  materialForm.items =
+      MATERIAL_CATALOG.map(label => {
+
+          const existing =
+              list.items.find(
+                  (i: MaterialItem) =>
+                      i.label === label,
+              )
+
+          return {
+              label,
+              quantity: existing?.quantity ?? null,
+              price: existing?.price ?? null,
+              unit: existing?.unit ?? 'pcs',
+          }
+      })
   autoResize()
 }
 function openPriceModal() {
@@ -225,6 +248,7 @@ function openPriceModal() {
     >
       <template #option="{ option }">
         <div class="project-option">
+          <!--  
           <strong>
             {{ option.city }} 
           </strong>
@@ -232,7 +256,14 @@ function openPriceModal() {
           <span>
             ➜  {{ option.address }}
           </span>
+          -->
+          <div class="city">
+              {{ option.city }}
+          </div>
 
+          <div class="address">
+              {{ option.address }}
+          </div>
         </div>
 
       </template>
@@ -548,6 +579,27 @@ button:hover {
   grid-template-columns:1fr 120px;
   gap:10px;
   align-items:center;
+}
+.project-option{
+
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+
+}
+
+.city{
+
+    font-weight:700;
+    color:var(--primary-color);
+
+}
+
+.address{
+
+    font-size:.9rem;
+    opacity:.8;
+
 }
 
 @media(max-width:700px){
