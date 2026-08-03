@@ -339,16 +339,22 @@ function openPriceModal() {
       v-if="isEditing"
       class="sticky-actions"
     >
-      <button @click="save">
+      <button
+        v-if="isEditing"
+        class="save-btn"
+        @click="save"
+      >
         {{ t('common.save') }}
       </button>
+
+      <button
+        v-else
+        class="save-btn secondary"
+        @click="edit"
+      >
+        {{ t('common.edit') }}
+      </button>
     </div>
-    <button
-      v-else
-      @click="edit"
-    >
-      {{ t('common.edit') }}
-    </button>
     <!--
     <Button
       v-if="isAdmin"
@@ -505,6 +511,7 @@ button:hover{
     width:72px;
     text-align:center;
 }
+/*
 .sticky-actions{
     position:sticky;
     bottom:0;
@@ -522,6 +529,30 @@ button:hover{
 .sticky-actions button{
     width:100%;
     height:48px;
+}
+*/
+.sticky-actions{
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 12px;
+  border-top: 1px solid #e5e7eb;
+  z-index: 20;
+}
+
+.save-btn{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:#2563eb;
+  color:white;
+  font-size:16px;
+  font-weight:700;
+}
+
+.save-btn.secondary{
+  background:#64748b;
 }
 
 .price-list{
@@ -600,6 +631,16 @@ button:hover{
 
   .material-form{
     padding:10px;
+  }
+  .sticky-actions{
+    position: static;
+    border-top:none;
+    padding:0;
+  }
+
+  .save-btn{
+    width:auto;
+    min-width:180px;
   }
 }
 
