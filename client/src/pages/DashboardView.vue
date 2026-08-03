@@ -43,7 +43,13 @@ const bottomTab = ref<'time' | 'projects' | 'list' | 'helpers' | 'stats'>('time'
       :is-admin="isAdmin"
       @back="projectNav.closeProject"
     />
-    <MaterialListForm v-else-if="bottomTab === 'list'" />
+    <MaterialListForm 
+      v-else-if="bottomTab === 'list'" 
+      :is-admin="isAdmin"
+      :project-id="projectNav.selectedProjectId!"
+      @back="projectNav.closeProject"
+
+    />
     <HelperTab
       v-else-if="bottomTab === 'helpers'"
       mode="helpers"
