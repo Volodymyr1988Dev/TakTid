@@ -214,9 +214,8 @@ function openPriceModal() {
       @complete="searchProjects"
     >
       <template #option="{ option }">
-        {{ t('common.selectProject') }}
         <div class="project-option">
-
+          {{ t('common.selectProject') }}
           <strong>
             {{ option.city }} 
           </strong>
