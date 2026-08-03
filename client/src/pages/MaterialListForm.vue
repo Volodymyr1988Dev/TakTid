@@ -209,8 +209,7 @@ function edit() {
 */ 
   const list = materialStore.materialList
 
-  if (!list)
-      return
+  if (!list) return
 
   materialForm.items =
       MATERIAL_CATALOG.map(label => {
@@ -249,6 +248,7 @@ function openPriceModal() {
     >
       <template #option="{ option }">
         <div class="project-option">
+          <!--  
           <strong>
             {{ option.city }} 
           </strong>
@@ -256,7 +256,14 @@ function openPriceModal() {
           <span>
             ➜  {{ option.address }}
           </span>
+          -->
+          <div class="city">
+              {{ option.city }}
+          </div>
 
+          <div class="address">
+              {{ option.address }}
+          </div>
         </div>
 
       </template>
@@ -579,6 +586,27 @@ button:hover{
   grid-template-columns:1fr 120px;
   gap:10px;
   align-items:center;
+}
+.project-option{
+
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+
+}
+
+.city{
+
+    font-weight:700;
+    color:var(--primary-color);
+
+}
+
+.address{
+
+    font-size:.9rem;
+    opacity:.8;
+
 }
 
 @media(max-width:700px){
