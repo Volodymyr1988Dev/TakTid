@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { reactive, ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-
+import type { Project } from '../types/Project.dto'
 import { MATERIAL_CATALOG } from '../const/MaterialCatalog'
-
+import AutoComplete from 'primevue/autocomplete'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
 import type {
   CreateMaterialListDto,
   MaterialItem,
@@ -11,16 +13,24 @@ import type {
 
 import { useProjectStore } from '../stores/project.store'
 import { useProjectMaterialStore } from '../stores/projectMaterial.store'
+import 'primeicons/primeicons.css'
 
 const { t } = useI18n()
-
+const filteredProjects = ref<Project[]>([])
 const projectStore = useProjectStore()
 const materialStore = useProjectMaterialStore()
 
 const isEditing = ref(true)
+const showPriceDialog = ref(false)
 
 const textareaRef = ref<HTMLTextAreaElement>()
+const selectedProject = ref<Project | null>(null)
 
+const props = defineProps<{ projectId: string, isAdmin: boolean }>()
+
+watch(selectedProject, project => {
+  materialForm.projectId = project?.id ?? ''
+})
 const materialForm = reactive<CreateMaterialListDto>({
   projectId: '',
   //title: '',
@@ -38,6 +48,15 @@ const hasOther = computed(() => materialForm.other.trim().length > 0)
 const visibleItems = computed(() =>
   materialForm.items.filter(i => i.quantity !== null && i.quantity !== 0),
 )
+
+function searchProjects(event: { query: string }) {
+  const query = event.query.toLowerCase()
+
+  filteredProjects.value = projectStore.projects.filter(project =>
+    project.address.toLowerCase().includes(query) ||
+    project.city.toLowerCase().includes(query),
+  )
+}
 
 function autoResize() {
   nextTick(() => {
@@ -205,6 +224,32 @@ function edit() {
 <template>
   <div class="material-form">
 
+    <AutoComplete
+      v-model="selectedProject"
+      :suggestions="filteredProjects"
+      optionLabel="address"
+      dropdown
+      forceSelection
+      @complete="searchProjects"
+    >
+      <template #option="{ option }">
+
+        <div class="project-option">
+
+          <strong>
+            {{ option.city }}
+          </strong>
+
+          <span>
+            {{ option.address }}
+          </span>
+
+        </div>
+
+      </template>
+
+    </AutoComplete>
+    <!--
     <select v-model="materialForm.projectId">
       <option value="">
         {{ t('common.selectProject') }}
@@ -215,9 +260,24 @@ function edit() {
         :key="project.id"
         :value="project.id"
       >
-        {{project.city}}  ➤  {{ project.address }}
+        <div>
+
+        <strong>
+
+        {{project.city}}
+
+        </strong>
+
+        ➜
+
+        {{project.address}}
+
+        </div>-->
+        <!--{{project.city}}  ➤  {{ project.address }}-->
+      <!--  
       </option>
     </select>
+  -->
     <!--
     <input
       v-model="materialForm.title"
@@ -248,15 +308,6 @@ function edit() {
           step="0.01"
           :disabled="!isEditing"
         >
-
-        <input
-          v-if="isEditing"
-          v-model.number="item.price"
-          class="price"
-          type="number"
-          step="0.01"
-          placeholder="Price"
-        >
       </div>
 
       <div
@@ -280,20 +331,49 @@ function edit() {
 
     </div>
 
-    <button
+    <div
       v-if="isEditing"
-      @click="save"
+      class="sticky-actions"
     >
-      {{ t('common.save') }}
-    </button>
-
+      <button @click="save">
+        {{ t('common.save') }}
+      </button>
+    </div>
     <button
       v-else
       @click="edit"
     >
       {{ t('common.edit') }}
     </button>
+    <Button
+      v-if="props.isAdmin"
+      icon="pi pi-dollar"
+      label="Edit prices"
+      severity="secondary"
+      @click="showPriceDialog = true"
+    />
+    <Dialog
+      v-model:visible="showPriceDialog"
+      modal
+      header="Material Prices"
+      :style="{ width: '700px' }"
+    >
+      <div
+        v-for="item in materialForm.items"
+        :key="item.label"
+        class="price-row"
+      >
+        <span>
+          {{ item.label }}
+        </span>
 
+        <input
+          v-model.number="item.price"
+          type="number"
+          step="0.01"
+        >
+      </div>
+    </Dialog>
   </div>
 </template>
 
@@ -380,6 +460,24 @@ button:hover{
 .quantity{
     width:72px;
     text-align:center;
+}
+.sticky-actions{
+    position:sticky;
+    bottom:0;
+    z-index:50;
+
+    background:white;
+
+    padding:12px;
+
+    margin-top:12px;
+
+    border-top:1px solid #e5e7eb;
+}
+
+.sticky-actions button{
+    width:100%;
+    height:48px;
 }
 
 @media(max-width:700px){
