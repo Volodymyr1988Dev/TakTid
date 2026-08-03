@@ -232,6 +232,7 @@ function openPriceModal() {
     <AutoComplete
       v-model="selectedProject"
       :suggestions="filteredProjects"
+      :label="t('common.selectProject')"
       optionLabel="address"
       dropdown
       forceSelection
@@ -239,7 +240,6 @@ function openPriceModal() {
     >
       <template #option="{ option }">
         <div class="project-option">
-          {{ t('common.selectProject') }}
           <strong>
             {{ option.city }} 
           </strong>
