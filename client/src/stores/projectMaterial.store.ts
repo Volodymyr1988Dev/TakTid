@@ -19,6 +19,31 @@ async function load(
     )
 }
 async function save(
+  payload: CreateMaterialListDto,
+) {
+
+  if (materialList.value?.id) {
+
+    const updatePayload: UpdateMaterialListDto = {
+      other: payload.other,
+      items: payload.items,
+    }
+
+    materialList.value =
+      await updateMaterialList(
+        materialList.value.id,
+        updatePayload,
+      )
+
+  } else {
+
+    materialList.value =
+      await createMaterialList(
+        payload,
+      )
+  }
+}/*
+async function save(
   payload: CreateMaterialListDto | UpdateMaterialListDto,
 ) {
 
@@ -36,7 +61,7 @@ async function save(
         payload,
       )
   }
-}
+}*/
 return {
   materialList,
   load,
