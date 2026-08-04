@@ -101,7 +101,7 @@ export class ProjectMaterialService {
 
       list.title = dto.title ?? list.title;
       list.other = dto.other ?? list.other;
-
+      /*
       list.items = dto.items.map((item, index) =>
         manager.create(ProjectMaterialItem, {
           label: item.label,
@@ -113,7 +113,23 @@ export class ProjectMaterialService {
       );
 
       await manager.save(list);
+      */
+     await manager.delete(ProjectMaterialItem, {
+          materialId: list.id,
+      })
 
+      list.items = dto.items.map((item, index) =>
+          manager.create(ProjectMaterialItem, {
+              materialId: list.id,
+              label: item.label,
+              quantity: item.quantity,
+              price: item.price,
+              unit: item.unit ?? 'pcs',
+              sortOrder: index,
+          }),
+      )
+
+      await manager.save(list)
       return manager.findOne(ProjectMaterial, {
         where: {
           projectId: list.projectId,
