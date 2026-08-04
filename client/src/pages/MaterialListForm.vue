@@ -33,6 +33,21 @@ const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 watch(selectedProject, project => {
   materialForm.projectId = project?.id ?? ''
 })
+
+watch(
+    () => props.projectId,
+    id => {
+
+        selectedProject.value =
+            projectStore.projects.find(
+                p => p.id === id
+            ) ?? null
+
+    },
+    {
+        immediate:true
+    }
+)
 const materialForm = reactive<CreateMaterialListDto>({
   projectId: '',
   //title: '',
@@ -161,8 +176,10 @@ async function save() {
         item.quantity !== 0,
     ),
   }*/
-
+  console.log(materialStore.materialList, 'Material List')
+  console.log(materialStore.materialList?.id, 'Material List ID')
   await materialStore.save(payload)
+  await materialStore.load(materialForm.projectId)
   /*
   materialForm.items = materialForm.items.filter(
     i => i.quantity !== null && i.quantity !== 0,
@@ -170,9 +187,14 @@ async function save() {
 
   await materialStore.save(materialForm)*/
 
+  const list = materialStore.materialList
+
+  materialForm.other = list?.other ?? ''
+
+
   materialForm.items = MATERIAL_CATALOG.map(label => {
     const existing =
-      materialStore.materialList?.items?.find(
+      list?.items.find(
         (i: MaterialItem) => i.label === label,
       )
 
