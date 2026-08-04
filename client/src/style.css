@@ -13,6 +13,8 @@
   -moz-osx-font-smoothing: grayscale;
   --p-text-color: #111827;
   --p-content-color: #111827;
+  --p-surface-0: #ffffff;
+    --p-surface-100: #f8fafc;
 }
 
 a {
