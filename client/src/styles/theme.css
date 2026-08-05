@@ -15,8 +15,9 @@
 body {
   background: var(--bg);
   font-family: system-ui;
+}
 
-  .p-inputtext,
+.p-inputtext,
 .p-select-label,
 .p-autocomplete-input,
 .p-dropdown-label,
@@ -36,5 +37,4 @@ body {
 }
 .p-dropdown-item {
     color: #111827;
-}
 }
