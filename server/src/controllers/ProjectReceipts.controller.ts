@@ -17,7 +17,6 @@ import { ProjectReceiptsService } from '../services/ProjectReceipts';
 @ApiTags('Project Receipts')
 @Controller('project-receipts')
 export class ProjectReceiptsController {
-
   constructor(private readonly receiptsService: ProjectReceiptsService) {}
   @Post(':projectId')
   @UseInterceptors(

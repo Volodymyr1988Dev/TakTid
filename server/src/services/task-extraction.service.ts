@@ -1,43 +1,31 @@
-import {
-  Injectable,
-  Logger,
-} from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common';
 
-import OpenAI from 'openai'
-import { ExtractedTask } from '../types/project/extractedTask.dto'
+import OpenAI from 'openai';
+import { ExtractedTask } from '../types/project/extractedTask.dto';
 
 @Injectable()
 export class TaskExtractionService {
+  private readonly logger = new Logger(TaskExtractionService.name);
 
-  private readonly logger =
-    new Logger(TaskExtractionService.name)
+  private readonly openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
 
-  private readonly openai =
-    new OpenAI({
-      apiKey:
-        process.env.OPENAI_API_KEY,
-    })
-
-  async extractTasks(
-    text: string,
-  ): Promise<ExtractedTask []> {
-
+  async extractTasks(text: string): Promise<ExtractedTask[]> {
     try {
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4.1-mini',
 
-      const response =
-        await this.openai.chat.completions.create({
-          model: 'gpt-4.1-mini',
+        temperature: 0,
 
-          temperature: 0,
+        response_format: {
+          type: 'json_object',
+        },
 
-          response_format: {
-            type: 'json_object',
-          },
-
-          messages: [
-            {
-              role: 'system',
-             content: `
+        messages: [
+          {
+            role: 'system',
+            content: `
 Extract construction tasks.
 
 Return JSON:
@@ -106,7 +94,7 @@ Ignore:
 - legal text
 - company presentations
 - company marketing text
-`/*
+` /*
 Return:
 
 {
@@ -115,58 +103,43 @@ Return:
     "task2"
   ]
 }
-`,*/
-            },
-            {
-              role: 'user',
-              content: text,
-            },
-          ],
-        })
+`,*/,
+          },
+          {
+            role: 'user',
+            content: text,
+          },
+        ],
+      });
 
-      const content =
-        response.choices[0].message.content
+      const content = response.choices[0].message.content;
 
       if (!content) {
-        return []
+        return [];
       }
 
-      const parsed =
-        JSON.parse(content)
+      const parsed = JSON.parse(content);
 
-      if (
-        !parsed.tasks ||
-        !Array.isArray(parsed.tasks)
-      ) {
-        return []
+      if (!parsed.tasks || !Array.isArray(parsed.tasks)) {
+        return [];
       }
 
       //return parsed.tasks
-        //.map((x: string) => x.trim())
-        //.filter(Boolean)
-        return parsed.tasks
-        .filter(
-            (task: any) =>
-            task?.title,
-        )
-        .map(
-            (task: any) => ({
-            title:
-                task.title?.trim() || '',
+      //.map((x: string) => x.trim())
+      //.filter(Boolean)
+      return parsed.tasks
+        .filter((task: any) => task?.title)
+        .map((task: any) => ({
+          title: task.title?.trim() || '',
 
-            note:
-                task.note?.trim() || '',
+          note: task.note?.trim() || '',
 
-            attentionNote:
-                task.attentionNote?.trim() || '',
-            }),
-        )
-
+          attentionNote: task.attentionNote?.trim() || '',
+        }));
     } catch (error) {
+      this.logger.error(error);
 
-      this.logger.error(error)
-
-      return []
+      return [];
     }
   }
 }

@@ -2,9 +2,39 @@
   --purple: #6a1b9a;
   --purple-light: #ede7f6;
   --bg: #f6f5f2;
+  --p-text-color: #111827;
+  --p-text-muted-color: #6b7280;
+  --p-content-color: #111827;
+  --p-surface-0: #ffffff;
+  --p-surface-50: #f8fafc;
+  --p-surface-100: #f8fafc;
+
+  --p-overlay-background: rgba(0, 0, 0, 0.5);
 }
 
 body {
   background: var(--bg);
   font-family: system-ui;
+}
+
+.p-inputtext,
+.p-select-label,
+.p-autocomplete-input,
+.p-dropdown-label,
+.p-multiselect-label,
+
+.p-dialog-title,
+.p-dialog-content,
+
+.p-autocomplete-option,
+.p-select-option,
+
+  .p-datepicker-input {
+    color: #111827;
+  }
+.p-dialog-header {
+    color: #111827;
+}
+.p-dropdown-item {
+    color: #111827;
 }

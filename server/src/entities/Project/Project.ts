@@ -1,10 +1,17 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { ProjectAssignment } from '../Project/ProjectAssignment';
 import { TimeEntry } from '../TimeEntries/TimeEntries';
 import { ProjectImage } from './ProjectImages';
 import { ProjectTask } from './ProjectTask';
 import { ProjectReceipt } from './ProjectReceipt';
+import { ProjectMaterial } from './ProjectMaterial';
 
 @Entity('projects')
 export class Projects {
@@ -44,7 +51,7 @@ export class Projects {
 
   @Column('decimal', { nullable: true })
   areaM2!: number | null;
-  
+
   @OneToMany(() => ProjectAssignment, (assignment) => assignment.project)
   assignments!: ProjectAssignment[];
   @OneToMany(() => TimeEntry, (timeEntry) => timeEntry.project)
@@ -55,9 +62,14 @@ export class Projects {
   })
   images!: ProjectImage[];
 
-  @OneToMany(() => ProjectTask, task => task.project)
-  tasks!: ProjectTask[]
+  @OneToMany(() => ProjectTask, (task) => task.project)
+  tasks!: ProjectTask[];
 
-  @OneToMany(() => ProjectReceipt, receipt => receipt.project)
-  receipts!: ProjectReceipt[]
+  @OneToMany(() => ProjectReceipt, (receipt) => receipt.project)
+  receipts!: ProjectReceipt[];
+
+  @OneToOne(() => ProjectMaterial, (material) => material.project, {
+    cascade: true,
+  })
+  material!: ProjectMaterial;
 }

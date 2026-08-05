@@ -6,5 +6,5 @@ export type ProjectUserStat = {
   extraHours: number;
   totalHours: number;
 
-  currentSalary: number | null
+  currentSalary: number | null;
 };

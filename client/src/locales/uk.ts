@@ -15,6 +15,10 @@ export default {
     deleteConfirm: 'Ви впевнені?',
     registerTime: 'Зареєструвати час',
     close: 'Закрити',
+    selectProject: 'Вибрати проект',
+    other: 'Інше',
+    editPrices: 'Редагувати ціни',
+    done: 'Готово',
   },
 
   project: {

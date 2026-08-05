@@ -102,15 +102,11 @@ export class ProjectStatsService {
 
     //const totalProjectPrice = Number(project.pricePerM2 ?? 0) * Number(project.areaM2 ?? 0)
     const baseProjectPrice =
-      Number(project.pricePerM2 ?? 0) *
-      Number(project.areaM2 ?? 0)
+      Number(project.pricePerM2 ?? 0) * Number(project.areaM2 ?? 0);
 
-    const extraHoursPrice =
-      totalExtra *
-      Number(project.pricePerExtraH ?? 0)
+    const extraHoursPrice = totalExtra * Number(project.pricePerExtraH ?? 0);
 
-    const totalProjectPrice =
-      baseProjectPrice + extraHoursPrice
+    const totalProjectPrice = baseProjectPrice + extraHoursPrice;
     return {
       project: {
         id: project.id,
