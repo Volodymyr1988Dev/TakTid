@@ -19,7 +19,7 @@ import 'dayjs/locale/pl'
 import './styles/theme.css'
 import './styles/calendar.css'
 import PrimeVue from 'primevue/config'
-//import Aura from '@primeuix/themes/aura'
+import Aura from '@primeuix/themes/aura'
 import 'primeicons/primeicons.css'
 
 dayjs.extend(weekOfYear)
@@ -38,11 +38,14 @@ app.use(i18n)
 await initLanguage()
 const auth = useAuthStore()
 
-app.use(PrimeVue/*,{
-    theme:{
-        preset:Aura
+app.use(PrimeVue, {
+    theme: {
+        preset: Aura,
+        options: {
+            darkModeSelector: false
+        }
     }
-}*/)
+})
 
 document.addEventListener("visibilitychange", async () => {
   if (document.visibilityState === "visible") {
