@@ -33,7 +33,7 @@ const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 watch(selectedProject, project => {
   materialForm.projectId = project?.id ?? ''
 })
-
+/*
 watch(
     () => props.projectId,
     id => {
@@ -48,6 +48,23 @@ watch(
         immediate:true
     }
 )
+    */
+   onMounted(async () => {
+
+      autoResize()
+
+      await projectStore.load()
+
+      if (props.projectId) {
+
+          selectedProject.value =
+              projectStore.projects.find(
+                  p => p.id === props.projectId
+              ) ?? null
+
+      }
+
+  })
 const materialForm = reactive<CreateMaterialListDto>({
   projectId: '',
   //title: '',
