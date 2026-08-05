@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { reactive, ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-
+import type { Project } from '../types/Project.dto'
 import { MATERIAL_CATALOG } from '../const/MaterialCatalog'
-
+import AutoComplete from 'primevue/autocomplete'
+import Dialog from 'primevue/dialog'
+//import Button from 'primevue/button'
 import type {
   CreateMaterialListDto,
   //UpdateMaterialListDto,
@@ -12,15 +14,21 @@ import type {
 
 import { useProjectStore } from '../stores/project.store'
 import { useProjectMaterialStore } from '../stores/projectMaterial.store'
+import 'primeicons/primeicons.css'
 
 const { t } = useI18n()
-
+const filteredProjects = ref<Project[]>([])
 const projectStore = useProjectStore()
 const materialStore = useProjectMaterialStore()
 
 const isEditing = ref(true)
+//const showPriceDialog = ref(false)
 
 const textareaRef = ref<HTMLTextAreaElement>()
+const selectedProject = ref<Project | null>(null)
+const priceDialog = ref(false)
+
+const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 
 watch(selectedProject, project => {
   materialForm.projectId = project?.id ?? ''
@@ -75,6 +83,15 @@ const visibleItems = computed(() =>
   materialForm.items.filter(i => i.quantity !== null && i.quantity !== 0),
 )
 
+function searchProjects(event: { query: string }) {
+  const query = event.query.toLowerCase()
+
+  filteredProjects.value = projectStore.projects.filter(project =>
+    project.address.toLowerCase().includes(query) ||
+    project.city.toLowerCase().includes(query),
+  )
+}
+
 function autoResize() {
   nextTick(() => {
     if (!textareaRef.value) return
@@ -113,6 +130,7 @@ watch(
     //await materialStore.load(materialForm.projectId)
     await materialStore.load(id)
 
+    //selectedProject.value = projectStore.projects.find(p => p.id === id) ?? null
     const list = materialStore.materialList
 
     //materialForm.title = list?.title ?? ''
@@ -127,10 +145,19 @@ watch(
         const existing = list?.items?.find((i: MaterialItem) => i.label === label)
         return {
           label,
-          quantity: existing?.quantity ?? null,
-          price: existing?.price ?? null,
+          //quantity: existing?.quantity ?? null,
+          //price: existing?.price ?? null,
+          quantity:
+              existing?.quantity == null
+                  ? null
+                  : Number(existing.quantity),
+
+          price:
+              existing?.price == null
+                  ? null
+                  : Number(existing.price),
           unit: existing?.unit ?? 'pcs',
-        }
+          }
       })
 
     autoResize()
@@ -222,8 +249,7 @@ function edit() {
 */ 
   const list = materialStore.materialList
 
-  if (!list)
-      return
+  if (!list) return
 
   materialForm.items =
       MATERIAL_CATALOG.map(label => {
@@ -243,11 +269,47 @@ function edit() {
       })
   autoResize()
 }
+function openPriceModal() {
+  priceDialog.value = true
+}
 </script>
 
 <template>
   <div class="material-form">
 
+    <AutoComplete
+      v-model="selectedProject"
+      :suggestions="filteredProjects"
+      :label="t('common.selectProject')"
+      optionLabel="address"
+      dropdown
+      forceSelection
+      @complete="searchProjects"
+    >
+      <template #option="{ option }">
+        <div class="project-option">
+          <!--  
+          <strong>
+            {{ option.city }} 
+          </strong>
+
+          <span>
+            ➜  {{ option.address }}
+          </span>
+          -->
+          <div class="city">
+              {{ option.city }}
+          </div>
+
+          <div class="address">
+              {{ option.address }}
+          </div>
+        </div>
+
+      </template>
+
+    </AutoComplete>
+    <!--
     <select v-model="materialForm.projectId">
       <option value="">
         {{ t('common.selectProject') }}
@@ -258,9 +320,24 @@ function edit() {
         :key="project.id"
         :value="project.id"
       >
-        {{project.city}}  ➤  {{ project.address }}
+        <div>
+
+        <strong>
+
+        {{project.city}}
+
+        </strong>
+
+        ➜
+
+        {{project.address}}
+
+        </div>-->
+        <!--{{project.city}}  ➤  {{ project.address }}-->
+      <!--  
       </option>
     </select>
+  -->
     <!--
     <input
       v-model="materialForm.title"
@@ -291,15 +368,6 @@ function edit() {
           step="0.01"
           :disabled="!isEditing"
         >
-
-        <input
-          v-if="isEditing"
-          v-model.number="item.price"
-          class="price"
-          type="number"
-          step="0.01"
-          placeholder="Price"
-        >
       </div>
 
       <div
@@ -308,7 +376,7 @@ function edit() {
       >
 
         <label>
-          Other
+          {{ t('common.other') }}
         </label>
 
         <textarea
@@ -323,30 +391,115 @@ function edit() {
 
     </div>
 
-    <button
+    <div
       v-if="isEditing"
-      @click="save"
+      class="sticky-actions"
     >
-      {{ t('common.save') }}
-    </button>
+      <button
+        v-if="isEditing"
+        class="save-btn"
+        @click="save"
+      >
+        {{ t('common.save') }}
+      </button>
 
+      <button
+        v-else
+        class="save-btn secondary"
+        @click="edit"
+      >
+        {{ t('common.edit') }}
+      </button>
+    </div>
+    <!--
+    <Button
+      v-if="isAdmin"
+      icon="pi pi-dollar"
+      label="Edit prices"
+      severity="secondary"
+      @click="showPriceDialog = true"
+    />
+  -->
     <button
-      v-else
-      @click="edit"
+      v-if="isEditing && isAdmin"
+      class="edit-prices-btn"
+      @click="openPriceModal"
     >
-      {{ t('common.edit') }}
+      <i class="pi pi-pencil"></i>
+      {{ t('common.editPrices') }}
     </button>
+    <Dialog
+      v-model:visible="priceDialog"
+      modal
+      header="Material Prices"
+      :style="{ width: '700px', maxWidth: '95vw' }"
+    >
+      <div class="price-list">
+        <div
+          v-for="item in materialForm.items"
+          :key="item.label"
+          class="price-row"
+        >
+          <span>{{ item.label }}</span>
+          <input
+            v-model.number="item.price"
+            type="number"
+            step="0.01"
+            placeholder="0.00"
+          >
+        </div>
+      </div>
 
+      <template #footer>
+        <button @click="priceDialog = false">
+          {{ t('common.done') }}
+        </button>
+      </template>
+    </Dialog>
+    <!--
+    <Dialog
+      v-model:visible="showPriceDialog"
+      modal
+      header="Material Prices"
+      :style="{ width: '700px' }"
+    >
+      <div
+        v-for="item in materialForm.items"
+        :key="item.label"
+        class="price-row"
+      >
+        <span>
+          {{ item.label }}
+        </span>
+
+        <input
+          v-model.number="item.price"
+          type="number"
+          step="0.01"
+        >
+      </div>
+    </Dialog>
+    -->
   </div>
 </template>
 
 <style scoped>
-
+.select{
+    width:100%;
+    padding:10px 14px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+    background:white;
+    font-size:14px;
+    max-height:300px;
+}
 .material-form{
     display:flex;
     flex-direction:column;
     gap:10px;
     padding:12px;
+
+    color:#111827;
 }
 
 .title-input{
@@ -367,10 +520,13 @@ function edit() {
     align-items:center;
 }
 
-.label{
+.label{/*
     overflow:hidden;
-    white-space:nowrap;
-    text-overflow:ellipsis;
+    text-overflow:ellipsis;*/
+
+    flex:1;
+    white-space:normal;
+    word-break:break-word;
 }
 
 .row input{
@@ -409,17 +565,162 @@ button{
 button:hover{
     opacity:.9;
 }
+.quantity{
+    width:72px;
+    text-align:center;
+}
+/*
+.sticky-actions{
+    position:sticky;
+    bottom:0;
+    z-index:50;
+
+    background:white;
+
+    padding:12px;
+
+    margin-top:12px;
+
+    border-top:1px solid #e5e7eb;
+}
+
+.sticky-actions button{
+    width:100%;
+    height:48px;
+}
+*/
+.sticky-actions{
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 12px;
+  border-top: 1px solid #e5e7eb;
+  z-index: 20;
+}
+
+.save-btn{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:#2563eb;
+  color:white;
+  font-size:16px;
+  font-weight:700;
+}
+
+.save-btn.secondary{
+  background:#64748b;
+}
+
+.price-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-height:60vh;
+  overflow:auto;
+}
+
+.price-row{
+  display:grid;
+  grid-template-columns:1fr 120px;
+  gap:10px;
+  align-items:center;
+}
+.project-option{
+
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+
+}
+
+.city{
+
+    font-weight:700;
+    color:var(--primary-color);
+
+}
+
+.address{
+
+    font-size:.9rem;
+    opacity:.8;
+
+}
 
 @media(max-width:700px){
-
+.row input{
+  width:70px;
+  text-align:center;
+  padding:2px;
+}
 .row{
-    grid-template-columns:1fr;
+    /*grid-template-columns:1fr;
+    font-size:11px;*/
+
+    display:flex;
+    align-items:center;
+    gap:8px;
 }
 
 .price{
     width:100%;
 }
+.price-btn{
+    width:36px;
+    height:36px;
+}
+.material-form{
+    padding:8px;
+}
+.label{
+    flex:1;
+    white-space:normal;
+    word-break:break-word;
+    font-size:13px;
+    line-height:1.2;
+}
 
+
+.row{
+    display:grid;
+    grid-template-columns:1fr 72px 40px;
+    gap:8px;
+    align-items:center;
+  }
+
+  .label{
+    font-size:13px;
+    line-height:1.2;
+    white-space:normal;
+    word-break:break-word;
+  }
+
+  .row input{
+    width:72px;
+    text-align:center;
+    padding:6px 4px;
+  }
+
+  .price-btn{
+    width:40px;
+    height:40px;
+  }
+
+  .material-form{
+    padding:10px;
+  }
+  .sticky-actions{
+    position: static;
+    border-top:none;
+    padding:0;
+  }
+
+  .save-btn{
+    width:auto;
+    min-width:180px;
+  }
 }
 
 </style>
