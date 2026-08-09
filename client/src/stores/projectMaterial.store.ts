@@ -12,15 +12,18 @@ export const useProjectMaterialStore = defineStore('projectMaterial', () => {
 
 async function load(
   projectId: string,
-) {
-  materialList.value =
-    await getMaterialList(
-      projectId,
-    )
+) : Promise<MaterialList | null> {
+  //materialList.value = await getMaterialList( projectId )
+      const list = await getMaterialList(projectId)
+      materialList.value = list
+      return list
 }
+function clear(): void {
+      materialList.value = null
+    }
 async function save(
   payload: CreateMaterialListDto,
-) {
+) : Promise<MaterialList | null> {
 
   if (materialList.value?.id) {
 
@@ -38,33 +41,14 @@ async function save(
   } else {
 
     materialList.value =
-      await createMaterialList(
-        payload,
-      )
+      await createMaterialList( payload )
   }
-}/*
-async function save(
-  payload: CreateMaterialListDto | UpdateMaterialListDto,
-) {
-
-  if (
-    materialList.value?.id
-  ) {
-    materialList.value =
-      await updateMaterialList(
-        materialList.value.id,
-        payload,
-      )
-  } else {
-    materialList.value =
-      await createMaterialList(
-        payload,
-      )
-  }
-}*/
+  return materialList.value
+}
 return {
   materialList,
   load,
   save,
+  clear,
 }
 })

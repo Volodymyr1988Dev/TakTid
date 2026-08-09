@@ -10,6 +10,7 @@
   --p-surface-100: #f8fafc;
 
   --p-overlay-background: rgba(0, 0, 0, 0.5);
+  -webkit-text-fill-color: #111827;
 }
 
 body {
