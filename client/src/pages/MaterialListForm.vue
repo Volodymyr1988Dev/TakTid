@@ -5,10 +5,8 @@ import type { Project } from '../types/Project.dto'
 import { MATERIAL_CATALOG } from '../const/MaterialCatalog'
 import AutoComplete from 'primevue/autocomplete'
 import Dialog from 'primevue/dialog'
-//import Button from 'primevue/button'
 import type {
   CreateMaterialListDto,
-  //UpdateMaterialListDto,
   MaterialItem,
 } from '../types/Material'
 
@@ -17,266 +15,220 @@ import { useProjectMaterialStore } from '../stores/projectMaterial.store'
 import 'primeicons/primeicons.css'
 
 const { t } = useI18n()
-const filteredProjects = ref<Project[]>([])
-const projectStore = useProjectStore()
-const materialStore = useProjectMaterialStore()
-
-const isEditing = ref(true)
-//const showPriceDialog = ref(false)
-
-const textareaRef = ref<HTMLTextAreaElement>()
-const selectedProject = ref<Project | null>(null)
-const priceDialog = ref(false)
-
 const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 
-watch(selectedProject, project => {
-  materialForm.projectId = project?.id ?? ''
-})
-/*
-watch(
-    () => props.projectId,
-    id => {
+const materialStore = useProjectMaterialStore()
+const projectStore = useProjectStore()
 
-        selectedProject.value =
-            projectStore.projects.find(
-                p => p.id === id
-            ) ?? null
+const filteredProjects = ref<Project[]>([])
+const selectedProject = ref<Project | null>(null)
 
-    },
-    {
-        immediate:true
-    }
-)
-    */
-   onMounted(async () => {
+const textareaRef = ref<HTMLTextAreaElement>()
 
-      autoResize()
+const isEditing = ref(true)
+const priceDialog = ref(false)
 
-      await projectStore.load()
+let loadRequestId = 0
 
-      if (props.projectId) {
-
-          selectedProject.value =
-              projectStore.projects.find(
-                  p => p.id === props.projectId
-              ) ?? null
-
-      }
-
-  })
-const materialForm = reactive<CreateMaterialListDto>({
-  projectId: '',
-  //title: '',
-  other: '',
-  items: MATERIAL_CATALOG.map(label => ({
+const createEmptyItems = (): MaterialItem[] =>
+  MATERIAL_CATALOG.map(label => ({
     label,
     quantity: null,
     price: null,
     unit: 'pcs',
-  })),
+  }))
+
+const materialForm = reactive<CreateMaterialListDto>({
+  projectId: '',
+  other: '',
+  items: createEmptyItems(),
 })
 
-const hasOther = computed(() => materialForm.other.trim().length > 0)
-
-const visibleItems = computed(() =>
-  materialForm.items.filter(i => i.quantity !== null && i.quantity !== 0),
+const hasOther = computed(() =>
+  materialForm.other.trim().length > 0,
 )
 
-function searchProjects(event: { query: string }) {
-  const query = event.query.toLowerCase()
+const visibleItems = computed(() =>
+  materialForm.items.filter(
+    item =>
+      item.quantity !== null &&
+      item.quantity !== 0,
+  ),
+)
 
-  filteredProjects.value = projectStore.projects.filter(project =>
-    project.address.toLowerCase().includes(query) ||
-    project.city.toLowerCase().includes(query),
-  )
+function syncFormFromList(): void {
+  const list = materialStore.materialList
+
+  materialForm.other = list?.other ?? ''
+
+  materialForm.items = MATERIAL_CATALOG.map(label => {
+    const existing = list?.items?.find(
+      (item: MaterialItem) =>
+        item.label === label,
+    )
+
+    return {
+      label,
+      quantity:
+        existing?.quantity == null
+          ? null
+          : Number(existing.quantity),
+
+      price:
+        existing?.price == null
+          ? null
+          : Number(existing.price),
+
+      unit: existing?.unit ?? 'pcs',
+    }
+  })
+
+  autoResize()
 }
 
-function autoResize() {
+function resetForm(): void {
+  materialForm.other = ''
+  materialForm.items = createEmptyItems()
+
+  nextTick(() => {
+    autoResize()
+  })
+}
+
+function autoResize(): void {
   nextTick(() => {
     if (!textareaRef.value) return
 
     textareaRef.value.style.height = 'auto'
     textareaRef.value.style.height =
-      textareaRef.value.scrollHeight + 'px'
+      `${textareaRef.value.scrollHeight}px`
   })
 }
 
-watch(
-  () => materialForm.other,
-  autoResize,
-)
+function searchProjects(event: { query: string }): void {
+  const query = event.query.toLowerCase().trim()
 
-onMounted(async () => {
-  autoResize()
-
-  await projectStore.load()
-})
+  filteredProjects.value =
+    projectStore.projects.filter(project =>
+      project.address
+        .toLowerCase()
+        .includes(query) ||
+      project.city
+        .toLowerCase()
+        .includes(query),
+    )
+}
 
 watch(
   () => materialForm.projectId,
-  async id => {
-    if (!id) {
-      //materialForm.title = ''
-      materialForm.other = ''
-      materialForm.items = MATERIAL_CATALOG.map(label => ({
-        label,
-        quantity: null,
-        price: null,
-        unit: 'pcs',
-      }))
+  async projectId => {
+    const requestId = ++loadRequestId
+
+    if (!projectId) {
+      materialStore.clear()
+      resetForm()
+      isEditing.value = true
       return
     }
-    //await materialStore.load(materialForm.projectId)
-    await materialStore.load(id)
 
-    //selectedProject.value = projectStore.projects.find(p => p.id === id) ?? null
-    const list = materialStore.materialList
+    await materialStore.load(projectId)
 
-    //materialForm.title = list?.title ?? ''
-    materialForm.other = list?.other ?? ''
-    //materialForm.title = materialStore.materialList?.title ?? ''
+    if (requestId !== loadRequestId) {
+      return
+    }
 
-    //materialForm.other = materialStore.materialList?.other ?? ''
+    syncFormFromList()
 
-    materialForm.items =
-      MATERIAL_CATALOG.map(label => {
-        //const existing =materialStore.materialList?.items.find((i: MaterialItem) => i.label === label)
-        const existing = list?.items?.find((i: MaterialItem) => i.label === label)
-        return {
-          label,
-          //quantity: existing?.quantity ?? null,
-          //price: existing?.price ?? null,
-          quantity:
-              existing?.quantity == null
-                  ? null
-                  : Number(existing.quantity),
-
-          price:
-              existing?.price == null
-                  ? null
-                  : Number(existing.price),
-          unit: existing?.unit ?? 'pcs',
-          }
-      })
-
-    autoResize()
+    isEditing.value =
+      materialStore.materialList === null
   },
 )
 
-async function save() {
-  const payload: CreateMaterialListDto = {
-      projectId: materialForm.projectId,
-      //title: materialForm.title,
-      other: materialForm.other?.trim() || '',
-      items: materialForm.items
-        .filter(
-            item =>
-                item.quantity !== null &&
-                item.quantity !== 0 &&
-                !Number.isNaN(item.quantity),
-        )
-        .map(item => ({
-            label: item.label,
-            quantity: item.quantity,
-            price: item.price,
-            unit: item.unit,
-        })),
+onMounted(async () => {
+  await projectStore.load()
+
+  if (!props.projectId) {
+    return
   }
-/*
-  const payload: CreateMaterialListDto = {
-    ...materialForm,
-    items: materialForm.items.filter(
-      item =>
-        item.quantity !== null &&
-        !Number.isNaN(item.quantity) &&
-        item.quantity !== 0,
-    ),
-  }*/
-  console.log(materialStore.materialList, 'Material List')
-  console.log(materialStore.materialList?.id, 'Material List ID')
-  await materialStore.save(payload)
-  await materialStore.load(materialForm.projectId)
-  /*
-  materialForm.items = materialForm.items.filter(
-    i => i.quantity !== null && i.quantity !== 0,
-  )
+  if (props.projectId) {
+    setProject(props.projectId)
+  }
+})
 
-  await materialStore.save(materialForm)*/
-
-  const list = materialStore.materialList
-
-  materialForm.other = list?.other ?? ''
-
-
-  materialForm.items = MATERIAL_CATALOG.map(label => {
-    const existing =
-      list?.items.find(
-        (i: MaterialItem) => i.label === label,
-      )
-
-    return {
-      label,
-      quantity: existing?.quantity ?? null,
-      price: existing?.price ?? null,
-      unit: existing?.unit ?? 'pcs',
+watch(
+  () => props.projectId,
+  projectId => {
+    if (projectId) {
+      setProject(projectId)
     }
-  })
+  },
+)
 
+async function save(): Promise<void> {
+  if (!materialForm.projectId) {
+    return
+  }
+
+  const payload: CreateMaterialListDto = {
+    projectId: materialForm.projectId,
+
+    other:
+      materialForm.other.trim() || '',
+
+    items: materialForm.items
+      .filter(
+        item =>
+          item.quantity !== null &&
+          item.quantity !== 0 &&
+          !Number.isNaN(item.quantity),
+      )
+      .map(item => ({
+        label: item.label,
+        quantity: item.quantity,
+        price: item.price,
+        unit: item.unit,
+      })),
+  }
+  await materialStore.save(payload)
+
+  syncFormFromList()
   isEditing.value = false
-  }
-
-function edit() {
-  isEditing.value = true
-/*
-  if (materialStore.materialList) {
-    materialForm.items =
-      MATERIAL_CATALOG.map(label => {
-        const existing =
-          materialStore.materialList.items.find(
-            (i: MaterialItem) => i.label === label,
-          )
-
-        return {
-          label,
-          quantity: existing?.quantity ?? null,
-          price: existing?.price ?? null,
-          unit: existing?.unit ?? 'pcs',
-        }
-      })
-
-  }
-*/ 
-  const list = materialStore.materialList
-
-  if (!list) return
-
-  materialForm.items =
-      MATERIAL_CATALOG.map(label => {
-
-          const existing =
-              list.items.find(
-                  (i: MaterialItem) =>
-                      i.label === label,
-              )
-
-          return {
-              label,
-              quantity: existing?.quantity ?? null,
-              price: existing?.price ?? null,
-              unit: existing?.unit ?? 'pcs',
-          }
-      })
-  autoResize()
 }
-function openPriceModal() {
+function edit(): void {
+  if (!materialStore.materialList) {
+    return
+  }
+
+  syncFormFromList()
+  isEditing.value = true
+}
+
+function openPriceModal(): void {
   priceDialog.value = true
 }
+function selectProject(project: Project | null): void {
+  selectedProject.value = project
+  materialForm.projectId = project?.id ?? ''
+}
+function setProject(projectId: string): void {
+  const project =
+    projectStore.projects.find(
+      p => p.id === projectId,
+    ) ?? null
+  if (!project) {
+    selectedProject.value = null
+    materialForm.projectId = ''
+    return
+  }
+  selectedProject.value = project
+  materialForm.projectId = project?.id ?? ''
+}
+
 </script>
 
 <template>
   <div class="material-form">
-
+    <!--
     <AutoComplete
       v-model="selectedProject"
       :suggestions="filteredProjects"
@@ -288,15 +240,7 @@ function openPriceModal() {
     >
       <template #option="{ option }">
         <div class="project-option">
-          <!--  
-          <strong>
-            {{ option.city }} 
-          </strong>
-
-          <span>
-            ➜  {{ option.address }}
-          </span>
-          -->
+         
           <div class="city">
               {{ option.city }}
           </div>
@@ -309,47 +253,33 @@ function openPriceModal() {
       </template>
 
     </AutoComplete>
-    <!--
-    <select v-model="materialForm.projectId">
-      <option value="">
-        {{ t('common.selectProject') }}
-      </option>
-
-      <option
-        v-for="project in projectStore.projects"
-        :key="project.id"
-        :value="project.id"
+-->
+      <AutoComplete
+        v-model="selectedProject"
+        :suggestions="filteredProjects"
+        :placeholder="t('common.selectProject')"
+        optionLabel="address"
+        dropdown
+        forceSelection
+        @complete="searchProjects"
+        @update:model-value="selectProject"
       >
-        <div>
+        <template #option="{ option }">
+          <div class="project-option">
+            <div class="city">
+              {{ option.city }}
+            </div>
 
-        <strong>
-
-        {{project.city}}
-
-        </strong>
-
-        ➜
-
-        {{project.address}}
-
-        </div>-->
-        <!--{{project.city}}  ➤  {{ project.address }}-->
-      <!--  
-      </option>
-    </select>
-  -->
-    <!--
-    <input
-      v-model="materialForm.title"
-      class="title-input"
-      :disabled="!isEditing"
-      :placeholder="t('common.title')"
-    >
-    -->
-
+            <div class="address">
+              {{ option.address }}
+            </div>
+          </div>
+        </template>
+      </AutoComplete>
     <div
       v-if="isEditing || visibleItems.length"
       class="grid"
+      :class="{ 'view-mode': !isEditing }"
     >
 
       <div
@@ -365,8 +295,9 @@ function openPriceModal() {
         <input
           v-model.number="item.quantity"
           type="number"
-          step="0.01"
+          step="1"
           :disabled="!isEditing"
+          :class="{ 'readonly-quantity': !isEditing }"
         >
       </div>
 
@@ -390,9 +321,8 @@ function openPriceModal() {
       </div>
 
     </div>
-
+    <!--v-if="isEditing"-->
     <div
-      v-if="isEditing"
       class="sticky-actions"
     >
       <button
@@ -411,15 +341,6 @@ function openPriceModal() {
         {{ t('common.edit') }}
       </button>
     </div>
-    <!--
-    <Button
-      v-if="isAdmin"
-      icon="pi pi-dollar"
-      label="Edit prices"
-      severity="secondary"
-      @click="showPriceDialog = true"
-    />
-  -->
     <button
       v-if="isEditing && isAdmin"
       class="edit-prices-btn"
@@ -456,30 +377,6 @@ function openPriceModal() {
         </button>
       </template>
     </Dialog>
-    <!--
-    <Dialog
-      v-model:visible="showPriceDialog"
-      modal
-      header="Material Prices"
-      :style="{ width: '700px' }"
-    >
-      <div
-        v-for="item in materialForm.items"
-        :key="item.label"
-        class="price-row"
-      >
-        <span>
-          {{ item.label }}
-        </span>
-
-        <input
-          v-model.number="item.price"
-          type="number"
-          step="0.01"
-        >
-      </div>
-    </Dialog>
-    -->
   </div>
 </template>
 
@@ -496,8 +393,8 @@ function openPriceModal() {
 .material-form{
     display:flex;
     flex-direction:column;
-    gap:10px;
-    padding:12px;
+    gap:8px;
+    padding:10px;
 
     color:#111827;
 }
@@ -510,29 +407,78 @@ function openPriceModal() {
 
 .grid{
     display:grid;
-    gap:6px;
+    gap:5px;
 }
 
 .row{
     display:grid;
-    grid-template-columns:minmax(0,1fr) 90px 90px;
+    grid-template-columns:minmax(0,1fr) 72px;
     gap:8px;
     align-items:center;
+    min-height: 30px;
 }
 
-.label{/*
-    overflow:hidden;
-    text-overflow:ellipsis;*/
-
-    flex:1;
+.label{
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.15;
+    color: #111827;
+    /*flex:1;*/
     white-space:normal;
     word-break:break-word;
+
+}
+.readonly-quantity {
+  -webkit-appearance: none;
+  appearance: none;
+
+  opacity: 1;
+  color: #111827;
+  -webkit-text-fill-color: #111827;
+}
+.row input{
+    width: 72px;
+    height: 28px;
+    box-sizing: border-box;
+
+    border:1px solid #ccc;
+    border-radius:7px;
+    padding: 3px 5px;
+
+    text-align: center;
+    font-size: 13px;
+    color: #111827;
+    background: #fff;
 }
 
-.row input{
-    border:1px solid #ccc;
-    border-radius:8px;
-    padding:5px;
+.grid.view-mode {
+  gap: 2px;
+}
+.view-mode .row {
+  min-height: 24px;
+  grid-template-columns: minmax(0, 1fr) 55px;
+  gap: 6px;
+}
+.view-mode .label {
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+.view-mode .row input {
+  width: 55px;
+  height: 23px;
+
+  padding: 0;
+
+  border: none;
+  background: transparent;
+
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
+
+  text-align: right;
+  pointer-events: none;
 }
 
 .price{
@@ -542,15 +488,26 @@ function openPriceModal() {
 .other-section{
     display:flex;
     flex-direction:column;
-    gap:4px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    /*gap:4px;*/
 }
 
 textarea{
+    width: 100%;
+    box-sizing: border-box;
+
     resize:none;
     overflow:hidden;
     border:1px solid #ccc;
     border-radius:8px;
-    padding:8px;
+    padding:6px;
+
+    font-size: 13px;
+    color: #111827;
+    background: #fff;
 }
 
 button{
@@ -563,49 +520,30 @@ button{
 }
 
 button:hover{
-    opacity:.9;
+    opacity:0.9;
 }
 .quantity{
     width:72px;
     text-align:center;
 }
-/*
-.sticky-actions{
-    position:sticky;
-    bottom:0;
-    z-index:50;
 
-    background:white;
-
-    padding:12px;
-
-    margin-top:12px;
-
-    border-top:1px solid #e5e7eb;
-}
-
-.sticky-actions button{
-    width:100%;
-    height:48px;
-}
-*/
 .sticky-actions{
   position: sticky;
   bottom: 0;
   background: white;
-  padding: 12px;
+  padding: 8px 0;
   border-top: 1px solid #e5e7eb;
   z-index: 20;
 }
 
 .save-btn{
   width:100%;
-  padding:14px;
+  padding:12px;
   border:none;
-  border-radius:12px;
+  border-radius:10px;
   background:#2563eb;
   color:white;
-  font-size:16px;
+  font-size:15px;
   font-weight:700;
 }
 
@@ -618,7 +556,8 @@ button:hover{
   flex-direction:column;
   gap:10px;
   max-height:60vh;
-  overflow:auto;
+  /*overflow:auto;*/
+  overflow-y: auto;
 }
 
 .price-row{
@@ -644,8 +583,8 @@ button:hover{
 
 .address{
 
-    font-size:.9rem;
-    opacity:.8;
+    font-size:0.9rem;
+    opacity:0.8;
 
 }
 
@@ -672,14 +611,15 @@ button:hover{
     height:36px;
 }
 .material-form{
-    padding:8px;
+    padding:6px;
+    gap: 6px;
 }
 .label{
     flex:1;
     white-space:normal;
     word-break:break-word;
-    font-size:13px;
-    line-height:1.2;
+    font-size:12px;
+    line-height:1.1;
 }
 
 
@@ -698,9 +638,11 @@ button:hover{
   }
 
   .row input{
-    width:72px;
+    width:68px;
     text-align:center;
-    padding:6px 4px;
+    padding:2px 4px;
+    height: 26px;
+    font-size: 12px;
   }
 
   .price-btn{
@@ -720,6 +662,51 @@ button:hover{
   .save-btn{
     width:auto;
     min-width:180px;
+  }
+  .grid.view-mode {
+    gap: 1px;
+  }
+
+  .view-mode .row {
+    grid-template-columns: minmax(0, 1fr) 52px;
+    gap: 5px;
+    min-height: 22px;
+  }
+
+  .view-mode .label {
+    font-size: 11.5px;
+    line-height: 1.05;
+  }
+
+  .view-mode .row input {
+    width: 52px;
+    height: 21px;
+
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+   .other-section {
+    margin-top: 3px;
+  }
+
+  .other-section label {
+    font-size: 11px;
+  }
+  .sticky-actions {
+    position: static;
+    padding: 4px 0;
+    border-top: none;
+  }
+
+  .save-btn {
+    width: auto;
+    min-width: 150px;
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  .price-row {
+    grid-template-columns: minmax(0, 1fr) 90px;
+    gap: 8px;
   }
 }
 
