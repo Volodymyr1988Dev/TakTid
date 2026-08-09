@@ -13,7 +13,6 @@ export const useProjectMaterialStore = defineStore('projectMaterial', () => {
 async function load(
   projectId: string,
 ) : Promise<MaterialList | null> {
-  //materialList.value = await getMaterialList( projectId )
       const list = await getMaterialList(projectId)
       materialList.value = list
       return list

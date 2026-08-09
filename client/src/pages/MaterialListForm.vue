@@ -28,185 +28,6 @@ const textareaRef = ref<HTMLTextAreaElement>()
 const isEditing = ref(true)
 const priceDialog = ref(false)
 
-/*
-watch(selectedProject, project => {
-  materialForm.projectId = project?.id ?? ''
-})
-   onMounted(async () => {
-
-      autoResize()
-
-      await projectStore.load()
-
-      if (props.projectId) {
-
-          selectedProject.value =
-              projectStore.projects.find(
-                  p => p.id === props.projectId
-              ) ?? null
-
-      }
-
-  })
-const materialForm = reactive<CreateMaterialListDto>({
-  projectId: '',
-  //title: '',
-  other: '',
-  items: MATERIAL_CATALOG.map(label => ({
-    label,
-    quantity: null,
-    price: null,
-    unit: 'pcs',
-  })),
-})
-
-const hasOther = computed(() => materialForm.other.trim().length > 0)
-
-const visibleItems = computed(() =>
-  materialForm.items.filter(i => i.quantity !== null && i.quantity !== 0),
-)
-
-function searchProjects(event: { query: string }) {
-  const query = event.query.toLowerCase()
-
-  filteredProjects.value = projectStore.projects.filter(project =>
-    project.address.toLowerCase().includes(query) ||
-    project.city.toLowerCase().includes(query),
-  )
-}
-
-function autoResize() {
-  nextTick(() => {
-    if (!textareaRef.value) return
-
-    textareaRef.value.style.height = 'auto'
-    textareaRef.value.style.height =
-      textareaRef.value.scrollHeight + 'px'
-  })
-}
-
-watch(
-  () => materialForm.other,
-  autoResize,
-)
-
-onMounted(async () => {
-  autoResize()
-
-  await projectStore.load()
-})
-
-watch(
-  () => materialForm.projectId,
-  async id => {
-    if (!id) {
-      materialForm.other = ''
-      materialForm.items = MATERIAL_CATALOG.map(label => ({
-        label,
-        quantity: null,
-        price: null,
-        unit: 'pcs',
-      }))
-      return
-    }
-    await materialStore.load(id)
-
-    const list = materialStore.materialList
-    materialForm.other = list?.other ?? ''
-
-    materialForm.items =
-      MATERIAL_CATALOG.map(label => {
-        const existing = list?.items?.find((i: MaterialItem) => i.label === label)
-        return {
-          label,
-          quantity:
-              existing?.quantity == null
-                  ? null
-                  : Number(existing.quantity),
-
-          price:
-              existing?.price == null
-                  ? null
-                  : Number(existing.price),
-          unit: existing?.unit ?? 'pcs',
-          }
-      })
-
-    autoResize()
-  },
-)
-
-async function save() {
-  const payload: CreateMaterialListDto = {
-      projectId: materialForm.projectId,
-      //title: materialForm.title,
-      other: materialForm.other?.trim() || '',
-      items: materialForm.items
-        .filter(
-            item =>
-                item.quantity !== null &&
-                item.quantity !== 0 &&
-                !Number.isNaN(item.quantity),
-        )
-        .map(item => ({
-            label: item.label,
-            quantity: item.quantity,
-            price: item.price,
-            unit: item.unit,
-        })),
-  }
-  await materialStore.save(payload)
-  await materialStore.load(materialForm.projectId)
-
-  const list = materialStore.materialList
-
-  materialForm.other = list?.other ?? ''
-
-
-  materialForm.items = MATERIAL_CATALOG.map(label => {
-    const existing =
-      list?.items.find(
-        (i: MaterialItem) => i.label === label,
-      )
-
-    return {
-      label,
-      quantity: existing?.quantity ?? null,
-      price: existing?.price ?? null,
-      unit: existing?.unit ?? 'pcs',
-    }
-  })
-
-  isEditing.value = false
-  }
-
-function edit() {
-  isEditing.value = true
-  const list = materialStore.materialList
-
-  if (!list) return
-
-  materialForm.items =
-      MATERIAL_CATALOG.map(label => {
-
-          const existing =
-              list.items.find(
-                  (i: MaterialItem) =>
-                      i.label === label,
-              )
-
-          return {
-              label,
-              quantity: existing?.quantity ?? null,
-              price: existing?.price ?? null,
-              unit: existing?.unit ?? 'pcs',
-          }
-      })
-  autoResize()
-}
-function openPriceModal() {
-  priceDialog.value = true
-}*/
 let loadRequestId = 0
 
 const createEmptyItems = (): MaterialItem[] =>
@@ -298,9 +119,6 @@ function searchProjects(event: { query: string }): void {
     )
 }
 
-/**
- * Load material list whenever selected project changes.
- */
 watch(
   () => materialForm.projectId,
   async projectId => {
@@ -315,26 +133,17 @@ watch(
 
     await materialStore.load(projectId)
 
-    // A newer project was selected while this request
-    // was still loading.
     if (requestId !== loadRequestId) {
       return
     }
 
     syncFormFromList()
 
-    /**
-     * Existing list -> show read-only list.
-     * No list -> open empty form for creation.
-     */
     isEditing.value =
       materialStore.materialList === null
   },
 )
 
-/**
- * Load projects once.
- */
 onMounted(async () => {
   await projectStore.load()
 
@@ -344,17 +153,6 @@ onMounted(async () => {
   if (props.projectId) {
     setProject(props.projectId)
   }
-  /*
-  const project =
-    projectStore.projects.find(
-      p => p.id === props.projectId,
-    ) ?? null
-
-  selectedProject.value = project
-
-  if (project) {
-    materialForm.projectId = project.id
-  }*/
 })
 
 watch(
@@ -365,9 +163,7 @@ watch(
     }
   },
 )
-/**
- * Save current material list.
- */
+
 async function save(): Promise<void> {
   if (!materialForm.projectId) {
     return
@@ -393,24 +189,11 @@ async function save(): Promise<void> {
         unit: item.unit,
       })),
   }
-
-  /**
-   * Store.save() already receives the updated entity
-   * from the backend, so there is no need for another GET.
-   */
   await materialStore.save(payload)
 
   syncFormFromList()
-
-  /**
-   * Return to read-only list after saving.
-   */
   isEditing.value = false
 }
-
-/**
- * Return from read-only list to editing mode.
- */
 function edit(): void {
   if (!materialStore.materialList) {
     return
