@@ -1,2189 +1,677 @@
 <script setup lang="ts">
 import {
-  ref,
-  watch,
   computed,
-  onBeforeUnmount,
-  nextTick,
-  onServerPrefetch
+  toRef,
+  watch,
+  ref,
 } from 'vue'
-import type { ProjectStats } from '../types/projectStats.type'
-import { cloudinary } from '../utils/cloudinary'
-//import { getProjectStats, getProjectSummary } from '../api/projectStats.api'
-import { getProjectStats } from '../api/projectStats.api'
-import { useProjectImageStore } from '../stores/projectImage.store'
-import { useProjectReceiptStore } from '../stores/projectReceipts'
-import { useStatsStore } from '../stores/stats.store'
-import AppLoader from '../components/ui/AppLoader.vue'
-import type { TimeEntry } from '../types/TimeEntry.type'
-import { useProjectStore } from '../stores/project.store'
+
 import { useI18n } from 'vue-i18n'
+
+import AppLoader from '../components/ui/AppLoader.vue'
 import ProjectTasks from '../components/ui/ProjectTasks.vue'
-import type { ViewerItem } from '../types/ViewerItem'
-import type { ProjectImage } from '../types/ProjectImage.type'
+
+import ProjectHeader from '../components/ProjectInfo/ProjectHeader.vue'
+import ProjectMetrics from '../components/ProjectInfo/ProjectMetrics.vue'
+import ProjectTimeSummary from '../components/ProjectInfo/ProjectTimeSummary.vue'
+import ProjectUsers from '../components/ProjectInfo/ProjectUsers.vue'
+import ProjectMedia from '../components/ProjectInfo/ProjectMedia.vue'
+
+import { useProjectInfo } from '../components/composables/projectInfo/useProjectInfo'
+import { useProjectMedia } from '../components/composables/projectInfo/useProjectMedia'
+import { useImageViewer } from '../components/composables/projectInfo/useImageViewer'
+
+import { useStatsStore } from '../stores/stats.store'
+import type { ProjectImage } from '../types/ProjectImage.type.ts'
 import type { ProjectReceipt } from '../types/projectReceipts.type.ts'
+import type { ViewerItem } from '../types/ViewerItem.ts'
+
+const props = defineProps<{
+  projectId: string
+  isAdmin: boolean
+}>()
+
+const emit = defineEmits<{
+  back: []
+}>()
 
 const { t } = useI18n()
-const projectStore = useProjectStore()
-const props = defineProps<{ projectId: string, isAdmin: boolean }>()
-const emit = defineEmits<{ (e: 'back'): void }>()
-const imageStore = useProjectImageStore()
-const receiptStore = useProjectReceiptStore()
+
+const projectId = toRef(props, 'projectId')
+const isAdmin = toRef(props, 'isAdmin')
+
+/*
+ * IMPORTANT:
+ *
+ * We destructure refs from composables.
+ *
+ * This is intentional.
+ * If we use:
+ *
+ *   projectInfo.stats
+ *
+ * directly in template, Vue may pass the Ref itself
+ * because projectInfo is a normal object.
+ *
+ * Top-level refs are automatically unwrapped by Vue templates.
+ */
+
+const projectInfo = useProjectInfo(
+  projectId,
+  isAdmin,
+)
+
+const {
+  stats,
+  loading,
+  error,
+
+  totalProjectPrice,
+  extraHoursPrice,
+  workersCost,
+  profit,
+
+  area,
+  price,
+  extraPrice,
+
+  editMode,
+
+  totalWork,
+  totalExtra,
+  totalAll,
+
+  showDetails,
+  filteredDetails,
+  loadingDetails,
+
+  expandedUserId,
+
+  loadStats,
+  resetForProject,
+
+  saveArea,
+  savePrice,
+  saveExtraPrice,
+
+  toggleSummary,
+  toggleDetails,
+} = projectInfo
+
+
+const media = useProjectMedia(projectId)
+
+const {
+  imageStore,
+  receiptStore,
+
+  showImages,
+  showReceipts,
+
+  loaded,
+  sentinel,
+
+  deletingImage,
+
+  loadReceipts,
+  toggleReceipts,
+  uploadReceipts,
+  removeViewerItem,
+
+  onLoad,
+  resetMedia,
+} = media
+
+const viewer = useImageViewer()
+
+const {
+  viewerOpen,
+  viewerType,
+  viewerItems,
+  //viewerIndex,
+  currentViewerItem,
+
+  scale,
+  translateX,
+  translateY,
+
+  openViewer,
+  closeViewer,
+
+  onTouchStart,
+  onTouchMove,
+  onTouchEnd,
+  replaceViewerItems,
+} = viewer
+
 const statsStore = useStatsStore()
+
+const statsLoadingUserId = computed(
+  () => statsStore.loadingProjectUserId,
+)
+
+const projectUserEntries = computed(
+  () => statsStore.projectUserEntries,
+)
 const showTasks = ref(false)
-const showReceipts = ref(false)
-const viewerOpen = ref(false)
-const viewerType = ref<'images' | 'receipts'>('images')
-const viewerItems = ref<ViewerItem[]>([])
-const viewerIndex = ref(0)
-const stats = ref<ProjectStats | null>(null)
-const loading = ref(true)
-const loaded = ref(new Set<string>())
-const error = ref<string | null>(null)
 
-const extraPrice = ref<number | null>(null)
-
-//const showReceiptMenu = ref(false)
-//const showReceiptDialog = ref(false)
-const receiptInput = ref<HTMLInputElement>()  
-const editMode = ref<'area' | 'price' | 'extraPrice' | null>(null)
-
-const expandedUserId = ref<string | null>(null)
-
-const showEdit = ref(false)
-
-const area = ref<number | null>(null)
-const price = ref<number | null>(null)
-
-const EMPLOYER_TAX = 0.3142
-const EMPLOYER_MULTIPLIER = 1.55
-//const MONTH_HOURS = 174
-
-const showDetails = ref<'work' | 'extra' | 'total' | null>(null)
-const loadingDetails = ref(false)  
-//const receiptCount = ref(0)
-
-const currentViewerItem = computed(() => {
-    return viewerItems.value[viewerIndex.value] ?? null
-})
-
-function onLoad(id: string) {
-  loaded.value.add(id)
+function setSentinel(
+  element: HTMLElement | null,
+): void {
+  sentinel.value = element
 }
-/* ================= LOAD STATS ================= */
 
-async function loadStats() {
-  if (!props.projectId) return console.log(t('errors.missingProjectId'))
-  loading.value = true
-  error.value = null
+function imageToViewerItem(
+  image: ProjectImage,
+): ViewerItem {
+  return {
+    id: image.id,
+    url: image.url,
+    createdAt: image.createdAt,
+    type: 'image',
+  }
+}
+
+function receiptToViewerItem(
+  receipt: ProjectReceipt,
+): ViewerItem {
+  return {
+    id: receipt.id,
+    url: receipt.url,
+    createdAt: receipt.createdAt,
+    type: 'receipt',
+  }
+}
+
+function getViewerItems(
+  type: 'images' | 'receipts',
+): ViewerItem[] {
+  if (type === 'images') {
+    return imageStore.images.map(
+      imageToViewerItem,
+    )
+  }
+
+  return receiptStore.receipts.map(
+    receiptToViewerItem,
+  )
+}
+
+function findViewerEntity(
+  item: ViewerItem,
+):
+  | ProjectImage
+  | ProjectReceipt
+  | undefined {
+  if (item.type === 'image') {
+    return imageStore.images.find(
+      image =>
+        image.id === item.id,
+    )
+  }
+
+  return receiptStore.receipts.find(
+    receipt =>
+      receipt.id === item.id,
+  )
+}
+/*
+const showTasks = computed({
+  get: () => projectInfo.showTasks.value,
+  set: value => {
+    projectInfo.showTasks.value = value
+  },
+})
+*/
+/*
+ * Open image in fullscreen viewer.
+ */
+function openImage(url: string): void {
+  const index =
+    imageStore.images.findIndex(
+      image => image.url === url,
+    )
+
+  if (index < 0) {
+    return
+  }
+
+  //const items = imageStore.images.map(imageToViewerItem,
+    /*image => ({
+      id: image.id,
+      url: image.url,
+      createdAt: image.createdAt,
+      type: 'image' as const,
+    }),*/
+  //)
+
+  openViewer(
+    'images',
+    //items,
+    getViewerItems('images'),
+    index,
+  )
+}
+
+/*
+ * Open receipt in fullscreen viewer.
+ */
+async function openReceipt(
+  index: number,
+): Promise<void> {
+  await loadReceipts()
+
+   const receipts = receiptStore.receipts
+  if (!receipts.length) {
+    return
+  }
+
+  const safeIndex = Math.min(
+    Math.max(index, 0),
+    receipts.length - 1,
+  )
+
+  //const items =
+    //receipts.map(receiptToViewerItem,
+      /*receipt => ({
+        id: receipt.id,
+        url: receipt.url,
+        createdAt: receipt.createdAt,
+        type: 'receipt' as const,
+      }),*/
+    //)
+
+  openViewer(
+    'receipts',
+    //items,
+    getViewerItems('receipts'),
+    safeIndex,
+  )
+}
+
+/*
+ * Delete current image / receipt.
+ 
+async function deleteCurrentViewerItem(
+  item?:  {
+    id: string
+    url: string
+  },
+): Promise<void> {
+  if (!isAdmin.value) {
+    return
+  }
+
+  const current =
+    item ??
+    currentViewerItem.value
+
+  if (!current) {
+    return
+  }
+
+  if (
+    !window.confirm(
+      t('project.confirmDeleteImage'),
+    )
+  ) {
+    return
+  }
+
+  deletingImage.value = true
 
   try {
-    const { data } = await getProjectStats(props.projectId)
-    //await receiptStore.getCount(props.projectId)
-    await receiptStore.loadCount(props.projectId)
-    stats.value = data
+    await removeViewerItem(
+      current,
+      viewerType.value,
+    )
 
-    area.value = data.project.areaM2 ?? null
-    price.value = data.project.pricePerM2 ?? null
-
-    extraPrice.value = data.project.pricePerExtraH ?? null
-  } catch (err: any) {
-    if (err?.response?.status === 403) {
-      error.value = t('errors.accessDenied')
+    if (
+      viewerType.value === 'images'
+    ) {
+      viewerItems.value =
+        imageStore.images.map(
+          image => ({
+            id: image.id,
+            url: image.url,
+            createdAt:
+              image.createdAt,
+            type: 'image' as const,
+          }),
+        )
     } else {
-      error.value = t('errors.loadStats')
+      viewerItems.value =
+        receiptStore.receipts.map(
+          receipt => ({
+            id: receipt.id,
+            url: receipt.url,
+            createdAt:
+              receipt.createdAt,
+            type: 'receipt' as const,
+          }),
+        )
+    }
+
+    if (
+      viewerItems.value.length === 0
+    ) {
+      closeViewer()
+      return
+    }
+
+    if (
+      viewerIndex.value >=
+      viewerItems.value.length
+    ) {
+      viewerIndex.value =
+        viewerItems.value.length - 1
     }
   } finally {
-    loading.value = false
+    deletingImage.value = false
   }
 }
-
-async function saveExtraPrice() {
-  await projectStore.updateProject(props.projectId, {
-    pricePerExtraH: extraPrice.value,
-  })
-
-  await loadStats()
-
-  editMode.value = null
-}
-
-watch(() => [props.projectId, props.isAdmin], async ([id, isAdmin]) => {
-  if (!id || isAdmin === undefined) return console.log(t('errors.missingProjectId'))
-  loaded.value.clear()
-  await loadStats()
-}, { immediate: true })
-onServerPrefetch(() => Promise.resolve())
-/* ================= USER DETAILS ================= */
-async function toggleDetails(userId: string) {
-  if (expandedUserId.value === userId) {
-    expandedUserId.value = null
+*/
+async function deleteCurrentViewerItem(
+  item?:
+    | ProjectImage
+    | ProjectReceipt,
+): Promise<void> {
+  if (!isAdmin.value) {
     return
   }
 
-  expandedUserId.value = userId
-
-  await statsStore.loadProjectUserEntries(
-    props.projectId,
-    userId
-  )
-
-}
-
-/* ================= PAGINATION IMAGES ================= */
-
-const showImages = ref(false)
-const page = ref(1)
-const limit = 20
-const hasMore = ref(true)
-
-const sentinel = ref<HTMLElement | null>(null)
-let observer: IntersectionObserver | null = null
-
-watch(showImages, async (val) => {
-  if (!val) {
-    observer?.disconnect()
-    return
-  }
-
-  page.value = 1
-  hasMore.value = true
-  imageStore.images = []
-
-  loaded.value.clear()
-  await loadImages()
-  await nextTick()
-  observeSentinel()
-})
-/*
-watch(currentIndex, (i) => {
-  const next = imageStore.images[i + 1]
-  if (next) {
-    const img = new Image()
-    img.src = next.url
-  }
-})*/
-watch(
-    viewerIndex,
-    index=>{
-
-        const next=
-            viewerItems.value[index+1]
-
-        if(!next)
-            return
-
-        const img=new Image()
-
-        img.src=next.url
-
-    }
-)
-async function loadImages() {
-  if (!hasMore.value || imageStore.loading) return
-
-  const res = await imageStore.loadPaginated(
-    props.projectId,
-    page.value,
-    limit
-  )
-  /*
-  await receiptStore.loadPaginated(
-      props.projectId,
-      1,
-      100,
-  )*/
-
-  if (res.page >= res.lastPage) {
-    hasMore.value = false
-  } else {
-    page.value++
-  }
-}
-
-function observeSentinel() {
-  if (!sentinel.value) return
-
-  observer?.disconnect()
-
-  observer = new IntersectionObserver(async (entries) => {
-    if (entries[0]?.isIntersecting) {
-      await loadImages()
-    }
-  })
-
-  observer.observe(sentinel.value)
-}
-
-onBeforeUnmount(() => { 
-  observer?.disconnect() 
-  document.body.style = ''
-})
-
-function openViewer(
-    type:'images'|'receipts',
-    items:ViewerItem[],
-    index:number,
-){
-
-    viewerType.value=type
-
-    //viewerItems.value=items
-    viewerItems.value = [...items]
-
-    viewerIndex.value=index
-
-    viewerOpen.value=true
-
-    scrollY=window.scrollY
-
-    document.body.style.position='fixed'
-    document.body.style.top=`-${scrollY}px`
-    document.body.style.width='100%'
-
-}
-
-let scrollY = 0
-function openImage(url: string) {
-  const index = imageStore.images.findIndex(i => i.url === url)
-  if (index === -1) return
-  openViewer(
-        'images',
-        imageStore.images,
-        //imageStore.images.map(img => ({ ...img, type: 'image' as const })),
-        index,
+  /**
+   * If the delete button in the receipt grid was clicked,
+   * we already receive the real store entity.
+   *
+   * If the fullscreen delete button was clicked,
+   * find the real entity by viewer item id.
+   */
+  const entity =
+    item ??
+    (
+      currentViewerItem.value
+        ? findViewerEntity(
+            currentViewerItem.value,
+          )
+        : undefined
     )
-}
 
-function closeViewer(){
+  if (!entity) {
+    return
+  }
 
-      viewerOpen.value=false
+  if (
+    !window.confirm(
+      t(
+        'project.confirmDeleteImage',
+      ),
+    )
+  ) {
+    return
+  }
 
-      document.body.style=''
+  deletingImage.value = true
 
-      window.scrollTo(
-          0,
-          scrollY,
+  try {
+    await removeViewerItem(
+      entity,
+      viewerType.value,
+    )
+
+    /**
+     * Rebuild viewer items from the stores.
+     * This prevents stale deleted items from remaining
+     * in the fullscreen viewer.
+     */
+    const newItems =
+      getViewerItems(
+        viewerType.value,
       )
 
-      resetTransform()
-
-  }
-
-const scale = ref(1)
-const lastScale = ref(1)
-const startDistance = ref(0)
-
-const translateX = ref(0)
-const translateY = ref(0)
-
-let lastTouchX = 0
-let lastTouchY = 0
-let isDragging = false
-
-let startX = 0
-let startY = 0
-let isSwiping = false
-
-function clamp(val: number, min: number, max: number) {
-  return Math.min(Math.max(val, min), max)
-}
-
-function resetTransform() {
-  scale.value = 1
-  translateX.value = 0
-  translateY.value = 0
-}
-
-function onTouchStart(e: TouchEvent) {
-  const touch = e.touches[0]
-  if (!touch) return
-
-  if (e.touches.length === 2) {
-    const dist = getDistance(e.touches)
-    if (!dist) return
-
-    startDistance.value = dist
-    lastScale.value = scale.value
-  } else if (e.touches.length === 1) {
-    const touch = e.touches[0]
-    if (!touch) return
-    lastTouchX = touch.clientX
-    lastTouchY = touch.clientY
-  
-    isDragging = true
-
-    startX = touch.clientX
-    startY = touch.clientY
-    isSwiping = true
-  }
-}
-let velocityX = 0
-
-function onTouchMove(e: TouchEvent) {
-  if (e.touches.length === 2) {
-    const newDistance = getDistance(e.touches)
-    if (!newDistance || !startDistance.value) return
-    scale.value = Math.min(
-      Math.max(1, (newDistance / startDistance.value) * lastScale.value),
-      4
-    )
-  }
-
-  if (e.touches.length === 1 && scale.value > 1 && isDragging) {
-    const touch = e.touches[0]
-    if (!touch) return
-    const dx = touch.clientX - lastTouchX
-    const dy = touch.clientY - lastTouchY
-    velocityX = dx
-    const rect = (e.target as HTMLElement).getBoundingClientRect()
-    const maxX = Math.max(0, (rect.width * scale.value - window.innerWidth) / 2)
-    const maxY = Math.max(0, (rect.height * scale.value - window.innerHeight) / 2)
-    translateX.value = clamp(translateX.value + dx, -maxX, maxX)
-    translateY.value = clamp(translateY.value + dy, -maxY, maxY)
-
-    lastTouchX = touch.clientX
-    lastTouchY = touch.clientY
-  }
-}
-
-function onTouchEnd(e: TouchEvent) {
-  if (!isSwiping) return
-  if (scale.value > 1) {
-    isSwiping = false
-    return
-  }
-  const touch = e.changedTouches[0]
-  if (!touch) return
-
-  const dx = touch.clientX - startX
-  const dy = touch.clientY - startY
-
-  if (Math.abs(dy) > Math.abs(dx) && dy > 80) {
-    //closeImage()
-    closeViewer()
-  }
-  if (Math.abs(velocityX) > 20) {
-    velocityX < 0 ? /*nextImage()*/ nextViewerItem() : /*prevImage()*/ prevViewerItem()
-  }
-    if (dx < -50) /*nextImage()*/ nextViewerItem()
-    if (dx > 50) /*prevImage()*/ prevViewerItem()
-  isSwiping = false
-  isDragging = false
-}
-
-function getDistance(touches: TouchList): number | undefined {
-  if (!touches[0] || !touches[1]) return
-  const dx = touches[0].clientX - touches[1].clientX
-  const dy = touches[0].clientY - touches[1].clientY
-  return Math.sqrt(dx * dx + dy * dy)
-}
-
-function nextViewerItem(){
-
-    if(
-        viewerIndex.value>=
-        viewerItems.value.length-1
-    )
-        return
-
-    viewerIndex.value++
-
-    resetTransform()
-
-}
-
-function prevViewerItem(){
-
-    if(
-        viewerIndex.value<=0
-    )
-        return
-
-    viewerIndex.value--
-
-    resetTransform()
-
-}
-/* ================= COMPUTED ================= */
-
-async function loadProjectDetails() {
-  if (!props.isAdmin) return
-  loadingDetails.value = true
-
-  try {
-    await projectStore.loadDetails(props.projectId)
-    //await receiptStore.getCount(props.projectId)
-    await receiptStore.loadCount(props.projectId)
-  } finally {
-    loadingDetails.value = false
-  }
-}
-
-async function toggleSummary(type: 'work' | 'extra' | 'total') {
-   if (!props.isAdmin) return 
-  if (showDetails.value === type) {
-    showDetails.value = null
-    return
-  }
-
-  showDetails.value = type
-    await loadProjectDetails()
-}
-const filteredDetails = computed(() => {
-  if (!showDetails.value) return []
-
-  if (showDetails.value === 'total') {
-    return projectStore.projectDetails
-  }
-
-  return projectStore.projectDetails.filter((e: TimeEntry) =>
-    showDetails.value === 'work'
-      ? e.type === 'WORK'
-      : e.type === 'EXTRA'
-  )
-})
-
-watch(() => props.isAdmin, (isAdmin) => {
-  if (!isAdmin) {
-    showDetails.value = null
-  }
-})
-
-function detailBadge(type: string) {
-  switch (type) {
-    case 'WORK':
-      return {
-        icon: '🛠',
-        text: t('stats.work'),
-        class: 'badge-work'
-      }
-
-    case 'EXTRA':
-      return {
-        icon: '💼',
-        text: t('stats.extra'),
-        class: 'badge-extra'
-      }
-
-    default:
-      return {
-        icon: '⏱',
-        text: type,
-        class: 'badge-default'
-      }
-  }
-}
-
-const totalWork = computed(() => stats.value?.total.work ?? 0)
-const totalExtra = computed(() => stats.value?.total.extra ?? 0)
-const totalAll = computed(() => totalWork.value + totalExtra.value)
-
-
-
-//const workerCost = workedHours * currentSalary * (1 + EMPLOYER_TAX)
-
-const workersCost = computed(() => {
-  const users = stats.value?.users
-
-  if (!users?.length) return 0
-
-  return users.reduce((sum: number, worker) => {
-    const salary = worker.currentSalary ?? 0
-    const hours = worker.totalHours ?? 0
-
-    const fullCost =
-      hours *
-      salary *
-      //(1 + EMPLOYER_TAX)
-      EMPLOYER_MULTIPLIER
-
-    return sum + fullCost
-  }, 0)
-})
-
-function getWorkerSalary(worker: any) {
-  const hourlySalary =
-    Number(worker.currentSalary) || 0
-
-  const totalHours =
-    Number(worker.totalHours) || 0
-
-  return hourlySalary * totalHours
-}
-
-function getWorkerSalaryWithTax(worker: any) {
-  return getWorkerSalary(worker) * EMPLOYER_TAX
-}
-function getWorkerSalaryWithMultiTax(worker: any) {
-  return getWorkerSalary(worker) * (1 - EMPLOYER_MULTIPLIER)
-}
-const profit = computed(() => {
-  if (!totalProjectPrice.value) return 0
-
-  return totalProjectPrice.value - workersCost.value
-})
-
-async function saveArea() {
-  await projectStore.updateProject(props.projectId, {
-    areaM2: area.value,
-  })
-
-  await loadStats()
-
-  editMode.value = null
-}
-
-async function savePrice() {
-  await projectStore.updateProject(props.projectId, {
-    pricePerM2: price.value,
-  })
-
-  await loadStats()
-
-  editMode.value = null
-}
-
-const totalProjectPrice = computed(
-  () => stats.value?.totalProjectPrice ?? 0
-)
-
-const extraHoursPrice = computed(
-  () => stats.value?.extraHoursPrice ?? 0
-)
-
-const deletingImage = ref(false)
-async function deleteCurrentViewerItem(item?: ProjectImage | ProjectReceipt) {
-
-    if (!props.isAdmin)
-        return
-
-    const current = item ?? currentViewerItem.value
-        //currentViewerItem.value
-
-    if (!current)
-        return
-
-    if (
-        !confirm(
-            t('project.confirmDeleteImage')
-        )
-    )
-        return
-
-    deletingImage.value = true
-
-    try {
-
-        if (
-            viewerType.value === 'images'
-        ) {
-
-            await imageStore.remove(current.id)
-
-            viewerItems.value =
-                imageStore.images
-
-        }
-
-        else {
-
-            await receiptStore.remove( current.id )
-
-            viewerItems.value = receiptStore.receipts
-            await receiptStore.loadCount(props.projectId)
-        }
-
-        if (
-            viewerItems.value.length === 0
-        ) {
-
-            closeViewer()
-
-            return
-
-        }
-
-        if (
-            viewerIndex.value >=
-            viewerItems.value.length
-        ) {
-
-            viewerIndex.value =
-                viewerItems.value.length - 1
-
-        }
-
+    //viewerItems.value = newItems
+
+    if (!newItems.length) {
+      closeViewer()
+      return
     }
 
-    finally {
-
-        deletingImage.value = false
-
-    }
-
-}
-
-async function onReceiptUpload(
-    e: Event,
-){
-    const files=(e.target as HTMLInputElement).files
-
-    if(!files?.length)return
-
-    await receiptStore.upload(
-        props.projectId,
-        [...files],
+    replaceViewerItems(
+      newItems,
     )
-    await receiptStore.loadCount(props.projectId)
-}
-
-async function openReceipt(index:number){
-  //showReceiptDialog.value=false
-  console.log('receipt clicked')
-  //await nextTick()
-  await loadReceipts()
-  //showReceiptDialog.value = true
-  console.log(receiptStore.receipts)
-    //if(receiptStore.receipts.length === 0){
-
-        openViewer(
-        'receipts',
-        receiptStore.receipts,
-        index,
-        )
-      console.log(viewerOpen.value)
-   // }
-}
-
-const receiptsLoaded = ref(false)
-
-async function loadReceipts() {
-
-    if (receiptsLoaded.value)
-        return
-
-    await receiptStore.loadPaginated(
-        props.projectId,
-        1,
-        100,
-    )
-
-    receiptsLoaded.value = true
-}
-
-async function toggleReceipts() {
-
-    showReceipts.value = !showReceipts.value
-
+    /**
+     * Keep the current index valid.
+    
     if (
-        showReceipts.value &&
-        !receiptsLoaded.value
+      viewerIndex.value >=
+      newItems.length
     ) {
-        await loadReceipts()
+      viewerIndex.value =
+        newItems.length - 1
     }
+
+    if (
+      viewerIndex.value < 0
+    ) {
+      viewerIndex.value = 0
+    } */
+  } finally {
+    deletingImage.value = false
+  }
 }
+
+/*
+ * When project changes:
+ *
+ * - cancel/reset old project state
+ * - close viewer
+ * - clear media
+ * - load new stats
+ */
+function onProjectChanged(): void {
+  closeViewer()
+  resetForProject()
+  void resetMedia()
+  //resetMedia()
+  showTasks.value = false
+  sentinel.value = null
+}
+
 watch(
-    () => props.projectId,
-    async (id) => {
+  () => props.projectId,
+  async id => {
+    if (!id) {
+      return
+    }
 
-        if (!id)
-            return
+    onProjectChanged()
 
-        receiptsLoaded.value = false
+    await loadStats()
+  },
+  {
+    immediate: true,
+  },
+)
 
-        receiptStore.receipts = []
-
-        await receiptStore.loadCount(id)
-
-    },
-    {
-        immediate: true,
-    },
-)    
+watch(
+  () => props.isAdmin,
+  isAdminValue => {
+    if (!isAdminValue) {
+      showDetails.value = null
+      editMode.value = null
+      showTasks.value = false
+      closeViewer()
+    }
+  },
+)
 </script>
 
 <template>
   <div class="project-info">
-    <button 
-      class="back" 
+    <button
+      class="back"
       @click="emit('back')"
     >
       ← {{ t('project.back') }}
     </button>
 
-    <AppLoader 
-      v-if="loading" 
-      text="Loading project..." 
+    <AppLoader
+      v-if="loading"
+      text="Loading project..."
     />
 
-    <div 
-      v-else-if="error" 
+    <div
+      v-else-if="error"
       class="error"
     >
       {{ error }}
     </div>
 
-    <div v-else-if="stats">
-      <h2>
-        {{ stats.project.city }} – {{ stats.project.address }}
-      </h2>
-      <div v-if="isAdmin">
-
-        <div class="metrics-header">
-            <h3>{{ t('project.metrics') }}</h3>
-
-            <button
-              v-if="isAdmin"
-              class="edit-project-btn"
-              @click="showEdit = !showEdit"
-            >
-              {{
-                showEdit
-                  ? t('common.close')
-                  : t('project.editProject')
-              }}
-            </button>
-          </div>
-        <div class="metrics-wrapper">
-
-          <div class="metric-card">
-            <div class="metric-title">
-              {{ t('project.totalProjectPrice') }}
-            </div>
-
-            <div class="metric-value">
-              {{ totalProjectPrice.toLocaleString() }} kr
-            </div>
-          </div>
-
-          <div class="metric-card extra-income">
-            <div class="metric-title">
-              {{ t('project.extraHoursIncome') }}
-            </div>
-
-            <div class="metric-value">
-              {{ extraHoursPrice.toLocaleString() }} kr
-            </div>
-          </div>
-
-          <div class="metric-card workers-cost">
-            <div class="metric-title">
-              {{ t('project.workersCost') }}
-            </div>
-
-            <div class="metric-value">
-              {{ workersCost.toLocaleString() }} kr
-            </div>
-          </div>
-
-          <div class="metric-card profit-card"
-            :class="profit >= 0 ? 'profit-positive' : 'profit-negative'"
-          >
-            <div class="metric-title">
-              {{ t('project.profit') }}
-            </div>
-
-            <div
-              class="metric-value"
-              :class="{ negative: profit < 0 }"
-            >
-              {{ profit.toLocaleString() }} kr
-            </div>
-          </div>
-
-        </div>
-
-        <div v-if="showEdit" class="edit-menu">
-
-          <button 
-            class="edit-btn edit-project-btn"
-            @click="editMode = 'area'"
-          >
-            {{ t('project.changeArea') }}
-          </button>
-
-          <button 
-            class="edit-btn edit-project-btn"
-            @click="editMode = 'price'"
-          >
-            {{ t('project.changePricePerM2') }}
-          </button>
-
-          <button 
-            class="edit-btn edit-project-btn"
-            @click="editMode = 'extraPrice'"
-          >
-            {{ t('project.changeExtraHourPrice') }}
-          </button>
-
-        </div>
-
-        <div class="project-small-info">
-          <div>
-            {{ t('project.area') }}:
-            {{ stats.project.areaM2 }} m²
-          </div>
-
-          <div>
-            {{ t('project.pricePerM2') }}:
-            {{ stats.project.pricePerM2 }}
-          </div>
-
-          <div>
-            {{ t('project.pricePerExtraHour') }}:
-            {{ stats.project.pricePerExtraH }} kr
-          </div>
-
-          <div>
-            {{ t('project.extraHoursIncome') }}:
-            {{ extraHoursPrice.toLocaleString() }} kr
-          </div>
-        </div>
-        <div v-if="editMode === 'area'" class="modal">
-          <div class="modal-content">
-            <label for="area">{{ t('project.area') }}</label>
-            <input
-              v-model="area"
-              type="number"
-              :placeholder="t('project.area')"
-              id="area"
-            >
-
-            <button 
-              class="edit-btn edit-project-btn"
-              @click="saveArea"
-            >
-              {{ t('project.saveArea') }}
-            </button>
-
-          </div>
-        </div>
-
-        <div v-if="editMode === 'price'" class="modal">
-          <div class="modal-content">
-
-            <label for="price">{{ t('project.pricePerM2') }}</label>
-            <input
-              v-model.number="price"
-              type="number"
-              :placeholder="t('project.pricePerM2')"
-              id="price"
-            >
-
-            <button 
-              class="edit-btn edit-project-btn"
-              @click="savePrice"
-            >
-              {{ t('project.savePrice') }}
-            </button>
-
-          </div>
-        </div>
-
-        <div v-if="editMode === 'extraPrice'" class="modal">
-          <div class="modal-content">
-
-            <label for="extraPrice">
-              {{ t('project.pricePerExtraHour') }}
-            </label>
-
-            <input
-              v-model.number="extraPrice"
-              type="number"
-              id="extraPrice"
-            >
-
-            <button 
-              class="edit-btn edit-project-btn"
-              @click="saveExtraPrice"
-            >
-              {{ t('project.saveExtraHourPrice') }}
-            </button>
-
-          </div>
-        </div>
-      <div class="summary">
-        <div 
-          @click="toggleSummary('work')"
-          :class="[
-            'summary-item',
-            'work',
-            { active: showDetails === 'work', clickable: isAdmin }
-          ]" 
-        >
-        <!--:class="{ active: showDetails === 'work', disabled: !isAdmin }"-->
-          🛠 {{ t('stats.work') }} <strong>{{ totalWork }}h</strong>
-        </div>
-
-        <div 
-          @click="toggleSummary('extra')" 
-          :class="[
-            'summary-item',
-            'extra',
-            { active: showDetails === 'extra', clickable: isAdmin }
-          ]"
-        >
-          💼 {{ t('stats.extra') }} <strong>{{ totalExtra }}h</strong>
-        </div>
-        <!--:class="{ active: showDetails === 'extra', disabled: !isAdmin }"-->
-
-        <div 
-          @click="toggleSummary('total')" 
-          :class="[
-            'summary-item',
-            'total',
-            { active: showDetails === 'total', clickable: isAdmin }
-          ]"
-        >
-        ⏱ {{ t('stats.total') }} <strong>{{ totalAll }}h</strong>
-        </div>
-        <!--:class="{ active: showDetails === 'total', disabled: !isAdmin }"-->
-      </div>
-      <!--<div v-if="showDetails && isAdmin" class="project-details"></div>-->
-      <div v-if="loadingDetails">{{ t('common.loading') }}</div>
-
-      <div v-else>
-        <div
-          v-for="entry in filteredDetails"
-          :key="entry.id"
-          class="detail-row"
-        >
-          <div class="detail-top">
-
-              <span
-                  class="type-badge"
-                  :class="detailBadge(entry.type).class"
-              >
-                  {{ detailBadge(entry.type).icon }}
-                  {{ detailBadge(entry.type).text }}
-              </span>
-
-              <span class="detail-date">
-                  {{ entry.date }}
-              </span>
-
-              <span class="detail-hours">
-                  {{ entry.hours }}h
-              </span>
-
-          </div>
-
-          <div class="user-info">
-
-              <div class="name">
-                  {{ entry.user?.name }}
-              </div>
-
-              <div class="email">
-                  {{ entry.user?.email }}
-              </div>
-
-          </div>
-
-          <div
-              v-if="entry.comment"
-              class="detail-comment"
-          >
-              {{ entry.comment }}
-          </div>
-        </div>
-        </div>
-        <!-- ADMIN VIEW
-        <div v-if="isAdmin">-->
-          <div
-          v-for="u in stats?.users || []"
-          :key="u.id"
-          class="user-card"
-          :class="{ clickable: isAdmin }"
-          @click="isAdmin && toggleDetails(u.id)"
-        >
-          <div class="user-header">
-            <div>
-              <strong>{{ u.name }}</strong>
-              <div class="email">
-                {{ u.email }}
-              </div>
-            </div>
-
-            <div class="hours">
-              <div class="hours-breakdown">
-                <span class="work">{{t('stats.work')}} {{ u.workHours }}h</span>
-                <span class="extra">{{t('stats.extra')}} {{ u.extraHours }}h</span>
-                <span class="total">{{t('stats.total')}} {{ u.totalHours }}h</span>
-
-                <div class="salary-info">
-                  <span>
-                    {{ t('account.salary') }}:
-                    {{ getWorkerSalary(u).toFixed(0) }} kr
-                  </span>
-
-                  <span class="tax">
-                    {{ t('account.employer31Tax') }}:
-                    {{ getWorkerSalaryWithTax(u).toFixed(0) }} kr
-                  </span>
-                  <span class="tax">
-                    {{ t('account.employerTax') }}:
-                    {{ getWorkerSalaryWithMultiTax(u).toFixed(0) }} kr
-                  </span>
-                </div>
-              </div>
-              
-              <button
-                v-if="isAdmin"
-                class="details-btn"
-                @click.stop="toggleDetails(u.id)"
-              >
-                {{ expandedUserId === u.id ? t('project.hideDetails') : t('project.showDetails') }}
-              </button>
-            </div>
-            
-          <!-- DETAILS -->
-          <div
-            v-if="expandedUserId === u.id"
-            class="details"
-          >
-            <div
-              v-if="statsStore.loadingProjectUserId === u.id"
-              class="details-skeleton"
-            >
-              <div
-                v-for="n in 3"
-                :key="n"
-                class="skeleton-line"
-              />
-              <!--line -->
-            </div>
-
-            <div v-else>
-              <div
-                v-for="entry in statsStore.projectUserEntries[`${props.projectId}-${u.id}`] || []"
-                :key="entry.id"
-                class="entry"
-              >
-                <div class="date">
-                  {{ entry.date }}
-                </div>
-
-                <div>
-                  {{ entry.hours }}h ({{ entry.type }})
-                </div>
-
-                <div
-                  v-if="entry.comment"
-                  class="comment"
-                >
-                  {{ entry.comment }}
-                </div>
-              </div>
-            </div>
-          </div>
-        <!--</div>-->
-        </div>
-      </div>
-    </div>
-    <!-- USER VIEW -->
-    <div v-else class="user-summary">
-      <div class="user-card">
-        <div class="hours-breakdown">
-          <span class="work">{{t('stats.work')}} {{ totalWork }}h</span>
-          <span class="extra">{{t('stats.extra')}} {{ totalExtra }}h</span>
-          <span class="total">{{t('stats.total')}} {{ totalAll }}h</span>
-        </div>
-      </div>
-    </div>
-    <button 
-      class="toggle-tasks-btn receipt-btn"
-      @click="showTasks = !showTasks"
+    <template
+      v-else-if="stats"
     >
-      {{ showTasks ? t('project.hideTasks') : t('project.showTasks') }}
-    </button>
-      <ProjectTasks
-          v-if="showTasks"
-          :project-id="projectId"
-          :is-admin="isAdmin"
+      <ProjectHeader
+        :project="stats.project"
       />
-      <!-- IMAGES -->
-      <div class="images-section">
-        <button 
-          class="toggle-images-btn receipt-btn"
-          @click="showImages = !showImages"
-        >
-          {{ showImages ? t('project.hideImages') : t('project.showImages') }}
-        </button>
 
-        <div 
-          v-if="showImages" 
-          class="images-grid"
-        >
-          <div
-            v-for="img in imageStore.images"
-            :key="img.id"
-            class="image-wrapper"
-          >
-            <div 
-              v-if="!loaded.has(img.id)" 
-              class="skeleton" 
-            />
+      <ProjectMetrics
+        v-if="isAdmin"
+        :stats="stats"
+        :is-admin="isAdmin"
+        :total-project-price="
+          totalProjectPrice
+        "
+        :extra-hours-price="
+          extraHoursPrice
+        "
+        :workers-cost="
+          workersCost
+        "
+        :profit="profit"
+        :area="area"
+        :price="price"
+        :extra-price="extraPrice"
+        :edit-mode="editMode"
+        @update:area="
+          area = $event
+        "
+        @update:price="
+          price = $event
+        "
+        @update:extra-price="
+          extraPrice = $event
+        "
+        @update:edit-mode="
+          editMode = $event
+        "
+        @save-area="saveArea"
+        @save-price="savePrice"
+        @save-extra-price="
+          saveExtraPrice
+        "
+      />
 
-            <img
+      <ProjectTimeSummary
+        :is-admin="isAdmin"
+        :total-work="totalWork"
+        :total-extra="totalExtra"
+        :total-all="totalAll"
+        :show-details="showDetails"
+        :filtered-details="
+          filteredDetails
+        "
+        :loading-details="
+          loadingDetails
+        "
+        @toggle="toggleSummary"
+      />
 
-              :src="cloudinary(img.url, 600)"
-              class="image"
-              :class="{ loaded: loaded.has(img.id) }"
-              loading="lazy"
-              @load="onLoad(img.id)"
-              @click="openImage(img.url)"
-            >
-          </div>
-          <!-- v-if="fullscreenImage"  @click="closeImage" -->
-          
-          <div ref="sentinel" />
-        </div>
-      </div>
+      <ProjectUsers
+        v-if="isAdmin"
+        :project-id="projectId"
+        :stats="stats"
+        :is-admin="isAdmin"
+        :expanded-user-id="
+          expandedUserId
+        "
+        :loading-project-user-id="
+          statsLoadingUserId
+        "
+        :project-user-entries="
+          projectUserEntries
+        "
+        @toggle="toggleDetails"
+      />
 
-      <div class="receipts-section">
-        <div class="receipts-header">
-          <button
-            class="receipt-btn"
-            @click="toggleReceipts"
-          >
-              🧾 {{ showReceipts
-                  ? t('project.hideReceipts')
-                  : t('project.showReceipts')
-              }} ({{ receiptStore.count }})
-          </button>
-          <button
-              class="add-receipt-btn"
-              @click="receiptInput?.click()"
-          >
-              ➕ {{ t('project.addReceipt') }}
-          </button>
-        </div>
-          <div
-              v-if="showReceipts"
-              class="receipt-grid"
-          >
-          <div
-              v-if="receiptStore.loading"
-              class="receipt-loading"
-          >
+      <button
+        class="toggle-tasks-btn receipt-btn"
+        @click="
+          showTasks = !showTasks
+        "
+      >
+        {{
+          showTasks
+            ? t('project.hideTasks')
+            : t('project.showTasks')
+        }}
+      </button>
 
-              {{ t('project.loadingReceipts') }}
-          </div>
+      <ProjectTasks
+        v-if="showTasks"
+        :project-id="projectId"
+        :is-admin="isAdmin"
+      />
 
-              <div
-                v-for="(receipt,index) in receiptStore.receipts"
-                :key="receipt.id"
-                class="receipt-card"
-                @click="openReceipt(index)"
-                >
-                  <v-btn
-                    v-if="isAdmin"
-                    icon
-                    class="delete-btn"
-                    @click.stop="deleteCurrentViewerItem(receipt)"
-                    >
-
-                    🗑
-
-                    </v-btn>
-                <img
-                :src="receipt.url"
-                loading="lazy"
-                />
-                <div class="receipt-date">
-                {{ receipt.createdAt }}
-                </div>
-              </div>
-          </div>
-      </div>
-      
-
-    <div
-            v-if="viewerOpen"
-            class="image-modal"
-            @click="closeViewer"
-          >
-            <!-- :src="fullscreenImage" -->
-            <img
-              :src="currentViewerItem?.url"
-              class="image-modal-content"
-              :style="{
-                transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`
-              }"
-              @click.stop
-              @touchstart="onTouchStart"
-              @touchend="onTouchEnd"
-              @touchmove="onTouchMove"
-            >
-            <!--@click.stop="closeImage"-->
-            <button
-              class="image-close"
-              @click.stop="closeViewer"
-            >
-              ✕
-            </button>
-            <!-- @click.stop="deleteCurrentImage" -->
-            <button
-              v-if="isAdmin"
-              class="image-delete"
-              :disabled="deletingImage"
-              @click.stop="deleteCurrentViewerItem()"
-            >
-              🗑
-            </button>
-          </div>
-    </div>
+      <ProjectMedia
+        :project-id="projectId"
+        :is-admin="isAdmin"
+        :image-store="imageStore"
+        :receipt-store="receiptStore"
+        :show-images="showImages"
+        :show-receipts="showReceipts"
+        :loaded="loaded"
+        :sentinel="sentinel"
+        :viewer-open="viewerOpen"
+        :viewer-type="viewerType"
+        :viewer-items="viewerItems"
+        :current-viewer-item="
+          currentViewerItem
+        "
+        :scale="scale"
+        :translate-x="translateX"
+        :translate-y="translateY"
+        :deleting-image="
+          deletingImage
+        "
+        @set-sentinel="setSentinel"
+        @toggle-images="
+          showImages = !showImages
+        "
+        @toggle-receipts="
+          toggleReceipts
+        "
+        @image-load="onLoad"
+        @open-image="openImage"
+        @open-receipt="openReceipt"
+        @upload-receipts="
+          uploadReceipts
+        "
+        @delete="
+          deleteCurrentViewerItem
+        "
+        @close-viewer="
+          closeViewer
+        "
+        @touch-start="
+          onTouchStart
+        "
+        @touch-move="
+          onTouchMove
+        "
+        @touch-end="
+          onTouchEnd
+        "
+      />
+    </template>
   </div>
-  <input
-    ref="receiptInput"
-    hidden
-    type="file"
-    multiple
-    accept="image/*"
-    @change="onReceiptUpload"
-  />
-
-  
 </template>
-
-<style scoped>
-.project-info { padding: 20px; max-width: 900px; margin:auto; }
-
-.summary {
-  display:flex;
-  gap:20px;
-  margin-bottom:20px;
-}
-
-.user-card {
-  border:1px solid #eee;
-  padding:16px;
-  border-radius:12px;
-  margin-bottom:12px;
-  background:white;
-  transition:.2s;
-}
-
-.negative {
-  color: #dc2626;
-}
-.user-card:hover {
-  box-shadow:0 4px 12px rgba(0,0,0,.05);
-}
-
-.user-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.details {
-  margin-top:12px;
-  padding:12px;
-  background:#f8fafc;
-  border-radius:10px;
-}
-
-.entry {
-  padding:8px 0;
-  border-bottom:1px solid #eee;
-}
-
-.images-grid {
-  column-count: 3;
-  gap:10px;
-}
-.image-wrapper {
-  position: relative;
-  break-inside: avoid;
-  margin-bottom: 10px;
-}
-.image {
-  width:100%;
-  border-radius:8px;
-
-  margin-bottom: 10px;
-  break-inside: avoid;
-  cursor: zoom-in;
-  transition: transform .2s, opacity .3s;
-  opacity: 0;
-}
-.image.loaded {
-  opacity: 1;
-}
-.error {
-  padding:16px;
-  background:#fee2e2;
-  color:#991b1b;
-  border-radius:8px;
-}
-.hours {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 6px;
-}
-
-.hours-breakdown {
-  display: flex;
-  gap: 12px;
-  font-size: 13px;
-}
-
-.work {
-  color: #2ecc71;
-  font-weight: 500;
-}
-
-.extra {
-  color: #f1c40f;
-  font-weight: 500;
-}
-
-.total {
-  font-weight: 600;
-}
-
-.details-btn {
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  background: #2563eb;
-  color: white;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.details-btn:hover {
-  background: #1d4ed8;
-}
-
-.details-btn:active {
-  transform: scale(0.97);
-}
-.skeleton {
-  height: 120px;
-  border-radius: 8px;
-  background: linear-gradient(
-    90deg,
-    #eee 25%,
-    #f5f5f5 37%,
-    #eee 63%
-  );
-  background-size: 400% 100%;
-  animation: skeleton 1.2s infinite;
-}
-.skeleton-line {
-  height: 14px;
-  margin-bottom: 8px;
-  border-radius: 6px;
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 25%,
-    #e0e0e0 37%,
-    #f0f0f0 63%
-  );
-  background-size: 400% 100%;
-  animation: shimmer 1.4s ease infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: 0 0;
-  }
-}
-@keyframes skeleton {
-  0% { background-position: -200px 0 }
-  100% { background-position: 200px 0 }
-}
-.user-card.clickable {
-  cursor: pointer;
-}
-
-.user-card.clickable:hover {
-  background: #f1f5f9;
-}
-
-.summary div {
-  /*cursor: pointer;*/
-  padding: 6px 10px;
-  border-radius: 8px;
-  transition: 0.2s;
-}
-
-.summary div:hover {
-  background: #f1f5f9;
-}
-
-.summary .active {
-  background: #2563eb;
-  color: white;
-}
-
-.project-details {
-  margin-top: 16px;
-  padding: 12px;
-  background: #f8fafc;
-  border-radius: 10px;
-}
-
-.detail-row {
-  /*display: grid;
-  grid-template-columns: 90px 1fr 70px;
-  display: flex;
-  gap: 15px;
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;*/
-  display: grid;
-  grid-template-columns:
-      110px
-      110px
-      minmax(180px,1fr)
-      80px;
-  gap: 12px;
-  align-items: center;
-
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.detail-comment {
-  /*grid-column: span 3;
-   grid-column:1/-1;
-  margin-top:4px;*/
-
-  margin-top:8px;
-  word-break:break-word;
-
-  font-size: 13px;
-  color: #666;
-}
-.summary div.disabled {
-  cursor: default;
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.summary div.disabled:hover {
-  background: transparent;
-}
-
-.name {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.email {
-  font-size: 11px;
-  color: #94a3b8;
-}
-.user-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-.summary-item {
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-.summary-item.work {
-  color: #2ecc71;
-}
-
-.summary-item.extra {
-  color: #f1c40f;
-}
-
-.summary-item.total {
-  color: #111;
-}
-
-/* кнопка тільки для адміна */
-.summary-item.clickable {
-  cursor: pointer;
-  border: 1px solid #e5e7eb;
-  background: white;
-}
-
-.summary-item.clickable:hover {
-  background: rgb(107, 12, 240);
-  transform: translateY(-1px);
-}
-.profit-positive {
-  border: 2px solid #16a34a;
-  background: #f0fdf4;
-}
-
-.profit-negative {
-  border: 2px solid #dc2626;
-  background: #fef2f2;
-}
-
-.profit-positive .metric-value {
-  color: #16a34a;
-}
-
-.profit-negative .metric-value {
-  color: #dc2626;
-}
-.summary-item.active {
-  background: #2563eb;
-  /*color: white;*/
-  color: white;
-  border-color: #2563eb;
-  transform: scale(0.97);
-}
-.user-info {
-  margin-top:8px;
-  /*
-  display: flex;
-  flex-direction: column;
-  min-width:0;*/
-}
-.email,
-.name{
-    overflow-wrap:anywhere;
-}
-
-.project-metrics {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-  margin: 20px 0;
-}
-
-.metrics-wrapper {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.metric-card {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 8px rgba(0,0,0,.04);
-}
-
-.metric-card.total {
-  background: #eff6ff;
-  border-color: #2563eb;
-}
-
-.metric-label {
-  font-size: 13px;
-  color: #64748b;
-}
-
-.metric-title {
-  font-size: 14px;
-  color: #64748b;
-  margin-bottom: 8px;
-}
-.metric-value {
-  font-size: 30px;
-  font-weight: 700;
-  color: #111827;
-}
-.workers-cost {
-  background: #fafafa;
-  border: 1px solid #f1f5f9;
-  box-shadow: none;
-}
-
-.workers-cost .metric-value {
-  color: #dc2626;
-  font-size: 24px;
-}
-.extra-income {
-  background: #f8fff9;
-  border: 1px solid #dcfce7;
-  box-shadow: none;
-}
-
-.extra-income .metric-value {
-  color: #16a34a;
-  font-size: 24px;
-}
-.project-small-info {
-  margin-top: 12px;
-  font-size: 12px;
-  color: #888;
-
-  display: flex;
-  gap: 16px;
-}
-.metrics-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:12px;
-}
-
-.edit-project-btn {
-  border:none;
-  background:#2563eb;
-  color:white;
-  padding:8px 14px;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:600;
-}
-
-.salary-info {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-
-  margin-top: 10px;
-
-  font-size: 13px;
-  padding-top: 10px;
-  border-top: 1px solid #f1f5f9;
-}
-.salary-info span:first-child {
-  color: #0f172a;
-  font-weight: 600;
-}
-
-.tax {
-  color: #ef4444;
-  font-weight: 500;
-  opacity: 0.85;
-}
-
-.detail-type {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.detail-hours{
-    justify-self:end;
-    white-space:nowrap;
-}
-.type-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-
-  padding: 5px 14px;
-
-  border-radius: 999px;
-
-  font-size: 13px;
-
-  font-weight: 600;
-}
-
-.badge-work {
-  background: #2ecc71;
-  color: white;
-}
-
-.badge-extra {
-  background: #f1c40f;
-  color: black;
-}
-
-.badge-default {
-  background: #94a3b8;
-  color: white;
-}
-.detail-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-    flex-wrap:wrap;
-}
-.image-delete {
-  position: absolute;
-
-  top: 20px;
-  left: 20px;
-
-  width: 48px;
-  height: 48px;
-
-  border: none;
-  border-radius: 50%;
-
-  background: rgba(220, 38, 38, 0.95);
-
-  color: white;
-
-  font-size: 22px;
-
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  transition: 0.2s;
-
-  box-shadow: 0 6px 20px rgba(0,0,0,.35);
-}
-
-.image-delete:hover {
-  background: #b91c1c;
-  transform: scale(1.08);
-}
-
-.image-delete:active {
-  transform: scale(.95);
-}
-
-.image-delete:disabled {
-  opacity: .5;
-  cursor: wait;
-}
-.receipts-section{
-
-    margin-top:40px;
-
-    padding-top:24px;
-
-    border-top:1px solid #e5e7eb;
-
-}
-.receipt-grid{
-
-display:grid;
-
-grid-template-columns:
-repeat(auto-fill,minmax(220px,1fr));
-
-gap:22px;
-
-}
-.receipt-card{
-position:relative;  
-
-cursor:pointer;
-
-border-radius:16px;
-
-overflow:hidden;
-
-box-shadow:0 10px 30px rgba(0,0,0,.08);
-background:white;
-transition:.25s;
-
-}
-.receipt-card:hover{
-
-    transform:translateY(-6px);
-
-    box-shadow:
-        0 18px 40px rgba(0,0,0,.16);
-
-}
-.receipt-card img{
-
-width:100%;
-aspect-ratio:4/5;
-height:180px;
-
-object-fit:cover;
-
-display:block;
-
-}
-.receipt-date{
-
-padding:12px;
-color:#64748b;
-font-size:13px;
-
-text-align:center;
-/*border-top:1px solid #eee;*/
-border-top:1px solid #ececec;
-
-}
-
-.delete-btn{
-
-    position:absolute;
-
-    top:12px;
-
-    right:12px;
-
-    z-index:20;
-
-    background:rgba(220,38,38,.9)!important;
-
-    color:white!important;
-
-}
-
-.receipt-loading{
-
-    grid-column:1/-1;
-
-    text-align:center;
-
-    padding:50px;
-
-    font-size:18px;
-
-    color:#64748b;
-
-}
-.receipts-header{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    gap:16px;
-
-    flex-wrap:wrap;
-
-    margin-bottom:22px;
-
-}
-.receipt-btn{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-    padding:12px 22px;
-
-    border:none;
-
-    border-radius:12px;
-
-    background:#2563eb;
-
-    color:white;
-
-    font-size:15px;
-
-    font-weight:600;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-    box-shadow:0 6px 20px rgba(37,99,235,.25);
-
-}
-.receipt-btn:hover{
-
-    transform:translateY(-2px);
-
-    background:#1d4ed8;
-
-}
-.add-receipt-btn{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-    padding:12px 22px;
-
-    border:none;
-
-    border-radius:12px;
-
-    background:#16a34a;
-
-    color:white;
-
-    font-size:15px;
-
-    font-weight:600;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-    box-shadow:0 6px 20px rgba(22,163,74,.25);
-
-}
-
-.add-receipt-btn:hover{
-
-    transform:translateY(-2px);
-
-    background:#15803d;
-
-}
-.toggle-tasks-btn {
-  margin-top: 40px;
-}
-.toggle-images-btn {
-  margin-top: 40px;
-}
-.edit-menu{
-
-    display:flex;
-
-    gap:12px;
-
-    flex-wrap:wrap;
-
-    margin-bottom:20px;
-}
-@media (max-width:768px){
-
-.detail-row{
-
-    display:flex;
-    flex-direction:column;
-
-    align-items:flex-start;
-
-    gap:8px;
-
-    padding:14px;
-
-    margin-bottom:12px;
-
-    border:1px solid #e5e7eb;
-
-    border-radius:12px;
-
-    background:white;
-}
-
-.detail-type,
-.detail-date,
-.detail-user,
-.detail-hours,
-.detail-comment{
-
-    width:100%;
-}
-
-.detail-hours{
-/*
-    text-align:right;
-
-    font-size:18px;
-
-    font-weight:700;*/
-    align-self:flex-end;
-}
-
-.detail-date{
-
-    color:#64748b;
-}
-
-.user-info{
-
-    width:100%;
-}
-
-.email{
-
-    word-break:break-word;
-}
-.summary{
-
-    grid-template-columns:1fr;
-}
-
-.summary-item{
-
-    width:100%;
-
-    text-align:center;
-}
-.hours{
-
-    display:grid;
-
-    gap:12px;
-}
-
-.hours-breakdown{
-
-    display:grid;
-
-    grid-template-columns:1fr;
-
-    gap:6px;
-}
-
-.details-btn{
-
-    width:100%;
-}
-.metrics-wrapper{
-
-    grid-template-columns:1fr;
-}
-
-.metric-card{
-
-    padding:16px;
-}
-
-.metric-value{
-
-    font-size:24px;
-}
-.project-small-info{
-
-    display:grid;
-
-    grid-template-columns:1fr;
-
-    gap:6px;
-}
-.detail-top{
-        flex-direction:column;
-        align-items:flex-start;
-    }
-.receipts-header{
-
-        /*flex-direction:column;
-        align-items:stretch;*/
-        align-items: center;
-
-    }
-
-    .receipt-btn,
-    .add-receipt-btn{
-
-        width:100%;
-
-        justify-content:center;
-
-    }
-
-    .receipt-grid{
-
-        grid-template-columns:
-        repeat(auto-fill,minmax(160px,1fr));
-
-        gap:16px;
-
-    }
-
-
-}
-@media (max-width: 640px) {
-
-  .detail-row {
-    grid-template-columns: 1fr;
-  }
-
-  .detail-comment {
-    grid-column: span 1;
-  }
-
-  .summary {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .user-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .hours {
-    width: 100%;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .hours-breakdown {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .details-btn {
-    width: 100%;
-    text-align: center;
-  }
-
-  .images-grid {
-    /*grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));*/
-    column-count: 2;
-  }
-}
-.image:hover {
-  transform: scale(1.05);
-}
-
-/* FULLSCREEN MODAL */
-
-.image-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 8999;
-  backdrop-filter: blur(8px);
-  animation: fadeIn 0.2s ease;
-}
-
-.image-modal-content {
-  max-width: 95%;
-  max-height: 95%;
-  border-radius: 10px;
-
-  transition: transform 0.25s ease, opacity 0.2s ease;
-  will-change: transform;
-  /*touch-action: pan-y;*/
-
-  touch-action: none;
-  cursor: grab;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-
-  object-fit:contain;
-}
-@keyframes fadeIn {
-  from { opacity: 0 }
-  to { opacity: 1 }
-}
-.image-close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  /*background: white;*/
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(6px);
-
-  border: none;
-  border-radius: 50%;
-  width: 42px;
-  height: 42px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.image-close:active {
-  transform: scale(0.9);
-}
-</style>

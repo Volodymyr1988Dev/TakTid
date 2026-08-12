@@ -1,18 +1,26 @@
+import type { CreateMaterialListDto, MaterialList, UpdateMaterialListDto } from '../types/Material'
 import api from './axios'
 
 export async function getMaterialList(
   projectId: string,
-) {
-  const { data } =
-    await api.get(
+) : Promise<MaterialList | null> {
+  try {
+    const { data } = await api.get<MaterialList>(
       `/project-materials/project/${projectId}`,
     )
 
-  return data
+    return data
+  } catch (error: any) {
+    if (error?.response?.status === 404) {
+      return null
+    }
+
+    throw error
+  }
 }
 export async function createMaterialList(
-  payload: any,
-) {
+  payload: CreateMaterialListDto,
+) : Promise<MaterialList | null> {
   const { data } =
     await api.post(
       '/project-materials',
@@ -23,8 +31,8 @@ export async function createMaterialList(
 }
 export async function updateMaterialList(
   id: string,
-  payload: any,
-) {
+  payload: UpdateMaterialListDto,
+) : Promise<MaterialList | null> {
   const { data } =
     await api.patch(
       `/project-materials/${id}`,
@@ -35,11 +43,17 @@ export async function updateMaterialList(
 }
 export async function removeMaterialList(
   id: string,
-) {
+) : Promise<void> {
   const { data } =
     await api.delete(
       `/project-materials/${id}`,
     )
 
   return data
+}
+
+export async function deleteMaterialList(
+  id: string,
+): Promise<void> {
+  await api.delete(`/project-materials/${id}`)
 }

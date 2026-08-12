@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { getMaterialList, updateMaterialList, createMaterialList } from '../api/projectMaterial.api'
+import { getMaterialList, updateMaterialList, createMaterialList, deleteMaterialList } from '../api/projectMaterial.api'
 import type {
     MaterialList,
     CreateMaterialListDto,
@@ -13,17 +13,43 @@ export const useProjectMaterialStore = defineStore('projectMaterial', () => {
 async function load(
   projectId: string,
 ) : Promise<MaterialList | null> {
+     materialList.value = null
+
+      if (!projectId) {
+        return null
+      }
+
+      materialList.value =
+        await getMaterialList(projectId)
+
+      return materialList.value
+      /*
       const list = await getMaterialList(projectId)
       materialList.value = list
-      return list
+      return list*/
 }
 function clear(): void {
       materialList.value = null
     }
+async function remove() {
+      if (!materialList.value?.id) {
+        return
+      }
+
+      await deleteMaterialList(
+        materialList.value.id,
+      )
+
+      materialList.value = null
+    }    
 async function save(
   payload: CreateMaterialListDto,
 ) : Promise<MaterialList | null> {
-
+  if (!payload.projectId) {
+        throw new Error(
+          'Project ID is required to save material list',
+        )
+      }
   if (materialList.value?.id) {
 
     const updatePayload: UpdateMaterialListDto = {
@@ -49,5 +75,6 @@ return {
   load,
   save,
   clear,
+  remove,
 }
 })
