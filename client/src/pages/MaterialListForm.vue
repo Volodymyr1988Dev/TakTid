@@ -1,10 +1,21 @@
 <script setup lang="ts">
-import { reactive, ref, computed, watch, onMounted, nextTick } from 'vue'
+import {
+  reactive,
+  ref,
+  computed,
+  watch,
+  onMounted,
+  nextTick,
+} from 'vue'
+
 import { useI18n } from 'vue-i18n'
+
 import type { Project } from '../types/Project.dto'
 import { MATERIAL_CATALOG } from '../const/MaterialCatalog'
+
 import AutoComplete from 'primevue/autocomplete'
 import Dialog from 'primevue/dialog'
+
 import type {
   CreateMaterialListDto,
   MaterialItem,
@@ -12,40 +23,48 @@ import type {
 
 import { useProjectStore } from '../stores/project.store'
 import { useProjectMaterialStore } from '../stores/projectMaterial.store'
+
 import 'primeicons/primeicons.css'
 
 const { t } = useI18n()
-const props = defineProps<{ projectId: string, isAdmin: boolean }>()
 
-const materialStore = useProjectMaterialStore()
+const props = defineProps<{
+  projectId: string
+  isAdmin: boolean
+}>()
+
 const projectStore = useProjectStore()
+const materialStore = useProjectMaterialStore()
 
 const filteredProjects = ref<Project[]>([])
 const selectedProject = ref<Project | null>(null)
 
-const textareaRef = ref<HTMLTextAreaElement>()
-
-const isEditing = ref(true)
+const isEditing = ref(false)
 const priceDialog = ref(false)
+const saving = ref(false)
 
-let loadRequestId = 0
+const textareaRef =
+  ref<HTMLTextAreaElement | null>(null)
 
-const createEmptyItems = (): MaterialItem[] =>
-  MATERIAL_CATALOG.map(label => ({
+function createEmptyItems(): MaterialItem[] {
+  return MATERIAL_CATALOG.map(label => ({
     label,
     quantity: null,
     price: null,
     unit: 'pcs',
   }))
+}
 
-const materialForm = reactive<CreateMaterialListDto>({
-  projectId: '',
-  other: '',
-  items: createEmptyItems(),
-})
+const materialForm =
+  reactive<CreateMaterialListDto>({
+    projectId: '',
+    other: '',
+    items: createEmptyItems(),
+  })
 
-const hasOther = computed(() =>
-  materialForm.other.trim().length > 0,
+const hasOther = computed(
+  () =>
+    materialForm.other.trim().length > 0,
 )
 
 const visibleItems = computed(() =>
@@ -56,213 +75,322 @@ const visibleItems = computed(() =>
   ),
 )
 
-function syncFormFromList(): void {
+function resetForm() {
+  materialForm.other = ''
+  materialForm.items = createEmptyItems()
+}
+
+function fillFormFromList() {
   const list = materialStore.materialList
 
-  materialForm.other = list?.other ?? ''
+  if (!list) {
+    resetForm()
+    return
+  }
 
-  materialForm.items = MATERIAL_CATALOG.map(label => {
-    const existing = list?.items?.find(
-      (item: MaterialItem) =>
-        item.label === label,
+  materialForm.other =
+    list.other ?? ''
+
+  materialForm.items =
+    MATERIAL_CATALOG.map(label => {
+      const existing =
+        list.items?.find(
+          (item: MaterialItem) =>
+            item.label === label,
+        )
+
+      return {
+        label,
+        quantity:
+          existing?.quantity == null
+            ? null
+            : Number(existing.quantity),
+        price:
+          existing?.price == null
+            ? null
+            : Number(existing.price),
+        unit:
+          existing?.unit ?? 'pcs',
+      }
+    })
+}
+
+function searchProjects(
+  event: { query: string },
+) {
+  const query =
+    event.query
+      .trim()
+      .toLowerCase()
+
+  if (!query) {
+    filteredProjects.value =
+      projectStore.projects
+
+    return
+  }
+
+  filteredProjects.value =
+    projectStore.projects.filter(
+      project =>
+        project.address
+          ?.toLowerCase()
+          .includes(query) ||
+        project.city
+          ?.toLowerCase()
+          .includes(query),
     )
+}
+/*
+function setSelectedProject(
+  project: Project | null,
+) {
+  selectedProject.value = project
 
-    return {
-      label,
-      quantity:
-        existing?.quantity == null
-          ? null
-          : Number(existing.quantity),
+  materialForm.projectId =
+    project?.id ?? ''
+}
+*/
+async function setSelectedProject(
+  project: Project | null,
+) {
+  selectedProject.value =
+    project
 
-      price:
-        existing?.price == null
-          ? null
-          : Number(existing.price),
+  const id =
+    project?.id ?? ''
 
-      unit: existing?.unit ?? 'pcs',
+  if (!id) {
+    materialForm.projectId = ''
+    materialStore.clear()
+    resetForm()
+    isEditing.value = true
+
+    return
+  }
+
+  await loadProject(id)
+}
+
+//let projectLoadRequest = 0
+async function loadProject(
+  projectId: string,
+) {
+  //const requestId = ++projectLoadRequest
+
+  if (!projectId) {
+    //materialStore.materialList = null
+    materialStore.clear()
+
+    materialForm.projectId = ''
+
+    resetForm()
+
+    selectedProject.value = null
+    isEditing.value = true
+
+    return
+  }
+
+  materialForm.projectId = projectId
+
+  const project =
+    projectStore.projects.find(
+      item => item.id === projectId,
+    ) ?? null
+
+  selectedProject.value = project
+
+  await materialStore.load(projectId)
+
+  if (materialStore.materialList) {
+    fillFormFromList()
+
+    isEditing.value = false
+  } else {
+    resetForm()
+
+    isEditing.value = true
+  }
+
+  await autoResize()
+}
+/*
+watch(
+  () => selectedProject.value,
+  async project => {
+    const id = project?.id ?? ''
+
+    if (!id) {
+      return
     }
+
+    if (id === materialForm.projectId) {
+      await loadProject(id)
+    }
+  },
+)
+*/
+watch(
+  () => props.projectId,
+  async id => {
+    if (!id) {
+      return
+    }
+
+    if (!projectStore.projects.length) {
+      await projectStore.load()
+    }
+
+    await loadProject(id)
+  },
+  {
+    immediate: true,
+  },
+)
+
+function autoResize() {
+  nextTick(() => {
+    const textarea =
+      textareaRef.value
+
+    if (!textarea) {
+      return
+    }
+
+    textarea.style.height = 'auto'
+
+    textarea.style.height =
+      `${textarea.scrollHeight}px`
   })
+}
+
+watch(
+  () => materialForm.other,
+  () => autoResize(),
+)
+
+function edit() {
+  if (!materialStore.materialList) {
+    isEditing.value = true
+    return
+  }
+
+  fillFormFromList()
+
+  isEditing.value = true
 
   autoResize()
 }
 
-function resetForm(): void {
-  materialForm.other = ''
-  materialForm.items = createEmptyItems()
-
-  nextTick(() => {
-    autoResize()
-  })
-}
-
-function autoResize(): void {
-  nextTick(() => {
-    if (!textareaRef.value) return
-
-    textareaRef.value.style.height = 'auto'
-    textareaRef.value.style.height =
-      `${textareaRef.value.scrollHeight}px`
-  })
-}
-
-function searchProjects(event: { query: string }): void {
-  const query = event.query.toLowerCase().trim()
-
-  filteredProjects.value =
-    projectStore.projects.filter(project =>
-      project.address
-        .toLowerCase()
-        .includes(query) ||
-      project.city
-        .toLowerCase()
-        .includes(query),
-    )
-}
-
-watch(
-  () => materialForm.projectId,
-  async projectId => {
-    const requestId = ++loadRequestId
-
-    if (!projectId) {
-      materialStore.clear()
-      resetForm()
-      isEditing.value = true
-      return
-    }
-
-    await materialStore.load(projectId)
-
-    if (requestId !== loadRequestId) {
-      return
-    }
-
-    syncFormFromList()
-
-    isEditing.value =
-      materialStore.materialList === null
-  },
-)
-
-onMounted(async () => {
-  await projectStore.load()
-
-  if (!props.projectId) {
+async function save() {
+  if (saving.value) {
     return
   }
-  if (props.projectId) {
-    setProject(props.projectId)
-  }
-})
 
-watch(
-  () => props.projectId,
-  projectId => {
-    if (projectId) {
-      setProject(projectId)
-    }
-  },
-)
-
-async function save(): Promise<void> {
   if (!materialForm.projectId) {
+    window.alert(
+      t('common.selectProject'),
+    )
+
     return
   }
 
-  const payload: CreateMaterialListDto = {
-    projectId: materialForm.projectId,
+  saving.value = true
 
-    other:
-      materialForm.other.trim() || '',
+  try {
+    const payload: CreateMaterialListDto = {
+      projectId:
+        materialForm.projectId,
 
-    items: materialForm.items
-      .filter(
-        item =>
-          item.quantity !== null &&
-          item.quantity !== 0 &&
-          !Number.isNaN(item.quantity),
-      )
-      .map(item => ({
-        label: item.label,
-        quantity: item.quantity,
-        price: item.price,
-        unit: item.unit,
-      })),
+      other:
+        materialForm.other.trim(),
+
+      items:
+        materialForm.items
+          .filter(
+            item =>
+              item.quantity !== null &&
+              item.quantity !== 0 &&
+              !Number.isNaN(
+                item.quantity,
+              ),
+          )
+          .map(item => ({
+            label: item.label,
+
+            quantity:
+              item.quantity,
+
+            price:
+              item.price,
+
+            unit:
+              item.unit,
+          })),
+    }
+
+    await materialStore.save(
+      payload,
+    )
+
+    fillFormFromList()
+
+    isEditing.value = false
+  } finally {
+    saving.value = false
   }
-  await materialStore.save(payload)
-
-  syncFormFromList()
-  isEditing.value = false
-}
-function edit(): void {
-  if (!materialStore.materialList) {
-    return
-  }
-
-  syncFormFromList()
-  isEditing.value = true
 }
 
-function openPriceModal(): void {
+function openPriceModal() {
   priceDialog.value = true
 }
-function selectProject(project: Project | null): void {
-  selectedProject.value = project
-  materialForm.projectId = project?.id ?? ''
-}
-function setProject(projectId: string): void {
-  const project =
-    projectStore.projects.find(
-      p => p.id === projectId,
-    ) ?? null
-  if (!project) {
-    selectedProject.value = null
-    materialForm.projectId = ''
-    return
-  }
-  selectedProject.value = project
-  materialForm.projectId = project?.id ?? ''
-}
 
+onMounted(async () => {
+  if (!projectStore.projects.length) {
+    await projectStore.load()
+  }
+
+  if (props.projectId) {
+    const project =
+      projectStore.projects.find(
+        item =>
+          item.id === props.projectId,
+      ) ?? null
+
+    selectedProject.value =
+      project
+
+    materialForm.projectId =
+      props.projectId
+
+    await loadProject(
+      props.projectId,
+    )
+  }
+
+  await autoResize()
+})
 </script>
 
 <template>
   <div class="material-form">
-    <!--
-    <AutoComplete
-      v-model="selectedProject"
-      :suggestions="filteredProjects"
-      :label="t('common.selectProject')"
-      optionLabel="address"
-      dropdown
-      forceSelection
-      @complete="searchProjects"
-    >
-      <template #option="{ option }">
-        <div class="project-option">
-         
-          <div class="city">
-              {{ option.city }}
-          </div>
 
-          <div class="address">
-              {{ option.address }}
-          </div>
-        </div>
+    <!-- PROJECT SELECTOR -->
+    <div class="project-selector">
+      <label class="field-label">
+        {{ t('common.selectProject') }}
+      </label>
 
-      </template>
-
-    </AutoComplete>
--->
       <AutoComplete
-        v-model="selectedProject"
+        :model-value="selectedProject"
         :suggestions="filteredProjects"
-        :placeholder="t('common.selectProject')"
-        optionLabel="address"
+        option-label="address"
         dropdown
-        forceSelection
+        force-selection
+        :disabled="saving"
+        @update:model-value="setSelectedProject"
         @complete="searchProjects"
-        @update:model-value="selectProject"
       >
         <template #option="{ option }">
           <div class="project-option">
@@ -275,19 +403,35 @@ function setProject(projectId: string): void {
             </div>
           </div>
         </template>
-      </AutoComplete>
-    <div
-      v-if="isEditing || visibleItems.length"
-      class="grid"
-      :class="{ 'view-mode': !isEditing }"
-    >
 
+        <template #empty>
+          <div class="empty-projects">
+            No projects found
+          </div>
+        </template>
+      </AutoComplete>
+    </div>
+
+    <!-- MATERIALS -->
+    <div
+      v-if="
+        isEditing ||
+        visibleItems.length
+      "
+      class="grid"
+    >
       <div
-        v-for="item in (isEditing ? materialForm.items : visibleItems)"
+        v-for="
+          item in
+          (
+            isEditing
+              ? materialForm.items
+              : visibleItems
+          )
+        "
         :key="item.label"
         class="row"
       >
-
         <div class="label">
           {{ item.label }}
         </div>
@@ -295,17 +439,23 @@ function setProject(projectId: string): void {
         <input
           v-model.number="item.quantity"
           type="number"
-          step="1"
-          :disabled="!isEditing"
-          :class="{ 'readonly-quantity': !isEditing }"
-        >
+          min="0"
+          step="0.01"
+          inputmode="decimal"
+          :disabled="
+            !isEditing || saving
+          "
+        />
       </div>
 
+      <!-- OTHER -->
       <div
-        v-if="isEditing || hasOther"
+        v-if="
+          isEditing ||
+          hasOther
+        "
         class="other-section"
       >
-
         <label>
           {{ t('common.other') }}
         </label>
@@ -314,65 +464,108 @@ function setProject(projectId: string): void {
           ref="textareaRef"
           v-model="materialForm.other"
           rows="1"
-          :disabled="!isEditing"
+          :disabled="
+            !isEditing || saving
+          "
           @input="autoResize"
         />
-
       </div>
-
     </div>
-    <!--v-if="isEditing"-->
-    <div
-      class="sticky-actions"
-    >
+
+    <!-- ACTIONS -->
+    <div class="actions">
+
       <button
         v-if="isEditing"
         class="save-btn"
+        :disabled="saving"
         @click="save"
       >
-        {{ t('common.save') }}
+        <i
+          v-if="saving"
+          class="pi pi-spin pi-spinner"
+        />
+
+        {{
+          saving
+            ? t('common.loading')
+            : t('common.save')
+        }}
       </button>
 
+      <template v-else>
+        <button
+          class="save-btn secondary"
+          @click="edit"
+        >
+          <i class="pi pi-pencil" />
+          {{ t('common.edit') }}
+        </button>
+
+        <button
+          v-if="isAdmin"
+          class="edit-prices-btn"
+          @click="openPriceModal"
+        >
+          <i class="pi pi-dollar" />
+          {{ t('common.editPrices') }}
+        </button>
+      </template>
+
       <button
-        v-else
-        class="save-btn secondary"
-        @click="edit"
+        v-if="
+          isEditing &&
+          isAdmin
+        "
+        class="edit-prices-btn"
+        @click="openPriceModal"
       >
-        {{ t('common.edit') }}
+        <i class="pi pi-dollar" />
+        {{ t('common.editPrices') }}
       </button>
     </div>
-    <button
-      v-if="isEditing && isAdmin"
-      class="edit-prices-btn"
-      @click="openPriceModal"
-    >
-      <i class="pi pi-pencil"></i>
-      {{ t('common.editPrices') }}
-    </button>
+
+    <!-- PRICE DIALOG -->
     <Dialog
       v-model:visible="priceDialog"
       modal
-      header="Material Prices"
-      :style="{ width: '700px', maxWidth: '95vw' }"
+      :header="t('common.editPrices')"
+      :style="{
+        width: '700px',
+        maxWidth: '95vw',
+      }"
+      :draggable="false"
     >
       <div class="price-list">
         <div
-          v-for="item in materialForm.items"
+          v-for="
+            item in materialForm.items
+          "
           :key="item.label"
           class="price-row"
         >
-          <span>{{ item.label }}</span>
+          <span class="price-label">
+            {{ item.label }}
+          </span>
+
           <input
             v-model.number="item.price"
             type="number"
+            min="0"
             step="0.01"
+            inputmode="decimal"
             placeholder="0.00"
-          >
+          />
         </div>
       </div>
 
       <template #footer>
-        <button @click="priceDialog = false">
+        <button
+          class="dialog-done-btn"
+          @click="
+            priceDialog = false
+          "
+        >
           {{ t('common.done') }}
         </button>
       </template>
@@ -381,333 +574,301 @@ function setProject(projectId: string): void {
 </template>
 
 <style scoped>
-.select{
-    width:100%;
-    padding:10px 14px;
-    border-radius:10px;
-    border:1px solid #d1d5db;
-    background:white;
-    font-size:14px;
-    max-height:300px;
-}
-.material-form{
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    padding:10px;
-
-    color:#111827;
-}
-
-.title-input{
-    border:1px solid #ddd;
-    border-radius:10px;
-    padding:8px;
-}
-
-.grid{
-    display:grid;
-    gap:5px;
-}
-
-.row{
-    display:grid;
-    grid-template-columns:minmax(0,1fr) 72px;
-    gap:8px;
-    align-items:center;
-    min-height: 30px;
-}
-
-.label{
-    min-width: 0;
-    font-size: 13px;
-    line-height: 1.15;
-    color: #111827;
-    /*flex:1;*/
-    white-space:normal;
-    word-break:break-word;
-
-}
-.readonly-quantity {
-  -webkit-appearance: none;
-  appearance: none;
-
-  opacity: 1;
+.material-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 12px;
   color: #111827;
-  -webkit-text-fill-color: #111827;
-}
-.row input{
-    width: 72px;
-    height: 28px;
-    box-sizing: border-box;
-
-    border:1px solid #ccc;
-    border-radius:7px;
-    padding: 3px 5px;
-
-    text-align: center;
-    font-size: 13px;
-    color: #111827;
-    background: #fff;
 }
 
-.grid.view-mode {
-  gap: 2px;
-}
-.view-mode .row {
-  min-height: 24px;
-  grid-template-columns: minmax(0, 1fr) 55px;
+.project-selector {
+  display: flex;
+  flex-direction: column;
   gap: 6px;
 }
-.view-mode .label {
-  font-size: 12px;
-  line-height: 1.1;
-}
 
-.view-mode .row input {
-  width: 55px;
-  height: 23px;
-
-  padding: 0;
-
-  border: none;
-  background: transparent;
-
-  font-size: 12px;
+.field-label {
+  font-size: 13px;
   font-weight: 600;
-  color: #111827;
-
-  text-align: right;
-  pointer-events: none;
+  color: #475569;
 }
 
-.price{
-    width:90px;
+.project-option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0;
 }
 
-.other-section{
-    display:flex;
-    flex-direction:column;
-
-    font-size: 12px;
-    font-weight: 600;
-
-    /*gap:4px;*/
+.city {
+  font-weight: 700;
+  color: var(--primary-color, #2563eb);
 }
 
-textarea{
-    width: 100%;
-    box-sizing: border-box;
-
-    resize:none;
-    overflow:hidden;
-    border:1px solid #ccc;
-    border-radius:8px;
-    padding:6px;
-
-    font-size: 13px;
-    color: #111827;
-    background: #fff;
+.address {
+  font-size: 0.9rem;
+  color: #64748b;
 }
 
-button{
-    padding:10px;
-    border:none;
-    border-radius:10px;
-    background:#2563eb;
-    color:white;
-    font-weight:600;
+.empty-projects {
+  padding: 10px;
+  color: #64748b;
+  font-size: 14px;
 }
 
-button:hover{
-    opacity:0.9;
-}
-.quantity{
-    width:72px;
-    text-align:center;
+/*
+ * PrimeVue AutoComplete
+ */
+:deep(.p-autocomplete) {
+  width: 100%;
 }
 
-.sticky-actions{
-  position: sticky;
-  bottom: 0;
+:deep(.p-autocomplete-input) {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px 0 0 10px;
+  font-size: 14px;
+}
+
+:deep(.p-autocomplete-dropdown) {
+  width: 44px;
+  min-height: 42px;
+  border-radius: 0 10px 10px 0;
+  border: 1px solid #d1d5db;
+  border-left: 0;
+}
+
+:deep(.p-autocomplete-panel) {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+:deep(.p-autocomplete-option) {
+  padding: 9px 12px;
+}
+
+/*
+ * MATERIAL GRID
+ */
+.grid {
+  display: grid;
+  gap: 6px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    90px;
+  gap: 8px;
+  align-items: center;
+}
+
+.label {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+
+.row input {
+  width: 90px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 7px 6px;
+  text-align: center;
   background: white;
-  padding: 8px 0;
-  border-top: 1px solid #e5e7eb;
-  z-index: 20;
+  color: #111827;
 }
 
-.save-btn{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:#2563eb;
-  color:white;
-  font-size:15px;
-  font-weight:700;
+.row input:disabled {
+  background: #f8fafc;
+  color: #475569;
 }
 
-.save-btn.secondary{
-  background:#64748b;
+/*
+ * OTHER
+ */
+.other-section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 6px;
 }
 
-.price-list{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  max-height:60vh;
-  /*overflow:auto;*/
+.other-section textarea {
+  width: 100%;
+  min-height: 40px;
+  resize: none;
+  overflow: hidden;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+/*
+ * ACTIONS
+ */
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.save-btn,
+.edit-prices-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 11px 16px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save-btn {
+  flex: 1;
+  background: #2563eb;
+}
+
+.save-btn.secondary {
+  background: #64748b;
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.edit-prices-btn {
+  background: #475569;
+}
+
+.save-btn:hover:not(:disabled),
+.edit-prices-btn:hover {
+  opacity: 0.9;
+}
+
+/*
+ * PRICE DIALOG
+ */
+.price-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 60vh;
   overflow-y: auto;
+  padding-right: 3px;
 }
 
-.price-row{
-  display:grid;
-  grid-template-columns:1fr 120px;
-  gap:10px;
-  align-items:center;
-}
-.project-option{
-
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-
+.price-row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    120px;
+  gap: 10px;
+  align-items: center;
 }
 
-.city{
-
-    font-weight:700;
-    color:var(--primary-color);
-
+.price-label {
+  overflow-wrap: anywhere;
 }
 
-.address{
-
-    font-size:0.9rem;
-    opacity:0.8;
-
+.price-row input {
+  width: 120px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px;
+  text-align: right;
 }
 
-@media(max-width:700px){
-.row input{
-  width:70px;
-  text-align:center;
-  padding:2px;
-}
-.row{
-    /*grid-template-columns:1fr;
-    font-size:11px;*/
-
-    display:flex;
-    align-items:center;
-    gap:8px;
+.dialog-done-btn {
+  border: none;
+  border-radius: 9px;
+  padding: 9px 18px;
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.price{
-    width:100%;
-}
-.price-btn{
-    width:36px;
-    height:36px;
-}
-.material-form{
-    padding:6px;
-    gap: 6px;
-}
-.label{
-    flex:1;
-    white-space:normal;
-    word-break:break-word;
-    font-size:12px;
-    line-height:1.1;
+/*
+ * PrimeVue Dialog
+ */
+:deep(.p-dialog) {
+  border-radius: 14px;
+  overflow: hidden;
 }
 
+:deep(.p-dialog-header) {
+  padding: 16px 20px;
+}
 
-.row{
-    display:grid;
-    grid-template-columns:1fr 72px 40px;
-    gap:8px;
-    align-items:center;
-  }
+:deep(.p-dialog-content) {
+  padding: 10px 20px 20px;
+}
 
-  .label{
-    font-size:13px;
-    line-height:1.2;
-    white-space:normal;
-    word-break:break-word;
-  }
+:deep(.p-dialog-footer) {
+  padding: 12px 20px 16px;
+}
 
-  .row input{
-    width:68px;
-    text-align:center;
-    padding:2px 4px;
-    height: 26px;
-    font-size: 12px;
+/*
+ * MOBILE
+ */
+@media (max-width: 700px) {
+  .material-form {
+    padding: 8px;
   }
 
-  .price-btn{
-    width:40px;
-    height:40px;
-  }
-
-  .material-form{
-    padding:10px;
-  }
-  .sticky-actions{
-    position: static;
-    border-top:none;
-    padding:0;
-  }
-
-  .save-btn{
-    width:auto;
-    min-width:180px;
-  }
-  .grid.view-mode {
-    gap: 1px;
-  }
-
-  .view-mode .row {
-    grid-template-columns: minmax(0, 1fr) 52px;
-    gap: 5px;
-    min-height: 22px;
-  }
-
-  .view-mode .label {
-    font-size: 11.5px;
-    line-height: 1.05;
-  }
-
-  .view-mode .row input {
-    width: 52px;
-    height: 21px;
-
-    font-size: 11.5px;
-    font-weight: 600;
-  }
-   .other-section {
-    margin-top: 3px;
-  }
-
-  .other-section label {
-    font-size: 11px;
-  }
-  .sticky-actions {
-    position: static;
-    padding: 4px 0;
-    border-top: none;
-  }
-
-  .save-btn {
-    width: auto;
-    min-width: 150px;
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-  .price-row {
-    grid-template-columns: minmax(0, 1fr) 90px;
+  .row {
+    grid-template-columns:
+      minmax(0, 1fr)
+      72px;
     gap: 8px;
   }
-}
 
+  .label {
+    font-size: 13px;
+  }
+
+  .row input {
+    width: 72px;
+    padding: 6px 4px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .save-btn,
+  .edit-prices-btn {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .price-row {
+    grid-template-columns:
+      minmax(0, 1fr)
+      90px;
+  }
+
+  .price-row input {
+    width: 90px;
+  }
+
+  :deep(.p-dialog) {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  :deep(.p-dialog-content) {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
 </style>

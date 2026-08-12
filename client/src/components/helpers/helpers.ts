@@ -31,3 +31,21 @@ export function isCountedInTotal(e: DayEntry) {
     TimeKind.MEETING
   ].includes(e.type as Exclude<TimeKind, typeof TimeKind.DAY_OFF>)
 }
+
+export function numberOrNull(
+  event: Event,
+): number | null {
+  const value = (
+    event.target as HTMLInputElement
+  ).value
+
+  if (value === '') {
+    return null
+  }
+
+  const number = Number(value)
+
+  return Number.isFinite(number)
+    ? number
+    : null
+}

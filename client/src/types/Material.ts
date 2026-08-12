@@ -10,6 +10,8 @@ export interface MaterialList {
   projectId: string
   title: string | null
   other: string | null
+  createdAt?: string
+  updatedAt?: string
   items: MaterialItem[]
 }
 
