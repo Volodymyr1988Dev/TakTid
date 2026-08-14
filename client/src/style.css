@@ -2,7 +2,7 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
+/*
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
@@ -14,7 +14,7 @@
   --p-text-color: #111827;
   --p-content-color: #111827;
   --p-surface-0: #ffffff;
-    --p-surface-100: #f8fafc;
+    --p-surface-100: #f8fafc;*/
 }
 
 a {

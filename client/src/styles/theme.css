@@ -2,6 +2,7 @@
   --purple: #6a1b9a;
   --purple-light: #ede7f6;
   --bg: #f6f5f2;
+  /*
   --p-text-color: #111827;
   --p-text-muted-color: #6b7280;
   --p-content-color: #111827;
@@ -10,14 +11,14 @@
   --p-surface-100: #f8fafc;
 
   --p-overlay-background: rgba(0, 0, 0, 0.5);
-  -webkit-text-fill-color: #111827;
+  -webkit-text-fill-color: #111827;*/
 }
 
 body {
   background: var(--bg);
   font-family: system-ui;
 }
-
+/*
 .p-inputtext,
 .p-select-label,
 .p-autocomplete-input,
@@ -38,4 +39,4 @@ body {
 }
 .p-dropdown-item {
     color: #111827;
-}
+}*/
