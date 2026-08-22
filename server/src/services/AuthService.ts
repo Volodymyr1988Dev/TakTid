@@ -53,7 +53,8 @@ export class AuthService {
       user: this.sessionService.toAuthUser(user),
       token: session.token,
       refreshToken: session.refresh_token,
-      expiresAt: session.expires_at,
+      //expiresAt: session.expires_at,
+      expiresAt: session.access_token_expires_at,
     };
   }
 
@@ -111,7 +112,8 @@ export class AuthService {
       message: 'Login successful',
       token: session.token,
       refreshToken: session.refresh_token,
-      expiresAt: session.expires_at,
+      //expiresAt: session.expires_at,
+      expiresAt: session.access_token_expires_at,
       user: this.sessionService.toAuthUser(user),
     };
   }
