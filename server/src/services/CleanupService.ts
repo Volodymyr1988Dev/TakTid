@@ -24,16 +24,17 @@ export class CleanupService {
     @InjectRepository(ProjectImage)
     private readonly imageRepo: Repository<ProjectImage>,
 
-    @InjectRepository(ProjectAssignment)
-    private readonly assignmentRepo: Repository<ProjectAssignment>,
+    //@InjectRepository(ProjectAssignment)
+    //private readonly assignmentRepo: Repository<ProjectAssignment>,
 
-    @InjectRepository(TimeEntry)
-    private readonly timeEntryRepo: Repository<TimeEntry>,
+    //@InjectRepository(TimeEntry)
+    //private readonly timeEntryRepo: Repository<TimeEntry>,
 
     private readonly imagesService: ProjectImagesService,
   ) {}
 
-  @Cron('0 3 1 * *')
+  //@Cron('0 5 1 * *')
+  @Cron('0 3 * * *')
   async handleCleanup() {
     if (this.isRunning) {
       this.logger.warn('⚠️ Cleanup already running, skipping...');
@@ -45,7 +46,8 @@ export class CleanupService {
     try {
       this.logger.log('🧹 START CLEANUP');
 
-      await this.sessionService.cleanupExpiredSessions();
+      //await this.sessionService.cleanupExpiredSessions();
+      await this.cleanupExpiredSessions();
       await this.cleanupInactiveImages();
       await this.cleanupVeryOldProjects();
 
@@ -54,6 +56,20 @@ export class CleanupService {
       this.logger.error('❌ CLEANUP FAILED', e);
     } finally {
       this.isRunning = false;
+    }
+  }
+
+  private async cleanupExpiredSessions() {
+    try {
+      await this.sessionService
+        .cleanupExpiredSessions();
+    } catch (error) {
+      this.logger.error(
+        '❌ Failed to cleanup sessions',
+        error,
+      );
+
+      throw error;
     }
   }
 
@@ -83,12 +99,16 @@ export class CleanupService {
         ) a ON a."projectId" = p.id
 
         WHERE p."createdAt" IS NOT NULL
-          AND COALESCE(t.last_time_entry, a.last_assignment, p."createdAt")
+          AND GREATEST(
+            COALESCE(t.last_time_entry, p."createdAt"),
+            COALESCE(a.last_assignment, p."createdAt"),
+            p."createdAt"
+          ) 
               < NOW() - INTERVAL '1 year'
       ) AS sub2  
       WHERE sub2.rn > 3
     `);
-
+      // COALESCE(t.last_time_entry, a.last_assignment, p."createdAt")
     if (!images.length) {
       this.logger.log('🖼 No images to clean');
       return;
@@ -96,11 +116,30 @@ export class CleanupService {
 
     const limit = pLimit(5);
 
+    let deleted = 0;
+    
     await Promise.all(
-      images.map((img) => limit(() => this.imagesService.remove(img.id))),
+      //images.map((img) => limit(() => this.imagesService.remove(img.id))),
+      images.map((image) =>
+        limit(async () => {
+          try {
+            await this.imagesService.remove(
+              image.id,
+            );
+
+            deleted++;
+          } catch (error) {
+            this.logger.error(
+              `❌ Failed to delete image ${image.id}`,
+              error,
+            );
+          }
+        }),
+      ),
     );
 
-    this.logger.log(`🖼 Deleted ${images.length} old images`);
+    //this.logger.log(`🖼 Deleted ${images.length} old images`);
+    this.logger.log( `🖼 Deleted ${deleted}/${images.length} old images` );
   }
 
   private async cleanupVeryOldProjects() {
@@ -121,13 +160,22 @@ export class CleanupService {
       ) a ON a."projectId" = p.id
 
       WHERE p."createdAt" IS NOT NULL
-        AND COALESCE(t.last_time_entry, a.last_assignment, p."createdAt")
+        AND GREATEST( COALESCE(t.last_time_entry, p."createdAt"), COALESCE(a.last_assignment, p."createdAt"), p."createdAt")
             < NOW() - INTERVAL '5 years'
     `);
+    //COALESCE(t.last_time_entry, a.last_assignment, p."createdAt")
+      if (!oldProjects.length) {
+        this.logger.log(
+          '📁 No very old projects to clean',
+        );
+
+        return;
+      }
 
     for (const p of oldProjects) {
       this.logger.warn(`🔥 DELETE PROJECT ${p.id}`);
-
+         await this.deleteVeryOldProject(
+        p.id,/*
       await this.projectRepo.manager.transaction(async (manager) => {
         try {
           // images
@@ -151,7 +199,65 @@ export class CleanupService {
           this.logger.error(`❌ Failed to fully delete project ${p.id}`, e);
           throw e;
         }
-      });
+      }*/);
+    }
+  }
+  private async deleteVeryOldProject(
+    projectId: string,
+  ) {
+    this.logger.warn(
+      `🔥 DELETE PROJECT ${projectId}`,
+    );
+
+    try {
+      /**
+       * First remove images through the existing service.
+       *
+       * ProjectImagesService is responsible for Cloudinary.
+       */
+      await this.imagesService.removeByProject(
+        projectId,
+      );
+
+      /**
+       * Then delete DB records.
+       */
+      await this.projectRepo.manager.transaction(
+        async manager => {
+          await manager.query(
+            `
+              DELETE FROM time_entries
+              WHERE "projectId" = $1
+            `,
+            [projectId],
+          );
+
+          await manager.query(
+            `
+              DELETE FROM project_assignments
+              WHERE "projectId" = $1
+            `,
+            [projectId],
+          );
+
+          await manager.query(
+            `
+              DELETE FROM projects
+              WHERE id = $1
+            `,
+            [projectId],
+          );
+        },
+      );
+
+      this.logger.log(
+        `✅ Deleted project ${projectId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `❌ Failed to fully delete project ${projectId}`,
+        error,
+      );
     }
   }
 }
