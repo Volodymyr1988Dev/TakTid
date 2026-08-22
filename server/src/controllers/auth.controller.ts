@@ -21,8 +21,11 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Public()
   @Post('refresh')
+  @ApiOperation({
+    summary: 'Refresh access token',
+  })
   async refresh(
-    @Req() req: Request & { cookies: { refresh_token?: string } },
+    @Req() req: Request & { cookies?: { refresh_token?: string } },
     @Res({ passthrough: true }) res: Response,
   ) {
     const cookies = req.cookies as {
@@ -37,9 +40,10 @@ export class AuthController {
       await this.authService.refreshByRefreshToken(refreshToken);
 
     if (!refreshed) {
+      clearAuthCookies(res);
       throw new UnauthorizedException('Invalid refresh token');
     }
-    clearAuthCookies(res);
+    //clearAuthCookies(res);
     setAuthCookies(res, {
       accessToken: refreshed.token,
       refreshToken: refreshed.refreshToken,
@@ -51,6 +55,9 @@ export class AuthController {
     };
   }
   @Get('me')
+  @ApiOperation({
+    summary: 'Get current authenticated user',
+  })
   me(@Req() req: AuthRequest) {
     return req.user;
   }
@@ -111,16 +118,22 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout user and clear cookies' })
   @ApiResponse({ status: 200, description: 'Logout successful' })
   async logout(
-    @Req() req: Request & { cookies: { refresh_token?: string } },
+    @Req() req: Request & { cookies?: { refresh_token?: string } },
     @Res({ passthrough: true }) res: Response,
   ) {
     const coockie = req.cookies as {
       refresh_token?: string;
     };
     const refreshToken = coockie?.refresh_token;
-    if (!refreshToken) return;
+    //if (!refreshToken) return;
+    //if (refreshToken) {
+      await this.authService.logout(
+        refreshToken,
+      );
+    //}
 
-    await this.authService.logout(refreshToken);
+
+    //await this.authService.logout(refreshToken);
 
     clearAuthCookies(res);
 

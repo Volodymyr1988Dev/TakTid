@@ -49,4 +49,27 @@ export class Session {
   })
   @ApiProperty({ example: '2025-02-01T13:00:00.000Z' })
   expires_at!: Date;
+
+  @Column({
+    type: 'timestamp',
+    //default: Date,
+    nullable: true,
+  })
+  @ApiProperty({
+    example: '2025-02-01T12:10:00.000Z',
+    nullable: true,
+  })
+  access_token_expires_at!: Date;
+
+  @Index()
+  @Column({
+    type: 'timestamp',
+    //default: Date,
+    nullable: true,
+  })
+  @ApiProperty({
+    example: '2025-02-01T13:10:00.000Z',
+    nullable: true,
+  })
+  refresh_token_expires_at!: Date;
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import 'dotenv/config';
-import { LessThan, Repository } from 'typeorm';
+import { LessThanOrEqual, Repository } from 'typeorm';
 import { User, Session } from '../entities';
 import { safeMs } from '../utils/safeMs';
 import { AuthUser } from '../types/index';
@@ -14,7 +14,7 @@ export class SessionService {
     private readonly sessionRepository: Repository<Session>,
     private readonly jwtService: JwtService,
   ) {}
-
+/*
   async createForUser(user: User): Promise<Session> {
     const payload = { userId: user.id, email: user.email };
     const options: JwtSignOptions = {
@@ -41,6 +41,65 @@ export class SessionService {
 
     return this.sessionRepository.save(session);
   }
+*/
+
+  async createForUser(user: User): Promise<Session> {
+    const payload = {
+      userId: user.id,
+      email: user.email,
+    };
+
+    const accessOptions: JwtSignOptions = {
+      secret: process.env.SECRET,
+      expiresIn: process.env.EXPIRES_AT as JwtSignOptions['expiresIn'],
+    };
+
+    const accessToken = this.jwtService.sign(payload, /*{
+      secret: process.env.SECRET,
+      expiresIn: process.env.EXPIRES_AT as JwtSignOptions['expiresIn'],
+    }*/ accessOptions);
+
+    const decodedAccess =
+      this.jwtService.decode<{ exp?: number }>(accessToken);
+
+    const accessExpiresAt = decodedAccess?.exp
+      ? new Date(decodedAccess.exp * 1000)
+      //: new Date(Date.now() + safeMs('30m'));
+      : new Date(
+          Date.now() +
+            safeMs(process.env.EXPIRES_AT ?? '30m'),
+        );
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: process.env.SECRET,
+      expiresIn:
+        process.env.REFRESH_TOKEN_EXPIRES_IN as JwtSignOptions['expiresIn'],
+    });
+
+    const decodedRefresh =
+      this.jwtService.decode<{ exp?: number }>(refreshToken);
+
+    const refreshExpiresAt = decodedRefresh?.exp
+      ? new Date(decodedRefresh.exp * 1000)
+      //: new Date(Date.now() + safeMs('30d'));
+      : new Date(
+          Date.now() +
+            safeMs(
+              process.env.REFRESH_TOKEN_EXPIRES_IN ?? '30d',
+            ),
+        );
+
+    const session = this.sessionRepository.create({
+      user,
+      token: accessToken,
+      refresh_token: refreshToken,
+      access_token_expires_at: accessExpiresAt,
+      refresh_token_expires_at: refreshExpiresAt,
+      lastActivityAt: new Date(),
+    });
+
+    return this.sessionRepository.save(session);
+  }
 
   async findByToken(token: string): Promise<Session | null> {
     return this.sessionRepository.findOne({
@@ -53,12 +112,12 @@ export class SessionService {
     return this.sessionRepository.save(session);
   }
 
-  async removeByRefreshToken(refreshToken: string) {
+  async removeByRefreshToken(refreshToken: string) : Promise<void> {
     await this.sessionRepository.delete({
       refresh_token: refreshToken,
     });
   }
-
+/*
   async refreshSession(session: Session): Promise<Session> {
     const payload = { userId: session.user.id, email: session.user.email };
     const token = this.jwtService.sign(payload, {
@@ -75,7 +134,7 @@ export class SessionService {
 
     return this.sessionRepository.save(session);
   }
-
+*//*
   async cleanupExpiredSessions(): Promise<void> {
     await this.sessionRepository.query(`
       DELETE FROM sessions
@@ -84,22 +143,122 @@ export class SessionService {
 
     console.log('🧹 Expired sessions deleted');
   }
+*/
+
+  async cleanupExpiredSessions(): Promise<void> {
+    const now = new Date();
+    const result = await this.sessionRepository.delete({
+        refresh_token_expires_at:
+          LessThanOrEqual(now),
+      });
+      //.createQueryBuilder()
+      //.delete()
+      //.from(Session)
+      //.where( `"refresh_token_expires_at" < CURRENT_TIMESTAMP` )
+      //.execute();
+
+    console.log(
+      `🧹 Expired sessions deleted: ${result.affected ?? 0}`,
+    );
+  }
+/*
+  async cleanupExpiredSessions(): Promise<void> {
+    const now = new Date();
+
+    const result = await this.sessionRepository.delete({
+      refresh_token_expires_at: LessThan(now),
+    });
+
+    console.log(
+      `🧹 Expired sessions deleted: ${result.affected ?? 0}`,
+    );
+  }
+*/
+  async refreshSession(session: Session): Promise<Session> {
+    const now = new Date();
+    if (
+      !session.refresh_token_expires_at ||
+      session.refresh_token_expires_at <= now
+    ) {
+      throw new Error(
+        'Refresh token session has expired',
+      );
+    }
+    const payload = {
+      userId: session.user.id,
+      email: session.user.email,
+    };
+
+    const accessToken = this.jwtService.sign(payload, {
+      secret: process.env.SECRET,
+      expiresIn: process.env.EXPIRES_AT as JwtSignOptions['expiresIn'],
+    });
+
+    const decodedAccess =
+      this.jwtService.decode<{ exp?: number }>(accessToken);
+
+    const accessExpiresAt = decodedAccess?.exp
+      ? new Date(decodedAccess.exp * 1000)
+      //: new Date(Date.now() + safeMs('30m'));
+      : new Date(
+          Date.now() +
+            safeMs(process.env.EXPIRES_AT ?? '30m'),
+        );
+        /*
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: process.env.SECRET,
+      expiresIn:
+        process.env.REFRESH_TOKEN_EXPIRES_IN as JwtSignOptions['expiresIn'],
+    });
+
+    const decodedRefresh =
+      this.jwtService.decode<{ exp?: number }>(refreshToken);
+
+    const refreshExpiresAt = decodedRefresh?.exp
+      ? new Date(decodedRefresh.exp * 1000)
+      //: new Date(Date.now() + safeMs('30d'));
+      : new Date(
+          Date.now() +
+            safeMs(
+              process.env.REFRESH_TOKEN_EXPIRES_IN ?? '30d',
+            ),
+        );
+        */
+    session.token = accessToken;
+    //session.refresh_token = refreshToken;
+
+    session.access_token_expires_at = accessExpiresAt;
+    //session.refresh_token_expires_at = refreshExpiresAt;
+
+    session.lastActivityAt = now; //new Date();
+
+    return this.sessionRepository.save(session);
+  }
 
   async cleanupInactiveSessions(): Promise<void> {
-    const maxIdle = safeMs(process.env.CLEAN_SESSION_IDLE ?? '7d');
+    const maxIdle = safeMs(process.env.CLEAN_SESSION_IDLE ?? '30d');
 
     const idleDate = new Date(Date.now() - maxIdle);
 
-    const result = await this.sessionRepository.delete({
-      lastActivityAt: LessThan(idleDate),
-    });
+    const result =
+      await this.sessionRepository
+        .createQueryBuilder()
+        .delete()
+        .from(Session)
+        .where(
+          '"lastActivityAt" < :idleDate',
+          { idleDate },
+        )
+        .execute();
 
-    console.log(`💤 Inactive sessions deleted: ${result.affected}`);
+    //const result = await this.sessionRepository.delete({ lastActivityAt: LessThan(idleDate)});
+
+    console.log(`💤 Inactive sessions deleted: ${result.affected ?? 0}`);
   }
 
   async refreshByRefreshToken(refreshToken: string): Promise<Session | null> {
     try {
-      const decoded = this.jwtService.verify<{ userId: string; email: string }>(
+      const decoded = this.jwtService.verify<{ userId: string; email: string; exp?: number; }>(
         refreshToken,
         {
           secret: process.env.SECRET,
@@ -111,9 +270,39 @@ export class SessionService {
         relations: ['user'],
       });
 
-      if (!session || session.user.id !== decoded.userId) return null;
+      if (!session) {
+        return null;
+      }
 
-      return this.refreshSession(session);
+      if (session.user.id !== decoded.userId) {
+        return null;
+      }
+        //if (!session || session.user.id !== decoded.userId) return null;
+      /*
+      if (
+        session.refresh_token_expires_at.getTime() <=
+        Date.now()
+      ) {
+        await this.sessionRepository.delete(session.id);
+        return null;
+      }
+
+      return this.refreshSession(session);*/
+      if (
+        !session.refresh_token_expires_at ||
+        session.refresh_token_expires_at <=
+          new Date()
+      ) {
+        await this.removeByRefreshToken(
+          refreshToken,
+        );
+
+        return null;
+      }
+
+      return await this.refreshSession(
+        session,
+      );
     } catch {
       return null;
     }
@@ -131,6 +320,16 @@ export class SessionService {
   }
 
   async removeAllByUser(userId: string): Promise<void> {
+    /*
+    await this.sessionRepository
+      .createQueryBuilder()
+      .delete()
+      .from(Session)
+      .where('"userId" = :userId', {
+        userId,
+      })
+      .execute();
+    */
     await this.sessionRepository.softDelete({
       user: { id: userId },
     });
