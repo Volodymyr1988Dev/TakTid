@@ -11,11 +11,7 @@ import {
 import { useI18n } from 'vue-i18n'
 
 import type { Project } from '../types/Project.dto'
-
-import {
-  MATERIAL_CATALOG,
-  getMaterialDefinition,
-} from '../const/MaterialCatalog'
+import { MATERIAL_CATALOG, getMaterialDefinition } from '../const/MaterialCatalog'
 
 import AutoComplete from 'primevue/autocomplete'
 import Dialog from 'primevue/dialog'
@@ -48,7 +44,8 @@ const isEditing = ref(false)
 const priceDialog = ref(false)
 const saving = ref(false)
 
-const textareaRef = ref<HTMLTextAreaElement | null>(null)
+const textareaRef =
+  ref<HTMLTextAreaElement | null>(null)
 
 function createEmptyItems(): MaterialItem[] {
   return MATERIAL_CATALOG.map(material => ({
@@ -59,11 +56,13 @@ function createEmptyItems(): MaterialItem[] {
   }))
 }
 
-const materialForm = reactive<MaterialFormState>({
-  projectId: '',
-  other: '',
-  items: createEmptyItems(),
-})
+
+const materialForm =
+  reactive<MaterialFormState>({
+    projectId: '',
+    other: '',
+    items: createEmptyItems(),
+  })
 
 const hasOther = computed(
   () => materialForm.other.trim().length > 0,
@@ -90,40 +89,40 @@ function fillFormFromList() {
     return
   }
 
-  materialForm.other = list.other ?? ''
+  materialForm.other =
+    list.other ?? ''
 
-  materialForm.items = MATERIAL_CATALOG.map(
-    material => {
-      const existing = list.items?.find(
-        (item: MaterialItem) =>
-          item.materialKey === material.key,
-      )
+  materialForm.items =
+    MATERIAL_CATALOG.map(material => {
+      const existing =
+        list.items?.find(
+          (item: MaterialItem) =>
+            item.materialKey === material.key,
+        )
 
       return {
         materialKey: material.key,
-
         quantity:
           existing?.quantity == null
             ? null
             : Number(existing.quantity),
-
         price:
           existing?.price == null
             ? null
             : Number(existing.price),
-
-        note: existing?.note ?? null,
+        note:
+          existing?.note ?? null,
       }
-    },
-  )
+    })
 }
 
 function searchProjects(
   event: { query: string },
 ) {
-  const query = event.query
-    .trim()
-    .toLowerCase()
+  const query =
+    event.query
+      .trim()
+      .toLowerCase()
 
   if (!query) {
     filteredProjects.value =
@@ -143,21 +142,29 @@ function searchProjects(
           .includes(query),
     )
 }
-
-async function setSelectedProject(
+/*
+function setSelectedProject(
   project: Project | null,
 ) {
   selectedProject.value = project
 
-  const id = project?.id ?? ''
+  materialForm.projectId =
+    project?.id ?? ''
+}
+*/
+async function setSelectedProject(
+  project: Project | null,
+) {
+  selectedProject.value =
+    project
+
+  const id =
+    project?.id ?? ''
 
   if (!id) {
     materialForm.projectId = ''
-
     materialStore.clear()
-
     resetForm()
-
     isEditing.value = true
 
     return
@@ -166,10 +173,14 @@ async function setSelectedProject(
   await loadProject(id)
 }
 
+//let projectLoadRequest = 0
 async function loadProject(
   projectId: string,
 ) {
+  //const requestId = ++projectLoadRequest
+
   if (!projectId) {
+    //materialStore.materialList = null
     materialStore.clear()
 
     materialForm.projectId = ''
@@ -177,7 +188,6 @@ async function loadProject(
     resetForm()
 
     selectedProject.value = null
-
     isEditing.value = true
 
     return
@@ -206,7 +216,22 @@ async function loadProject(
 
   await autoResize()
 }
+/*
+watch(
+  () => selectedProject.value,
+  async project => {
+    const id = project?.id ?? ''
 
+    if (!id) {
+      return
+    }
+
+    if (id === materialForm.projectId) {
+      await loadProject(id)
+    }
+  },
+)
+*/
 watch(
   () => props.projectId,
   async id => {
@@ -227,7 +252,8 @@ watch(
 
 function autoResize() {
   nextTick(() => {
-    const textarea = textareaRef.value
+    const textarea =
+      textareaRef.value
 
     if (!textarea) {
       return
@@ -292,8 +318,7 @@ async function save() {
               ),
           )
           .map(item => ({
-            materialKey:
-              item.materialKey,
+            materialKey: item.materialKey,
 
             quantity:
               item.quantity,
@@ -306,7 +331,9 @@ async function save() {
           })),
     }
 
-    await materialStore.save(payload)
+    await materialStore.save(
+      payload,
+    )
 
     fillFormFromList()
 
@@ -332,7 +359,8 @@ onMounted(async () => {
           item.id === props.projectId,
       ) ?? null
 
-    selectedProject.value = project
+    selectedProject.value =
+      project
 
     materialForm.projectId =
       props.projectId
@@ -353,7 +381,9 @@ function materialLabel(
       materialKey,
     )
 
-  return material?.label ?? materialKey
+  return material
+    ? t(material.label)
+    : materialKey
 }
 
 function materialUnit(
@@ -372,8 +402,8 @@ function materialUnit(
 
 <template>
   <div class="material-form">
-    <!-- PROJECT SELECTOR -->
 
+    <!-- PROJECT SELECTOR -->
     <div class="project-selector">
       <label class="field-label">
         {{ t('common.selectProject') }}
@@ -410,39 +440,13 @@ function materialUnit(
     </div>
 
     <!-- MATERIALS -->
-
     <div
       v-if="
         isEditing ||
         visibleItems.length
       "
-      class="materials-container"
+      class="grid"
     >
-      <!-- HEADER -->
-
-      <div
-        v-if="isEditing"
-        class="material-header"
-      >
-        <div class="header-material">
-          {{ t('common.material') }}
-        </div>
-
-        <div class="header-quantity">
-          {{ t('common.quantity') }}
-        </div>
-
-        <div class="header-unit">
-          {{ t('common.unit') }}
-        </div>
-
-        <div class="header-note">
-          {{ t('material.note') }}
-        </div>
-      </div>
-
-      <!-- ROWS -->
-
       <div
         v-for="
           item in
@@ -453,65 +457,49 @@ function materialUnit(
           )
         "
         :key="item.materialKey"
-        class="material-row"
+        class="row"
       >
-        <!-- MATERIAL -->
+        <div class="label">
+            <div class="material-name">
+                {{ materialLabel(item.materialKey) }}
+            </div>
 
-        <div class="material-cell">
-          <div class="material-name">
-            {{ materialLabel(item.materialKey) }}
-          </div>
-        </div>
+            <textarea
+                v-if="isEditing"
+                v-model="item.note"
+                class="material-note-input"
+                rows="1"
+                :placeholder="t('material.notePlaceholder')"
+                :disabled="saving"
+            />
 
-        <!-- QUANTITY -->
+            <div
+                v-else-if="item.note"
+                class="material-note"
+            >
+                {{ item.note }}
+            </div>
+            </div>
 
         <div class="quantity-cell">
-          <input
+            <input
             v-model.number="item.quantity"
             type="number"
             min="0"
             step="0.01"
             inputmode="decimal"
             :disabled="
-              !isEditing || saving
+                !isEditing || saving
             "
-            :aria-label="
-              materialLabel(item.materialKey)
-            "
-          />
-        </div>
+            />
 
-        <!-- UNIT -->
-
-        <div class="unit-cell">
-          {{ materialUnit(item.materialKey) }}
-        </div>
-
-        <!-- NOTE -->
-
-        <div class="note-cell">
-          <textarea
-            v-if="isEditing"
-            v-model="item.note"
-            class="material-note-input"
-            rows="1"
-            :placeholder="
-              t('material.notePlaceholder')
-            "
-            :disabled="saving"
-          />
-
-          <div
-            v-else-if="item.note"
-            class="material-note"
-          >
-            {{ item.note }}
-          </div>
+            <span class="unit">
+            {{ materialUnit(item.materialKey) }}
+            </span>
         </div>
       </div>
 
       <!-- OTHER -->
-
       <div
         v-if="
           isEditing ||
@@ -536,8 +524,8 @@ function materialUnit(
     </div>
 
     <!-- ACTIONS -->
-
     <div class="actions">
+
       <button
         v-if="isEditing"
         class="save-btn"
@@ -562,7 +550,6 @@ function materialUnit(
           @click="edit"
         >
           <i class="pi pi-pencil" />
-
           {{ t('common.edit') }}
         </button>
 
@@ -572,7 +559,6 @@ function materialUnit(
           @click="openPriceModal"
         >
           <i class="pi pi-dollar" />
-
           {{ t('common.editPrices') }}
         </button>
       </template>
@@ -586,13 +572,11 @@ function materialUnit(
         @click="openPriceModal"
       >
         <i class="pi pi-dollar" />
-
         {{ t('common.editPrices') }}
       </button>
     </div>
 
     <!-- PRICE DIALOG -->
-
     <Dialog
       v-model:visible="priceDialog"
       modal
@@ -649,8 +633,6 @@ function materialUnit(
   color: #111827;
 }
 
-/* PROJECT */
-
 .project-selector {
   display: flex;
   flex-direction: column;
@@ -672,10 +654,7 @@ function materialUnit(
 
 .city {
   font-weight: 700;
-  color: var(
-    --primary-color,
-    #2563eb
-  );
+  color: var(--primary-color, #2563eb);
 }
 
 .address {
@@ -689,6 +668,9 @@ function materialUnit(
   font-size: 14px;
 }
 
+/*
+ * PrimeVue AutoComplete
+ */
 :deep(.p-autocomplete) {
   width: 100%;
 }
@@ -719,197 +701,70 @@ function materialUnit(
   padding: 9px 12px;
 }
 
-/* MATERIALS */
-
-.materials-container {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.material-header,
-.material-row {
+/*
+ * MATERIAL GRID
+ */
+.grid {
   display: grid;
+  gap: 6px;
+}
 
-  /*
-   * Material | Quantity | Unit | Note
-   */
+.row {
+  display: grid;
   grid-template-columns:
-    minmax(180px, 1.5fr)
-    80px
-    55px
-    minmax(150px, 1fr);
-
-  column-gap: 10px;
+    minmax(0, 1fr)
+    90px;
+  gap: 8px;
   align-items: center;
 }
 
-.material-header {
-  padding: 5px 8px 7px;
-
-  color: #64748b;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.material-row {
-  min-height: 46px;
-  padding: 5px 8px;
-
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.material-row:last-of-type {
-  border-bottom: none;
-}
-
-.material-cell {
+.label {
   min-width: 0;
-}
-
-.material-name {
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.25;
+  white-space: normal;
   overflow-wrap: anywhere;
+  line-height: 1.25;
 }
 
-.quantity-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.quantity-cell input {
-  width: 72px;
-  height: 34px;
-
+.row input {
+  width: 90px;
   border: 1px solid #d1d5db;
-  border-radius: 7px;
-
-  padding: 5px 6px;
-
+  border-radius: 8px;
+  padding: 7px 6px;
   text-align: center;
-
   background: white;
   color: #111827;
-
-  font-size: 13px;
 }
 
-.quantity-cell input:focus {
-  outline: none;
-  border-color: var(
-    --primary-color,
-    #2563eb
-  );
-}
-
-.quantity-cell input:disabled {
+.row input:disabled {
   background: #f8fafc;
   color: #475569;
 }
 
-.unit-cell {
-  color: #64748b;
-  font-size: 12px;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.note-cell {
-  min-width: 0;
-}
-
-.material-note-input {
-  width: 100%;
-  min-height: 32px;
-  height: 32px;
-
-  margin: 0;
-
-  padding: 6px 8px;
-
-  border: 1px solid #d1d5db;
-  border-radius: 7px;
-
-  background: #fff;
-  color: #111827;
-
-  font-family: inherit;
-  font-size: 12px;
-  line-height: 1.35;
-
-  resize: none;
-  overflow: hidden;
-}
-
-.material-note-input:focus {
-  outline: none;
-  border-color: var(
-    --primary-color,
-    #2563eb
-  );
-}
-
-.material-note {
-  color: #64748b;
-  font-size: 12px;
-  line-height: 1.35;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-/* OTHER */
-
+/*
+ * OTHER
+ */
 .other-section {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  margin-top: 8px;
-  padding: 8px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.other-section label {
-  color: #475569;
-  font-size: 12px;
-  font-weight: 600;
+  margin-top: 6px;
 }
 
 .other-section textarea {
   width: 100%;
   min-height: 40px;
-
   resize: none;
   overflow: hidden;
-
   border: 1px solid #d1d5db;
   border-radius: 8px;
-
   padding: 8px;
-
   font-family: inherit;
-  font-size: 13px;
   line-height: 1.4;
-
-  background: white;
-  color: #111827;
 }
 
-.other-section textarea:focus {
-  outline: none;
-  border-color: var(
-    --primary-color,
-    #2563eb
-  );
-}
-
-/* ACTIONS */
-
+/*
+ * ACTIONS
+ */
 .actions {
   display: flex;
   gap: 10px;
@@ -922,9 +777,7 @@ function materialUnit(
   border: none;
   border-radius: 10px;
   padding: 11px 16px;
-
   color: white;
-
   font-weight: 600;
   cursor: pointer;
 }
@@ -952,26 +805,23 @@ function materialUnit(
   opacity: 0.9;
 }
 
-/* PRICE DIALOG */
-
+/*
+ * PRICE DIALOG
+ */
 .price-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
-
   max-height: 60vh;
   overflow-y: auto;
-
   padding-right: 3px;
 }
 
 .price-row {
   display: grid;
-
   grid-template-columns:
     minmax(0, 1fr)
     120px;
-
   gap: 10px;
   align-items: center;
 }
@@ -982,30 +832,25 @@ function materialUnit(
 
 .price-row input {
   width: 120px;
-
   border: 1px solid #d1d5db;
   border-radius: 8px;
-
   padding: 8px;
-
   text-align: right;
 }
 
 .dialog-done-btn {
   border: none;
   border-radius: 9px;
-
   padding: 9px 18px;
-
   background: #2563eb;
   color: white;
-
   font-weight: 600;
   cursor: pointer;
 }
 
-/* DIALOG */
-
+/*
+ * PrimeVue Dialog
+ */
 :deep(.p-dialog) {
   border-radius: 14px;
   overflow: hidden;
@@ -1022,77 +867,81 @@ function materialUnit(
 :deep(.p-dialog-footer) {
   padding: 12px 20px 16px;
 }
+.quantity-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
 
-/* MOBILE */
+.quantity-cell input {
+  width: 72px;
+}
 
+.unit {
+  min-width: 34px;
+  color: #64748b;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.material-name {
+  font-weight: 500;
+}
+
+.material-note {
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #64748b;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.material-note-input {
+  width: 100%;
+  min-height: 32px;
+  margin-top: 5px;
+  padding: 6px 8px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+
+  background: #fff;
+  color: #111827;
+
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.35;
+
+  resize: vertical;
+}
+
+.material-note-input:focus {
+  outline: none;
+  border-color: var(--primary-color, #2563eb);
+}
+/*
+ * MOBILE
+ */
 @media (max-width: 700px) {
   .material-form {
-    padding: 6px;
-    gap: 10px;
+    padding: 8px;
   }
 
-  .materials-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .material-header,
-  .material-row {
-    /*
-     * Still one row:
-     * material | qty | unit | note
-     */
+  .row {
     grid-template-columns:
-      minmax(125px, 1.35fr)
-      58px
-      42px
-      minmax(105px, 1fr);
-
-    column-gap: 6px;
+      minmax(0, 1fr)
+      72px;
+    gap: 8px;
   }
 
-  .material-header {
-    padding: 4px 5px 6px;
-    font-size: 9px;
+  .label {
+    font-size: 13px;
   }
 
-  .material-row {
-    min-height: 42px;
-    padding: 4px 5px;
-  }
-
-  .material-name {
-    font-size: 12px;
-    line-height: 1.2;
-  }
-
-  .quantity-cell input {
-    width: 58px;
-    height: 32px;
-    padding: 4px;
-
-    font-size: 12px;
-  }
-
-  .unit-cell {
-    font-size: 10px;
-  }
-
-  .material-note-input {
-    height: 32px;
-    min-height: 32px;
-
-    padding: 5px 6px;
-
-    font-size: 11px;
-  }
-
-  .material-note {
-    font-size: 11px;
-  }
-
-  .other-section {
-    padding: 6px;
+  .row input {
+    width: 72px;
+    padding: 6px 4px;
   }
 
   .actions {
