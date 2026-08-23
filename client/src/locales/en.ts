@@ -21,6 +21,9 @@ export default {
     other: 'Other',
     editPrices: 'Edit Prices',
     done: 'Done',
+    material: 'Material',
+    quantity: 'Quantity',
+    unit: 'Unit',
   },
     material: {
     note: 'Note',
