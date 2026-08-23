@@ -27,6 +27,15 @@ export class AuthGuard implements CanActivate {
     if (isPublic) return true;
     const request = context.switchToHttp().getRequest<AuthRequest>();
 
+    const accessToken =
+      request.cookies?.access_token;
+
+    if (!accessToken) {
+      throw new UnauthorizedException(
+        'No access token provided',
+      );
+    }
+    
     const coockie = request.cookies as {
       access_token?: string;
     };
@@ -52,7 +61,7 @@ export class AuthGuard implements CanActivate {
         throw new UnauthorizedException('User account deleted');
       }
       const now = new Date();
-      if (session.expires_at < now) {
+      if (session.expires_at <= now) {
         throw new UnauthorizedException('Session expired');
       }
       //const now = new Date();
