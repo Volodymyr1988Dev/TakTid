@@ -20,7 +20,19 @@ export default {
     editPrices: 'Редагувати ціни',
     done: 'Готово',
   },
-
+  material: {
+    note: 'Примітка',
+    notePlaceholder: 'Додайте примітку...',
+  },
+  units: {
+    piece: "шт.",
+    meter: "м",
+    pack: "уп.",
+    tube: "туба",
+    bucket: "відро",
+    roll: "рулон",
+    squareMeter: 'm²',
+  },
   project: {
     title: 'Проекти',
     create: 'Створити проект',
@@ -55,6 +67,7 @@ export default {
     extraHoursIncome: 'Доход з надгодин',
     changeExtraHourPrice: 'Змінити ціну за надгодину',
     saveExtraHourPrice: 'Зберегти цену за надгодину',
+    noProject: 'Проектів не знайдено',
   },
 
   auth: {

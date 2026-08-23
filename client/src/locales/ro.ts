@@ -20,7 +20,19 @@ export default {
     editPrices: 'Editează prețuri',
     done: 'Gata',
   },
-
+  material: {
+    note: 'Notă',
+    notePlaceholder: 'Adăugați o notă...',
+  },
+    units: {
+    piece: 'buc.',
+    meter: 'm',
+    pack: 'pachet',
+    tube: 'tub',
+    bucket: 'găleată',
+    roll: 'rolă',
+    squareMeter: 'm²',
+  },
   project: {
     title: 'Proiecte',
     create: 'Creează proiect',
@@ -55,6 +67,7 @@ export default {
     extraHoursIncome: 'Venit din ore extra',
     changeExtraHourPrice: 'Modifică prețul pe oră extra',
     saveExtraHourPrice: 'Salvează prețul pe oră extra',
+    noProject: 'Niciun proiect găsit',
   },
 
   auth: {

@@ -21,9 +21,20 @@ export default {
     other: 'Other',
     editPrices: 'Edit Prices',
     done: 'Done',
-
   },
-
+    material: {
+    note: 'Note',
+    notePlaceholder: 'Add a note...',
+  },
+  units: {
+    piece: "pcs.",
+    meter: "m",
+    pack: "pack",
+    tube: "tube",
+    bucket: "bucket",
+    roll: "roll",
+    squareMeter: 'm²',
+  },
   project: {
     title: 'Projects',
     create: 'Create project',
@@ -58,6 +69,7 @@ export default {
     extraHoursIncome: 'Extra hours income',
     changeExtraHourPrice: 'Change price per extra hour',
     saveExtraHourPrice: 'Save price per extra hour',
+    noProject: 'No projects found',
   },
 
   auth: {
