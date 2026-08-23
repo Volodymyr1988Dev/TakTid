@@ -266,17 +266,35 @@ export class SessionService {
           secret: process.env.SECRET,
         },
       );
+      console.log(
+        'REFRESH JWT VALID',
+        {
+          userId: decoded.userId,
+          exp: decoded.exp
+            ? new Date(decoded.exp * 1000)
+            : null,
+        },
+      );
 
       const session = await this.sessionRepository.findOne({
         where: { refresh_token: refreshToken },
         relations: ['user'],
       });
 
+       console.log(
+          'SESSION FOUND:',
+          Boolean(session),
+        );
+
       if (!session) {
         return null;
       }
 
       if (session.user.id !== decoded.userId) {
+        console.log(
+        'REFRESH USER ID MISMATCH',
+      );
+
         return null;
       }
         //if (!session || session.user.id !== decoded.userId) return null;
@@ -295,6 +313,9 @@ export class SessionService {
         session.refresh_token_expires_at <=
           new Date()
       ) {
+         console.log(
+        'REFRESH TOKEN EXPIRED IN DB',
+      );
         await this.removeByRefreshToken(
           refreshToken,
         );
@@ -305,8 +326,12 @@ export class SessionService {
       return await this.refreshSession(
         session,
       );
-    } catch {
-      return null;
+    } catch (error) {
+      console.error(
+      'REFRESH TOKEN VERIFY ERROR:',
+      error,
+    );
+    return null;
     }
   }
 
