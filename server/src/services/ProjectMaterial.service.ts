@@ -16,12 +16,12 @@ export class ProjectMaterialService {
   constructor(
     @InjectRepository(ProjectMaterial)
     private readonly listRepo: Repository<ProjectMaterial>,
-
+    /*
     @InjectRepository(ProjectMaterialItem)
     private readonly itemRepo: Repository<ProjectMaterialItem>,
 
     @InjectRepository(Projects)
-    private readonly projectRepo: Repository<Projects>,
+    private readonly projectRepo: Repository<Projects>,*/
   ) {}
 
   async create(dto: CreateMaterialListDto) {
@@ -51,24 +51,56 @@ export class ProjectMaterialService {
       const list = manager.create(ProjectMaterial, {
         project,
         projectId: dto.projectId,
-        title: dto.title ?? null,
-        other: dto.other ?? null,
-        items: dto.items.map((item, index) =>
+        title: dto.title?.trim() ?? null,
+        other: dto.other?.trim() ?? null,
+        /*items: dto.items.map((item, index) =>
           manager.create(ProjectMaterialItem, {
-            label: item.label,
-            quantity: item.quantity,
-            price: item.price,
-            unit: item.unit ?? 'pcs',
+            materialKey: item.materialKey,
+            quantity: item.quantity ?? null,
+            price: item.price ?? null,
+            note: item.note?.trim() ?? null,
             sortOrder: index,
           }),
-        ),
+        ),*/
       });
 
       await manager.save(list);
 
+      const items = dto.items.map(
+        (item, index) =>
+          manager.create(
+            ProjectMaterialItem,
+            {
+              materialId: list.id,
+
+              materialKey:
+                item.materialKey.trim(),
+
+              quantity:
+                item.quantity ?? null,
+
+              price:
+                item.price ?? null,
+
+              note:
+                item.note?.trim() || null,
+
+              sortOrder: index,
+            },
+          ),
+      )
+
+      if (items.length > 0) {
+        await manager.save(
+          ProjectMaterialItem,
+          items,
+        )
+      }
+
       return manager.findOne(ProjectMaterial, {
         where: {
-          projectId: dto.projectId,
+          //projectId: dto.projectId,
+          id: list.id,
         },
         relations: {
           items: true,
@@ -99,8 +131,17 @@ export class ProjectMaterialService {
         );
       }
 
-      list.title = dto.title ?? list.title;
-      list.other = dto.other ?? list.other;
+      if (dto.title !== undefined) {
+          list.title =
+            dto.title.trim() || null
+        }
+
+        if (dto.other !== undefined) {
+          list.other =
+            dto.other.trim() || null
+        }
+      //list.title = dto.title ?? list.title;
+      //list.other = dto.other ?? list.other;
       /*
       list.items = dto.items.map((item, index) =>
         manager.create(ProjectMaterialItem, {
@@ -114,25 +155,62 @@ export class ProjectMaterialService {
 
       await manager.save(list);
       */
+     await manager.save(
+          ProjectMaterial,
+          list,
+        )
+
      await manager.delete(ProjectMaterialItem, {
           materialId: list.id,
       })
-
+      /*
       list.items = dto.items.map((item, index) =>
           manager.create(ProjectMaterialItem, {
               materialId: list.id,
-              label: item.label,
-              quantity: item.quantity,
-              price: item.price,
-              unit: item.unit ?? 'pcs',
+              materialKey: item.materialKey,
+              quantity: item.quantity ?? null,
+              price: item.price ?? null,
+              note: item.note?.trim() || null,
               sortOrder: index,
           }),
-      )
 
-      await manager.save(list)
+      )*/
+      const items = dto.items.map(
+          (item, index) =>
+            manager.create(
+              ProjectMaterialItem,
+              {
+                materialId: list.id,
+
+                materialKey:
+                  item.materialKey.trim(),
+
+                quantity:
+                  item.quantity ?? null,
+
+                price:
+                  item.price ?? null,
+
+                note:
+                  item.note?.trim() || null,
+
+                sortOrder: index,
+              },
+            ),
+        )
+
+        if (items.length > 0) {
+          await manager.save(
+            ProjectMaterialItem,
+            items,
+          )
+        }
+
+      //await manager.save(list)
       return manager.findOne(ProjectMaterial, {
         where: {
-          projectId: list.projectId,
+          //projectId: list.projectId,
+          id: list.id,
         },
         relations: {
           items: true,
@@ -164,7 +242,8 @@ export class ProjectMaterialService {
 
   async remove(id: string): Promise<void> {
     const result = await this.listRepo.delete(id);
-    if (result.affected === 0) {
+    //if (result.affected === 0) {
+    if (!result.affected) {
       throw new NotFoundException('Material list not found');
     }
   }

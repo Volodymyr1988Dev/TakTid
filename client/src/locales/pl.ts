@@ -20,7 +20,19 @@ export default {
     editPrices: 'Edytuj ceny',
     done: 'Gotowe',
   },
-
+  material: {
+    note: 'Uwagi',
+    notePlaceholder: 'Dodaj uwagę...',
+  },
+  units: {
+    piece: 'szt.',
+    meter: 'm',
+    pack: 'opak.',
+    tube: 'tuba',
+    bucket: 'wiadro',
+    roll: 'rolka',
+    squareMeter: 'm²',
+  },
   project: {
     title: 'Projekty',
     create: 'Utwórz projekt',
@@ -55,6 +67,7 @@ export default {
     extraHoursIncome: 'Dochód z nadgodzin',
     changeExtraHourPrice: 'Zmień cenę za nadgodzinę',
     saveExtraHourPrice: 'Zapisz cenę za nadgodzinę',
+    noProject: 'Brak projektów',
   },
 
   auth: {

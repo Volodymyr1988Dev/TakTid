@@ -11,7 +11,7 @@ import {
 import { useI18n } from 'vue-i18n'
 
 import type { Project } from '../types/Project.dto'
-import { MATERIAL_CATALOG } from '../const/MaterialCatalog'
+import { MATERIAL_CATALOG, getMaterialDefinition } from '../const/MaterialCatalog'
 
 import AutoComplete from 'primevue/autocomplete'
 import Dialog from 'primevue/dialog'
@@ -19,6 +19,7 @@ import Dialog from 'primevue/dialog'
 import type {
   CreateMaterialListDto,
   MaterialItem,
+  MaterialFormState,
 } from '../types/Material'
 
 import { useProjectStore } from '../stores/project.store'
@@ -47,24 +48,24 @@ const textareaRef =
   ref<HTMLTextAreaElement | null>(null)
 
 function createEmptyItems(): MaterialItem[] {
-  return MATERIAL_CATALOG.map(label => ({
-    label,
+  return MATERIAL_CATALOG.map(material => ({
+    materialKey: material.key,
     quantity: null,
     price: null,
-    unit: 'pcs',
+    note: null,
   }))
 }
 
+
 const materialForm =
-  reactive<CreateMaterialListDto>({
+  reactive<MaterialFormState>({
     projectId: '',
     other: '',
     items: createEmptyItems(),
   })
 
 const hasOther = computed(
-  () =>
-    materialForm.other.trim().length > 0,
+  () => materialForm.other.trim().length > 0,
 )
 
 const visibleItems = computed(() =>
@@ -92,15 +93,15 @@ function fillFormFromList() {
     list.other ?? ''
 
   materialForm.items =
-    MATERIAL_CATALOG.map(label => {
+    MATERIAL_CATALOG.map(material => {
       const existing =
         list.items?.find(
           (item: MaterialItem) =>
-            item.label === label,
+            item.materialKey === material.key,
         )
 
       return {
-        label,
+        materialKey: material.key,
         quantity:
           existing?.quantity == null
             ? null
@@ -109,8 +110,8 @@ function fillFormFromList() {
           existing?.price == null
             ? null
             : Number(existing.price),
-        unit:
-          existing?.unit ?? 'pcs',
+        note:
+          existing?.note ?? null,
       }
     })
 }
@@ -317,7 +318,7 @@ async function save() {
               ),
           )
           .map(item => ({
-            label: item.label,
+            materialKey: item.materialKey,
 
             quantity:
               item.quantity,
@@ -325,8 +326,8 @@ async function save() {
             price:
               item.price,
 
-            unit:
-              item.unit,
+            note:
+              item.note?.trim() || null,
           })),
     }
 
@@ -371,6 +372,32 @@ onMounted(async () => {
 
   await autoResize()
 })
+
+function materialLabel(
+  materialKey: string,
+): string {
+  const material =
+    getMaterialDefinition(
+      materialKey,
+    )
+
+  return material
+    ? t(material.labelKey)
+    : materialKey
+}
+
+function materialUnit(
+  materialKey: string,
+): string {
+  const material =
+    getMaterialDefinition(
+      materialKey,
+    )
+
+  return material
+    ? t(material.unitKey)
+    : ''
+}
 </script>
 
 <template>
@@ -406,7 +433,7 @@ onMounted(async () => {
 
         <template #empty>
           <div class="empty-projects">
-            No projects found
+            {{ t('project.noProject') }}
           </div>
         </template>
       </AutoComplete>
@@ -429,23 +456,47 @@ onMounted(async () => {
               : visibleItems
           )
         "
-        :key="item.label"
+        :key="item.materialKey"
         class="row"
       >
         <div class="label">
-          {{ item.label }}
-        </div>
+            <div class="material-name">
+                {{ materialLabel(item.materialKey) }}
+            </div>
 
-        <input
-          v-model.number="item.quantity"
-          type="number"
-          min="0"
-          step="0.01"
-          inputmode="decimal"
-          :disabled="
-            !isEditing || saving
-          "
-        />
+            <textarea
+                v-if="isEditing"
+                v-model="item.note"
+                class="material-note-input"
+                rows="1"
+                :placeholder="t('material.notePlaceholder')"
+                :disabled="saving"
+            />
+
+            <div
+                v-else-if="item.note"
+                class="material-note"
+            >
+                {{ item.note }}
+            </div>
+            </div>
+
+        <div class="quantity-cell">
+            <input
+            v-model.number="item.quantity"
+            type="number"
+            min="0"
+            step="0.01"
+            inputmode="decimal"
+            :disabled="
+                !isEditing || saving
+            "
+            />
+
+            <span class="unit">
+            {{ materialUnit(item.materialKey) }}
+            </span>
+        </div>
       </div>
 
       <!-- OTHER -->
@@ -541,11 +592,11 @@ onMounted(async () => {
           v-for="
             item in materialForm.items
           "
-          :key="item.label"
+          :key="item.materialKey"
           class="price-row"
         >
           <span class="price-label">
-            {{ item.label }}
+            {{ materialLabel(item.materialKey) }}
           </span>
 
           <input
@@ -816,7 +867,59 @@ onMounted(async () => {
 :deep(.p-dialog-footer) {
   padding: 12px 20px 16px;
 }
+.quantity-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
 
+.quantity-cell input {
+  width: 72px;
+}
+
+.unit {
+  min-width: 34px;
+  color: #64748b;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.material-name {
+  font-weight: 500;
+}
+
+.material-note {
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #64748b;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.material-note-input {
+  width: 100%;
+  min-height: 32px;
+  margin-top: 5px;
+  padding: 6px 8px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+
+  background: #fff;
+  color: #111827;
+
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.35;
+
+  resize: vertical;
+}
+
+.material-note-input:focus {
+  outline: none;
+  border-color: var(--primary-color, #2563eb);
+}
 /*
  * MOBILE
  */

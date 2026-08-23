@@ -17,6 +17,7 @@ export class ProjectMaterial {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
+  @Index({ unique: true })
   @Column('uuid')
   projectId!: string;
 

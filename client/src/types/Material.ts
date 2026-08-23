@@ -1,8 +1,10 @@
 export interface MaterialItem {
-  label: string
+  //label: string
+  materialKey: string
   quantity: number | null
   price: number | null
-  unit: string
+  //unit: string
+  note: string | null
 }
 
 export interface MaterialList {
@@ -18,12 +20,18 @@ export interface MaterialList {
 export interface CreateMaterialListDto {
   projectId: string
   title?: string
-  other: string
+  other?: string
   items: MaterialItem[]
 }
 
 export interface UpdateMaterialListDto {
   title?: string
   other?: string
+  items: MaterialItem[]
+}
+
+export interface MaterialFormState {
+  projectId: string
+  other: string
   items: MaterialItem[]
 }

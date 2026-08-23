@@ -1,27 +1,30 @@
 <script setup lang="ts">
-
 import { reactive } from 'vue'
 import { MATERIAL_CATALOG } from '../../const/MaterialCatalog'
-import type { /*MaterialItem,*/ CreateMaterialListDto } from '../../types/Material'
-/*
-export const items = reactive<MaterialItem[]>(
-  MATERIAL_CATALOG.map(label => ({
-    label,
+import type {
+  CreateMaterialListDto,
+  MaterialItem,
+} from '../../types/Material'
+
+export interface MaterialFormState {
+  projectId: string
+  other: string
+  items: MaterialItem[]
+}
+
+function createEmptyItems(): MaterialItem[] {
+  return MATERIAL_CATALOG.map(material => ({
+    materialKey: material.key,
     quantity: null,
     price: null,
-    unit: 'pcs',
-  })),
-)*/
-export const materialForm = reactive<CreateMaterialListDto>({
-    projectId: '',
-    title: '',
-    other: '',
-    items: MATERIAL_CATALOG.map(label => ({
-        label,
-        quantity: null,
-        price: null,
-        unit: 'pcs',
-    })),
-})
+    note: null,
+  }))
+}
 
+export const materialForm = reactive<CreateMaterialListDto>({
+  projectId: '',
+  title: '',
+  other: '',
+  items: createEmptyItems(),
+})
 </script>

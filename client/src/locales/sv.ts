@@ -16,9 +16,22 @@ export default {
     registerTime: 'Registrera tid',
     close: 'Stäng',
     selectProject: 'Välj projekt',
-    other: 'Other',
+    other: 'Övrigt',
     editPrices: 'Redigera priser',
     done: 'Klar',
+  },
+  material: {
+    note: 'Anteckning',
+    notePlaceholder: 'Lägg till en anteckning...',
+  },
+   units: {
+    piece: "st",
+    meter: "m",
+    pack: "pkt",
+    tube: "tub",
+    bucket: "hink",
+    roll: "rulle",
+    squareMeter: 'm²',
   },
 
   project: {
@@ -55,6 +68,7 @@ export default {
     extraHoursIncome: 'Inkomst från extra timmar',
     changeExtraHourPrice: 'Ändra pris per extra timme',
     saveExtraHourPrice: 'Spara pris per extra timme',
+    noProject: 'Inga projekt',
   },
 
   auth: {

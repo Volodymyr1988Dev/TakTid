@@ -7,11 +7,13 @@ import {
   Index,
 } from 'typeorm';
 import { ProjectMaterial } from './ProjectMaterial';
+import { decimalTransformer } from '../../utils/decimal.transformer';
 
 @Entity('project_material_items')
 export class ProjectMaterialItem {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
+
   @Index()
   @Column('uuid')
   materialId!: string;
@@ -23,26 +25,27 @@ export class ProjectMaterialItem {
   })
   material!: ProjectMaterial;
 
-  @Column()
-  label!: string;
+  @Index()
+  @Column({
+    type: 'varchar',
+    length: 100,
+  })
+  materialKey!: string;
+
+  @Column({
+    type: 'text',
+    nullable: true,
+  })
+  note!: string | null;
 
   @Column({
     type: 'decimal',
     precision: 10,
     scale: 2,
     nullable: true,
+    transformer: decimalTransformer,
   })
   quantity!: number | null;
-
-  // pcs / pack / m / l
-
-  @Column({
-    default: 'pcs',
-    length: 20,
-  })
-  unit!: string;
-
-  // тільки для адміна
 
   @Column({
     type: 'decimal',
