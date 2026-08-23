@@ -19,7 +19,7 @@ import type { AuthRequest } from '../types/index';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-  @Public()
+  /*@Public()
   @Post('refresh')
   @ApiOperation({
     summary: 'Refresh access token',
@@ -53,7 +53,81 @@ export class AuthController {
       accessToken: refreshed.token,
       user: refreshed.user,
     };
+  }*/
+
+  @Public()
+@Post('refresh')
+@ApiOperation({
+  summary: 'Refresh access token',
+})
+async refresh(
+  @Req() req: Request & {
+    cookies?: {
+      access_token?: string;
+      refresh_token?: string;
+    };
+  },
+  @Res({ passthrough: true }) res: Response,
+) {
+  const refreshToken = req.cookies?.refresh_token;
+
+  console.log('========== REFRESH DEBUG ==========');
+
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+
+  console.log(
+    'COOKIE refresh_token exists:',
+    Boolean(refreshToken),
+  );
+
+  console.log(
+    'COOKIE refresh_token length:',
+    refreshToken?.length ?? 0,
+  );
+
+  console.log(
+    'ALL COOKIES:',
+    req.cookies,
+  );
+
+  console.log('====================================');
+
+  if (!refreshToken) {
+    clearAuthCookies(res);
+
+    throw new UnauthorizedException(
+      'No refresh token cookie',
+    );
   }
+
+  const refreshed =
+    await this.authService.refreshByRefreshToken(
+      refreshToken,
+    );
+
+  if (!refreshed) {
+    console.log(
+      'REFRESH TOKEN REJECTED BY SESSION SERVICE',
+    );
+
+    clearAuthCookies(res);
+
+    throw new UnauthorizedException(
+      'Invalid refresh token',
+    );
+  }
+
+  setAuthCookies(res, {
+    accessToken: refreshed.token,
+    refreshToken: refreshed.refreshToken,
+  });
+
+  return {
+    accessToken: refreshed.token,
+    user: refreshed.user,
+  };
+}
+
   @Get('me')
   @ApiOperation({
     summary: 'Get current authenticated user',
