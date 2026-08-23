@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
+//import type { Response } from 'express';
 import { SessionService } from '../../services';
 import type { AuthRequest } from '../index';
 import { IS_PUBLIC_KEY } from '../../utils/public.decorator';
@@ -84,8 +85,14 @@ export class AuthGuard implements CanActivate {
       request.user = this.sessionService.toAuthUser(session.user);
 
       return true;
-    } catch {
-      throw new UnauthorizedException('Invalid or expired token');
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      throw new UnauthorizedException(
+        'Invalid or expired token',
+      );
     }
   }
 }

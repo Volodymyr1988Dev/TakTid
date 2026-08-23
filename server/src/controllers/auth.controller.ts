@@ -71,27 +71,6 @@ async refresh(
 ) {
   const refreshToken = req.cookies?.refresh_token;
 
-  console.log('========== REFRESH DEBUG ==========');
-
-  console.log('NODE_ENV:', process.env.NODE_ENV);
-
-  console.log(
-    'COOKIE refresh_token exists:',
-    Boolean(refreshToken),
-  );
-
-  console.log(
-    'COOKIE refresh_token length:',
-    refreshToken?.length ?? 0,
-  );
-
-  console.log(
-    'ALL COOKIES:',
-    req.cookies,
-  );
-
-  console.log('====================================');
-
   if (!refreshToken) {
     clearAuthCookies(res);
 
@@ -106,9 +85,6 @@ async refresh(
     );
 
   if (!refreshed) {
-    console.log(
-      'REFRESH TOKEN REJECTED BY SESSION SERVICE',
-    );
 
     clearAuthCookies(res);
 
