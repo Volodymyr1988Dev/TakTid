@@ -19,6 +19,9 @@ export default {
     other: 'Інше',
     editPrices: 'Редагувати ціни',
     done: 'Готово',
+    material: 'Матеріал',
+    quantity: 'Кількість',
+    unit: 'Одиниця',
   },
   material: {
     note: 'Примітка',

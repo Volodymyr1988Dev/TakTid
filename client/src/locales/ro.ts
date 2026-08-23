@@ -19,6 +19,9 @@ export default {
     other: 'Altele',
     editPrices: 'Editează prețuri',
     done: 'Gata',
+    material: 'Material',
+    quantity: 'Cantitate',
+    unit: 'Unitate',
   },
   material: {
     note: 'Notă',

@@ -724,6 +724,7 @@ function materialUnit(
 .materials-container {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .material-header,
@@ -735,8 +736,8 @@ function materialUnit(
    */
   grid-template-columns:
     minmax(180px, 1.5fr)
-    80px
-    55px
+    90px
+    70px
     minmax(150px, 1fr);
 
   column-gap: 10px;
@@ -744,15 +745,36 @@ function materialUnit(
 }
 
 .material-header {
-  padding: 5px 8px 7px;
+  min-height: 32px;
+  padding: 5px 8px;
 
   color: #64748b;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
 
   border-bottom: 1px solid #e2e8f0;
+}
+
+.material-header > div {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-material {
+  text-align: left;
+}
+
+.header-quantity,
+.header-unit {
+  text-align: center;
+}
+
+.header-note {
+  text-align: left;
 }
 
 .material-row {
@@ -762,7 +784,7 @@ function materialUnit(
   border-bottom: 1px solid #f1f5f9;
 }
 
-.material-row:last-of-type {
+.material-row:last-child {
   border-bottom: none;
 }
 
@@ -774,17 +796,22 @@ function materialUnit(
   font-size: 13px;
   font-weight: 500;
   line-height: 1.25;
+
   overflow-wrap: anywhere;
 }
+
+/* QUANTITY */
 
 .quantity-cell {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  min-width: 0;
 }
 
 .quantity-cell input {
-  width: 72px;
+  width: 76px;
   height: 34px;
 
   border: 1px solid #d1d5db;
@@ -813,12 +840,22 @@ function materialUnit(
   color: #475569;
 }
 
+/* UNIT */
+
 .unit-cell {
+  min-width: 0;
+
   color: #64748b;
   font-size: 12px;
+
   text-align: center;
   white-space: nowrap;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+/* NOTE */
 
 .note-cell {
   min-width: 0;
@@ -830,7 +867,6 @@ function materialUnit(
   height: 32px;
 
   margin: 0;
-
   padding: 6px 8px;
 
   border: 1px solid #d1d5db;
@@ -859,10 +895,10 @@ function materialUnit(
   color: #64748b;
   font-size: 12px;
   line-height: 1.35;
+
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-
 /* OTHER */
 
 .other-section {
@@ -1038,22 +1074,25 @@ function materialUnit(
 
   .material-header,
   .material-row {
-    /*
-     * Still one row:
-     * material | qty | unit | note
-     */
     grid-template-columns:
-      minmax(125px, 1.35fr)
-      58px
-      42px
-      minmax(105px, 1fr);
+      minmax(120px, 1.35fr)
+      62px
+      55px
+      minmax(110px, 1fr);
 
     column-gap: 6px;
   }
 
   .material-header {
-    padding: 4px 5px 6px;
+    min-height: 30px;
+    padding: 4px 5px;
+
     font-size: 9px;
+    letter-spacing: 0.01em;
+  }
+
+  .material-header > div {
+    white-space: nowrap;
   }
 
   .material-row {
@@ -1069,8 +1108,8 @@ function materialUnit(
   .quantity-cell input {
     width: 58px;
     height: 32px;
-    padding: 4px;
 
+    padding: 4px;
     font-size: 12px;
   }
 
@@ -1083,7 +1122,6 @@ function materialUnit(
     min-height: 32px;
 
     padding: 5px 6px;
-
     font-size: 11px;
   }
 

@@ -19,6 +19,9 @@ export default {
     other: 'Inne',
     editPrices: 'Edytuj ceny',
     done: 'Gotowe',
+    material: 'Materiał',
+    quantity: 'Ilość',
+    unit: 'Jednostka',
   },
   material: {
     note: 'Uwagi',
