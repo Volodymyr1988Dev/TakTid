@@ -20,8 +20,12 @@ const api = axios.create({
 
 //let isRefreshing = false
 let refreshPromise: Promise<void> | null = null
+let refreshFailed = false;
 
 async function refreshAccessToken() {
+  if (refreshFailed) {
+    throw new Error('Refresh session is invalid');
+  }
   if (!refreshPromise) {
     refreshPromise = refresh()
       //.then(() => undefined)
@@ -31,6 +35,16 @@ async function refreshAccessToken() {
         if (data?.user) {
           authStore.setUser(data.user);
         }
+        refreshFailed = false;
+      })
+      .catch(error => {
+        refreshFailed = true;
+
+        const authStore = useAuthStore();
+
+        authStore.clearAuth();
+
+        throw error;
       })
       .finally(() => {
         refreshPromise = null;
@@ -88,7 +102,11 @@ api.interceptors.response.use(
       useAuthStore().clearAuth()
       return Promise.reject(error)
     }
+    if (refreshFailed) {
+      useAuthStore().clearAuth();
 
+      return Promise.reject(error);
+    }
     originalRequest._retry = true
 
     try {
