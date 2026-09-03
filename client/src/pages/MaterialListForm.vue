@@ -144,6 +144,12 @@ function searchProjects(
     )
 }
 
+function projectLabel(project: Project): string {
+  return [project.city, project.address]
+    .filter(Boolean)
+    .join(' — ')
+}
+
 async function setSelectedProject(
   project: Project | null,
 ) {
@@ -378,17 +384,18 @@ function materialUnit(
       <label class="field-label">
         {{ t('common.selectProject') }}
       </label>
-
+      <!--option-label="address"-->
       <AutoComplete
         :model-value="selectedProject"
         :suggestions="filteredProjects"
-        option-label="address"
+        :option-label="projectLabel"
         dropdown
         force-selection
         :disabled="saving"
         @update:model-value="setSelectedProject"
         @complete="searchProjects"
       >
+      
         <template #option="{ option }">
           <div class="project-option">
             <div class="city">
@@ -400,7 +407,7 @@ function materialUnit(
             </div>
           </div>
         </template>
-
+        
         <template #empty>
           <div class="empty-projects">
             {{ t('project.noProject') }}
@@ -644,8 +651,8 @@ function materialUnit(
 .material-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 12px;
+  gap: 10px;
+  padding: 8px;
   color: #111827;
 }
 
@@ -654,11 +661,11 @@ function materialUnit(
 .project-selector {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .field-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: #475569;
 }
@@ -666,12 +673,41 @@ function materialUnit(
 .project-option {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 4px 0;
+  gap: 1px;
+  padding: 3px 0;
+}
+
+.selected-project { 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+  min-width: 0; 
+  line-height: 1.15; 
+} 
+.selected-project-city { 
+  font-size: 12px; 
+  font-weight: 700; 
+  color: var( --primary-color, #2563eb ); 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+} 
+.selected-project-address { 
+  font-size: 11px; 
+  color: #475569; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+
+.selected-project-placeholder { 
+  color: #94a3b8; 
+  font-size: 13px; 
 }
 
 .city {
   font-weight: 700;
+  font-size: 13px;
   color: var(
     --primary-color,
     #2563eb
@@ -679,14 +715,15 @@ function materialUnit(
 }
 
 .address {
-  font-size: 0.9rem;
+  font-size: 12px;
+  /*font-size: 0.9rem;*/
   color: #64748b;
 }
 
 .empty-projects {
-  padding: 10px;
+  padding: 8px;
   color: #64748b;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 :deep(.p-autocomplete) {
@@ -695,28 +732,28 @@ function materialUnit(
 
 :deep(.p-autocomplete-input) {
   width: 100%;
-  min-height: 42px;
-  padding: 9px 12px;
+  min-height: 38px;
+  padding: 5px 10px;
   border: 1px solid #d1d5db;
-  border-radius: 10px 0 0 10px;
-  font-size: 14px;
+  border-radius: 8px 0 0 8px;
+  font-size: 13px;
 }
 
 :deep(.p-autocomplete-dropdown) {
-  width: 44px;
-  min-height: 42px;
-  border-radius: 0 10px 10px 0;
+  width: 40px;
+  min-height: 38px;
+  border-radius: 0 8px 8px 0;
   border: 1px solid #d1d5db;
   border-left: 0;
 }
 
 :deep(.p-autocomplete-panel) {
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
 }
 
 :deep(.p-autocomplete-option) {
-  padding: 9px 12px;
+  padding: 7px 10px;
 }
 
 /* MATERIALS */
@@ -735,24 +772,24 @@ function materialUnit(
    * Material | Quantity | Unit | Note
    */
   grid-template-columns:
-    minmax(180px, 1.5fr)
-    90px
-    70px
-    minmax(150px, 1fr);
+    minmax(150px, 1.45fr)
+    68px
+    48px
+    minmax(120px, 1fr);
 
-  column-gap: 10px;
+  column-gap: 6px;
   align-items: center;
 }
 
 .material-header {
-  min-height: 32px;
-  padding: 5px 8px;
+  min-height: 28px;
+  padding: 3px 5px;
 
   color: #64748b;
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.025em;
 
   border-bottom: 1px solid #e2e8f0;
 }
@@ -778,8 +815,8 @@ function materialUnit(
 }
 
 .material-row {
-  min-height: 46px;
-  padding: 5px 8px;
+  min-height: 39px;
+  padding: 3px 5px;
 
   border-bottom: 1px solid #f1f5f9;
 }
@@ -811,20 +848,20 @@ function materialUnit(
 }
 
 .quantity-cell input {
-  width: 76px;
-  height: 34px;
+  width: 62px;
+  height: 29px;
 
   border: 1px solid #d1d5db;
-  border-radius: 7px;
+  border-radius: 6px;
 
-  padding: 5px 6px;
+  padding: 3px 4px;
 
   text-align: center;
 
   background: white;
   color: #111827;
 
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .quantity-cell input:focus {
@@ -846,7 +883,8 @@ function materialUnit(
   min-width: 0;
 
   color: #64748b;
-  font-size: 12px;
+  font-size: 10px;
+  font-weight: 500;
 
   text-align: center;
   white-space: nowrap;
@@ -863,21 +901,21 @@ function materialUnit(
 
 .material-note-input {
   width: 100%;
-  min-height: 32px;
-  height: 32px;
+  min-height: 28px;
+  height: 28px;
 
   margin: 0;
-  padding: 6px 8px;
+  padding: 4px 6px;
 
   border: 1px solid #d1d5db;
-  border-radius: 7px;
+  border-radius: 6px;
 
   background: #fff;
   color: #111827;
 
   font-family: inherit;
-  font-size: 12px;
-  line-height: 1.35;
+  font-size: 10.5px;
+  line-height: 1.25;
 
   resize: none;
   overflow: hidden;
@@ -893,8 +931,8 @@ function materialUnit(
 
 .material-note {
   color: #64748b;
-  font-size: 12px;
-  line-height: 1.35;
+  font-size: 10.5px;
+  line-height: 1.25;
 
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -904,33 +942,33 @@ function materialUnit(
 .other-section {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  margin-top: 8px;
-  padding: 8px;
+  gap: 3px;
+  margin-top: 5px;
+  padding: 5px;
   border-top: 1px solid #e2e8f0;
 }
 
 .other-section label {
   color: #475569;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 600;
 }
 
 .other-section textarea {
   width: 100%;
-  min-height: 40px;
+  min-height: 34px;
 
   resize: none;
   overflow: hidden;
 
   border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border-radius: 6px;
 
-  padding: 8px;
+  padding: 5px 6px;
 
   font-family: inherit;
-  font-size: 13px;
-  line-height: 1.4;
+  font-size: 11px;
+  line-height: 1.25;
 
   background: white;
   color: #111827;
@@ -948,7 +986,7 @@ function materialUnit(
 
 .actions {
   display: flex;
-  gap: 10px;
+  gap: 7px;
   align-items: stretch;
   flex-wrap: wrap;
 }
@@ -956,8 +994,8 @@ function materialUnit(
 .save-btn,
 .edit-prices-btn {
   border: none;
-  border-radius: 10px;
-  padding: 11px 16px;
+  border-radius: 8px;
+  padding: 8px 12px;
 
   color: white;
 
@@ -993,7 +1031,7 @@ function materialUnit(
 .price-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 
   max-height: 60vh;
   overflow-y: auto;
@@ -1006,9 +1044,9 @@ function materialUnit(
 
   grid-template-columns:
     minmax(0, 1fr)
-    120px;
+    110px;
 
-  gap: 10px;
+  gap: 8px;
   align-items: center;
 }
 
@@ -1017,21 +1055,21 @@ function materialUnit(
 }
 
 .price-row input {
-  width: 120px;
+  width: 110px;
 
   border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border-radius: 7px;
 
-  padding: 8px;
+  padding: 7px;
 
   text-align: right;
 }
 
 .dialog-done-btn {
   border: none;
-  border-radius: 9px;
+  border-radius: 8px;
 
-  padding: 9px 18px;
+  padding: 8px 16px;
 
   background: #2563eb;
   color: white;
@@ -1043,124 +1081,208 @@ function materialUnit(
 /* DIALOG */
 
 :deep(.p-dialog) {
-  border-radius: 14px;
+  border-radius: 12px;
   overflow: hidden;
 }
 
 :deep(.p-dialog-header) {
-  padding: 16px 20px;
+  padding: 13px 16px;
 }
 
 :deep(.p-dialog-content) {
-  padding: 10px 20px 20px;
+  padding: 8px 16px 16px;
 }
 
 :deep(.p-dialog-footer) {
-  padding: 12px 20px 16px;
+  padding: 10px 16px 13px;
 }
 
 /* MOBILE */
 
 @media (max-width: 700px) {
   .material-form {
-    padding: 6px;
-    gap: 10px;
+    padding: 3px;
+    gap: 5px;
   }
-
+/*
   .materials-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+  }*/
+  .project-selector { 
+    gap: 2px; 
+  } 
+  .field-label { 
+    font-size: 9px; 
+    line-height: 1.1;
+  }
+  :deep(.p-autocomplete) {
+    width: 100%;
+  }
+  :deep(.p-autocomplete-input) { 
+    min-height: 33px; 
+    height: 33px;
+    padding: 3px 7px; 
+    font-size: 10.5px; 
+  } 
+  :deep(.p-autocomplete-dropdown) { 
+    width: 33px; 
+    min-height: 33px; 
+  } 
+  .selected-project-city { 
+    font-size: 10.5px; 
+  } 
+  .selected-project-address { 
+    font-size: 10px; 
+  }
+  .project-option { 
+    padding: 2px 0; 
+    gap: 0;
+    line-height: 1.1;
+  } 
+  .city { 
+    font-size: 10.5px; 
+    line-height: 1.1;
+  }
+  .address { 
+    font-size: 9.5px; 
+    line-height: 1.1;
   }
 
   .material-header,
   .material-row {
     grid-template-columns:
-      minmax(120px, 1.35fr)
-      62px
-      55px
-      minmax(110px, 1fr);
+      minmax(105px, 1.45fr)
+      50px
+      34px
+      minmax(78px, 1fr);
 
-    column-gap: 6px;
+    column-gap: 4px;
+  }
+
+  .materials-container { 
+    width: 100%; 
+    overflow-x: hidden; 
   }
 
   .material-header {
-    min-height: 30px;
-    padding: 4px 5px;
+    min-height: 22px;
+    padding: 2px 3px;
 
-    font-size: 9px;
-    letter-spacing: 0.01em;
+    font-size: 8px;
+    letter-spacing: 0.015em;
   }
 
   .material-header > div {
+    min-width: 0;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .material-row {
-    min-height: 42px;
-    padding: 4px 5px;
+    min-height: 32px;
+    height: 32px;
+    padding: 2px 3px;
   }
 
   .material-name {
-    font-size: 12px;
-    line-height: 1.2;
+    font-size: 10px;
+    line-height: 1.1;
+    min-width: 0;
+
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .quantity-cell input {
-    width: 58px;
-    height: 32px;
-
-    padding: 4px;
-    font-size: 12px;
+    width: 48px;
+    height: 26px;
+    border-radius: 5px;
+    padding: 2px;
+    font-size: 10.5px;
   }
 
   .unit-cell {
-    font-size: 10px;
+    font-size: 8.5px;
+    line-height: 1;
   }
 
   .material-note-input {
-    height: 32px;
-    min-height: 32px;
-
-    padding: 5px 6px;
-    font-size: 11px;
+    width: 100%;
+    height: 26px;
+    min-height: 26px;
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-size: 9px;
+    line-height: 1.1;
   }
 
   .material-note {
-    font-size: 11px;
+    font-size: 9px;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .other-section {
-    padding: 6px;
+    gap: 2px; 
+    margin-top: 2px; 
+    padding: 3px;
+  }
+  .other-section label { 
+    font-size: 9px; 
+    line-height: 1;
+  } 
+  .other-section textarea { 
+    min-height: 29px; 
+    padding: 3px 5px; 
+    border-radius: 5px; 
+    font-size: 9.5px; 
   }
 
   .actions {
     flex-direction: column;
+    gap: 5px;
   }
 
   .save-btn,
   .edit-prices-btn {
     width: 100%;
-    min-height: 44px;
+    min-height: 38px;
+    padding: 7px 10px; 
+    border-radius: 7px; 
+    font-size: 11px;
   }
 
   .price-row {
     grid-template-columns:
       minmax(0, 1fr)
-      90px;
+      85px;
   }
 
   .price-row input {
-    width: 90px;
+    width: 85px;
   }
 
   :deep(.p-dialog) {
-    width: calc(100vw - 20px) !important;
-    max-width: calc(100vw - 20px) !important;
+    width: calc(100vw - 14px) !important;
+    max-width: calc(100vw - 14px) !important;
   }
 
   :deep(.p-dialog-content) {
-    padding-left: 14px;
-    padding-right: 14px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
+  :deep(.p-dialog-header) { 
+    padding: 11px 12px; 
+  } 
+  :deep(.p-dialog-footer) { 
+    padding: 8px 12px 10px; 
+  }
+
 }
 </style>
