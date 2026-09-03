@@ -198,6 +198,9 @@ async function loadProject(
 
   selectedProject.value = project
 
+  materialStore.clear()
+  resetForm()
+
   await materialStore.load(projectId)
 
   if (materialStore.materialList) {
@@ -682,7 +685,7 @@ function materialUnit(
   gap: 1px;
   padding: 3px 0;
 }
-
+/*
 .selected-project { 
   display: flex; 
   flex-direction: column; 
@@ -710,7 +713,7 @@ function materialUnit(
   color: #94a3b8; 
   font-size: 13px; 
 }
-
+*/
 .city {
   font-weight: 700;
   font-size: 13px;
@@ -1135,12 +1138,13 @@ function materialUnit(
     width: 33px; 
     min-height: 33px; 
   } 
+  /*
   .selected-project-city { 
     font-size: 10.5px; 
   } 
   .selected-project-address { 
     font-size: 10px; 
-  }
+  }*/
   .project-option { 
     padding: 2px 0; 
     gap: 0;
