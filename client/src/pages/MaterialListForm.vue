@@ -49,6 +49,7 @@ const priceDialog = ref(false)
 const saving = ref(false)
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
+const autocompleteRef = ref<InstanceType<typeof AutoComplete> | null>(null)
 
 function createEmptyItems(): MaterialItem[] {
   return MATERIAL_CATALOG.map(material => ({
@@ -117,7 +118,7 @@ function fillFormFromList() {
     },
   )
 }
-
+/*
 function searchProjects(
   event: { query: string },
 ) {
@@ -143,7 +144,7 @@ function searchProjects(
           .includes(query),
     )
 }
-
+*/
 function projectLabel(project: Project): string {
   return [project.city, project.address]
     .filter(Boolean)
@@ -186,6 +187,8 @@ async function loadProject(
 
     isEditing.value = true
 
+    setProjectInputReadonly()
+
     return
   }
 
@@ -214,6 +217,7 @@ async function loadProject(
   }
 
   await autoResize()
+  setProjectInputReadonly()
 }
 
 watch(
@@ -231,6 +235,13 @@ watch(
   },
   {
     immediate: true,
+  },
+)
+
+watch(
+  selectedProject,
+  () => {
+    setProjectInputReadonly()
   },
 )
 
@@ -381,6 +392,23 @@ function materialUnit(
     ? t(material.unitKey)
     : ''
 }
+function setProjectInputReadonly() {
+  nextTick(() => {
+    const component = autocompleteRef.value as unknown as {
+      $el?: HTMLElement
+    }
+
+    const root = component.$el
+
+    const input = root?.querySelector(
+      'input.p-autocomplete-input',
+    ) as HTMLInputElement | null
+
+    if (!input) return
+
+    input.readOnly = true
+  })
+}
 </script>
 
 <template>
@@ -391,18 +419,20 @@ function materialUnit(
       <label class="field-label">
         {{ t('common.selectProject') }}
       </label>
-      <!--option-label="address"-->
+      <!--:pt="{ input: { readonly: true }}"  @complete="searchProjects"-->
       <AutoComplete
+        ref="autocompleteRef"
         :model-value="selectedProject"
         :suggestions="filteredProjects"
         :option-label="projectLabel"
         dropdown
         force-selection
         :disabled="saving"
-        :pt="{ input: { readonly: true }}"
         @update:model-value="setSelectedProject"
-        @complete="searchProjects"
+        
         @dropdown-click="showAllProjects"
+        @show="setProjectInputReadonly"
+        @hide="setProjectInputReadonly"
       >
       
         <template #option="{ option }">
