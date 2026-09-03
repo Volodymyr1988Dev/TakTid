@@ -326,6 +326,10 @@ function openPriceModal() {
   priceDialog.value = true
 }
 
+function showAllProjects() {
+  filteredProjects.value = [...projectStore.projects]
+}
+
 onMounted(async () => {
   if (!projectStore.projects.length) {
     await projectStore.load()
@@ -392,8 +396,10 @@ function materialUnit(
         dropdown
         force-selection
         :disabled="saving"
+        :pt="{ input: { readonly: true }}"
         @update:model-value="setSelectedProject"
         @complete="searchProjects"
+        @dropdown-click="showAllProjects"
       >
       
         <template #option="{ option }">
