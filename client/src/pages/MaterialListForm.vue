@@ -121,33 +121,7 @@ function fillFormFromList() {
     },
   )
 }
-/*
-function searchProjects(
-  event: { query: string },
-) {
-  const query = event.query
-    .trim()
-    .toLowerCase()
 
-  if (!query) {
-    filteredProjects.value =
-      projectStore.projects
-
-    return
-  }
-
-  filteredProjects.value =
-    projectStore.projects.filter(
-      project =>
-        project.address
-          ?.toLowerCase()
-          .includes(query) ||
-        project.city
-          ?.toLowerCase()
-          .includes(query),
-    )
-}
-*/
 function projectLabel(project: Project): string {
   return [project.city, project.address]
     .filter(Boolean)
@@ -702,7 +676,6 @@ function setProjectInputReadonly() {
       <label class="field-label">
         {{ t('common.selectProject') }}
       </label>
-      <!--:pt="{ input: { readonly: true }}"  @complete="searchProjects"-->
       <AutoComplete
         ref="autocompleteRef"
         :model-value="selectedProject"
@@ -914,7 +887,7 @@ function setProjectInputReadonly() {
           @click="downloadPdf"
         >
           <i class="pi pi-download"></i>
-          <span>↓ PDF</span>
+          <span>PDF</span>
         </button>
       </template>
 
@@ -1010,35 +983,7 @@ function setProjectInputReadonly() {
   gap: 1px;
   padding: 3px 0;
 }
-/*
-.selected-project { 
-  display: flex; 
-  flex-direction: column; 
-  justify-content: center; 
-  min-width: 0; 
-  line-height: 1.15; 
-} 
-.selected-project-city { 
-  font-size: 12px; 
-  font-weight: 700; 
-  color: var( --primary-color, #2563eb ); 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-} 
-.selected-project-address { 
-  font-size: 11px; 
-  color: #475569; 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-}
 
-.selected-project-placeholder { 
-  color: #94a3b8; 
-  font-size: 13px; 
-}
-*/
 .city {
   font-weight: 700;
   font-size: 13px;
@@ -1050,7 +995,6 @@ function setProjectInputReadonly() {
 
 .address {
   font-size: 12px;
-  /*font-size: 0.9rem;*/
   color: #64748b;
 }
 
@@ -1090,7 +1034,6 @@ function setProjectInputReadonly() {
   padding: 7px 10px;
 }
 
-/* MATERIALS */
 
 .materials-container {
   width: 100%;
@@ -1102,9 +1045,6 @@ function setProjectInputReadonly() {
 .material-row {
   display: grid;
 
-  /*
-   * Material | Quantity | Unit | Note
-   */
   grid-template-columns:
     minmax(150px, 1.45fr)
     68px
@@ -1171,7 +1111,6 @@ function setProjectInputReadonly() {
   overflow-wrap: anywhere;
 }
 
-/* QUANTITY */
 
 .quantity-cell {
   display: flex;
@@ -1211,7 +1150,6 @@ function setProjectInputReadonly() {
   color: #475569;
 }
 
-/* UNIT */
 
 .unit-cell {
   min-width: 0;
@@ -1226,8 +1164,6 @@ function setProjectInputReadonly() {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* NOTE */
 
 .note-cell {
   min-width: 0;
@@ -1271,7 +1207,6 @@ function setProjectInputReadonly() {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-/* OTHER */
 
 .other-section {
   display: flex;
@@ -1315,8 +1250,6 @@ function setProjectInputReadonly() {
     #2563eb
   );
 }
-
-/* ACTIONS */
 
 .actions {
   display: flex;
@@ -1384,8 +1317,6 @@ function setProjectInputReadonly() {
   opacity: 0.9;
 }
 
-/* PRICE DIALOG */
-
 .price-list {
   display: flex;
   flex-direction: column;
@@ -1436,8 +1367,6 @@ function setProjectInputReadonly() {
   cursor: pointer;
 }
 
-/* DIALOG */
-
 :deep(.p-dialog) {
   border-radius: 12px;
   overflow: hidden;
@@ -1455,18 +1384,12 @@ function setProjectInputReadonly() {
   padding: 10px 16px 13px;
 }
 
-/* MOBILE */
-
 @media (max-width: 700px) {
   .material-form {
     padding: 3px;
     gap: 5px;
   }
-/*
-  .materials-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }*/
+
   .project-selector { 
     gap: 2px; 
   } 
@@ -1487,13 +1410,7 @@ function setProjectInputReadonly() {
     width: 30px; 
     min-height: 30px; 
   } 
-  /*
-  .selected-project-city { 
-    font-size: 10.5px; 
-  } 
-  .selected-project-address { 
-    font-size: 10px; 
-  }*/
+
   .project-option { 
     padding: 2px 0; 
     gap: 0;
@@ -1610,19 +1527,9 @@ function setProjectInputReadonly() {
     /*flex-direction: column;
     gap: 5px;*/
     display: grid;
-    /*grid-template-columns: repeat(3, minmax(0, 1fr));*/
     gap: 4px;
   }
-/*
-  .save-btn,
-  .edit-prices-btn {
-    width: 100%;
-    min-height: 38px;
-    padding: 7px 10px; 
-    border-radius: 7px; 
-    font-size: 11px;
-  }
-*/
+
 .actions.actions-view {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -1644,10 +1551,7 @@ function setProjectInputReadonly() {
   align-items: center;
   justify-content: center;
   gap: 4px;
-}/*
-.actions > .save-btn:only-child {
-  grid-column: 1 / -1;
-}*/
+}
   .price-row {
     grid-template-columns:
       minmax(0, 1fr)
