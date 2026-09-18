@@ -102,22 +102,22 @@ export const MATERIAL_CATALOG: MaterialDefinition[] = [
 
   {
     key: 'windboard_22x170_3_6m',
-    label: 'Ytterpanelbräda (vindskivor trä) 22x170 3.6m',
+    label: 'Ytterpanelbräda 22x170 3.6m',
     unitKey: 'units.piece',
   },
   {
     key: 'windboard_22x170_4_8m',
-    label: 'Ytterpanelbräda (vindskivor trä) 22x170 4.8m',
+    label: 'Ytterpanelbräda 22x170 4.8m',
     unitKey: 'units.piece',
   },
   {
     key: 'windboard_22x170_4_2m',
-    label: 'Ytterpanelbräda (vindskivor trä) 22x170 4.2m',
+    label: 'Ytterpanelbräda 22x170 4.2m',
     unitKey: 'units.piece',
   },
   {
     key: 'windboard_22x170_5_4m',
-    label: 'Ytterpanelbräda (vindskivor trä) 22x170 5.4m',
+    label: 'Ytterpanelbräda 22x170 5.4m',
     unitKey: 'units.piece',
   },
   {
@@ -127,17 +127,17 @@ export const MATERIAL_CATALOG: MaterialDefinition[] = [
   },
   {
     key: 'windboard_22x195_4_8m',
-    label: 'Ytterpanelbräda (vindskivor trä) 22x195 4.8m',
+    label: 'Ytterpanelbräda 22x195 4.8m',
     unitKey: 'units.piece',
   },
   {
     key: 'windboard_22x195_5_4m',
-    label: 'Ytterpanelbräda (vindskivor trä) 22x195 5.4m',
+    label: 'Ytterpanelbräda 22x195 5.4m',
     unitKey: 'units.piece',
   },
   {
     key: 'windboard_22x195_3_6m',
-    label: 'Ytterpanelbräda (vindskivor trä) 22x195 3.6m',
+    label: 'Ytterpanelbräda 22x195 3.6m',
     unitKey: 'units.piece',
   },
   {
