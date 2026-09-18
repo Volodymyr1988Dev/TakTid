@@ -73,15 +73,15 @@ const materialForm = reactive<MaterialFormState>({
 const hasOther = computed(
   () => materialForm.other.trim().length > 0,
 )
-/*
+
 const visibleItems = computed(() =>
   materialForm.items.filter(
     item =>
       item.quantity !== null &&
       item.quantity !== 0,
   ),
-)*/
-const visibleItems = computed(() => materialForm.items)
+)
+//const visibleItems = computed(() => materialForm.items)
 
 function resetForm() {
   materialForm.other = ''
