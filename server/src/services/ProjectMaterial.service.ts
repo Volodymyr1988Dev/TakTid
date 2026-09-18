@@ -66,7 +66,14 @@ export class ProjectMaterialService {
 
       await manager.save(list);
 
-      const items = dto.items.map(
+      const items = dto.items
+      .filter(
+        item =>
+          item.quantity !== null &&
+          item.quantity !== undefined &&
+          Number(item.quantity) > 0,
+      )
+      .map(
         (item, index) =>
           manager.create(
             ProjectMaterialItem,
@@ -80,7 +87,10 @@ export class ProjectMaterialService {
                 item.quantity ?? null,
 
               price:
-                item.price ?? null,
+                //item.price ?? null,
+                item.price == null
+                  ? null
+                  : Number(item.price),
 
               note:
                 item.note?.trim() || null,
@@ -175,7 +185,14 @@ export class ProjectMaterialService {
           }),
 
       )*/
-      const items = dto.items.map(
+      const items = dto.items
+        .filter(
+          item =>
+            item.quantity !== null &&
+            item.quantity !== undefined &&
+            Number(item.quantity) > 0,
+        )
+        .map(
           (item, index) =>
             manager.create(
               ProjectMaterialItem,
@@ -189,7 +206,10 @@ export class ProjectMaterialService {
                   item.quantity ?? null,
 
                 price:
-                  item.price ?? null,
+                  //item.price ?? null,
+                  item.price == null
+                    ? null
+                    : Number(item.price),
 
                 note:
                   item.note?.trim() || null,

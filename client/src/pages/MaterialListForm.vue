@@ -55,12 +55,13 @@ const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const autocompleteRef = ref<InstanceType<typeof AutoComplete> | null>(null)
 
 function createEmptyItems(): MaterialItem[] {
-  return MATERIAL_CATALOG.map(material => ({
+ /* return MATERIAL_CATALOG.map(material => ({
     materialKey: material.key,
     quantity: null,
     price: null,
     note: null,
-  }))
+  }))*/
+  return []
 }
 
 const materialForm = reactive<MaterialFormState>({
@@ -72,20 +73,23 @@ const materialForm = reactive<MaterialFormState>({
 const hasOther = computed(
   () => materialForm.other.trim().length > 0,
 )
-
+/*
 const visibleItems = computed(() =>
   materialForm.items.filter(
     item =>
       item.quantity !== null &&
       item.quantity !== 0,
   ),
-)
+)*/
+const visibleItems = computed(() => materialForm.items)
 
 function resetForm() {
   materialForm.other = ''
-  materialForm.items = createEmptyItems()
+  //materialForm.items = createEmptyItems()
+  
+  materialForm.items = []
 }
-
+/*
 function fillFormFromList() {
   const list = materialStore.materialList
 
@@ -120,6 +124,40 @@ function fillFormFromList() {
       }
     },
   )
+}
+*/
+function fillFormFromList() {
+  const list = materialStore.materialList
+
+  if (!list) {
+    resetForm()
+    return
+  }
+
+  materialForm.other = list.other ?? ''
+
+  materialForm.items = MATERIAL_CATALOG.map(material => {
+    const existing = list.items?.find(
+      (item: MaterialItem) =>
+        item.materialKey === material.key,
+    )
+
+    return {
+      materialKey: material.key,
+
+      quantity:
+        existing?.quantity == null
+          ? null
+          : Number(existing.quantity),
+
+      price:
+        existing?.price == null
+          ? null
+          : Number(existing.price),
+
+      note: existing?.note ?? null,
+    }
+  })
 }
 
 function projectLabel(project: Project): string {
@@ -278,7 +316,7 @@ async function save() {
       other:
         materialForm.other.trim(),
 
-      items:
+      /*items:
         materialForm.items
           .filter(
             item =>
@@ -300,7 +338,26 @@ async function save() {
 
             note:
               item.note?.trim() || null,
-          })),
+          })),*/
+          items: materialForm.items
+            .filter(item => {
+              const quantity = Number(item.quantity)
+
+              return (
+                Number.isFinite(quantity) &&
+                quantity > 0
+              )
+            })
+            .map(item => ({
+              materialKey: item.materialKey,
+              quantity: Number(item.quantity),
+              price:
+                item.price == null ||
+                !Number.isFinite(Number(item.price))
+                  ? null
+                  : Number(item.price),
+              note: item.note?.trim() || null,
+            })),
     }
 
     await materialStore.save(payload)
