@@ -80,6 +80,11 @@ export const MATERIAL_CATALOG: MaterialDefinition[] = [
     unitKey: 'units.piece',
   },
   {
+    key: 'middle_section',
+    label: 'Mellanstycke MST 87X500MM',
+    unitKey: 'units.piece',
+  },
+  {
     key: 'downpipe_clamp',
     label: 'Stuprörssvep',
     unitKey: 'units.piece',
