@@ -35,13 +35,15 @@ const result = ref<Result | null>(null)
 const error = ref<string | null>(null)
 
   const hasFirstFixedEdge = computed(() => {
-  return fixedEdge.value !== null
+  return fixedEdge.value !== null &&
+    Number.isFinite(fixedEdge.value)
 })
 
 const hasSecondFixedEdge = computed(() => {
   return (
     hasFirstFixedEdge.value &&
-    fixedEdgeRight.value !== null
+    fixedEdgeRight.value !== null  &&
+    Number.isFinite(fixedEdgeRight.value)
   )
 })
 
@@ -58,7 +60,7 @@ function validate() {
 
   if (
     leftEdge !== null &&
-    (leftEdge < 0 || leftEdge > len)
+    (leftEdge < 0 || leftEdge > len || leftEdge > 25)
   ) {
     error.value = t('hook.errors.edge')
     return false
@@ -77,63 +79,12 @@ function validate() {
   ) {
     error.value = t('hook.errors.edge')
     return false
-  }/*
-  if (edge !== null && (edge < 0 || edge > len / 2)) {
-    return (error.value = t('hook.errors.edge')), false
-  }*/
+  }
 
   error.value = null
   return true
 }
-/*
-const validSpacings = computed(() => {
-  const len = sanitizeNumber(length.value)
-  if (!len) return []
 
-  if (hasSecondFixedEdge.value) {
-    return []
-  }
-  const list: number[] = []
-
-  for (let s = 60; s >= 50; s -= 0.5) {
-    const spacing = round05(s)
-    const segments = getSegments(len, spacing)
-    if (segments < 1) continue
-
-    const { left, right } = getEdges(len, spacing, segments, fixedEdge.value)
-
-    if (isValidEdge(left, right)) { list.push(spacing)}
-  }
-
-  return list
-})*/
-
-/*
-function calculate() {
-  const len = sanitizeNumber(length.value)
-  const spacing = sanitizeNumber(spacingInput.value)
-
-  if (!len || !spacing) return
-
-  const segments = getSegments(len, spacing)
-  if (segments < 1) return
-
-  const { left, right } = getEdges(len, spacing, segments, fixedEdge.value)
-
-  if (!isValidEdge(left, right)) return
-
-  result.value = {
-    edgeLeft: left,
-    edgeRight: right,
-    spacing,
-    hooks: segments + 1,
-    segments,
-    marks: Array.from({ length: segments }, (_, i) =>
-      round05((i + 1) * spacing)
-    )
-  }
-}
-*/
 const validSpacings = computed(() => {
   const len = sanitizeNumber(length.value)
 
@@ -141,11 +92,6 @@ const validSpacings = computed(() => {
     return []
   }
 
-  /**
-   * Якщо введено ДВА краї,
-   * slider 0.5-кратності більше не є основним
-   * способом розрахунку.
-   */
   if (hasSecondFixedEdge.value) {
     return []
   }
@@ -197,11 +143,6 @@ function calculate() {
     return
   }
 
-  /**
-   * ============================================
-   * РЕЖИМ 2 FIXED EDGES
-   * ============================================
-   */
   if (
     fixedEdge.value !== null &&
     fixedEdgeRight.value !== null
@@ -251,13 +192,6 @@ function calculate() {
     return
   }
 
-  /**
-   * ============================================
-   * СТАРИЙ РЕЖИМ
-   * 0 або 1 fixed edge
-   * ============================================
-   */
-
   const spacing = sanitizeNumber(
     spacingInput.value,
   )
@@ -282,10 +216,6 @@ function calculate() {
     fixedEdge.value,
   )
 
-  /**
-   * Якщо fixed edge введений,
-   * він може бути 0.
-   */
   if (fixedEdge.value !== null) {
     if (
       !isValidSingleFixedEdge(
@@ -319,15 +249,7 @@ function calculate() {
         ),
     ),
   }
-}/*
-function autoCalculate() {
-  const len = sanitizeNumber(length.value)
-  if (!len) return
-
-  const best = findBestSpacingAuto(len, fixedEdge.value)
-  if (best) spacingInput.value = best
 }
-*/
 function autoCalculate() {
   const len = sanitizeNumber(length.value)
 
@@ -335,12 +257,6 @@ function autoCalculate() {
     return
   }
 
-  /**
-   * ДВА fixed edges
-   *
-   * Тут spacing вже не обмежений 0.5.
-   * Він розраховується окремо з точністю до 2 знаків.
-   */
   if (
     fixedEdge.value !== null &&
     fixedEdgeRight.value !== null
@@ -360,10 +276,6 @@ function autoCalculate() {
     return
   }
 
-  /**
-   * 0 або 1 fixed edge:
-   * використовуємо стару логіку.
-   */
   const best = findBestSpacingAuto(
     len,
     fixedEdge.value,
@@ -373,43 +285,11 @@ function autoCalculate() {
     spacingInput.value = best
   }
 }
-/*
-const spacingDrag = computed({
-  get: () => spacingInput.value,
-  set: (v: number) => {
-    isManual.value = true
-    const snapped = round05(v)
 
-    //if (!validSpacings.value.includes(snapped)) return
-    //spacingInput.value = snapped
-    const nearest = validSpacings.value.reduce((prev, curr) =>
-      Math.abs(curr - snapped) < Math.abs(prev - snapped) ? curr : prev
-    )
-
-    spacingInput.value = nearest
-  }
-})*/
-/*
-watch([length, fixedEdge, spacingInput], () => {
-  if (timer) clearTimeout(timer)
-
-  timer = setTimeout(() => {
-    if (!validate()) return
-
-    if (!isManual.value) autoCalculate()
-    calculate()
-  }, 300)
-})
-*/
 const spacingDrag = computed({
   get: () => spacingInput.value,
 
   set: (v: number) => {
-    /**
-     * При двох fixed edges spacing
-     * задається автоматично і може бути
-     * не кратним 0.5.
-     */
     if (hasSecondFixedEdge.value) {
       return
     }
@@ -447,6 +327,7 @@ watch(
     }
 
     timer = setTimeout(() => {
+      
       if (!validate()) {
         return
       }
@@ -461,8 +342,14 @@ watch(
 )
 watch(
   [fixedEdge, fixedEdgeRight],
-  () => {
+  ([newLeft, newRight]/*, [oldLeft, oldRight]*/) => {
     isManual.value = false
+    if (
+      newLeft === null &&
+      newRight !== null
+    ) {
+      fixedEdgeRight.value = null
+    }
   },
 )
 function getLabelRow(index: number) {
@@ -497,10 +384,23 @@ function getEdgeStyle(edge: number) {
 
     <div class="field">
       <label>{{ t('hook.fixedEdge') }}</label>
-      <input 
-        v-model.number="fixedEdge" 
+      <!--
+      v-model.number="fixedEdge" 
         type="number" 
         :placeholder="t('hook.fixedEdgePlaceholder')" />
+      -->
+      <input 
+        :value="fixedEdge ?? ''"
+        type="number"
+        min="0"
+        step="0.01"
+        :placeholder="t('hook.fixedEdgePlaceholder')"
+        @input="
+          fixedEdge =
+            ($event.target as HTMLInputElement).value === ''
+              ? null
+              : Number(($event.target as HTMLInputElement).value)
+        "
     </div>
 
     <div
@@ -510,14 +410,26 @@ function getEdgeStyle(edge: number) {
       <label>
         {{ t('hook.fixedEdgeRight') }}
       </label>
-
-      <input
-        v-model.number="fixedEdgeRight"
+      <!--
+      v-model.number="fixedEdgeRight"
         type="number"
         min="0"
         step="0.01"
         :placeholder="
           t('hook.fixedEdgeRightPlaceholder')
+        "
+      -->
+      <input
+        :value="fixedEdgeRight ?? ''"
+        type="number"
+        min="0"
+        step="0.01"
+        :placeholder="t('hook.fixedEdgeRightPlaceholder')"
+        @input="
+          fixedEdgeRight =
+            ($event.target as HTMLInputElement).value === ''
+              ? null
+              : Number(($event.target as HTMLInputElement).value)
         "
       />
     </div>
