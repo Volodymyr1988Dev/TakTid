@@ -152,7 +152,8 @@ export default {
   },
 
   hook: {
-    title: 'Калькулятор гаків',
+    //title: 'Калькулятор гаків',
+    title: 'Калькулятор ринвних інтервалів',
     length: 'Довжина',
     fixedEdge: 'Фіксований край',
     lengthPlaceholder: 'Введіть довжину',
@@ -161,6 +162,8 @@ export default {
     hooks: 'Гаки',
     left: 'Лівий край',
     right: 'Правий край',
+    fixedEdgeRight: 'Фіксований край (правий)',
+    fixedEdgeRightPlaceholder: 'Введіть фіксований край (правий)',
 
     errors: {
       length: 'Довжина має бути ≥ 60 см',

@@ -152,7 +152,8 @@ export default {
   },
 
   hook: {
-    title: 'Kalkulator haków',
+    //title: 'Kalkulator haków',
+    title: 'Kalkulator odstępów rynien',
     length: 'Długość',
     fixedEdge: 'Stała krawędź',
     lengthPlaceholder: 'Wprowadź długość',
@@ -161,6 +162,8 @@ export default {
     hooks: 'Haki',
     left: 'Lewa krawędź',
     right: 'Prawa krawędź',
+    fixedEdgeRight: 'Stała krawędź (prawa)',
+    fixedEdgeRightPlaceholder: 'Wprowadź krawędź (prawa)',
 
     errors: {
       length: 'Długość ≥ 60 cm',
