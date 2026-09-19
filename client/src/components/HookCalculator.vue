@@ -6,7 +6,9 @@ import {
   getSegments,
   getEdges,
   isValidEdge,
-  findBestSpacingAuto
+  isValidSingleFixedEdge,
+  findBestSpacingAuto,
+  findSpacingWithTwoFixedEdges,
 } from './helpers/utils/hookMath'
 
 import { sanitizeNumber } from './helpers/helpers'
@@ -24,6 +26,7 @@ type Result = {
 
 const length = ref<number | null>(null)
 const fixedEdge = ref<number | null>(null)
+const fixedEdgeRight = ref<number | null>(null)
 
 const spacingInput = ref(60)
 const isManual = ref(false)
@@ -31,27 +34,65 @@ const isManual = ref(false)
 const result = ref<Result | null>(null)
 const error = ref<string | null>(null)
 
+  const hasFirstFixedEdge = computed(() => {
+  return fixedEdge.value !== null
+})
+
+const hasSecondFixedEdge = computed(() => {
+  return (
+    hasFirstFixedEdge.value &&
+    fixedEdgeRight.value !== null
+  )
+})
+
 let timer: ReturnType<typeof setTimeout> | null = null
 
 function validate() {
   const len = sanitizeNumber(length.value)
-  const edge = sanitizeNumber(fixedEdge.value)
+  //const edge = sanitizeNumber(fixedEdge.value)
+  const leftEdge = sanitizeNumber(fixedEdge.value)
+  const rightEdge = sanitizeNumber(fixedEdgeRight.value)
 
   if (!len) return (error.value = t('hook.errors.lengthNumber')), false
   if (len < 60) return (error.value = t('hook.errors.length')), false
 
+  if (
+    leftEdge !== null &&
+    (leftEdge < 0 || leftEdge > len)
+  ) {
+    error.value = t('hook.errors.edge')
+    return false
+  }
+  if (
+    rightEdge !== null &&
+    leftEdge === null
+  ) {
+    error.value = t('hook.errors.edge')
+    return false
+  }
+  if (
+    leftEdge !== null &&
+    rightEdge !== null &&
+    leftEdge + rightEdge >= len
+  ) {
+    error.value = t('hook.errors.edge')
+    return false
+  }/*
   if (edge !== null && (edge < 0 || edge > len / 2)) {
     return (error.value = t('hook.errors.edge')), false
-  }
+  }*/
 
   error.value = null
   return true
 }
-
+/*
 const validSpacings = computed(() => {
   const len = sanitizeNumber(length.value)
   if (!len) return []
 
+  if (hasSecondFixedEdge.value) {
+    return []
+  }
   const list: number[] = []
 
   for (let s = 60; s >= 50; s -= 0.5) {
@@ -61,14 +102,13 @@ const validSpacings = computed(() => {
 
     const { left, right } = getEdges(len, spacing, segments, fixedEdge.value)
 
-    if (isValidEdge(left, right)) {
-      list.push(spacing)
-    }
+    if (isValidEdge(left, right)) { list.push(spacing)}
   }
 
   return list
-})
+})*/
 
+/*
 function calculate() {
   const len = sanitizeNumber(length.value)
   const spacing = sanitizeNumber(spacingInput.value)
@@ -93,7 +133,193 @@ function calculate() {
     )
   }
 }
+*/
+const validSpacings = computed(() => {
+  const len = sanitizeNumber(length.value)
 
+  if (!len) {
+    return []
+  }
+
+  /**
+   * Якщо введено ДВА краї,
+   * slider 0.5-кратності більше не є основним
+   * способом розрахунку.
+   */
+  if (hasSecondFixedEdge.value) {
+    return []
+  }
+
+  const list: number[] = []
+
+  for (let s = 60; s >= 50; s -= 0.5) {
+    const spacing = round05(s)
+
+    const segments = getSegments(
+      len,
+      spacing,
+    )
+
+    if (segments < 1) {
+      continue
+    }
+
+    const { left, right } = getEdges(
+      len,
+      spacing,
+      segments,
+      fixedEdge.value,
+    )
+
+    if (fixedEdge.value !== null) {
+      if (
+        isValidSingleFixedEdge(
+          fixedEdge.value,
+          right,
+        )
+      ) {
+        list.push(spacing)
+      }
+    } else if (
+      isValidEdge(left, right)
+    ) {
+      list.push(spacing)
+    }
+  }
+
+  return list
+})
+
+function calculate() {
+  const len = sanitizeNumber(length.value)
+
+  if (!len) {
+    return
+  }
+
+  /**
+   * ============================================
+   * РЕЖИМ 2 FIXED EDGES
+   * ============================================
+   */
+  if (
+    fixedEdge.value !== null &&
+    fixedEdgeRight.value !== null
+  ) {
+    const calculated =
+      findSpacingWithTwoFixedEdges(
+        len,
+        fixedEdge.value,
+        fixedEdgeRight.value,
+      )
+
+    if (!calculated) {
+      result.value = null
+      return
+    }
+
+    const {
+      spacing,
+      segments,
+    } = calculated
+
+    result.value = {
+      edgeLeft: fixedEdge.value,
+      edgeRight: fixedEdgeRight.value,
+      spacing,
+      hooks: segments + 1,
+      segments,
+
+      marks: Array.from(
+        { length: segments },
+        (_, i) =>
+          Number(
+            (
+              fixedEdge.value! +
+              (i + 1) *
+                (
+                  (len -
+                    fixedEdge.value! -
+                    fixedEdgeRight.value!) /
+                  segments
+                )
+            ).toFixed(2)
+          ),
+      ),
+    }
+
+    return
+  }
+
+  /**
+   * ============================================
+   * СТАРИЙ РЕЖИМ
+   * 0 або 1 fixed edge
+   * ============================================
+   */
+
+  const spacing = sanitizeNumber(
+    spacingInput.value,
+  )
+
+  if (!spacing) {
+    return
+  }
+
+  const segments = getSegments(
+    len,
+    spacing,
+  )
+
+  if (segments < 1) {
+    return
+  }
+
+  const { left, right } = getEdges(
+    len,
+    spacing,
+    segments,
+    fixedEdge.value,
+  )
+
+  /**
+   * Якщо fixed edge введений,
+   * він може бути 0.
+   */
+  if (fixedEdge.value !== null) {
+    if (
+      !isValidSingleFixedEdge(
+        fixedEdge.value,
+        right,
+      )
+    ) {
+      result.value = null
+      return
+    }
+  } else if (!isValidEdge(left, right)) {
+    result.value = null
+    return
+  }
+
+  result.value = {
+    edgeLeft: left,
+    edgeRight: right,
+    spacing,
+    hooks: segments + 1,
+    segments,
+
+    marks: Array.from(
+      { length: segments },
+      (_, i) =>
+        round05(
+          fixedEdge.value !== null
+            ? fixedEdge.value +
+                (i + 1) * spacing
+            : (i + 1) * spacing,
+        ),
+    ),
+  }
+}/*
 function autoCalculate() {
   const len = sanitizeNumber(length.value)
   if (!len) return
@@ -101,7 +327,53 @@ function autoCalculate() {
   const best = findBestSpacingAuto(len, fixedEdge.value)
   if (best) spacingInput.value = best
 }
+*/
+function autoCalculate() {
+  const len = sanitizeNumber(length.value)
 
+  if (!len) {
+    return
+  }
+
+  /**
+   * ДВА fixed edges
+   *
+   * Тут spacing вже не обмежений 0.5.
+   * Він розраховується окремо з точністю до 2 знаків.
+   */
+  if (
+    fixedEdge.value !== null &&
+    fixedEdgeRight.value !== null
+  ) {
+    const calculated =
+      findSpacingWithTwoFixedEdges(
+        len,
+        fixedEdge.value,
+        fixedEdgeRight.value,
+      )
+
+    if (calculated) {
+      spacingInput.value =
+        calculated.spacing
+    }
+
+    return
+  }
+
+  /**
+   * 0 або 1 fixed edge:
+   * використовуємо стару логіку.
+   */
+  const best = findBestSpacingAuto(
+    len,
+    fixedEdge.value,
+  )
+
+  if (best !== null) {
+    spacingInput.value = best
+  }
+}
+/*
 const spacingDrag = computed({
   get: () => spacingInput.value,
   set: (v: number) => {
@@ -116,8 +388,8 @@ const spacingDrag = computed({
 
     spacingInput.value = nearest
   }
-})
-
+})*/
+/*
 watch([length, fixedEdge, spacingInput], () => {
   if (timer) clearTimeout(timer)
 
@@ -128,7 +400,71 @@ watch([length, fixedEdge, spacingInput], () => {
     calculate()
   }, 300)
 })
+*/
+const spacingDrag = computed({
+  get: () => spacingInput.value,
 
+  set: (v: number) => {
+    /**
+     * При двох fixed edges spacing
+     * задається автоматично і може бути
+     * не кратним 0.5.
+     */
+    if (hasSecondFixedEdge.value) {
+      return
+    }
+
+    isManual.value = true
+
+    const snapped = round05(v)
+
+    if (!validSpacings.value.length) {
+      return
+    }
+
+    const nearest =
+      validSpacings.value.reduce(
+        (prev, curr) =>
+          Math.abs(curr - snapped) <
+          Math.abs(prev - snapped)
+            ? curr
+            : prev,
+      )
+
+    spacingInput.value = nearest
+  },
+})
+watch(
+  [
+    length,
+    fixedEdge,
+    fixedEdgeRight,
+    spacingInput,
+  ],
+  () => {
+    if (timer) {
+      clearTimeout(timer)
+    }
+
+    timer = setTimeout(() => {
+      if (!validate()) {
+        return
+      }
+
+      if (!isManual.value) {
+        autoCalculate()
+      }
+
+      calculate()
+    }, 300)
+  },
+)
+watch(
+  [fixedEdge, fixedEdgeRight],
+  () => {
+    isManual.value = false
+  },
+)
 function getLabelRow(index: number) {
   const total = result.value?.marks.length ?? 0
   if (total <= 10) return 0
@@ -167,11 +503,29 @@ function getEdgeStyle(edge: number) {
         :placeholder="t('hook.fixedEdgePlaceholder')" />
     </div>
 
+    <div
+      v-if="hasFirstFixedEdge"
+      class="field"
+    >
+      <label>
+        {{ t('hook.fixedEdgeRight') }}
+      </label>
+
+      <input
+        v-model.number="fixedEdgeRight"
+        type="number"
+        min="0"
+        step="0.01"
+        :placeholder="
+          t('hook.fixedEdgeRightPlaceholder')
+        "
+      />
+    </div>
     <p v-if="error" class="error">{{ error }}</p>
 
     <div class="slider">
       <label>{{ t('hook.spacing') }}: {{ spacingDrag }} cm</label>
-      <input v-model.number="spacingDrag" type="range" min="50" max="60" step="0.5" />
+      <input v-model.number="spacingDrag" type="range" min="50" max="60" step="0.5" :disabled="hasSecondFixedEdge" />
     </div>
 
     <div v-if="result" class="card">

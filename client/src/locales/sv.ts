@@ -153,7 +153,8 @@ export default {
   },
 
   hook: {
-    title: 'Krok-kalkylator',
+    //title: 'Krok-kalkylator',
+    title: 'Jgheabur-kalkylator',
     length: 'Längd',
     fixedEdge: 'Fast kant',
     lengthPlaceholder: 'Ange längd',
@@ -162,6 +163,8 @@ export default {
     hooks: 'Krokar',
     left: 'Vänster',
     right: 'Höger',
+    fixedEdgeRight: 'Fast kant (höger)',
+    fixedEdgeRightPlaceholder: 'Ange fast kant (höger)',
 
     errors: {
       length: 'Längd ≥ 60 cm',

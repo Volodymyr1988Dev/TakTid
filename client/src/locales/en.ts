@@ -155,7 +155,8 @@ export default {
   },
 
   hook: {
-    title: 'Hook Calculator',
+    //title: 'Hook Calculator',
+    title: 'Gutter spacing calculator',
     length: 'Length',
     fixedEdge: 'Fixed edge',
     lengthPlaceholder: 'Enter length',
@@ -164,6 +165,8 @@ export default {
     hooks: 'Hooks',
     left: 'Left edge',
     right: 'Right edge',
+    fixedEdgeRight: 'Fixed edge (right)',
+    fixedEdgeRightPlaceholder: 'Enter fixed edge (right)',
 
     errors: {
       length: 'Length must be ≥ 60 cm',

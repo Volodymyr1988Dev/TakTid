@@ -152,7 +152,8 @@ export default {
   },
 
   hook: {
-    title: 'Calculator cârlige',
+    //title: 'Calculator cârlige',
+    title: 'Calculator spațiere jgheaburi',
     length: 'Lungime',
     fixedEdge: 'Margine fixă',
     lengthPlaceholder: 'Introdu lungimea',
@@ -161,6 +162,8 @@ export default {
     hooks: 'Cârlige',
     left: 'Stânga',
     right: 'Dreapta',
+    fixedEdgeRight: 'Margine fixă (dreapta)',
+    fixedEdgeRightPlaceholder: 'Introdu marginea (dreapta)',
 
     errors: {
       length: 'Lungime ≥ 60 cm',
