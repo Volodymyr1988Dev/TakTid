@@ -84,7 +84,8 @@ export default {
     noAccount: "Do not have account?",
     haveAccount: 'Already have account?',
     invalid: 'Invalid email or password',
-    registerFailed: 'Register failed'
+    registerFailed: 'Register failed',
+    registrationPending: 'Registration pending approval. Please wait for admin approval.',
   },
 
   stats: {

@@ -34,11 +34,13 @@ async function login() {
       v-model="form.email"
       type="email"
       :placeholder="t('auth.email')"
+      autocomplete="email"
     >
     <input
       v-model="form.password"
       type="password"
       :placeholder="t('auth.password')"
+      autocomplete="current-password"
     >
 
     <button @click="login">

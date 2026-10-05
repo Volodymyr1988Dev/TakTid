@@ -83,7 +83,8 @@ export default {
     noAccount: 'Har du inget konto?',
     haveAccount: 'Har du redan konto?',
     invalid: 'Fel email eller lösenord',
-    registerFailed: 'Registrering misslyckades'
+    registerFailed: 'Registrering misslyckades',
+    registrationPending: 'Registrering väntar på godkännande. Vänligen vänta på administratörens godkännande.',
   },
 
   stats: {

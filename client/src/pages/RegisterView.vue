@@ -20,7 +20,15 @@ const { value: name, errorMessage: nameError } = useField<string>('name')
 
 const onSubmit = handleSubmit(async (values) => {
   try {
-    await api.post('/auth/register', values)
+    //await api.post('/auth/register', values)
+     const { data } = await api.post(
+      '/auth/register',
+      values,
+    )
+     alert(
+      data.message ??
+        t('auth.registrationPending'),
+    )
     await router.push('/login')
   } catch (err) {
     console.error(t('errors.registerFailed'), err)
@@ -49,6 +57,7 @@ const onSubmit = handleSubmit(async (values) => {
       v-model="password"
       type="password"
       :placeholder="t('auth.password')"
+      autocomplete="new-password"
     >
     <p 
       v-if="passwordError" 
@@ -60,6 +69,7 @@ const onSubmit = handleSubmit(async (values) => {
       v-model="name"
       type="text"
       :placeholder="t('auth.name')"
+      autocomplete="name"
     >
     <p 
       v-if="nameError" 

@@ -82,7 +82,8 @@ export default {
     noAccount: 'Nie masz konta?',
     haveAccount: 'Masz już konto?',
     invalid: 'Nieprawidłowy email lub hasło',
-    registerFailed: 'Rejestracja nie powiodła się'
+    registerFailed: 'Rejestracja nie powiodła się',
+    registrationPending: 'Rejestracja oczekuje na zatwierdzenie. Proszę czekać na zatwierdzenie administratora.',
   },
 
   stats: {

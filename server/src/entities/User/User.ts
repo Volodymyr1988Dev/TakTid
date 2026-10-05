@@ -16,6 +16,7 @@ import { Session } from '../Sessions/Sessions';
 import { TimeEntry } from '../TimeEntries/TimeEntries';
 import { UserSalaryHistory } from './SallaryHistory';
 import { ProjectTask } from '../Project/ProjectTask';
+import { RegistrationApproval } from '../Auth/RegistrationApproval';
 
 @Entity('users')
 export class User {
@@ -92,6 +93,8 @@ export class User {
   @OneToMany(() => Session, (session) => session.user)
   sessions!: Session[];
   @OneToMany(() => TimeEntry, (timeEntry) => timeEntry.user)
+  @OneToMany(() => RegistrationApproval, (approval) => approval.user)
+  registrationApprovals!: RegistrationApproval[];
   timeEntries!: TimeEntry[];
   @OneToMany(() => ProjectTask, (task) => task.completedBy)
   completedTasks!: ProjectTask[];

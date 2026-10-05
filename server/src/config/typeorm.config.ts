@@ -11,6 +11,7 @@ import { ProjectTask } from '../entities/Project/ProjectTask';
 import { ProjectReceipt } from '../entities/Project/ProjectReceipt';
 import { ProjectMaterial } from '../entities/Project/ProjectMaterial';
 import { ProjectMaterialItem } from '../entities/Project/ProjectMaterialItem';
+import { RegistrationApproval } from '../entities/Auth/RegistrationApproval';
 
 const useSSL = process.env.DATABASE_URL?.includes('neon.tech') ?? false;
 
@@ -30,6 +31,7 @@ export const baseConfig: DataSourceOptions = {
     ProjectReceipt,
     ProjectMaterial,
     ProjectMaterialItem,
+    RegistrationApproval,
   ],
   migrations: ['dist/migrations/*.js'],
 

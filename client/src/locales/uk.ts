@@ -82,7 +82,8 @@ export default {
     noAccount: 'Немає акаунту?',
     haveAccount: 'Вже є акаунт?',
     invalid: 'Невірний email або пароль',
-    registerFailed: 'Помилка реєстрації'
+    registerFailed: 'Помилка реєстрації',
+    registrationPending: 'Реєстрація очікує на затвердження. Будь ласка, зачекайте затвердження адміністратора.',
   },
 
   stats: {
