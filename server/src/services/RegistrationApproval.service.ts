@@ -55,10 +55,18 @@ export class RegistrationApprovalService {
         host,
         port,
         secure: port === 465,
+        //family: 4,
         auth: {
           user,
           pass,
         },
+      });
+      this.transporter.verify()
+      .then(() => {
+        console.log('SMTP connection verified successfully');
+      })
+      .catch((error) => {
+        console.error('SMTP connection failed:', error);
       });
   }
 
