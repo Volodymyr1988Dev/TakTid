@@ -82,7 +82,8 @@ export default {
     noAccount: 'Nu ai cont?',
     haveAccount: 'Ai deja cont?',
     invalid: 'Email sau parolă incorectă',
-    registerFailed: 'Înregistrare eșuată'
+    registerFailed: 'Înregistrare eșuată',
+    registrationPending: 'Înregistrarea este în așteptare pentru aprobare. Vă rugăm să așteptați aprobarea administratorului.',
   },
 
   stats: {

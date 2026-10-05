@@ -123,8 +123,8 @@ async refresh(
   })
   async register(
     @Body() registerDto: RegisterDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+    //@Res({ passthrough: true }) res: Response,
+  ) {/*
     const result = await this.authService.register(registerDto);
     setAuthCookies(res, {
       accessToken: result.token,
@@ -135,7 +135,10 @@ async refresh(
       message: 'User registered successfully',
       user: result.user,
       expiresAt: result.expiresAt,
-    };
+    };*/
+    return this.authService.register(
+      registerDto,
+    );
   }
 
   @Public()

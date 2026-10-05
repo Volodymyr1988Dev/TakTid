@@ -3,12 +3,15 @@ import * as bcrypt from 'bcrypt';
 import { CreateUserDto, LoginDto, RegisterDto } from '../types/index';
 import { UserService } from './UserService';
 import { SessionService } from './SessionService';
+import { RegistrationApprovalService } from './RegistrationApproval.service';
+import { RegistrationApprovalStatus } from '../entities/Auth/RegistrationApproval';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly sessionService: SessionService,
+    private readonly registrationApprovalService: RegistrationApprovalService,
   ) {}
   async refreshByRefreshToken(refreshToken: string) {
     const session =
@@ -34,27 +37,34 @@ export class AuthService {
 
   async register(registerDto: RegisterDto) {
     const { email, password, name } = registerDto;
-    const existingUser = await this.userService.findByEmail(email);
+     const normalizedEmail = email.trim().toLowerCase();
+    const existingUser = await this.userService.findByEmail(/*email*/ normalizedEmail);
     if (existingUser) {
       throw new HttpException('Email already in use', HttpStatus.CONFLICT);
     }
 
+    if (!name || !name.trim()) {
+      throw new HttpException('Name is required', HttpStatus.BAD_REQUEST);
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const createUserDto: CreateUserDto = {
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
-      name,
+      name: name.trim(),
     };
     const user = await this.userService.createUserOnly(createUserDto);
+    await this.registrationApprovalService
+      .createAndSend(user);
 
-    const session = await this.sessionService.createForUser(user);
+    //const session = await this.sessionService.createForUser(user);
     return {
-      message: 'User registered successfully',
-      user: this.sessionService.toAuthUser(user),
-      token: session.token,
-      refreshToken: session.refresh_token,
+      //message: 'User registered successfully',
+      message: 'User registered successfully. Please check your email for approval.',
+      //user: this.sessionService.toAuthUser(user),
+      //token: session.token,
+      //refreshToken: session.refresh_token,
       //expiresAt: session.expires_at,
-      expiresAt: session.access_token_expires_at,
+      //expiresAt: session.access_token_expires_at,
     };
   }
 
@@ -96,7 +106,8 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
-    const user = await this.userService.findByEmail(email);
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await this.userService.findByEmail(/*email*/ normalizedEmail);
     if (!user) {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
@@ -107,6 +118,29 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
+    const canLogin =
+      await this.registrationApprovalService
+        .canLogin(user.id);
+
+    if (!canLogin) {
+      const approval =
+        await this.registrationApprovalService
+          .getLatestForUser(user.id);
+      if (
+        approval?.status === RegistrationApprovalStatus.REJECTED
+        //'rejected'
+      ) {
+        throw new HttpException(
+          'Registration request was rejected',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      throw new HttpException(
+        'Registration is awaiting approval',
+        HttpStatus.FORBIDDEN,
+      );
+      }
     const session = await this.sessionService.createForUser(user);
 
     return {

@@ -3,11 +3,18 @@ import { AuthService } from '../services/AuthService';
 import { AuthController } from '../controllers/auth.controller';
 import { UserModule } from './user.module';
 import { SessionModule } from './session.module';
+import { RegistrationApproval } from '../entities/Auth/RegistrationApproval';
+//import { TypeOrmModule } from '@nestjs/typeorm/dist/typeorm.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RegistrationApprovalController } from '../controllers/RegistrationApprovalController';
+import { RegistrationApprovalService } from '../services/RegistrationApproval.service';
 
 @Module({
-  imports: [UserModule, SessionModule],
-  providers: [AuthService],
-  controllers: [AuthController],
-  exports: [AuthService],
+  imports: [UserModule, SessionModule, TypeOrmModule.forFeature([
+      RegistrationApproval,
+    ]),],
+  providers: [AuthService, RegistrationApprovalService],
+  controllers: [AuthController, RegistrationApprovalController],
+  exports: [AuthService, RegistrationApprovalService],
 })
 export class AuthModule {}
