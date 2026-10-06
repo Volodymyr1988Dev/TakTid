@@ -23,14 +23,24 @@ export class RegistrationApproval {
   id!: string;
 
   @Index()
-  @Column({ type: 'uuid' })
-  userId!: string;
+  @Column({ type: 'uuid', nullable: true })
+  userId!: string | null;
 
   @ManyToOne(() => User, {
-    onDelete: 'CASCADE',
+    nullable: true,
+    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'userId' })
-  user!: User;
+  user!: User | null;
+
+  @Column({ type: 'varchar', length: 320 }) 
+  email!: string; 
+  
+  @Column({ type: 'varchar', length: 255 }) 
+  name!: string;
+
+  @Column({ type: 'varchar', length: 255 }) 
+  passwordHash!: string;
 
   @Column({ type: 'varchar', length: 64 })
   tokenHash!: string;

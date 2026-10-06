@@ -7,7 +7,7 @@ import {
 
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 
@@ -27,6 +27,9 @@ export class RegistrationApprovalService {
     private readonly approvalRepository: Repository<RegistrationApproval>,
 
     private readonly configService: ConfigService,
+    private readonly dataSource: DataSource,
+    //@InjectRepository(User)
+    //private readonly userRepository: Repository<User>,
   ) {
     const host =
       this.configService.get<string>('SMTP_HOST');
@@ -74,7 +77,45 @@ export class RegistrationApprovalService {
    * Creates a pending registration approval
    * and sends an email containing a one-time token.
    */
-  async createAndSend(user: User): Promise<void> {
+  async createAndSend(/*user: User*/ email: string, name: string, passwordHash: string,): Promise<void> {
+    const normalizedEmail = email.trim().toLowerCase(); 
+    const normalizedName = name.trim(); 
+    if (!normalizedEmail) { 
+      throw new BadRequestException( 'Email is required.', ); 
+    }
+    if (!normalizedName) { 
+      throw new BadRequestException( 'Name is required.', ); 
+    }
+    const expiresHours = Number( this.configService.get<string>( 'REGISTRATION_APPROVAL_EXPIRES_HOURS', ) ?? '24', );
+     
+    if ( !Number.isFinite(expiresHours) || expiresHours <= 0 ) { 
+      throw new InternalServerErrorException( 'Invalid registration approval expiration configuration.', ); 
+    } 
+    await this.approvalRepository.update( 
+      { 
+        email: normalizedEmail, 
+        status: RegistrationApprovalStatus.PENDING, 
+      }, 
+      { 
+        status: RegistrationApprovalStatus.REJECTED, 
+        usedAt: new Date(), 
+      }, 
+    );
+    const rawToken = crypto.randomBytes(32).toString('hex'); 
+    const tokenHash = this.hashToken(rawToken);
+    
+    const expiresAt = new Date( Date.now() + expiresHours * 60 * 60 * 1000, ); 
+    const approval = this.approvalRepository.create({
+      userId: null,
+      user: null, 
+      email: normalizedEmail, 
+      name: normalizedName, 
+      passwordHash, 
+      tokenHash, 
+      status: RegistrationApprovalStatus.PENDING, 
+      expiresAt, 
+      usedAt: null, 
+    });/*
     await this.approvalRepository
       .update(
         {
@@ -116,23 +157,31 @@ export class RegistrationApprovalService {
         expiresAt,
         usedAt: null,
       });
-
+    */
     await this.approvalRepository.save(
       approval,
     );
 
     try {
       await this.sendApprovalEmail(
-        user,
-        rawToken,
+        approval.email, 
+        approval.name, 
+        rawToken, 
         expiresHours,
+        //user,
       );
     } catch (error) {
       console.error(
         'Failed to send registration approval email:',
         error,
       );
-
+      try { 
+        await this.approvalRepository.delete( approval.id, ); 
+      } 
+      catch (deleteError) { 
+        console.error( 'Failed to remove registration approval after email error:', deleteError, ); 
+      }
+      //await this.approvalRepository.delete( approval.id, );
       throw new InternalServerErrorException(
         'Registration request was created, but the approval email could not be sent.',
       );
@@ -160,36 +209,49 @@ export class RegistrationApprovalService {
   /**
    * Approves the registration.
    */
-  async approve(token: string) {
-    const approval =
-      await this.findByToken(token);
-
-    if (!approval) {
-      throw new NotFoundException(
-        'Registration approval request not found.',
-      );
-    }
-
-    this.ensureTokenIsUsable(approval);
-
-    approval.status =
-      RegistrationApprovalStatus.APPROVED;
-
-    approval.usedAt = new Date();
-
-    await this.approvalRepository.save(
-      approval,
-    );
-
-    return {
-      message:
-        'Registration approved successfully.',
-      user: {
-        id: approval.user.id,
-        email: approval.user.email,
-        name: approval.user.name,
-      },
-    };
+  async approve(token: string) { 
+    if (!token || token.length < 32) { 
+      throw new NotFoundException( 'Registration approval request not found.', ); 
+    } 
+    const tokenHash = this.hashToken(token); 
+    return this.dataSource.transaction( 
+      async (manager) => { 
+        const approvalRepository = manager.getRepository( RegistrationApproval, ); 
+        const userRepository = manager.getRepository(User);
+        const approval = await approvalRepository.findOne({ 
+          where: { tokenHash, }, 
+          lock: { mode: 'pessimistic_write', }, 
+        }); 
+        if (!approval) { 
+          throw new NotFoundException( 'Registration approval request not found.', ); 
+        } this.ensureTokenIsUsable(approval); 
+        const email = approval.email .trim() .toLowerCase(); 
+        const existingUser = await userRepository.findOne({ 
+          where: { email, },
+        }); 
+        if (existingUser) { 
+          approval.status = RegistrationApprovalStatus.REJECTED; 
+          approval.usedAt = new Date(); 
+          await approvalRepository.save( approval, ); 
+          throw new BadRequestException( 'A user with this email already exists.', ); 
+        } 
+        const user = userRepository.create({ 
+          email, 
+          name: approval.name, 
+          password: approval.passwordHash, 
+        }); 
+        await userRepository.save(user); 
+        approval.userId = user.id; 
+        approval.user = user; 
+        approval.status = RegistrationApprovalStatus.APPROVED; 
+        approval.usedAt = new Date(); 
+        await approvalRepository.save( approval, ); 
+        return { 
+          message: 'Registration approved successfully.', 
+          user: { id: user.id, email: user.email, name: user.name, }, 
+        }; 
+      }, 
+    ); 
   }
 
   /**
@@ -219,11 +281,11 @@ export class RegistrationApprovalService {
     return {
       message:
         'Registration rejected successfully.',
-      user: {
-        id: approval.user.id,
-        email: approval.user.email,
-        name: approval.user.name,
-      },
+      //user: {
+        //id: approval.user.id,
+        email: approval.email,
+        name: approval.name,
+      //},
     };
   }
 
@@ -280,9 +342,7 @@ export class RegistrationApprovalService {
       where: {
         tokenHash,
       },
-      relations: {
-        user: true,
-      },
+      //relations: {user: true},
     });
   }
 
@@ -324,7 +384,9 @@ export class RegistrationApprovalService {
   }
 
   private async sendApprovalEmail(
-    user: User,
+    //user: User,
+    email: string,
+    name: string,
     token: string,
     expiresHours: number,
   ): Promise<void> {
@@ -358,18 +420,18 @@ export class RegistrationApprovalService {
       `/api/auth/registration-approval/${encodeURIComponent(token)}`;
 
     const safeName =
-      this.escapeHtml(user.name);
+      this.escapeHtml(name);
 
     const safeEmail =
-      this.escapeHtml(user.email);
+      this.escapeHtml(email);
 
     const text = `
 New registration request for TakTid.
 
 A new user has requested access to TakTid.
 
-Name: ${user.name}
-Email: ${user.email}
+Name: ${name}
+Email: ${email}
 
 Please open the following link to review the request:
 

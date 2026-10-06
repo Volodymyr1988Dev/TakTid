@@ -32,8 +32,10 @@ export class RegistrationApprovalController {
       const html =
         this.renderReviewPage(
           token,
-          approval.user.name,
-          approval.user.email,
+          //approval.user.name,
+          approval.name,
+          approval.email,
+          //approval.user.email,
         );
 
       return res
@@ -106,9 +108,9 @@ export class RegistrationApprovalController {
           this.renderResultPage(
             'Registration rejected',
             `The registration for ${this.escapeHtml(
-              result.user.email,
+              result.email,
             )} has been rejected.`,
-          ),
+          ),//result.user.email,
         );
     } catch (error) {
       return res

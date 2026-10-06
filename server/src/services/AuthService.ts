@@ -47,19 +47,25 @@ export class AuthService {
       throw new HttpException('Name is required', HttpStatus.BAD_REQUEST);
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const createUserDto: CreateUserDto = {
+    /*const createUserDto: CreateUserDto = {
       email: normalizedEmail,
       password: hashedPassword,
       name: name.trim(),
-    };
-    const user = await this.userService.createUserOnly(createUserDto);
-    await this.registrationApprovalService
-      .createAndSend(user);
+    };*/
+    //const user = await this.userService.createUserOnly(createUserDto);
+    //await this.registrationApprovalService.createAndSend(user);
+    //const hashedPassword = await bcrypt.hash(password, 10);
 
+    await this.registrationApprovalService.createAndSend(
+      normalizedEmail,
+      name.trim(),
+      hashedPassword,
+    );
     //const session = await this.sessionService.createForUser(user);
     return {
       //message: 'User registered successfully',
-      message: 'User registered successfully. Please check your email for approval.',
+      message: //'User registered successfully. Please check your email for approval.',
+      'Registration request sent. Please wait for approval.',
       //user: this.sessionService.toAuthUser(user),
       //token: session.token,
       //refreshToken: session.refresh_token,

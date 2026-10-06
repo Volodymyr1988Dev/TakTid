@@ -10,10 +10,13 @@ import { RegistrationApproval } from '../entities/Auth/RegistrationApproval';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RegistrationApprovalController } from '../controllers/RegistrationApprovalController';
 import { RegistrationApprovalService } from '../services/RegistrationApproval.service';
+//import { User } from '../entities';
+import { User } from '../entities/User/User';
 
 @Module({
   imports: [UserModule, SessionModule, TypeOrmModule.forFeature([
-      RegistrationApproval,
+      RegistrationApproval, 
+      User,
     ]),],
   providers: [AuthService, RegistrationApprovalService],
   controllers: [AuthController, RegistrationApprovalController],
