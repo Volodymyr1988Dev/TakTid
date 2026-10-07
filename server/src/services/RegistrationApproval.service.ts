@@ -9,7 +9,8 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import * as crypto from 'crypto';
-import * as nodemailer from 'nodemailer';
+//import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 import {
   RegistrationApproval,
@@ -20,7 +21,8 @@ import { User } from '../entities/User/User';
 
 @Injectable()
 export class RegistrationApprovalService {
-  private readonly transporter: nodemailer.Transporter;
+  //private readonly transporter: nodemailer.Transporter;
+  private readonly resend: Resend;
 
   constructor(
     @InjectRepository(RegistrationApproval)
@@ -31,6 +33,16 @@ export class RegistrationApprovalService {
     //@InjectRepository(User)
     //private readonly userRepository: Repository<User>,
   ) {
+     const apiKey = this.configService.get<string>('RESEND_API_KEY');
+
+      if (!apiKey) {
+        throw new Error(
+          'RESEND_API_KEY is not configured.',
+        );
+      }
+
+      this.resend = new Resend(apiKey);
+      /*
     const host =
       this.configService.get<string>('SMTP_HOST');
 
@@ -70,7 +82,7 @@ export class RegistrationApprovalService {
       })
       .catch((error) => {
         console.error('SMTP connection failed:', error);
-      });
+      });*/
   }
 
   /**
@@ -397,7 +409,7 @@ export class RegistrationApprovalService {
 
     const from =
       this.configService.get<string>(
-        'SMTP_FROM',
+        'RESEND_FROM',
       );
 
     const appUrl =
@@ -530,14 +542,19 @@ If you did not expect this request, you can ignore this email.
 </html>
 `.trim();
 
-    await this.transporter.sendMail({
+    const { error } = await this.resend.emails.send({
       from,
-      to: approvalEmail,
-      subject:
-        'TakTid — New registration request',
+      to: [approvalEmail],
+      subject: 'TakTid — New registration request',
       text,
       html,
     });
+
+    if (error) {
+      throw new Error(
+        `Resend email error: ${error.message}`,
+      );
+    }
   }
 
   private escapeHtml(value: string): string {
