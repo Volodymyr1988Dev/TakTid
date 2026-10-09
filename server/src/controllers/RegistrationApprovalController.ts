@@ -43,14 +43,79 @@ export class RegistrationApprovalController {
         .type('html')
         .send(html);
     } catch (error) {
-      return res
+      return this.sendErrorPage(res, error);
+      /*return res
         .status(400)
         .type('html')
         .send(
           this.renderErrorPage(
             this.getErrorMessage(error),
           ),
+        );*/
+    }
+  }
+  @Public()
+   @Get(':token/approve')
+  async approvePage(
+    @Param('token') token: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const approval =
+        await this.approvalService.getByToken(
+          token,
         );
+
+      return res
+        .status(200)
+        .send(
+          this.renderActionPage(
+            token,
+            'approve',
+            approval.name,
+            approval.email,
+          ),
+        );
+    } catch (error) {
+      return this.sendErrorPage(
+        res,
+        error,
+      );
+    }
+  }
+
+  /**
+   * Reject confirmation page.
+   *
+   * Does not change database state.
+   */
+  @Public()
+  @Get(':token/reject')
+  async rejectPage(
+    @Param('token') token: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const approval =
+        await this.approvalService.getByToken(
+          token,
+        );
+
+      return res
+        .status(200)
+        .send(
+          this.renderActionPage(
+            token,
+            'reject',
+            approval.name,
+            approval.email,
+          ),
+        );
+    } catch (error) {
+      return this.sendErrorPage(
+        res,
+        error,
+      );
     }
   }
 
@@ -72,20 +137,32 @@ export class RegistrationApprovalController {
         .send(
           this.renderResultPage(
             'Registration approved',
-            `The registration for ${this.escapeHtml(
-              result.user.email,
-            )} has been approved.`,
+            `
+              <p>
+                The registration has been approved.
+              </p>
+
+              <p>
+                <strong>${this.escapeHtml(result.user.name)}</strong>
+                (${this.escapeHtml(result.user.email)})
+                can now log in to TakTid.
+              </p>
+            `,
           ),
         );
     } catch (error) {
+      return this.sendErrorPage(res, error);
+      /*
       return res
         .status(400)
         .type('html')
         .send(
+          //res,
+          //error,
           this.renderErrorPage(
             this.getErrorMessage(error),
           ),
-        );
+        );*/
     }
   }
 
@@ -107,12 +184,22 @@ export class RegistrationApprovalController {
         .send(
           this.renderResultPage(
             'Registration rejected',
-            `The registration for ${this.escapeHtml(
-              result.email,
-            )} has been rejected.`,
+            `
+              <p>
+                The registration request has been rejected.
+              </p>
+
+              <p>
+                <strong>${this.escapeHtml(result.name)}</strong>
+                (${this.escapeHtml(result.email)})
+                will not be able to log in to TakTid.
+              </p>
+            `,
           ),//result.user.email,
         );
     } catch (error) {
+      return this.sendErrorPage(res, error);
+      /*
       return res
         .status(400)
         .type('html')
@@ -120,7 +207,7 @@ export class RegistrationApprovalController {
           this.renderErrorPage(
             this.getErrorMessage(error),
           ),
-        );
+        );*/
     }
   }
 
@@ -129,110 +216,161 @@ export class RegistrationApprovalController {
     name: string,
     email: string,
   ): string {
+    //const safeToken = this.escapeHtml(token);
+     const safeToken =
+      encodeURIComponent(token);
+
+    const safeName =
+      this.escapeHtml(name);
+
+    const safeEmail =
+      this.escapeHtml(email);
+
+    return this.basePage(
+      'TakTid registration request',
+      `
+        <h1>Registration request</h1>
+
+        <p>
+          A new user wants to access TakTid.
+        </p>
+
+        <p>
+          <strong>Name:</strong>
+          ${safeName}
+        </p>
+
+        <p>
+          <strong>Email:</strong>
+          ${safeEmail}
+        </p>
+
+        <div style="margin-top:24px;">
+          <a
+            href="/api/auth/registration-approval/${safeToken}/approve"
+            style="
+              display:inline-block;
+              padding:12px 20px;
+              background:#16a34a;
+              color:white;
+              text-decoration:none;
+              border-radius:8px;
+              font-weight:bold;
+              margin-right:8px;
+            "
+          >
+            Approve
+          </a>
+
+          <a
+            href="/api/auth/registration-approval/${safeToken}/reject"
+            style="
+              display:inline-block;
+              padding:12px 20px;
+              background:#dc2626;
+              color:white;
+              text-decoration:none;
+              border-radius:8px;
+              font-weight:bold;
+            "
+          >
+            Reject
+          </a>
+        </div>
+      `,
+    );
+  }
+
+  private renderActionPage(
+    token: string,
+    action: 'approve' | 'reject',
+    name: string,
+    email: string,
+  ): string {
     const safeToken =
-      this.escapeHtml(token);
+      encodeURIComponent(token);
 
-    return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-  <title>TakTid registration approval</title>
-</head>
+    const safeName =
+      this.escapeHtml(name);
 
-<body
-  style="
-    margin:0;
-    padding:0;
-    background:#f5f5f5;
-    font-family:Arial,Helvetica,sans-serif;
-  "
->
-  <div
-    style="
-      max-width:560px;
-      margin:50px auto;
-      background:white;
-      padding:32px;
-      border-radius:12px;
-    "
-  >
-    <h2>TakTid registration request</h2>
+    const safeEmail =
+      this.escapeHtml(email);
 
-    <p>
-      A user wants to register for TakTid.
-    </p>
+    const isApprove =
+      action === 'approve';
 
-    <p>
-      <strong>Name:</strong>
-      ${this.escapeHtml(name)}
-    </p>
+    const title = isApprove
+      ? 'Approve registration?'
+      : 'Reject registration?';
 
-    <p>
-      <strong>Email:</strong>
-      ${this.escapeHtml(email)}
-    </p>
+    const buttonText = isApprove
+      ? 'Approve registration'
+      : 'Reject registration';
 
-    <p>
-      Do you approve this registration?
-    </p>
+    const buttonColor = isApprove
+      ? '#16a34a'
+      : '#dc2626';
 
-    <div
-      style="
-        display:flex;
-        gap:12px;
-        flex-wrap:wrap;
-        margin-top:24px;
-      "
-    >
-      <form
-        method="POST"
-        action="/api/auth/registration-approval/${safeToken}/approve"
-      >
-        <button
-          type="submit"
+    return this.basePage(
+      title,
+      `
+        <h1>${title}</h1>
+
+        <p>
+          <strong>Name:</strong>
+          ${safeName}
+        </p>
+
+        <p>
+          <strong>Email:</strong>
+          ${safeEmail}
+        </p>
+
+        <form
+          method="POST"
+          action="/api/auth/registration-approval/${safeToken}/${action}"
+          style="margin-top:24px;"
+        >
+          <button
+            type="submit"
+            style="
+              padding:12px 20px;
+              background:${buttonColor};
+              color:white;
+              border:none;
+              border-radius:8px;
+              font-weight:bold;
+              cursor:pointer;
+            "
+          >
+            ${buttonText}
+          </button>
+        </form>
+      `,
+    );
+  }
+
+  private renderSuccessPage(
+    title: string,
+    content: string,
+  ): string {
+    return this.basePage(
+      title,
+      `
+        <h1>${title}</h1>
+
+        ${content}
+
+        <p
           style="
-            padding:12px 22px;
-            border:0;
-            border-radius:8px;
-            background:#16a34a;
-            color:white;
-            font-size:16px;
-            cursor:pointer;
+            margin-top:24px;
+            color:#666;
           "
         >
-          Approve registration
-        </button>
-      </form>
-
-      <form
-        method="POST"
-        action="/api/auth/registration-approval/${safeToken}/reject"
-      >
-        <button
-          type="submit"
-          style="
-            padding:12px 22px;
-            border:0;
-            border-radius:8px;
-            background:#dc2626;
-            color:white;
-            font-size:16px;
-            cursor:pointer;
-          "
-        >
-          Reject registration
-        </button>
-      </form>
-    </div>
-  </div>
-</body>
-</html>
-`.trim();
+          You can close this window.
+        </p>
+      `,
+    );
   }
 
   private renderResultPage(
@@ -276,44 +414,60 @@ export class RegistrationApprovalController {
 `.trim();
   }
 
-  private renderErrorPage(
-    message: string,
-  ): string {
-    return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-  <title>TakTid</title>
-</head>
+  private getErrorStatus(
+    error: unknown,
+  ): number {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'getStatus' in error &&
+      typeof (
+        error as { getStatus?: unknown }
+      ).getStatus === 'function'
+    ) {
+      return (
+        error as {
+          getStatus: () => number;
+        }
+      ).getStatus();
+    }
 
-<body
-  style="
-    margin:0;
-    padding:0;
-    background:#f5f5f5;
-    font-family:Arial,Helvetica,sans-serif;
-  "
->
-  <div
-    style="
-      max-width:560px;
-      margin:50px auto;
-      background:white;
-      padding:32px;
-      border-radius:12px;
-    "
-  >
-    <h2>Registration request unavailable</h2>
-    <p>${this.escapeHtml(message)}</p>
-  </div>
-</body>
-</html>
-`.trim();
+    return 400;
+  }
+
+  private sendErrorPage(
+    res: Response,
+    error: unknown,
+  ) {
+    const message =
+      this.getErrorMessage(error);
+
+    const status =
+      this.getErrorStatus(error);
+
+    return res
+      .status(status)
+      .send(
+        this.basePage(
+          'TakTid',
+          `
+            <h1>Registration request unavailable</h1>
+
+            <p>
+              ${this.escapeHtml(message)}
+            </p>
+
+            <p
+              style="
+                margin-top:24px;
+                color:#666;
+              "
+            >
+              You can close this window.
+            </p>
+          `,
+        ),
+      );
   }
 
   private getErrorMessage(
@@ -334,6 +488,57 @@ export class RegistrationApprovalController {
     }
 
     return 'The registration request could not be processed.';
+  }
+
+  private basePage(
+    title: string,
+    content: string,
+  ): string {
+    return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    >
+    <title>${this.escapeHtml(title)}</title>
+  </head>
+
+  <body
+    style="
+      margin:0;
+      padding:40px 20px;
+      background:#f5f5f5;
+      font-family:Arial,Helvetica,sans-serif;
+    "
+  >
+    <div
+      style="
+        max-width:560px;
+        margin:0 auto;
+        background:#ffffff;
+        padding:32px;
+        border-radius:12px;
+        box-shadow:0 4px 20px rgba(0,0,0,0.08);
+      "
+    >
+      <div
+        style="
+          font-size:24px;
+          font-weight:bold;
+          margin-bottom:24px;
+        "
+      >
+        TakTid
+      </div>
+
+      ${content}
+    </div>
+  </body>
+  </html>
+  `.trim();
   }
 
   private escapeHtml(

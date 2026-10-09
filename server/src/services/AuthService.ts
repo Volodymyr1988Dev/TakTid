@@ -38,12 +38,13 @@ export class AuthService {
   async register(registerDto: RegisterDto) {
     const { email, password, name } = registerDto;
      const normalizedEmail = email.trim().toLowerCase();
+     const normalizedName = name?.trim();
     const existingUser = await this.userService.findByEmail(/*email*/ normalizedEmail);
     if (existingUser) {
       throw new HttpException('Email already in use', HttpStatus.CONFLICT);
     }
 
-    if (!name || !name.trim()) {
+    if (!normalizedName) {
       throw new HttpException('Name is required', HttpStatus.BAD_REQUEST);
     }
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -58,7 +59,7 @@ export class AuthService {
 
     await this.registrationApprovalService.createAndSend(
       normalizedEmail,
-      name.trim(),
+      normalizedName,
       hashedPassword,
     );
     //const session = await this.sessionService.createForUser(user);
