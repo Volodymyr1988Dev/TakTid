@@ -445,14 +445,19 @@ export class RegistrationApprovalService {
         'Registration approval email configuration is incomplete.',
       );
     }
-
+    const baseUrl = appUrl.replace(/\/+$/, '');
     const reviewUrl =
-      `${appUrl}/api/auth/registration-approval/${encodeURIComponent(token)}`;
+      //`${baseUrl}/api/auth/registration-approval/${encodeURIComponent(token)}`;
+      `${baseUrl}/api/auth/registration-approval/` +
+      encodeURIComponent(token);
     const approveUrl =
-      `${appUrl.replace(/\/$/, '')}` +
-      `/api/auth/registration-approval/${encodeURIComponent(token)}/approve`;
+      //`${baseUrl}` + `/api/auth/registration-approval/${encodeURIComponent(token)}/approve`;
+      `${baseUrl}/api/auth/registration-approval/` +
+      `${encodeURIComponent(token)}/approve`;
      const rejectUrl =
-      `${appUrl}/api/auth/registration-approval/${encodeURIComponent(token)}/reject`;
+      //`${baseUrl}/api/auth/registration-approval/${encodeURIComponent(token)}/reject`;
+      `${baseUrl}/api/auth/registration-approval/` +
+      `${encodeURIComponent(token)}/reject`;
     const safeName =
       this.escapeHtml(name);
 
