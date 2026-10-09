@@ -68,6 +68,7 @@ export class RegistrationApprovalController {
 
       return res
         .status(200)
+        .type('html')
         .send(
           this.renderActionPage(
             token,
@@ -103,6 +104,7 @@ export class RegistrationApprovalController {
 
       return res
         .status(200)
+        .type('html')
         .send(
           this.renderActionPage(
             token,
