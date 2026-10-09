@@ -433,7 +433,8 @@ export class RegistrationApprovalService {
 
     const appUrl =
       this.configService.get<string>(
-        'APP_URL',
+        //'APP_URL',
+        'BACKEND_URL',
       );
 
     if (
