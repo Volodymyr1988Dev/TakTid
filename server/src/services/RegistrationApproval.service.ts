@@ -21,7 +21,6 @@ import { User } from '../entities/User/User';
 
 @Injectable()
 export class RegistrationApprovalService {
-  //private readonly transporter: nodemailer.Transporter;
   private readonly resend: Resend;
 
   constructor(
@@ -30,8 +29,6 @@ export class RegistrationApprovalService {
 
     private readonly configService: ConfigService,
     private readonly dataSource: DataSource,
-    //@InjectRepository(User)
-    //private readonly userRepository: Repository<User>,
   ) {
      const apiKey = this.configService.get<string>('RESEND_API_KEY');
 
@@ -106,16 +103,12 @@ export class RegistrationApprovalService {
       catch (deleteError) { 
         console.error( 'Failed to remove registration approval after email error:', deleteError, ); 
       }
-      //await this.approvalRepository.delete( approval.id, );
       throw new InternalServerErrorException(
         'Registration request was created, but the approval email could not be sent.',
       );
     }
   }
 
-  /**
-   * Returns the approval request without changing it.
-   */
   async getByToken(token: string) {
     const approval =
       await this.findByToken(token);
@@ -131,9 +124,6 @@ export class RegistrationApprovalService {
     return approval;
   }
 
-  /**
-   * Approves the registration.
-   */
   async approve(token: string) {
     if (!token || token.length < 32) {
       throw new NotFoundException(
@@ -187,10 +177,6 @@ export class RegistrationApprovalService {
               },
             });
 
-          /*
-           * The transaction must commit the rejection
-           * before returning the conflict.
-           */
           if (existingUser) {
             approval.status =
               RegistrationApprovalStatus.REJECTED;
@@ -320,13 +306,6 @@ export class RegistrationApprovalService {
     );
   }
 
-  /**
-   * Checks whether a user is allowed to log in.
-   *
-   * IMPORTANT:
-   * If there is no approval record, the user is an
-   * existing/legacy user and is considered approved.
-   */
   async canLogin(userId: string): Promise<boolean> {
     const approval =
       await this.approvalRepository.findOne({
