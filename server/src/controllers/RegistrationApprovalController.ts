@@ -249,7 +249,7 @@ export class RegistrationApprovalController {
 
         <div style="margin-top:24px;">
           <a
-            href="/api/auth/registration-approval/${safeToken}/approve"
+            href="/auth/registration-approval/${safeToken}/approve"
             style="
               display:inline-block;
               padding:12px 20px;
@@ -265,7 +265,7 @@ export class RegistrationApprovalController {
           </a>
 
           <a
-            href="/api/auth/registration-approval/${safeToken}/reject"
+            href="/auth/registration-approval/${safeToken}/reject"
             style="
               display:inline-block;
               padding:12px 20px;
