@@ -330,7 +330,7 @@ export class RegistrationApprovalController {
 
         <form
           method="POST"
-          action="/api/auth/registration-approval/${safeToken}/${action}"
+          action="/auth/registration-approval/${safeToken}/${action}"
           style="margin-top:24px;"
         >
           <button
