@@ -13,6 +13,10 @@ const form = reactive({
   email: '',
   password: '',
 })
+/*
+function forgotPassword() {
+  router.push('/forgot-password')
+}*/
 
 async function login() {
   try {
@@ -48,6 +52,11 @@ async function login() {
     </button>
 
     <p>
+      <router-link to="/forgot-password">
+        {{ t('auth.forgotPassword') }}
+      </router-link>
+    </p>
+    <p>
       {{ t('auth.noAccount') }}
       <router-link to="/register">
         {{ t('auth.register') }}
@@ -55,3 +64,21 @@ async function login() {
     </p>
   </div>
 </template>
+
+    forgotPassword: '',
+    resetPassword: '',
+    sendResetLink: '',
+    resetInstructions: '',
+    resetEmailSent: '',
+    resetRequestError: '',
+    backToLogin: '',
+    newPassword: '',
+    resetPasswordTitle: '',
+    newPasswordPlaceholder: '',
+    confirmNewPasswordPlaceholder: '',
+    passwordsDoNotMatch: '',
+    passwordTooShort: '',
+    resetPasswordButton: '',
+    resetLinkInvalid: '',
+    resetFailed: '',
+    passwordResetSuccess: '',

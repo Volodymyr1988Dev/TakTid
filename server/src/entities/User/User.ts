@@ -17,6 +17,7 @@ import { TimeEntry } from '../TimeEntries/TimeEntries';
 import { UserSalaryHistory } from './SallaryHistory';
 import { ProjectTask } from '../Project/ProjectTask';
 import { RegistrationApproval } from '../Auth/RegistrationApproval';
+import { PasswordResetToken } from '../Auth/PasswordResetToken';
 
 @Entity('users')
 export class User {
@@ -98,4 +99,6 @@ export class User {
   timeEntries!: TimeEntry[];
   @OneToMany(() => ProjectTask, (task) => task.completedBy)
   completedTasks!: ProjectTask[];
+  @OneToMany(() => PasswordResetToken, (token) => token.user)
+  passwordResetTokens!: PasswordResetToken[];
 }

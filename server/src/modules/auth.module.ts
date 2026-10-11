@@ -10,14 +10,18 @@ import { RegistrationApprovalController } from '../controllers/RegistrationAppro
 import { RegistrationApprovalService } from '../services/RegistrationApproval.service';
 //import { User } from '../entities';
 import { User } from '../entities/User/User';
+import { PasswordResetToken } from '../entities/Auth/PasswordResetToken';
+import { PasswordResetService } from '../services/PasswordReset.service';
+import { PasswordResetController } from '../controllers/PasswordReset.controller';
 
 @Module({
   imports: [UserModule, SessionModule, TypeOrmModule.forFeature([
       RegistrationApproval, 
       User,
+      PasswordResetToken,
     ]),],
-  providers: [AuthService, RegistrationApprovalService],
-  controllers: [AuthController, RegistrationApprovalController],
-  exports: [AuthService, RegistrationApprovalService],
+  providers: [AuthService, RegistrationApprovalService, PasswordResetService],
+  controllers: [AuthController, RegistrationApprovalController, PasswordResetController],
+  exports: [AuthService, RegistrationApprovalService, PasswordResetService],
 })
 export class AuthModule {}
