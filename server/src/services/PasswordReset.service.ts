@@ -40,14 +40,27 @@ export class PasswordResetService {
 
   async requestReset(email: string, language = 'en'): Promise<void> {
     const normalizedEmail = email.trim().toLowerCase();
-
+    /*
     const user = await this.userRepository.findOne({
       where: { email: normalizedEmail },
     });
 
     // Do not disclose whether an account exists.
     if (!user || user.deletedAt) return;
+*/
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .where('LOWER(user.email) = :email', {
+        email: normalizedEmail,
+      })
+      .getOne();
 
+    if (!user || user.deletedAt) {
+      console.info(
+        '[PasswordReset] No eligible account found; email not sent.',
+      );
+      return;
+    }
     // Invalidate any earlier, unused reset links.
     await this.tokenRepository
       .createQueryBuilder()
@@ -127,7 +140,7 @@ export class PasswordResetService {
       `${appUrl.replace(/\/+$/, '')}/reset-password?token=` +
       encodeURIComponent(rawToken);
 
-    const { error } = await this.resend.emails.send({
+    const { data, error } = await this.resend.emails.send({
       from,
       to: [normalizedEmail],
       subject: m.subject,
@@ -155,6 +168,10 @@ export class PasswordResetService {
         'Unable to send password reset email',
       );
     }
+    console.info(
+      '[PasswordReset] Resend accepted the email.',
+      { id: data?.id },
+    );
   }
 
   async resetPassword(
