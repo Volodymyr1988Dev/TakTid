@@ -16,13 +16,29 @@ export class UserService {
   async findOne(id: string) {
     return this.userRepository.findOne({ where: { id } });
   }
-
+  /*
   async findByEmail(email: string) {
     return this.userRepository.findOne({ where: { email } });
+  }*/
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .where('LOWER(user.email) = LOWER(:email)', {
+        email: email.trim(),
+      })
+      .getOne();
   }
-
+  /*
   async createUserOnly(createUserDto: CreateUserDto) {
     const user = this.userRepository.create(createUserDto);
+    return this.userRepository.save(user);
+  }*/
+ async createUserOnly(createUserDto: CreateUserDto) {
+    const user = this.userRepository.create({
+      ...createUserDto,
+      email: createUserDto.email.trim().toLowerCase(),
+    });
+
     return this.userRepository.save(user);
   }
 
@@ -30,6 +46,7 @@ export class UserService {
     const user = await this.findOne(id);
     if (!user) throw new Error('User not found');
     if (updateData.email) {
+      updateData.email = updateData.email.trim().toLowerCase();
       const existing = await this.findByEmail(updateData.email);
 
       if (existing && existing.id !== id) {
