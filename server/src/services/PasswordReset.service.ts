@@ -163,7 +163,12 @@ export class PasswordResetService {
 
     if (error) {
       await this.tokenRepository.delete({ tokenHash });
-      console.error('Failed to send password reset email:', error.message);
+      //console.error('Failed to send password reset email:', error.message);
+       console.error('[PasswordReset] Resend rejected the email:', {
+          name: error.name,
+          message: error.message,
+          statusCode: error.statusCode,
+        });
       throw new InternalServerErrorException(
         'Unable to send password reset email',
       );
