@@ -85,9 +85,9 @@ const visibleItems = computed(() =>
 
 function resetForm() {
   materialForm.other = ''
-  //materialForm.items = createEmptyItems()
+  materialForm.items = createEmptyItems()
   
-  materialForm.items = []
+  //materialForm.items = []
 }
 /*
 function fillFormFromList() {
