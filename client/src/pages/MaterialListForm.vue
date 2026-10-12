@@ -61,7 +61,6 @@ function createEmptyItems(): MaterialItem[] {
     price: null,
     note: null,
   }))
-  //return []
 }
 
 const materialForm = reactive<MaterialFormState>({
@@ -81,51 +80,12 @@ const visibleItems = computed(() =>
       item.quantity !== 0,
   ),
 )
-//const visibleItems = computed(() => materialForm.items)
 
 function resetForm() {
   materialForm.other = ''
   materialForm.items = createEmptyItems()
-  
-  //materialForm.items = []
 }
-/*
-function fillFormFromList() {
-  const list = materialStore.materialList
 
-  if (!list) {
-    resetForm()
-    return
-  }
-
-  materialForm.other = list.other ?? ''
-
-  materialForm.items = MATERIAL_CATALOG.map(
-    material => {
-      const existing = list.items?.find(
-        (item: MaterialItem) =>
-          item.materialKey === material.key,
-      )
-
-      return {
-        materialKey: material.key,
-
-        quantity:
-          existing?.quantity == null
-            ? null
-            : Number(existing.quantity),
-
-        price:
-          existing?.price == null
-            ? null
-            : Number(existing.price),
-
-        note: existing?.note ?? null,
-      }
-    },
-  )
-}
-*/
 function fillFormFromList() {
   const list = materialStore.materialList
 
@@ -315,30 +275,6 @@ async function save() {
 
       other:
         materialForm.other.trim(),
-
-      /*items:
-        materialForm.items
-          .filter(
-            item =>
-              item.quantity !== null &&
-              item.quantity !== 0 &&
-              !Number.isNaN(
-                item.quantity,
-              ),
-          )
-          .map(item => ({
-            materialKey:
-              item.materialKey,
-
-            quantity:
-              item.quantity,
-
-            price:
-              item.price,
-
-            note:
-              item.note?.trim() || null,
-          })),*/
           items: materialForm.items
             .filter(item => {
               const quantity = Number(item.quantity)
@@ -846,8 +782,6 @@ function setProjectInputReadonly() {
           {{ materialUnit(item.materialKey) }}
         </div>
 
-        <!-- NOTE -->
-
         <div class="note-cell">
           <textarea
             v-if="isEditing"
@@ -868,8 +802,6 @@ function setProjectInputReadonly() {
           </div>
         </div>
       </div>
-
-      <!-- OTHER -->
 
       <div
         v-if="
@@ -893,8 +825,6 @@ function setProjectInputReadonly() {
         />
       </div>
     </div>
-
-    <!-- ACTIONS class="actions"-->
 
     <div
       :class="{
@@ -962,8 +892,6 @@ function setProjectInputReadonly() {
       </button>
     </div>
 
-    <!-- PRICE DIALOG -->
-
     <Dialog
       v-model:visible="priceDialog"
       modal
@@ -1019,8 +947,6 @@ function setProjectInputReadonly() {
   padding: 8px;
   color: #111827;
 }
-
-/* PROJECT */
 
 .project-selector {
   display: flex;
