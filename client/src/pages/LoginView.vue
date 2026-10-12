@@ -64,21 +64,3 @@ async function login() {
     </p>
   </div>
 </template>
-
-    forgotPassword: '',
-    resetPassword: '',
-    sendResetLink: '',
-    resetInstructions: '',
-    resetEmailSent: '',
-    resetRequestError: '',
-    backToLogin: '',
-    newPassword: '',
-    resetPasswordTitle: '',
-    newPasswordPlaceholder: '',
-    confirmNewPasswordPlaceholder: '',
-    passwordsDoNotMatch: '',
-    passwordTooShort: '',
-    resetPasswordButton: '',
-    resetLinkInvalid: '',
-    resetFailed: '',
-    passwordResetSuccess: '',
