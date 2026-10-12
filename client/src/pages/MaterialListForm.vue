@@ -55,13 +55,13 @@ const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const autocompleteRef = ref<InstanceType<typeof AutoComplete> | null>(null)
 
 function createEmptyItems(): MaterialItem[] {
- /* return MATERIAL_CATALOG.map(material => ({
+  return MATERIAL_CATALOG.map(material => ({
     materialKey: material.key,
     quantity: null,
     price: null,
     note: null,
-  }))*/
-  return []
+  }))
+  //return []
 }
 
 const materialForm = reactive<MaterialFormState>({
