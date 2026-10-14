@@ -80,6 +80,7 @@ export class UserService {
     id: string,
     deletedByUserId: string,
   ): Promise<{ message: string }> {
+    /*
     const admin = await this.userRepository.findOne({
       where: { id: deletedByUserId },
     });
@@ -109,6 +110,59 @@ export class UserService {
     await this.userRepository.softDelete(id);
 
     return { message: `User ${id} soft deleted successfully` };
+    */
+   return this.userRepository.manager.transaction(
+    async (manager) => {
+      const repository = manager.getRepository(User);
+
+      const admin = await repository.findOne({
+        where: { id: deletedByUserId },
+      });
+
+      if (!admin || !admin.isAdmin) {
+        throw new HttpException(
+          'Forbidden',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      if (id === deletedByUserId) {
+        throw new HttpException(
+          'Admin cannot delete himself',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const user = await repository.findOne({
+        where: { id },
+        withDeleted: true,
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      if (!user) {
+        throw new HttpException(
+          'User not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      if (user.deletedAt) {
+        throw new HttpException(
+          'User is already deleted',
+          HttpStatus.CONFLICT,
+        );
+      }
+
+      user.deletedByUserId = deletedByUserId;
+      await repository.save(user);
+
+      await repository.softDelete({ id });
+
+      return {
+        message: `User ${id} soft deleted successfully`,
+      };
+    },
+    );
   }
 
   async softDelete(id: string, deletedByUserId: string) {
