@@ -30,6 +30,9 @@ const showUsers = ref(false)
 const selectedUser = ref<User | null>(null)
 const isAdmin = computed(() => auth.user?.isAdmin === true)
 
+const deletingUserId = ref<string | null>(null)
+const restoringUserId = ref<string | null>(null)
+
 function goToDashboard() {
   router.push('/dashboard')
 }
@@ -83,13 +86,27 @@ async function toggleUsers() {
 }
 
 function confirmDelete(user: User) {
+  if (user.deletedAt || deletingUserId.value) return
   selectedUser.value = user
 }
 
 async function deleteUser() {
-  if (!selectedUser.value) return
+  const user = selectedUser.value
+
+  if (!user || deletingUserId.value) return
+
+  // Додаткова перевірка перед запитом.
+  if (user.deletedAt) {
+    selectedUser.value = null
+    await userStore.fetchUsers()
+    return
+  }
+  const userId = user.id
+  deletingUserId.value = userId
+  //if (!selectedUser.value) return
+
    try {
-    const user = selectedUser.value
+    //const user = selectedUser.value
 
     await userStore.deleteUser(user.id)
 
@@ -106,9 +123,16 @@ async function deleteUser() {
       toast.error(t('errors.deleteFailed'))
     }
   }
+  finally {
+    deletingUserId.value = null
+  }
 }
 
 async function restoreUser(user: User) {
+  if (!user.deletedAt || restoringUserId.value) return
+
+  const userId = user.id
+  restoringUserId.value = userId
   try {
     await userStore.restoreUser(user.id)
 
@@ -121,6 +145,9 @@ async function restoreUser(user: User) {
     } else {
       toast.error(t('errors.restoreFailed'))
     }
+  }
+  finally {
+    restoringUserId.value = null
   }
 }
 
@@ -222,16 +249,20 @@ async function saveSalary(userId: string) {
             {{ user.name ?? 'No name' }} ({{ user.email }})
           </div>
 
-          <div>
+          <div class="user-actions">
             <button
+              v-if="!user.deletedAt"
               class="delete"
+              :disabled="deletingUserId !== null"
               @click="confirmDelete(user)"
             >
               {{ t('common.delete') }}
             </button>
 
             <button
+              v-else
               class="restore"
+              :disabled="restoringUserId !== null"
               @click="restoreUser(user)"
             >
               {{ t('account.restore') }}
@@ -289,14 +320,18 @@ async function saveSalary(userId: string) {
         <p>
           {{ t('account.confirmDelete', { name: selectedUser.name ?? 'User', email: selectedUser.email }) }}
         </p>
-
+        <!-- {{ t('common.yes') }}  -->
         <button 
           class="delete" 
+          :disabled="deletingUserId !== null"
           @click="deleteUser"
         >
-          {{ t('common.yes') }}
+          {{ deletingUserId !== null ? 'Deleting...' : t('common.yes') }}
         </button>
-        <button @click="selectedUser = null">
+        <button 
+          @click="selectedUser = null"
+          :disabled="deletingUserId !== null"
+        >
           {{ t('common.no') }}
         </button>
       </div>
@@ -398,5 +433,16 @@ async function saveSalary(userId: string) {
 
 .cancel-btn {
   background:#ddd;
+}
+.user-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.user-actions button:disabled,
+.modal-content button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

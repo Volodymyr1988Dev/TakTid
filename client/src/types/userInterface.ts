@@ -6,4 +6,5 @@ export interface User {
   CanCreateProjects: boolean
   SpecialCan: boolean
   currentSalary?: number
+  deletedAt?: Date | string | null
 }

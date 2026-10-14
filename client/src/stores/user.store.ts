@@ -13,7 +13,12 @@ export const useUserStore = defineStore('user', () => {
       isLoading.value = true
       const { data } = await userApi.getAllUsers()
       users.value = data
-    } finally {
+      return true
+    } catch (error) {
+      console.error('Failed to fetch users:', error)
+      throw error
+    }
+     finally {
       isLoading.value = false
     }
   }
@@ -31,12 +36,28 @@ export const useUserStore = defineStore('user', () => {
 
   async function deleteUser(id: string) {
     await userApi.deleteUser(id)
-    await fetchUsers()
+    try {
+      await fetchUsers()
+    } catch (error) {
+      console.error(
+        'User was deleted, but the users list could not be refreshed:',
+        error
+      )
+    }
+    //await fetchUsers()
   }
 
   async function restoreUser(id: string) {
     await userApi.restoreUser(id)
-    await fetchUsers()
+    //await fetchUsers()
+     try {
+      await fetchUsers()
+    } catch (error) {
+      console.error(
+        'User was restored, but the users list could not be refreshed:',
+        error
+      )
+    }
   }
 
   async function saveSalary(
