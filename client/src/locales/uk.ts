@@ -243,6 +243,7 @@ export default {
     employerTax: 'Податок работодателя (55%)',
     employer31Tax: 'Податок работодателя (31,42%)',
     salary: 'Зарплата',
+    confirmDelete: 'Ви впевнені, що хочете видалити акаунт?',
   },
 
   calendar: {

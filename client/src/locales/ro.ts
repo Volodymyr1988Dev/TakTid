@@ -246,6 +246,7 @@ export default {
     employerTax: 'Taxă angajator (55%)',
     employer31Tax: 'Taxă angajator (31,42%)',
     salary: 'Salariu brut',
+    confirmDelete: 'Ești sigur că vrei ștergi contul?',
   },
 
   calendar: {

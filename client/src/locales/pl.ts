@@ -246,6 +246,7 @@ export default {
     employerTax: 'Podatek pracodawcy (55%)',
     employer31Tax: 'Podatek pracodawcy (31,42%)',
     salary: 'Pensja brutto',
+    confirmDelete: 'Czy na pewno chcesz usunąć konto?',
   },
 
   calendar: {

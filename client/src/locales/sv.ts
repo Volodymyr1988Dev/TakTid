@@ -244,6 +244,7 @@ export default {
     employerTax: 'Arbetsgivaravgift (55%)',
     employer31Tax: 'Arbetsgivaravgift (31,42%)',
     salary: 'Lön',
+    confirmDelete: 'Är du säker på att du vill ta bort konto?',
   },
 
   calendar: {
