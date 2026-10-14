@@ -27,6 +27,7 @@ export class StatsService {
         date: Between(fromStr, toStr),
       },
       relations: ['user'],
+      withDeleted: true,
     });
 
     const extraEntries = await this.assignmentRepo.find({
@@ -34,6 +35,7 @@ export class StatsService {
         date: Between(fromStr, toStr),
       },
       relations: ['user'],
+      withDeleted: true,
     });
 
     return this.aggregate(timeEntries, extraEntries);
@@ -47,6 +49,7 @@ export class StatsService {
       },
       relations: ['project'],
       order: { date: 'ASC' },
+      withDeleted: true,
     });
 
     const extraEntries = await this.assignmentRepo.find({
@@ -56,6 +59,7 @@ export class StatsService {
       },
       relations: ['project'],
       order: { date: 'ASC' },
+      withDeleted: true,
     });
 
     const entries = [
@@ -100,6 +104,7 @@ export class StatsService {
       },
       relations: ['project', 'user'],
       order: { date: 'ASC' },
+      withDeleted: true,
     });
 
     const extraEntries = await this.assignmentRepo.find({
@@ -109,6 +114,7 @@ export class StatsService {
       },
       relations: ['project', 'user'],
       order: { date: 'ASC' },
+      withDeleted: true,
     });
 
     const user = timeEntries[0]?.user ?? extraEntries[0]?.user;
