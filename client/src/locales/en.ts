@@ -247,6 +247,7 @@ export default {
     employerTax: 'Employer tax (55%)',
     employer31Tax: 'Employer tax (31,42%)',
     salary: 'Salary',
+    confirmDelete: 'Are you sure you want to delete this account?',
   },
   calendar: {
     week: 'Week',
