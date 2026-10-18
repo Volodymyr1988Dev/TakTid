@@ -106,6 +106,7 @@ export default {
     resetPasswordSuccess: 'Your password has been reset successfully. You can now log in with your new password.',
     resetPasswordError: 'Failed to reset password. Please check the token and try again.',
     confirmPassword: 'Confirm new password',
+    confirmNewPassword: 'Confirm new password',
   },
 
   stats: {

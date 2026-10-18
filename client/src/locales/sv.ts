@@ -102,6 +102,7 @@ export default {
     resetLinkInvalid: 'Återställningslänken är ogiltig eller har gått ut. Vänligen begär en ny länk.',
     resetFailed: 'Återställning av lösenord misslyckades. Försök igen senare.',
     passwordResetSuccess: 'Ditt lösenord har återställts. Du kan nu logga in med det nya lösenordet.',
+    confirmNewPassword: 'Bekräfta nytt lösenord',
   },
 
   stats: {

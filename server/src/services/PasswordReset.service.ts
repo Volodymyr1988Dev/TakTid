@@ -8,14 +8,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
-import { Resend } from 'resend';
+//import { Resend } from 'resend';
+import { MailService } from './mail.service';
 
 import { PasswordResetToken } from '../entities/Auth/PasswordResetToken';
 import { User } from '../entities/User/User';
 
 @Injectable()
 export class PasswordResetService {
-  private readonly resend: Resend;
+  //private readonly resend: Resend;
 
   constructor(
     @InjectRepository(PasswordResetToken)
@@ -24,14 +25,16 @@ export class PasswordResetService {
     private readonly userRepository: Repository<User>,
     private readonly config: ConfigService,
     private readonly dataSource: DataSource,
+    private readonly mailService: MailService,
   ) {
+    /*
     const apiKey = this.config.get<string>('RESEND_API_KEY');
 
     if (!apiKey) {
       throw new Error('RESEND_API_KEY is not configured');
     }
 
-    this.resend = new Resend(apiKey);
+    this.resend = new Resend(apiKey);*/
   }
 
   private hashToken(token: string): string {
@@ -85,9 +88,9 @@ export class PasswordResetService {
     );
 
     const appUrl = this.config.get<string>('APP_URL');
-    const from = this.config.get<string>('RESEND_FROM');
+    //const from = this.config.get<string>('RESEND_FROM');
 
-    if (!appUrl || !from) {
+    if (!appUrl /*|| !from*/) {
       throw new InternalServerErrorException(
         'Password reset email configuration is incomplete',
       );
@@ -140,8 +143,11 @@ export class PasswordResetService {
       `${appUrl.replace(/\/+$/, '')}/reset-password?token=` +
       encodeURIComponent(rawToken);
 
-    const { data, error } = await this.resend.emails.send({
-      from,
+    //const { data, error } = await this.resend.emails.send({
+
+      //from,
+    try {
+      await this.mailService.sendMail({
       to: [normalizedEmail],
       subject: m.subject,
       text: `${m.intro}\n\n${resetUrl}\n\n${m.expiry}\n${m.ignore}`,
@@ -160,23 +166,29 @@ export class PasswordResetService {
         </div>
       `,
     });
+  
+    //if (error) {
 
-    if (error) {
+    }  
+    catch(error) {
       await this.tokenRepository.delete({ tokenHash });
-      //console.error('Failed to send password reset email:', error.message);
+      /*console.error('Failed to send password reset email:', error.message);
        console.error('[PasswordReset] Resend rejected the email:', {
+       
           name: error.name,
           message: error.message,
           statusCode: error.statusCode,
-        });
+        });*/
+      console.error('[PasswordReset] Email delivery failed.');  
       throw new InternalServerErrorException(
         'Unable to send password reset email',
       );
     }
+    /*
     console.info(
       '[PasswordReset] Resend accepted the email.',
       { id: data?.id },
-    );
+    );*/
   }
 
   async resetPassword(
