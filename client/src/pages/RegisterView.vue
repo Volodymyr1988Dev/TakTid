@@ -149,29 +149,35 @@ button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
 .password-field {
   position: relative;
-  width: 100%;
+  display: inline-block;
+  vertical-align: middle;
+  width: 224px;
+  max-width: 100%;
 }
 
 .password-field input {
+  display: block;
   width: 100%;
   box-sizing: border-box;
-  padding-right: 48px;
+  padding-right: 38px;
 }
 
 .password-toggle {
   position: absolute;
   top: 50%;
-  right: 8px;
+  right: 3px;
   transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   padding: 0;
-  border: none;
+  border: 0;
+  border-radius: 4px;
   background: transparent;
   color: #666;
   cursor: pointer;
@@ -179,11 +185,17 @@ button:disabled {
 
 .password-toggle:hover {
   color: #222;
+  background: #f0f0f0;
 }
 
 .password-toggle:focus-visible {
   outline: 2px solid #2563eb;
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline-offset: 1px;
 }
+
+.password-toggle svg {
+  display: block;
+  flex-shrink: 0;
+}
+
 </style>
