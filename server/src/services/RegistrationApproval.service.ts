@@ -10,7 +10,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import * as crypto from 'crypto';
 //import * as nodemailer from 'nodemailer';
-import { Resend } from 'resend';
+//import { Resend } from 'resend';
+import { MailService } from './mail.service';
 
 import {
   RegistrationApproval,
@@ -21,7 +22,7 @@ import { User } from '../entities/User/User';
 
 @Injectable()
 export class RegistrationApprovalService {
-  private readonly resend: Resend;
+  //private readonly resend: Resend;
 
   constructor(
     @InjectRepository(RegistrationApproval)
@@ -29,7 +30,8 @@ export class RegistrationApprovalService {
 
     private readonly configService: ConfigService,
     private readonly dataSource: DataSource,
-  ) {
+    private readonly mailService: MailService,
+  ) {/*
      const apiKey = this.configService.get<string>('RESEND_API_KEY');
 
       if (!apiKey) {
@@ -38,7 +40,7 @@ export class RegistrationApprovalService {
         );
       }
 
-      this.resend = new Resend(apiKey);
+      this.resend = new Resend(apiKey);*/
   }
 
   async createAndSend( email: string, name: string, passwordHash: string,): Promise<void> {
@@ -405,10 +407,7 @@ export class RegistrationApprovalService {
         'REGISTRATION_APPROVAL_EMAIL',
       );
 
-    const from =
-      this.configService.get<string>(
-        'RESEND_FROM',
-      );
+    //const from = this.configService.get<string>( 'RESEND_FROM' );
 
     const appUrl =
       this.configService.get<string>(
@@ -418,7 +417,7 @@ export class RegistrationApprovalService {
 
     if (
       !approvalEmail ||
-      !from ||
+      //!from ||
       !appUrl
     ) {
       throw new Error(
@@ -589,21 +588,22 @@ If you did not expect this request, you can ignore this email.
 </html>
 `.trim();
 
-    const { error } =
-      await this.resend.emails.send({
-        from,
+    //const { error } =
+      //await this.resend.emails.send({
+        //from,
+        await this.mailService.sendMail({
         to: [approvalEmail],
         subject:
           'TakTid — New registration request',
         text,
         html,
       });
-
+    /*  
     if (error) {
       throw new Error(
         `Resend email error: ${error.message}`,
       );
-    }
+    }*/
   }
 
   private escapeHtml(

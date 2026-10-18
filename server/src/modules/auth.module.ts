@@ -13,9 +13,10 @@ import { User } from '../entities/User/User';
 import { PasswordResetToken } from '../entities/Auth/PasswordResetToken';
 import { PasswordResetService } from '../services/PasswordReset.service';
 import { PasswordResetController } from '../controllers/PasswordReset.controller';
+import { MailModule } from './mail.module';
 
 @Module({
-  imports: [UserModule, SessionModule, TypeOrmModule.forFeature([
+  imports: [UserModule, SessionModule, MailModule,  TypeOrmModule.forFeature([
       RegistrationApproval, 
       User,
       PasswordResetToken,
