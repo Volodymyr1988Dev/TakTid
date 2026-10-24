@@ -71,6 +71,11 @@ export default {
     changeExtraHourPrice: 'Modifică prețul pe oră extra',
     saveExtraHourPrice: 'Salvează prețul pe oră extra',
     noProject: 'Niciun proiect găsit',
+    startDate: "Data începerii",
+    endDate: "Data încheierii",
+    duration: "Durată",
+    calendarDays: "zile calendaristice",
+    inProgress: "În desfășurare",
   },
 
   auth: {

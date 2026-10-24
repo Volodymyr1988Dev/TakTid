@@ -8,4 +8,10 @@ export interface Project {
   areaM2?: number | null
   pricePerM2?: number | null
   pricePerExtraH?: number | null
+
+  startDate?: string | null;
+  lastWorkDate?: string | null;
+  endDate?: string | null;
+  durationDays?: number | null;
+  isCompleted?: boolean;
 }

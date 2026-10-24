@@ -25,10 +25,20 @@ export class ProjectsService {
   }
 
   async findAll(): Promise<Projects[]> {
-    return this.projectRepo.find({
+    /*return this.projectRepo.find({
+      relations: ['assignments', 'timeEntries'],
+      order: { createdAt: 'DESC' },
+    });*/
+    const projects = await this.projectRepo.find({
       relations: ['assignments', 'timeEntries'],
       order: { createdAt: 'DESC' },
     });
+
+    return projects.map(project => ({
+      ...project,
+      ...this.getProjectDates(project.timeEntries ?? []),
+    }));
+
   }
 
   async getProjectDetails(projectId: string) {
@@ -116,6 +126,7 @@ export class ProjectsService {
         areaM2: project.areaM2,
         pricePerM2: project.pricePerM2,
         pricePerExtraH: project.pricePerExtraH,
+        ...this.getProjectDates(timeEntries),
       },
       total: {
         work: totalWork,
@@ -154,5 +165,72 @@ export class ProjectsService {
     }
     await this.imagesService.removeByProject(id);
     await this.projectRepo.remove(project);
+  }
+  private getTodayInSweden(): string {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Stockholm',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(new Date());
+
+    const values = Object.fromEntries(
+      parts.map(part => [part.type, part.value]),
+    );
+
+    return `${values.year}-${values.month}-${values.day}`;
+  }
+
+  private getProjectDates(
+    entries: TimeEntry[],
+  ): {
+    startDate: string | null;
+    lastWorkDate: string | null;
+    endDate: string | null;
+    durationDays: number | null;
+    isCompleted: boolean;
+  } {
+    const workDates = entries
+      .filter(entry => entry.type === 'WORK')
+      .map(entry => entry.date)
+      .sort();
+
+    if (workDates.length === 0) {
+      return {
+        startDate: null,
+        lastWorkDate: null,
+        endDate: null,
+        durationDays: null,
+        isCompleted: false,
+      };
+    }
+
+    const startDate = workDates[0];
+    const lastWorkDate = workDates[workDates.length - 1];
+
+    const start = new Date(`${startDate}T00:00:00Z`);
+    const last = new Date(`${lastWorkDate}T00:00:00Z`);
+    const today = new Date(
+      `${this.getTodayInSweden()}T00:00:00Z`,
+    );
+
+    const daysSinceLastWork = Math.floor(
+      (today.getTime() - last.getTime()) / 86_400_000,
+    );
+
+    const durationDays =
+      Math.floor(
+        (last.getTime() - start.getTime()) / 86_400_000,
+      ) + 1;
+
+    const isCompleted = daysSinceLastWork >= 7;
+
+    return {
+      startDate,
+      lastWorkDate,
+      endDate: isCompleted ? lastWorkDate : null,
+      durationDays,
+      isCompleted,
+    };
   }
 }

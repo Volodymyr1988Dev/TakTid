@@ -73,6 +73,11 @@ export default {
     changeExtraHourPrice: 'Change price per extra hour',
     saveExtraHourPrice: 'Save price per extra hour',
     noProject: 'No projects found',
+    startDate: "Start date",
+    endDate: "End date",
+    duration: "Duration",
+    calendarDays: "calendar days",
+    inProgress: "In progress",
   },
 
   auth: {

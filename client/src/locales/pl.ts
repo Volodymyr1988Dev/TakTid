@@ -71,6 +71,11 @@ export default {
     changeExtraHourPrice: 'Zmień cenę za nadgodzinę',
     saveExtraHourPrice: 'Zapisz cenę za nadgodzinę',
     noProject: 'Brak projektów',
+    startDate: "Data rozpoczęcia",
+    endDate: "Data zakończenia",
+    duration: "Czas trwania",
+    calendarDays: "dni kalendarzowych",
+    inProgress: "W trakcie",
   },
 
   auth: {
