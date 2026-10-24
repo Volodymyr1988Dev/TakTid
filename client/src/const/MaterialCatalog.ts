@@ -323,6 +323,11 @@ export const MATERIAL_CATALOG: MaterialDefinition[] = [
     label: 'Tejp',
     unitKey: 'units.roll',
   },
+  {
+    key: 'stifts',
+    label: 'Stifts',
+    unitKey: 'units.piece',
+  }
 ]
 
 export const MATERIAL_CATALOG_MAP = new Map(
