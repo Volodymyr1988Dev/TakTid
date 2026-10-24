@@ -118,6 +118,16 @@ export class ProjectsService {
     const extraHoursPrice = totalExtra * Number(project.pricePerExtraH ?? 0);
 
     const totalProjectPrice = baseProjectPrice + extraHoursPrice;
+    
+    console.log('[ProjectSummary]', {
+      projectId,
+      entriesCount: timeEntries.length,
+      workEntries: timeEntries
+        .filter(e => String(e.type).toUpperCase() === 'WORK')
+        .map(e => e.date),
+      dates: this.getProjectDates(timeEntries),
+    });
+    
     return {
       project: {
         id: project.id,
@@ -192,7 +202,13 @@ export class ProjectsService {
   } {
     const workDates = entries
       .filter(entry => entry.type === 'WORK')
-      .map(entry => entry.date)
+      .map(entry => {
+        if (!entry.date) return null;
+        return String(entry.date).slice(0, 10);
+      })
+      .filter((date): date is string =>
+        date !== null && /^\d{4}-\d{2}-\d{2}$/.test(date),
+      )
       .sort();
 
     if (workDates.length === 0) {
