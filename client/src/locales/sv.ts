@@ -72,6 +72,11 @@ export default {
     changeExtraHourPrice: 'Ändra pris per extra timme',
     saveExtraHourPrice: 'Spara pris per extra timme',
     noProject: 'Inga projekt',
+    startDate: "Startdatum",
+    endDate: "Slutdatum",
+    duration: "Varaktighet",
+    calendarDays: "kalenderdagar",
+    inProgress: "Pågår",
   },
 
   auth: {

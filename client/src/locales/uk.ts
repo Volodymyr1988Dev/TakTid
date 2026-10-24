@@ -71,6 +71,11 @@ export default {
     changeExtraHourPrice: 'Змінити ціну за надгодину',
     saveExtraHourPrice: 'Зберегти цену за надгодину',
     noProject: 'Проектів не знайдено',
+    startDate: "Дата початку",
+    endDate: "Дата завершення",
+    duration: "Тривалість",
+    calendarDays: "календарних дн.",
+    inProgress: "Триває",
   },
 
   auth: {

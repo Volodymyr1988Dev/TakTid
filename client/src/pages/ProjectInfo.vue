@@ -40,22 +40,6 @@ const { t } = useI18n()
 const projectId = toRef(props, 'projectId')
 const isAdmin = toRef(props, 'isAdmin')
 
-/*
- * IMPORTANT:
- *
- * We destructure refs from composables.
- *
- * This is intentional.
- * If we use:
- *
- *   projectInfo.stats
- *
- * directly in template, Vue may pass the Ref itself
- * because projectInfo is a normal object.
- *
- * Top-level refs are automatically unwrapped by Vue templates.
- */
-
 const projectInfo = useProjectInfo(
   projectId,
   isAdmin,
@@ -289,88 +273,6 @@ async function openReceipt(
   )
 }
 
-/*
- * Delete current image / receipt.
- 
-async function deleteCurrentViewerItem(
-  item?:  {
-    id: string
-    url: string
-  },
-): Promise<void> {
-  if (!isAdmin.value) {
-    return
-  }
-
-  const current =
-    item ??
-    currentViewerItem.value
-
-  if (!current) {
-    return
-  }
-
-  if (
-    !window.confirm(
-      t('project.confirmDeleteImage'),
-    )
-  ) {
-    return
-  }
-
-  deletingImage.value = true
-
-  try {
-    await removeViewerItem(
-      current,
-      viewerType.value,
-    )
-
-    if (
-      viewerType.value === 'images'
-    ) {
-      viewerItems.value =
-        imageStore.images.map(
-          image => ({
-            id: image.id,
-            url: image.url,
-            createdAt:
-              image.createdAt,
-            type: 'image' as const,
-          }),
-        )
-    } else {
-      viewerItems.value =
-        receiptStore.receipts.map(
-          receipt => ({
-            id: receipt.id,
-            url: receipt.url,
-            createdAt:
-              receipt.createdAt,
-            type: 'receipt' as const,
-          }),
-        )
-    }
-
-    if (
-      viewerItems.value.length === 0
-    ) {
-      closeViewer()
-      return
-    }
-
-    if (
-      viewerIndex.value >=
-      viewerItems.value.length
-    ) {
-      viewerIndex.value =
-        viewerItems.value.length - 1
-    }
-  } finally {
-    deletingImage.value = false
-  }
-}
-*/
 async function deleteCurrentViewerItem(
   item?:
     | ProjectImage
@@ -380,13 +282,6 @@ async function deleteCurrentViewerItem(
     return
   }
 
-  /**
-   * If the delete button in the receipt grid was clicked,
-   * we already receive the real store entity.
-   *
-   * If the fullscreen delete button was clicked,
-   * find the real entity by viewer item id.
-   */
   const entity =
     item ??
     (
@@ -419,17 +314,11 @@ async function deleteCurrentViewerItem(
       viewerType.value,
     )
 
-    /**
-     * Rebuild viewer items from the stores.
-     * This prevents stale deleted items from remaining
-     * in the fullscreen viewer.
-     */
     const newItems =
       getViewerItems(
         viewerType.value,
       )
 
-    //viewerItems.value = newItems
 
     if (!newItems.length) {
       closeViewer()
@@ -439,35 +328,11 @@ async function deleteCurrentViewerItem(
     replaceViewerItems(
       newItems,
     )
-    /**
-     * Keep the current index valid.
-    
-    if (
-      viewerIndex.value >=
-      newItems.length
-    ) {
-      viewerIndex.value =
-        newItems.length - 1
-    }
-
-    if (
-      viewerIndex.value < 0
-    ) {
-      viewerIndex.value = 0
-    } */
   } finally {
     deletingImage.value = false
   }
 }
 
-/*
- * When project changes:
- *
- * - cancel/reset old project state
- * - close viewer
- * - clear media
- * - load new stats
- */
 function onProjectChanged(): void {
   closeViewer()
   resetForProject()
@@ -533,7 +398,7 @@ watch(
       <ProjectHeader
         :project="stats.project"
       />
-
+        
       <ProjectMetrics
         v-if="isAdmin"
         :stats="stats"
