@@ -103,7 +103,7 @@ const {
   removeViewerItem,
 
   onLoad,
-  resetMedia,
+  //resetMedia,
 } = media
 
 const viewer = useImageViewer()
@@ -336,7 +336,8 @@ async function deleteCurrentViewerItem(
 function onProjectChanged(): void {
   closeViewer()
   resetForProject()
-  void resetMedia()
+
+  //void resetMedia()
   //resetMedia()
   showTasks.value = false
   sentinel.value = null
