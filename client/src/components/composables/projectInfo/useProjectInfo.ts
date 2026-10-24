@@ -5,7 +5,7 @@ import {
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { getProjectStats } from '../../../api/projectStats.api'
+import { getProjectStats, getProjectSummary } from '../../../api/projectStats.api'
 import { useProjectStore } from '../../../stores/project.store'
 import { useStatsStore } from '../../../stores/stats.store'
 
@@ -65,33 +65,56 @@ export function useProjectInfo(
     error.value = null
 
     try {
+      /*
       const { data } = await getProjectStats(id)
-
       if (requestId !== statsRequestId) {
         return
       }
-
-      /*
-       * Count is part of the same project loading operation.
-       * If project changes while this request is running,
-       * the result becomes obsolete.
-       */
       await Promise.resolve()
 
       if (requestId !== statsRequestId) {
         return
       }
-
       stats.value = data
-
       area.value =
         data.project.areaM2 ?? null
-
       price.value =
         data.project.pricePerM2 ?? null
-
       extraPrice.value =
         data.project.pricePerExtraH ?? null
+        */
+
+        const [statsResponse, summaryResponse] =
+        await Promise.all([
+          getProjectStats(id),
+          getProjectSummary(id),
+        ])
+
+      // Ігноруємо відповіді від попереднього проєкту.
+      if (requestId !== statsRequestId) {
+        return
+      }
+
+      const statsData = statsResponse.data
+      const summaryProject = summaryResponse.data.project
+
+      // Зберігаємо всі наявні дані статистики,
+      // додаючи до project дати з endpoint /summary.
+      stats.value = {
+        ...statsData,
+        project: {
+          ...statsData.project,
+          startDate: summaryProject.startDate,
+          lastWorkDate: summaryProject.lastWorkDate,
+          endDate: summaryProject.endDate,
+          durationDays: summaryProject.durationDays,
+          isCompleted: summaryProject.isCompleted,
+        },
+      }
+
+      area.value = statsData.project.areaM2 ?? null
+      price.value = statsData.project.pricePerM2 ?? null
+      extraPrice.value = statsData.project.pricePerExtraH ?? null
     } catch (err: unknown) {
       if (requestId !== statsRequestId) {
         return
