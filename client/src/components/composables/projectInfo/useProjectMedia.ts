@@ -250,12 +250,15 @@ export function useProjectMedia(
 
     receiptsLoaded.value = false
 
-    await receiptStore.loadCount(
-      projectId.value,
-    )
+    //await receiptStore.loadCount(projectId.value)
 
     if (showReceipts.value) {
       await loadReceipts()
+    } else {
+      await receiptStore.loadCount(projectId.value)
+    }
+    if (input) {
+      input.value = ''
     }
   }
 
@@ -287,12 +290,12 @@ export function useProjectMedia(
 
     receiptsLoaded.value = false
 
-    await receiptStore.loadCount(
-      projectId.value,
-    )
+    //await receiptStore.loadCount( projectId.value)
 
     if (showReceipts.value) {
       await loadReceipts()
+    } else {
+      await receiptStore.loadCount(projectId.value)
     }
   }
 
