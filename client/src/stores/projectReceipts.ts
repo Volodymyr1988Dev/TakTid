@@ -58,7 +58,7 @@ export const useProjectReceiptStore = defineStore(
         } else {
           receipts.value.push(...data.data)
         }
-
+        count.value = data.total
         return data
       } finally {
         loading.value = false
