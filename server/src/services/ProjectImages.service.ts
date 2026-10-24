@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { ProjectImage } from '../entities/Project/ProjectImages';
 import { Projects } from '../entities';
 import cloudinary from '../config/cloudinary.config';
@@ -33,6 +33,9 @@ export class ProjectImagesService {
       throw new BadRequestException('No files uploaded');
     }
     const limitUpload = pLimit(3);
+    const uploadedPublicIds: string[] = [];
+    const savedPublicIds: string[] = [];
+    /*
     const uploads = files.map((file) =>
       limitUpload(async () => {
         const uploaded = await this.uploadToCloudinary(file.buffer, projectId);
@@ -47,7 +50,97 @@ export class ProjectImagesService {
       }),
     );
 
-    return Promise.all(uploads);
+    return Promise.all(uploads);*/
+    const results = await Promise.allSettled(
+      files.map((file) =>
+        limitUpload(async () => {
+          const uploaded = await this.uploadToCloudinary(
+            file.buffer,
+            projectId,
+          );
+
+          // Запам'ятовуємо тільки файли цього запиту.
+          uploadedPublicIds.push(uploaded.public_id);
+
+          const image = this.imageRepo.create({
+            url: uploaded.secure_url,
+            publicId: uploaded.public_id,
+            project,
+          } as Partial<ProjectImage>);
+
+          //return this.imageRepo.save(image);
+          const saved = await this.imageRepo.save(image);
+
+          savedPublicIds.push(uploaded.public_id);
+
+          return saved;
+        }),
+      ),
+    );
+
+    const failed = results.find(
+      (result): result is PromiseRejectedResult =>
+        result.status === 'rejected',
+    );
+
+    if (failed) {
+      let databaseCleanupSucceeded = true;
+      if (uploadedPublicIds.length > 0) {
+        try {
+          await this.imageRepo.delete({
+            publicId: In(uploadedPublicIds),
+          });
+        } catch (error) {
+          databaseCleanupSucceeded = false;
+          console.error(
+            '[ProjectImages] Failed to clean up database records:',
+            error,
+          );
+        }
+
+        const idsToDelete = databaseCleanupSucceeded
+        ? uploadedPublicIds
+        : uploadedPublicIds.filter(
+            (id) => !savedPublicIds.includes(id),
+          );
+        const cleanupResults = await Promise.allSettled(
+          idsToDelete.map(async (publicId) => {
+            const result = await cloudinary.uploader.destroy(publicId);
+
+            if (
+              result.result !== 'ok' &&
+              result.result !== 'not found'
+            ) {
+              throw new Error(
+                `Cloudinary destroy returned: ${result.result}`,
+              );
+            }
+          }),
+        );
+
+        cleanupResults.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            console.error(
+              '[ProjectImages] Failed to delete Cloudinary file:',
+              idsToDelete[index],
+              result.reason,
+            );
+          }
+        });
+      }
+
+      throw failed.reason instanceof Error
+        ? failed.reason
+        : new Error('Project images upload failed');
+    }
+
+    return results.map((result) => {
+      if (result.status !== 'fulfilled') {
+        throw new Error('Unexpected image upload failure');
+      }
+
+      return result.value;
+    });
   }
 
   async getByProject(projectId: string, page: number, limit: number) {
