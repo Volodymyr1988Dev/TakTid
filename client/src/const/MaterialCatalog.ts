@@ -276,7 +276,7 @@ export const MATERIAL_CATALOG: MaterialDefinition[] = [
   {
     key: 'batten_25x48',
     label: 'Läkt standard 25x48',
-    unitKey: 'units.piece',
+    unitKey: 'units.pack',
   },
   {
     key: 'batten_12x50',
