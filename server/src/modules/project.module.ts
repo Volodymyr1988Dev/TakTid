@@ -22,6 +22,6 @@ import { ProjectReceipt } from '../entities/Project/ProjectReceipt';
   ],
   providers: [ProjectsService, ProjectReceiptsService],
   controllers: [ProjectsController, ProjectReceiptsController],
-  exports: [ProjectsService],
+  exports: [ProjectsService, ProjectReceiptsService],
 })
 export class ProjectsModule {}

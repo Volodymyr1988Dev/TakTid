@@ -2,20 +2,39 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { SessionService } from './SessionService';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { Projects } from '../entities/Project/Project';
 import { ProjectImage } from '../entities/Project/ProjectImages';
 import { ProjectImagesService } from './ProjectImages.service';
-import { ProjectAssignment } from '../entities/Project/ProjectAssignment';
-import { TimeEntry } from '../entities/TimeEntries/TimeEntries';
 import pLimit from 'p-limit';
+import { ProjectReceiptsService } from './ProjectReceipts';
 
 @Injectable()
 export class CleanupService {
   private readonly logger = new Logger(CleanupService.name);
   private isRunning = false;
-
+  private readonly veryOldProjectCondition = `
+    p."createdAt" IS NOT NULL
+    AND GREATEST(
+      COALESCE(t.last_time_entry, p."createdAt"),
+      COALESCE(a.last_assignment, p."createdAt"),
+      p."createdAt"
+    ) < NOW() - INTERVAL '5 years'
+    AND NOT EXISTS (
+      SELECT 1
+      FROM time_entries te
+      WHERE te."projectId" = p.id
+        AND te.date >= CURRENT_DATE - INTERVAL '2 years'
+    )
+    AND NOT EXISTS (
+      SELECT 1
+      FROM project_assignments pa
+      WHERE pa."projectId" = p.id
+        AND pa.date >= CURRENT_DATE - INTERVAL '2 years'
+    )
+  `;
   constructor(
+    private readonly dataSource: DataSource,
     private readonly sessionService: SessionService,
 
     @InjectRepository(Projects)
@@ -23,39 +42,111 @@ export class CleanupService {
 
     @InjectRepository(ProjectImage)
     private readonly imageRepo: Repository<ProjectImage>,
-
-    //@InjectRepository(ProjectAssignment)
-    //private readonly assignmentRepo: Repository<ProjectAssignment>,
-
-    //@InjectRepository(TimeEntry)
-    //private readonly timeEntryRepo: Repository<TimeEntry>,
-
+    private readonly receiptsService: ProjectReceiptsService,
     private readonly imagesService: ProjectImagesService,
   ) {}
 
   //@Cron('0 5 1 * *')
   @Cron('0 3 * * *')
-  async handleCleanup() {
+  async handleCleanup(): Promise<void> {
     if (this.isRunning) {
-      this.logger.warn('⚠️ Cleanup already running, skipping...');
+      this.logger.warn('Cleanup is already running; skipping.');
       return;
     }
 
     this.isRunning = true;
 
+    const queryRunner = this.dataSource.createQueryRunner();
+    let lockAcquired = false;
+    let failures = 0;
+
     try {
-      this.logger.log('🧹 START CLEANUP');
+      await queryRunner.connect();
 
-      //await this.sessionService.cleanupExpiredSessions();
-      await this.cleanupExpiredSessions();
-      await this.cleanupInactiveImages();
-      await this.cleanupVeryOldProjects();
+      const lockRows: { acquired: boolean | string }[] =
+        await queryRunner.query(
+          'SELECT pg_try_advisory_lock(741852, 1) AS acquired',
+        );
 
-      this.logger.log('✅ CLEANUP DONE');
-    } catch (e) {
-      this.logger.error('❌ CLEANUP FAILED', e);
+      const lockValue = lockRows[0]?.acquired;
+      lockAcquired =
+        lockValue === true ||
+        lockValue === 't' ||
+        lockValue === 'true';
+
+      if (!lockAcquired) {
+        this.logger.warn(
+          'Another instance is running cleanup; skipping this run.',
+        );
+        return;
+      }
+
+      this.logger.log('START CLEANUP');
+
+      const steps: Array<[string, () => Promise<void>]> = [
+        [
+          'Expired sessions',
+          () => this.cleanupExpiredSessions(),
+        ],
+        [
+          'Inactive project images',
+          () => this.cleanupInactiveImages(),
+        ],
+        [
+          'Very old projects',
+          () => this.cleanupVeryOldProjects(),
+        ],
+      ];
+
+      for (const [name, run] of steps) {
+        try {
+          await run();
+        } catch (error) {
+          failures++;
+
+          this.logger.error(
+            `${name} cleanup failed: ${this.errorMessage(error)}`,
+            error instanceof Error ? error.stack : undefined,
+          );
+        }
+      }
+
+      if (failures === 0) {
+        this.logger.log('CLEANUP FINISHED');
+      } else {
+        this.logger.warn(
+          `CLEANUP FINISHED WITH ${failures} FAILED STEP(S). Check logs.`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `CLEANUP FAILED: ${this.errorMessage(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     } finally {
-      this.isRunning = false;
+      try {
+        if (lockAcquired && queryRunner.isReleased === false) {
+          await queryRunner.query(
+            'SELECT pg_advisory_unlock(741852, 1)',
+          );
+        }
+      } catch (error) {
+        this.logger.error(
+          `Failed to release cleanup advisory lock: ${this.errorMessage(error)}`,
+        );
+      } finally {
+        try {
+          if (!queryRunner.isReleased) {
+            await queryRunner.release();
+          }
+        } catch (error) {
+          this.logger.error(
+            `Failed to release cleanup connection: ${this.errorMessage(error)}`,
+          );
+        } finally {
+          this.isRunning = false;
+        }
+      }
     }
   }
 
@@ -72,28 +163,32 @@ export class CleanupService {
       throw error;
     }
   }
-
-  private async cleanupInactiveImages() {
+//SELECT sub2.id
+  private async cleanupInactiveImages(): Promise<void> {
     const images: { id: string }[] = await this.imageRepo.query(`
-      SELECT sub2.id
+      SELECT ranked.id
       FROM (
-        SELECT 
+        SELECT
           pi.id,
           ROW_NUMBER() OVER (
             PARTITION BY pi."projectId"
-            ORDER BY pi."createdAt" DESC
-          ) as rn
+            ORDER BY pi."createdAt" DESC, pi.id DESC
+          ) AS rn
         FROM project_images pi
         JOIN projects p ON p.id = pi."projectId"
 
         LEFT JOIN (
-          SELECT "projectId", MAX(date) as last_time_entry
+          SELECT
+            "projectId",
+            MAX(date)::timestamp AS last_time_entry
           FROM time_entries
           GROUP BY "projectId"
         ) t ON t."projectId" = p.id
 
         LEFT JOIN (
-          SELECT "projectId", MAX(date) as last_assignment
+          SELECT
+            "projectId",
+            MAX(date)::timestamp AS last_assignment
           FROM project_assignments
           GROUP BY "projectId"
         ) a ON a."projectId" = p.id
@@ -103,161 +198,194 @@ export class CleanupService {
             COALESCE(t.last_time_entry, p."createdAt"),
             COALESCE(a.last_assignment, p."createdAt"),
             p."createdAt"
-          ) 
-              < NOW() - INTERVAL '1 year'
-      ) AS sub2  
-      WHERE sub2.rn > 3
+          ) < NOW() - INTERVAL '1 year'
+      ) ranked
+      WHERE ranked.rn > 3
     `);
-      // COALESCE(t.last_time_entry, a.last_assignment, p."createdAt")
-    if (!images.length) {
-      this.logger.log('🖼 No images to clean');
+
+    if (images.length === 0) {
+      this.logger.log('No inactive project images to clean.');
       return;
     }
 
-    const limit = pLimit(5);
-
+    const limit = pLimit(3);
     let deleted = 0;
-    
+    let failed = 0;
+
     await Promise.all(
-      //images.map((img) => limit(() => this.imagesService.remove(img.id))),
       images.map((image) =>
         limit(async () => {
           try {
-            await this.imagesService.remove(
-              image.id,
-            );
-
+            await this.imagesService.remove(image.id);
             deleted++;
           } catch (error) {
+            failed++;
+
             this.logger.error(
-              `❌ Failed to delete image ${image.id}`,
-              error,
+              `Failed to delete project image ${image.id}: ${this.errorMessage(error)}`,
+              error instanceof Error ? error.stack : undefined,
             );
           }
         }),
       ),
     );
 
-    //this.logger.log(`🖼 Deleted ${images.length} old images`);
-    this.logger.log( `🖼 Deleted ${deleted}/${images.length} old images` );
+    this.logger.log(
+      `Inactive images: deleted ${deleted}; failed ${failed}; total ${images.length}.`,
+    );
+
+    if (failed > 0) {
+      throw new Error(
+        `Failed to delete ${failed} inactive project image(s).`,
+      );
+    }
   }
 
-  private async cleanupVeryOldProjects() {
+  private async cleanupVeryOldProjects(): Promise<void> {
     const oldProjects: { id: string }[] = await this.projectRepo.query(`
       SELECT p.id
       FROM projects p
 
       LEFT JOIN (
-        SELECT "projectId", MAX(date) as last_time_entry
+        SELECT
+          "projectId",
+          MAX(date)::timestamp AS last_time_entry
         FROM time_entries
         GROUP BY "projectId"
       ) t ON t."projectId" = p.id
 
       LEFT JOIN (
-        SELECT "projectId", MAX(date) as last_assignment
+        SELECT
+          "projectId",
+          MAX(date)::timestamp AS last_assignment
         FROM project_assignments
         GROUP BY "projectId"
       ) a ON a."projectId" = p.id
 
-      WHERE p."createdAt" IS NOT NULL
-        AND GREATEST( COALESCE(t.last_time_entry, p."createdAt"), COALESCE(a.last_assignment, p."createdAt"), p."createdAt")
-            < NOW() - INTERVAL '5 years'
+      WHERE ${this.veryOldProjectCondition}
+      ORDER BY p."createdAt" ASC
     `);
-    //COALESCE(t.last_time_entry, a.last_assignment, p."createdAt")
-      if (!oldProjects.length) {
-        this.logger.log(
-          '📁 No very old projects to clean',
-        );
 
-        return;
-      }
-
-    for (const p of oldProjects) {
-      this.logger.warn(`🔥 DELETE PROJECT ${p.id}`);
-         await this.deleteVeryOldProject(
-        p.id,/*
-      await this.projectRepo.manager.transaction(async (manager) => {
-        try {
-          // images
-          await this.imagesService.removeByProject(p.id);
-
-          // time entries
-          await manager.query(
-            `DELETE FROM time_entries WHERE "projectId" = $1`,
-            [p.id],
-          );
-
-          // assignments
-          await manager.query(
-            `DELETE FROM project_assignments WHERE "projectId" = $1`,
-            [p.id],
-          );
-
-          // project
-          await manager.query(`DELETE FROM projects WHERE id = $1`, [p.id]);
-        } catch (e) {
-          this.logger.error(`❌ Failed to fully delete project ${p.id}`, e);
-          throw e;
-        }
-      }*/);
+    if (oldProjects.length === 0) {
+      this.logger.log('No very old projects to delete.');
+      return;
     }
-  }
-  private async deleteVeryOldProject(
-    projectId: string,
-  ) {
+
     this.logger.warn(
-      `🔥 DELETE PROJECT ${projectId}`,
+      `Found ${oldProjects.length} candidate project(s) for deletion.`,
     );
 
-    try {
-      /**
-       * First remove images through the existing service.
-       *
-       * ProjectImagesService is responsible for Cloudinary.
-       */
-      await this.imagesService.removeByProject(
-        projectId,
-      );
+    let deleted = 0;
+    let skipped = 0;
+    let failed = 0;
 
-      /**
-       * Then delete DB records.
-       */
-      await this.projectRepo.manager.transaction(
-        async manager => {
-          await manager.query(
-            `
-              DELETE FROM time_entries
-              WHERE "projectId" = $1
-            `,
-            [projectId],
+    for (const project of oldProjects) {
+      try {
+        const wasDeleted = await this.deleteVeryOldProject(project.id);
+
+        if (wasDeleted) {
+          deleted++;
+        } else {
+          skipped++;
+
+          this.logger.warn(
+            `Project ${project.id} is no longer eligible; skipped.`,
           );
+        }
+      } catch (error) {
+        failed++;
 
-          await manager.query(
-            `
-              DELETE FROM project_assignments
-              WHERE "projectId" = $1
-            `,
-            [projectId],
-          );
+        this.logger.error(
+          `Failed to delete project ${project.id}: ${this.errorMessage(error)}`,
+          error instanceof Error ? error.stack : undefined,
+        );
+      }
+    }
 
-          await manager.query(
-            `
-              DELETE FROM projects
-              WHERE id = $1
-            `,
-            [projectId],
-          );
-        },
-      );
+    this.logger.log(
+      `Old projects: deleted ${deleted}; skipped ${skipped}; failed ${failed}.`,
+    );
 
-      this.logger.log(
-        `✅ Deleted project ${projectId}`,
-      );
-    } catch (error) {
-      this.logger.error(
-        `❌ Failed to fully delete project ${projectId}`,
-        error,
+    if (failed > 0) {
+      throw new Error(
+        `Failed to delete ${failed} old project(s).`,
       );
     }
+  }
+  
+ private async deleteVeryOldProject(
+    projectId: string,
+  ): Promise<boolean> {
+    return this.dataSource.transaction(async (manager) => {
+      const locked: { id: string }[] = await manager.query(
+        'SELECT id FROM projects WHERE id = $1 FOR UPDATE',
+        [projectId],
+      );
+
+      if (locked.length === 0) {
+        return false;
+      }
+
+      const eligible: { id: string }[] = await manager.query(
+        `
+          SELECT p.id
+          FROM projects p
+
+          LEFT JOIN (
+            SELECT
+              "projectId",
+              MAX(date)::timestamp AS last_time_entry
+            FROM time_entries
+            GROUP BY "projectId"
+          ) t ON t."projectId" = p.id
+
+          LEFT JOIN (
+            SELECT
+              "projectId",
+              MAX(date)::timestamp AS last_assignment
+            FROM project_assignments
+            GROUP BY "projectId"
+          ) a ON a."projectId" = p.id
+
+          WHERE p.id = $1
+            AND ${this.veryOldProjectCondition}
+        `,
+        [projectId],
+      );
+
+      if (eligible.length === 0) {
+        return false;
+      }
+
+      await this.imagesService.removeByProject(projectId);
+      await this.receiptsService.removeByProject(projectId);
+
+      await manager.query(
+        'DELETE FROM time_entries WHERE "projectId" = $1',
+        [projectId],
+      );
+
+      await manager.query(
+        'DELETE FROM project_assignments WHERE "projectId" = $1',
+        [projectId],
+      );
+
+      const result: { id: string }[] = await manager.query(
+        'DELETE FROM projects WHERE id = $1 RETURNING id',
+        [projectId],
+      );
+
+      if (result.length === 0) {
+        throw new Error(
+          `Project ${projectId} was not deleted from the database.`,
+        );
+      }
+
+      this.logger.log(`Deleted old project ${projectId}.`);
+      return true;
+    });
+  }
+  private errorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
   }
 }

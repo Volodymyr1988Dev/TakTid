@@ -12,6 +12,7 @@ import { Readable } from 'stream';
 import { UploadApiResponse } from 'cloudinary';
 import { Express } from 'express';
 import pLimit from 'p-limit';
+import { deleteCloudinaryAsset } from '../utils/delete-cloudinary-asset';
 
 @Injectable()
 export class ProjectImagesService {
@@ -35,22 +36,6 @@ export class ProjectImagesService {
     const limitUpload = pLimit(3);
     const uploadedPublicIds: string[] = [];
     const savedPublicIds: string[] = [];
-    /*
-    const uploads = files.map((file) =>
-      limitUpload(async () => {
-        const uploaded = await this.uploadToCloudinary(file.buffer, projectId);
-
-        const image = this.imageRepo.create({
-          url: uploaded.secure_url,
-          publicId: uploaded.public_id,
-          project,
-        } as Partial<ProjectImage>);
-
-        return this.imageRepo.save(image);
-      }),
-    );
-
-    return Promise.all(uploads);*/
     const results = await Promise.allSettled(
       files.map((file) =>
         limitUpload(async () => {
@@ -59,7 +44,6 @@ export class ProjectImagesService {
             projectId,
           );
 
-          // Запам'ятовуємо тільки файли цього запиту.
           uploadedPublicIds.push(uploaded.public_id);
 
           const image = this.imageRepo.create({
@@ -67,8 +51,6 @@ export class ProjectImagesService {
             publicId: uploaded.public_id,
             project,
           } as Partial<ProjectImage>);
-
-          //return this.imageRepo.save(image);
           const saved = await this.imageRepo.save(image);
 
           savedPublicIds.push(uploaded.public_id);
@@ -162,7 +144,7 @@ export class ProjectImagesService {
     const images = await this.imageRepo.find({
       where: { project: { id: projectId } },
     });
-
+    /*
     await Promise.all(
       images.map(async (image) => {
         try {
@@ -173,7 +155,27 @@ export class ProjectImagesService {
       }),
     );
 
-    await this.imageRepo.remove(images);
+    await this.imageRepo.remove(images);*/
+    const limit = pLimit(3);
+
+   const results = await Promise.allSettled(
+      images.map((image) =>
+        limit(async () => {
+          await deleteCloudinaryAsset(image.publicId);
+          await this.imageRepo.delete({ id: image.id });
+        }),
+      ),
+    );
+
+    const failures = results.filter(
+      (result) => result.status === 'rejected',
+    );
+
+    if (failures.length > 0) {
+      throw new Error(
+        `Failed to delete ${failures.length} of ${images.length} project images`,
+      );
+    }
   }
   async remove(imageId: string) {
     const image = await this.imageRepo.findOne({
@@ -183,14 +185,17 @@ export class ProjectImagesService {
     //if (!image) { throw new NotFoundException('Image not found')}
     if (!image) return;
 
-    //await cloudinary.uploader.destroy(image.publicId);
+    /*
     try {
       await cloudinary.uploader.destroy(image.publicId);
     } catch (e) {
       console.warn('Cloudinary delete failed:', image.publicId, e);
     }
 
-    await this.imageRepo.remove(image);
+    await this.imageRepo.remove(image);*/
+
+    await deleteCloudinaryAsset(image.publicId);
+    await this.imageRepo.delete({ id: image.id });
   }
   private uploadToCloudinary(
     buffer: Buffer,

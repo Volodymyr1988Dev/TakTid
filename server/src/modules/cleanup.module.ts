@@ -7,6 +7,7 @@ import { ProjectAssignment } from '../entities/Project/ProjectAssignment';
 import { TimeEntry } from '../entities/TimeEntries/TimeEntries';
 import { SessionModule } from './session.module';
 import { ProjectImagesModule } from './projectImage.module';
+import { ProjectsModule } from './project.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ProjectImagesModule } from './projectImage.module';
     ]),
     SessionModule,
     ProjectImagesModule,
+    ProjectsModule,
   ],
   providers: [CleanupService],
 })

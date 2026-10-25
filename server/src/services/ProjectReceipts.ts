@@ -13,6 +13,7 @@ import { UploadApiResponse } from 'cloudinary';
 import { Express } from 'express';
 import pLimit from 'p-limit';
 import { ProjectReceipt } from '../entities/Project/ProjectReceipt';
+import { deleteCloudinaryAsset } from '../utils/delete-cloudinary-asset';
 
 @Injectable()
 export class ProjectReceiptsService {
@@ -78,7 +79,7 @@ export class ProjectReceiptsService {
     const receipts = await this.receiptRepo.find({
       where: { project: { id: projectId } },
     });
-
+    /*
     await Promise.all(
       receipts.map(async (receipt) => {
         try {
@@ -89,7 +90,26 @@ export class ProjectReceiptsService {
       }),
     );
 
-    await this.receiptRepo.remove(receipts);
+    await this.receiptRepo.remove(receipts);*/
+    const limit = pLimit(3);
+    const results = await Promise.allSettled(
+      receipts.map((receipt) =>
+        limit(async () => {
+          await deleteCloudinaryAsset(receipt.publicId);
+          await this.receiptRepo.delete({ id: receipt.id });
+        }),
+      ),
+    );
+
+    const failures = results.filter(
+      (result) => result.status === 'rejected',
+    );
+
+    if (failures.length > 0) {
+      throw new Error(
+        `Failed to delete ${failures.length} of ${receipts.length} project receipts`,
+      );
+    }
   }
   async remove(receiptId: string) {
     const receipt = await this.receiptRepo.findOne({
@@ -99,16 +119,16 @@ export class ProjectReceiptsService {
     if (!receipt) {
       throw new NotFoundException('Receipt not found');
     }
-    //if (!receipt) return;
-
-    //await cloudinary.uploader.destroy(receipt.publicId);
+    /*
     try {
       await cloudinary.uploader.destroy(receipt.publicId);
     } catch (e) {
       console.warn('Cloudinary delete failed:', receipt.publicId, e);
     }
 
-    await this.receiptRepo.remove(receipt);
+    await this.receiptRepo.remove(receipt);*/
+    await deleteCloudinaryAsset(receipt.publicId);
+    await this.receiptRepo.delete({ id: receipt.id });
   }
   private uploadToCloudinary(
     buffer: Buffer,
