@@ -19,9 +19,5 @@
   "bugs": {
     "url": "https://github.com/Volodymyr1988Dev/TakTid/issues"
   },
-  "homepage": "https://github.com/Volodymyr1988Dev/TakTid#readme",
-  "dependencies": {
-    "@primeuix/themes": "^1.2.3",
-    "i": "^0.3.7"
-  }
+  "homepage": "https://github.com/Volodymyr1988Dev/TakTid#readme"
 }
