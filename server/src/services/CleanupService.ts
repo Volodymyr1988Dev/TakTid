@@ -53,6 +53,12 @@ export class CleanupService {
       this.logger.warn('Cleanup is already running; skipping.');
       return;
     }
+    if (process.env.ENABLE_CLEANUP_CRON !== 'true') {
+      this.logger.log(
+        'Cleanup cron is disabled for this deployment',
+      );
+      return;
+    }
 
     this.isRunning = true;
 
