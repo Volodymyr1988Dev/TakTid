@@ -1,11 +1,18 @@
 <script setup lang="ts">
+import LockIcon from './LockIcon.vue'
+import { useI18n } from 'vue-i18n'
+
 defineProps<{
   title: string
+  locked?: boolean
+  isAdmin?: boolean
+  showLockControls?: boolean
 }>()
-
+const { t } = useI18n()
 const emit = defineEmits<{
   (e: 'prev'): void
   (e: 'next'): void
+  (e: 'toggleLock'): void
 }>()
 </script>
 
@@ -24,6 +31,34 @@ const emit = defineEmits<{
     >
       ›
     </button>
+    <div
+      v-if="isAdmin && showLockControls"
+      class="lock-controls"
+    >
+      <span
+        class="lock-indicator"
+        :class="locked ? 'is-locked' : 'is-open'"
+        :title="locked
+          ? t('calendar.weekLocked')
+          : t('calendar.weekOpen')"
+      >
+        <LockIcon
+          :locked="!!locked"
+          :size="19"
+        />
+      </span>
+
+      <button
+        class="lock-button"
+        :class="locked ? 'unlock-button' : 'close-button'"
+        @click="emit('toggleLock')"
+      >
+        {{ locked
+          ? t('calendar.unlockWeek')
+          : t('calendar.closeWeek')
+        }}
+      </button>
+    </div>
   </div>
 </template>
 

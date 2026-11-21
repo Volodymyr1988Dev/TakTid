@@ -23,3 +23,43 @@
 .title {
   font-weight: 600;
 }
+.lock-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.lock-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lock-indicator.is-locked {
+  color: #dc2626;
+}
+
+.lock-indicator.is-open {
+  color: #16a34a;
+}
+
+.lock-button {
+  border: none;
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.close-button {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.unlock-button {
+  background: #dcfce7;
+  color: #15803d;
+}

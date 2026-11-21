@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useSwipe } from '@vueuse/core'
 import dayjs, { Dayjs } from 'dayjs'
 import { isHoliday } from '../helpers/holiday'
+import LockIcon from '../ui/LockIcon.vue'
 //import { useI18n } from 'vue-i18n'
 
 //const { t } = useI18n()
@@ -15,6 +16,7 @@ const emit = defineEmits<{
 const props = defineProps<{
   current: Dayjs
   hoursForDay: (day: Dayjs) => number
+  isWeekLocked: (day: Dayjs) => boolean
 }>()
 
 const el = ref<HTMLElement | null>(null)
@@ -94,7 +96,12 @@ function selectDay(day: Dayjs): void {
         <div class="day-number">
           {{ day.date() }}
         </div>
-
+          <LockIcon
+            v-if="isWeekLocked(day)"
+            :locked="true"
+            :size="14"
+            class="day-lock-icon"
+          />
         <div
           v-if="hoursForDay(day) > 0"
           class="day-hours"

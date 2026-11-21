@@ -262,6 +262,10 @@ export default {
     date: 'Дата',
     weekTotal: 'Всього за тиждень',
     monthTotal: 'Всього за місяць',
+    closeWeek: 'Закрити тиждень',
+    openWeek: 'Відкрити тиждень',
+    closed: 'Закрито',
+    unlockWeek: 'Розблокувати тиждень',
   },
 
   week: {

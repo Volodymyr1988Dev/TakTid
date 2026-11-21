@@ -2,11 +2,13 @@
 import type { DayEntry } from '../types/DayEntry.type';
 import { TimeKind } from '../types/timeKind.enum';
 import { useI18n } from 'vue-i18n'
+import LockIcon from '../components/ui/LockIcon.vue'
 
 const { t } = useI18n()
 defineProps<{
   date: string
   entries: DayEntry[]
+  locked: boolean
 }>()
 
 const emit = defineEmits<{
@@ -50,8 +52,24 @@ function getProjectSubtitle(e: DayEntry) {
     <header>
       <button @click="emit('back')">
         ← {{ t('project.back') }}
-      </button>
-      <button @click="emit('add')">
+      </button> 
+      <!--🔒-->
+      <div
+        class="lock-status"
+        :class="locked ? 'is-locked' : 'is-open'"
+        :title="locked
+          ? t('calendar.weekLocked')
+          : t('calendar.weekOpen')"
+      >
+        <LockIcon
+          :locked="locked"
+          :size="19"
+        />
+      </div>
+
+      <button 
+        :disabled="locked"
+        @click="emit('add')">
         + {{ t('project.add') }}
       </button>
       <strong>{{ date }}</strong>
@@ -61,7 +79,8 @@ function getProjectSubtitle(e: DayEntry) {
       v-for="e in entries"
       :key="e.id"
       class="entry"
-      @click="emit('edit', e)"
+      :class="{ locked }"
+      @click="!locked && emit('edit', e)"
     >
       <div>
         <strong>{{ getTitle(e) }}</strong>
@@ -72,3 +91,25 @@ function getProjectSubtitle(e: DayEntry) {
     </div>
   </div>
 </template>
+
+<style scoped>
+.lock-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lock-status.is-locked {
+  color: #dc2626;
+}
+
+.lock-status.is-open {
+  color: #16a34a;
+}
+
+.entry.locked {
+  cursor: default;
+  opacity: 0.75;
+}
+</style>

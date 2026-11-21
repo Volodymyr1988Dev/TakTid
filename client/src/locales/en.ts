@@ -1,5 +1,4 @@
 //import { toDisplayString } from "vue";
-
 export default {
   common: {
     title: 'Title',
@@ -265,6 +264,10 @@ export default {
     date: 'Date',
     weekTotal: 'Week total',
     monthTotal: 'Month total',
+    closeWeek: 'Close week',
+    openWeek: 'Open week',
+    closed: 'Closed',
+    unlockWeek: 'Unlock week',
   },
     week: {
     mon: 'Mon',
