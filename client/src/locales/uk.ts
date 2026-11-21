@@ -266,6 +266,7 @@ export default {
     openWeek: 'Відкрити тиждень',
     closed: 'Закрито',
     unlockWeek: 'Розблокувати тиждень',
+    closeOpenWeeks: 'Закрити всі відкриті тижні',
   },
 
   week: {

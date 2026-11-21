@@ -267,7 +267,8 @@ export default {
     closeWeek: 'Zamknij tydzień',
     openWeek: 'Otwórz tydzień',
     closed: 'Zamknięty',
-    unlockWeek: 'Odblokuj tydzień'
+    unlockWeek: 'Odblokuj tydzień',
+    closeOpenWeeks: 'Zamknij wszystkie otwarte tygodnie',
   },
 
   week: {
