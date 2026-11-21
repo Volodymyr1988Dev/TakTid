@@ -268,7 +268,14 @@ export default {
     openWeek: 'Deschide săptămâna',
     closed: 'Închis',
     unlockWeek: 'Deblochează săptămâna',
-    closeOpenWeeks: 'Închide toate săptămânile deschise'
+    closeOpenWeeks: 'Închide toate săptămânile deschise',
+    confirmCloseWeek: 'Ești sigur că vrei să închizi această săptămână?',
+    confirmUnlockWeek: 'Ești sigur că vrei să deblochezi această săptămână pentru 7 zile?',
+    confirmCloseMonth: 'Ești sigur că vrei să închizi toate săptămânile deschise din această lună?',
+    confirmUnlockMonth: 'Ești sigur că vrei să deblochezi toate săptămânile din această lună pentru 7 zile?',
+    closeMonth: 'Închide lună',
+    unlockMonth: 'Deblochează lună',
+
   },
 
   week: {

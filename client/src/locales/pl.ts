@@ -269,6 +269,12 @@ export default {
     closed: 'Zamknięty',
     unlockWeek: 'Odblokuj tydzień',
     closeOpenWeeks: 'Zamknij wszystkie otwarte tygodnie',
+    confirmCloseWeek: 'Czy na pewno chcesz zamknąć ten tydzień?',
+    confirmUnlockWeek: 'Czy na pewno chcesz odblokować ten tydzień na 7 dni?',
+    confirmCloseMonth: 'Czy na pewno chcesz zamknąć wszystkie otwarte tygodnie w tym miesiącu?',
+    confirmUnlockMonth: 'Czy na pewno chcesz odblokować wszystkie tygodnie w tym miesiącu na 7 dni?',
+    closeMonth: 'Zamknij miesiąc',
+    unlockMonth: 'Odblokuj miesiąc',
   },
 
   week: {
