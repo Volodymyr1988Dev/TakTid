@@ -48,6 +48,70 @@ const lockStore = useTimePeriodLockStore()
 const selectedDayLocked = computed(
   () => lockStore.status?.locked ?? true,
 )
+const monthWeekDates = computed(() => {
+  const firstWeek = current.value
+    .clone()
+    .startOf('month')
+    .startOf('isoWeek')
+
+  const lastWeek = current.value
+    .clone()
+    .endOf('month')
+    .endOf('isoWeek')
+
+  const dates: string[] = []
+
+  let week = firstWeek.clone()
+
+  while (
+    week.isBefore(lastWeek, 'day') ||
+    week.isSame(lastWeek, 'day')
+  ) {
+    dates.push(week.format('YYYY-MM-DD'))
+    week = week.add(1, 'week')
+  }
+
+  return dates
+})
+
+const monthWeekStatuses = computed(() =>
+  monthWeekDates.value.map(date =>
+    lockStore.getStatusForDate(date),
+  ),
+)
+
+// Do not offer bulk closing until every week has a loaded status.
+const monthStatusesLoaded = computed(() =>
+  monthWeekStatuses.value.every(status => status !== undefined),
+)
+
+// The month is considered open if at least one week is open.
+const monthHasOpenWeeks = computed(() =>
+  monthStatusesLoaded.value &&
+  monthWeekStatuses.value.some(status => status?.locked === false),
+)
+
+// The month is considered locked only if every week is locked.
+const monthAllLocked = computed(() =>
+  monthStatusesLoaded.value &&
+  monthWeekStatuses.value.every(status => status?.locked === true),
+)
+async function closeOpenWeeksInMonth() {
+  if (!monthStatusesLoaded.value) return
+
+  for (const date of monthWeekDates.value) {
+    const status = lockStore.getStatusForDate(date)
+
+    if (status && !status.locked) {
+      await lockStore.close(date)
+    }
+  }
+
+  const from = current.value.clone().startOf('month')
+  const to = current.value.clone().endOf('month')
+
+  await loadVisibleLockStatuses(from, to)
+}
 const suggestionsStore = useSuggestionsStore()
 async function loadVisibleLockStatuses(from: Dayjs, to: Dayjs) {
   const firstWeek = from.clone().startOf('isoWeek')
@@ -284,13 +348,19 @@ const monthTotal = computed(() => {
 
 async function openDay(day: Dayjs) {
   selectedDay.value = day
+
   selectedDayEntries.value = entries.value.filter(
     e => dayjs(e.date).isSame(day, 'day'),
   )
+
   await lockStore.loadStatus(day.format('YYYY-MM-DD'))
-  view.value = selectedDayEntries.value.length
-    ? 'dayEntries'
-    : 'tabs'
+
+  const locked = lockStore.status?.locked ?? true
+
+  view.value =
+    selectedDayEntries.value.length || locked
+      ? 'dayEntries'
+      : 'tabs'
 }
 
 function editFromList(entry: DayEntry) {
@@ -352,11 +422,12 @@ async function reloadCalendar () {
   navigating.value = false
 }
 
-function isWeekLocked(day: Dayjs): boolean {
-  const date = day.format('YYYY-MM-DD')
-  return lockStore.getStatusForDate(date)?.locked ?? false
-}
 async function toggleWeekLock() {
+  if (mode.value === 'month') {
+    await closeOpenWeeksInMonth()
+    return
+  }
+
   const date = current.value.format('YYYY-MM-DD')
 
   if (lockStore.status?.locked) {
@@ -364,6 +435,8 @@ async function toggleWeekLock() {
   } else {
     await lockStore.close(date)
   }
+
+  await lockStore.loadStatus(date)
 }
 </script>
 
@@ -375,9 +448,19 @@ async function toggleWeekLock() {
       :title="mode === 'week'
         ? t('calendar.weekLabel', { num: current.week() }) //`Week ${current.week()}`
         : current.format('MMMM YYYY')"
-      :locked="lockStore.status?.locked ?? true"
-      :is-admin="isAdmin" 
-      :show-lock-controls="mode === 'week'" 
+      :locked="mode === 'week'
+      ? (lockStore.status?.locked ?? true)
+      : monthAllLocked"
+      :is-admin="isAdmin"
+      :show-lock-controls="true"
+      :show-lock-action="
+        mode === 'week' || monthHasOpenWeeks
+      "
+      :lock-action-label="
+        mode === 'month'
+          ? t('calendar.closeOpenWeeks')
+          : undefined
+      "
       @prev="prev"
       @next="next"
       @toggle-lock="toggleWeekLock"
@@ -387,7 +470,6 @@ async function toggleWeekLock() {
       v-if="mode === 'week'"
       :current="current"
       :hours-for-day="hoursForDay"
-      :is-week-locked="isWeekLocked"
       @select-day="openDay"
     />
 
@@ -395,7 +477,6 @@ async function toggleWeekLock() {
       v-else
       :current="current"
       :hours-for-day="hoursForDay"
-      :is-week-locked="isWeekLocked"
       @select-day="openDay"
     />
 

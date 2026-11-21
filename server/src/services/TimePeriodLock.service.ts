@@ -16,7 +16,7 @@ import {
 
 @Injectable()
 export class TimePeriodLockService {
-  private readonly UNLOCK_HOURS = 24;
+  private readonly UNLOCK_DAYS = 7;
 
   constructor(
     @InjectRepository(TimePeriodLock)
@@ -72,6 +72,18 @@ export class TimePeriodLockService {
     };
   }
 
+  private getAutoLockCutoff(): string {
+    const cutoff = new Date(`${this.getToday()}T00:00:00.000Z`);
+
+    cutoff.setUTCDate(cutoff.getUTCDate() - 35);
+
+    return cutoff.toISOString().slice(0, 10);
+    }
+
+    private isAutomaticallyLocked(period: TimePeriodLock): boolean {
+    return period.periodEnd < this.getAutoLockCutoff();
+    }
+
   private async getOrCreatePeriod(date: string) {
     const { periodStart, periodEnd } =
       this.getWeekRange(date);
@@ -117,25 +129,20 @@ export class TimePeriodLockService {
   }
 
   private isPeriodLocked(period: TimePeriodLock): boolean {
-    const today = this.getToday();
-
     const temporarilyUnlocked =
-      period.unlockedUntil !== null &&
-      period.unlockedUntil.getTime() > Date.now();
+        period.unlockedUntil !== null &&
+        period.unlockedUntil.getTime() > Date.now();
 
+    // Temporary unlock always takes priority.
     if (temporarilyUnlocked) {
-      return false;
+        return false;
     }
 
-    // Automatically close completed weeks.
-    const automaticallyClosed =
-      period.periodEnd < today;
-
     return (
-      period.manuallyLocked ||
-      automaticallyClosed
+        period.manuallyLocked ||
+        this.isAutomaticallyLocked(period)
     );
-  }
+    }
 
   async assertPeriodOpen(
     //_userId: string,
@@ -163,7 +170,7 @@ export class TimePeriodLockService {
       locked,
       manuallyLocked: period.manuallyLocked,
       automaticallyLocked:
-        period.periodEnd < this.getToday(),
+        this.isAutomaticallyLocked(period),
       temporarilyUnlocked:
         period.unlockedUntil !== null &&
         period.unlockedUntil.getTime() > Date.now(),
@@ -200,7 +207,7 @@ export class TimePeriodLockService {
     const period = await this.getOrCreatePeriod(date);
 
     period.unlockedUntil = new Date(
-      Date.now() + this.UNLOCK_HOURS * 60 * 60 * 1000,
+      Date.now() + this.UNLOCK_DAYS * 24 * 60 * 60 * 1000,
     );
 
     period.unlockedByUserId = adminId;

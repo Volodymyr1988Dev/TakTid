@@ -4,12 +4,11 @@ import { useSwipe } from '@vueuse/core'
 import dayjs, { Dayjs } from 'dayjs'
 import { isHoliday } from '../helpers/holiday'
 import { isWeekend } from '../helpers/helpers'
-import LockIcon from '../ui/LockIcon.vue'
+//import LockIcon from '../ui/LockIcon.vue'
 
 const props = defineProps<{
   current: Dayjs
   hoursForDay: (day: Dayjs) => number
-  isWeekLocked: (day: Dayjs) => boolean
 }>()
 
 const emit = defineEmits<{
@@ -67,12 +66,6 @@ const isFuture = (day: Dayjs): boolean =>
       <div class="date">
         {{ day.format('D') }}
       </div>
-      <LockIcon
-        v-if="isWeekLocked(day)"
-        :locked="true"
-        :size="14"
-        class="day-lock-icon"
-      />
       <div class="hours">
         {{ hoursForDay(day) }}h
       </div>

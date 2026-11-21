@@ -267,7 +267,8 @@ export default {
     closeWeek: 'Închide săptămâna',
     openWeek: 'Deschide săptămâna',
     closed: 'Închis',
-    unlockWeek: 'Deblochează săptămâna'
+    unlockWeek: 'Deblochează săptămâna',
+    closeOpenWeeks: 'Închide toate săptămânile deschise'
   },
 
   week: {

@@ -268,6 +268,7 @@ export default {
     openWeek: 'Open week',
     closed: 'Closed',
     unlockWeek: 'Unlock week',
+    closeOpenWeeks: 'Close all open weeks',
   },
     week: {
     mon: 'Mon',

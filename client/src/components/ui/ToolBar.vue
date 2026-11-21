@@ -7,6 +7,8 @@ defineProps<{
   locked?: boolean
   isAdmin?: boolean
   showLockControls?: boolean
+  showLockAction?: boolean
+  lockActionLabel?: string
 }>()
 const { t } = useI18n()
 const emit = defineEmits<{
@@ -32,7 +34,7 @@ const emit = defineEmits<{
       ›
     </button>
     <div
-      v-if="isAdmin && showLockControls"
+      v-if="showLockControls"
       class="lock-controls"
     >
       <span
@@ -49,14 +51,16 @@ const emit = defineEmits<{
       </span>
 
       <button
+        v-if="isAdmin && showLockAction"
         class="lock-button"
         :class="locked ? 'unlock-button' : 'close-button'"
         @click="emit('toggleLock')"
       >
-        {{ locked
-          ? t('calendar.unlockWeek')
-          : t('calendar.closeWeek')
-        }}
+        {{ lockActionLabel ?? (
+          locked
+            ? t('calendar.unlockWeek')
+            : t('calendar.closeWeek')
+        ) }}
       </button>
     </div>
   </div>

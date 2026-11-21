@@ -266,7 +266,8 @@ export default {
     closeWeek: 'Stäng vecka',
     openWeek: 'Öppna vecka',
     closed: 'Stängd',
-    unlockWeek: 'Lås upp vecka'
+    unlockWeek: 'Lås upp vecka',
+    closeOpenWeeks: 'Stäng alla öppna veckor',
   },
 
   week: {
