@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
@@ -12,6 +13,7 @@ import { CreateTimeEntryDto } from '../types/index';
 import { UpdateTimeEntryDto } from '../types/timeEntry/timeEntry.update.dto';
 import { timeKind } from '../types/enums/enum';
 import { UserMonthStats } from '../types/stats/UserMonthStats';
+import { TimePeriodLockService } from './TimePeriodLock.service';
 
 @Injectable()
 export class TimeEntryService {
@@ -22,9 +24,11 @@ export class TimeEntryService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Projects)
     private readonly projectRepo: Repository<Projects>,
+    private readonly timePeriodLockService: TimePeriodLockService,
   ) {}
 
   async create(dto: CreateTimeEntryDto, userId: string): Promise<TimeEntry> {
+    await this.timePeriodLockService.assertPeriodOpen( dto.date );
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
@@ -80,12 +84,14 @@ export class TimeEntryService {
   }
 
   async update(id: string, dto: UpdateTimeEntryDto): Promise<TimeEntry> {
-    console.log('update started', dto);
+    //console.log('update started', dto);
     const entry = await this.timeRepo.findOne({
       where: { id },
       relations: ['project'],
     });
     if (!entry) throw new NotFoundException('Time entry not found');
+    await this.timePeriodLockService.assertPeriodOpen( entry.date );
+
     if ([timeKind.SICK, timeKind.VACATION, timeKind.VAB].includes(entry.type)) {
       entry.project = null;
     }
@@ -103,6 +109,7 @@ export class TimeEntryService {
     if (dto.type !== undefined) {
       entry.type = dto.type;
     }
+
     this.forbidProjectForAbsence(entry.type, entry.project?.id);
     const startTime = dto.startTime ?? entry.startTime;
     const endTime = dto.endTime ?? entry.endTime;
@@ -173,10 +180,21 @@ export class TimeEntryService {
   }
 
   async remove(id: string): Promise<void> {
+    const entry = await this.timeRepo.findOne({
+    where: { id },
+  });
+
+  if (!entry) {
+    throw new NotFoundException('Time entry not found');
+  }
+  await this.timePeriodLockService.assertPeriodOpen(entry.date);
+
+  await this.timeRepo.remove(entry);
+  /*
     const result = await this.timeRepo.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException('Time entry not found');
-    }
+    }*/
   }
 
   async getAdminMonthStats(year: number, month: number) {

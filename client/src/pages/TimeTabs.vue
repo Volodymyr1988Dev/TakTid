@@ -23,7 +23,11 @@ import type { Totals } from '../types/totals'
 import { useSuggestionsStore } from '../stores/suggestions.store'
 import { useI18n } from 'vue-i18n'
 import { isCountedInTotal } from '../components/helpers/helpers'
+import { useTimePeriodLockStore } from '../stores/timePeriodLock.store'
 
+defineProps<{
+  isAdmin: boolean
+}>()
 const { t } = useI18n()
 type ViewState = 'calendar' | 'tabs' |'dayEntries' | 'modal'
 const view = ref<ViewState>('calendar')
@@ -39,8 +43,40 @@ const editEntry = ref<DayEntry | null>(null)
 
 const auth = useAuthStore()
 const projectStore = useProjectStore()
-
+const lockStore = useTimePeriodLockStore()
+//const isAdmin = computed(() => auth.user?.isAdmin === true)
+const selectedDayLocked = computed(
+  () => lockStore.status?.locked ?? true,
+)
 const suggestionsStore = useSuggestionsStore()
+async function loadVisibleLockStatuses(from: Dayjs, to: Dayjs) {
+  const firstWeek = from.clone().startOf('isoWeek')
+  const lastWeek = to.clone().endOf('isoWeek')
+  const currentWeek = current.value
+    .clone()
+    .startOf('isoWeek')
+    .format('YYYY-MM-DD')
+
+  const requests: Promise<unknown>[] = []
+
+  let week = firstWeek.clone()
+
+  while (
+    week.isBefore(lastWeek, 'day') ||
+    week.isSame(lastWeek, 'day')
+  ) {
+    const date = week.format('YYYY-MM-DD')
+    const isCurrentWeek = date === currentWeek
+
+    requests.push(
+      lockStore.loadStatus(date, isCurrentWeek),
+    )
+
+    week = week.add(1, 'week')
+  }
+
+  await Promise.all(requests)
+}
 
  function mapToDayEntries(
   timeEntries: TimeEntry[],
@@ -148,6 +184,7 @@ async function loadEntries() {
     getTimeEntries(from.format('YYYY-MM-DD'), to.format('YYYY-MM-DD')),
     getProjectAssignments(from.format('YYYY-MM-DD'), to.format('YYYY-MM-DD'))
       .catch(() => []),
+      loadVisibleLockStatuses(from, to),
   ])
   
   if (id !== loadCounter) return
@@ -245,11 +282,12 @@ const monthTotal = computed(() => {
     .reduce((sum, e) => sum + Number(e.hours), 0)
 })
 
-function openDay(day: Dayjs) {
+async function openDay(day: Dayjs) {
   selectedDay.value = day
   selectedDayEntries.value = entries.value.filter(
     e => dayjs(e.date).isSame(day, 'day'),
   )
+  await lockStore.loadStatus(day.format('YYYY-MM-DD'))
   view.value = selectedDayEntries.value.length
     ? 'dayEntries'
     : 'tabs'
@@ -313,6 +351,20 @@ async function reloadCalendar () {
   view.value = 'calendar'
   navigating.value = false
 }
+
+function isWeekLocked(day: Dayjs): boolean {
+  const date = day.format('YYYY-MM-DD')
+  return lockStore.getStatusForDate(date)?.locked ?? false
+}
+async function toggleWeekLock() {
+  const date = current.value.format('YYYY-MM-DD')
+
+  if (lockStore.status?.locked) {
+    await lockStore.unlock(date)
+  } else {
+    await lockStore.close(date)
+  }
+}
 </script>
 
 <template>
@@ -323,14 +375,19 @@ async function reloadCalendar () {
       :title="mode === 'week'
         ? t('calendar.weekLabel', { num: current.week() }) //`Week ${current.week()}`
         : current.format('MMMM YYYY')"
+      :locked="lockStore.status?.locked ?? true"
+      :is-admin="isAdmin" 
+      :show-lock-controls="mode === 'week'" 
       @prev="prev"
       @next="next"
+      @toggle-lock="toggleWeekLock"
     />
 
     <WeekView
       v-if="mode === 'week'"
       :current="current"
       :hours-for-day="hoursForDay"
+      :is-week-locked="isWeekLocked"
       @select-day="openDay"
     />
 
@@ -338,6 +395,7 @@ async function reloadCalendar () {
       v-else
       :current="current"
       :hours-for-day="hoursForDay"
+      :is-week-locked="isWeekLocked"
       @select-day="openDay"
     />
 
@@ -388,6 +446,7 @@ async function reloadCalendar () {
     v-if="view === 'dayEntries' && selectedDay"
     :date="selectedDay.format('YYYY-MM-DD')"
     :entries="selectedDayEntries"
+    :locked="selectedDayLocked"
     @edit="editFromList"
     @add="addWork"
     @back="view = 'calendar'"

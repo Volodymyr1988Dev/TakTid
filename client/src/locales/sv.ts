@@ -263,6 +263,10 @@ export default {
     date: 'Datum',
     weekTotal: 'Veckototal',
     monthTotal: 'Månadstotal',
+    closeWeek: 'Stäng vecka',
+    openWeek: 'Öppna vecka',
+    closed: 'Stängd',
+    unlockWeek: 'Lås upp vecka'
   },
 
   week: {

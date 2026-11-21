@@ -13,6 +13,7 @@ import { ProjectMaterial } from '../entities/Project/ProjectMaterial';
 import { ProjectMaterialItem } from '../entities/Project/ProjectMaterialItem';
 import { RegistrationApproval } from '../entities/Auth/RegistrationApproval';
 import { PasswordResetToken } from '../entities/Auth/PasswordResetToken';
+import { TimePeriodLock } from '../entities/TimePeriodLock/TimePeriodLock';
 
 const useSSL = process.env.DATABASE_URL?.includes('neon.tech') ?? false;
 
@@ -34,6 +35,7 @@ export const baseConfig: DataSourceOptions = {
     ProjectMaterialItem,
     RegistrationApproval,
     PasswordResetToken,
+    TimePeriodLock,
   ],
   migrations: ['dist/migrations/*.js'],
 

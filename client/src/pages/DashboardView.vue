@@ -30,7 +30,9 @@ const bottomTab = ref<'time' | 'projects' | 'list' | 'helpers' | 'stats'>('time'
     Loading...
   </div>
   <div class="page">
-    <TimeTab v-if="bottomTab === 'time'" />
+    <TimeTab v-if="bottomTab === 'time'"
+    :is-admin="isAdmin" 
+    />
     <ProjectsTab
       v-else-if="bottomTab === 'projects' && !projectNav.selectedProjectId"
       mode="details"

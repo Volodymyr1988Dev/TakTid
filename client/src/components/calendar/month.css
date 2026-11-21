@@ -12,6 +12,7 @@
 }
 
 .day {
+  position: relative;
   background: white;
   border-radius: 12px;
   padding: 6px;
@@ -47,4 +48,10 @@
 .day.holiday .day-number {
   color: #d32f2f;
   font-weight: 600;
+}
+.day-lock-icon {
+  display: block;
+  margin: 3px auto 0;
+  color: #dc2626;
+  pointer-events: none;
 }

@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,6 +14,7 @@ import {
   UpdateProjectAssignmentDto,
   CreateProjectAssignmentDto,
 } from '../types/index';
+import { TimePeriodLockService } from './TimePeriodLock.service';
 
 @Injectable()
 export class ProjectAssignmentService {
@@ -23,12 +25,17 @@ export class ProjectAssignmentService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Projects)
     private readonly projectRepo: Repository<Projects>,
+    private readonly timePeriodLockService: TimePeriodLockService,
   ) {}
 
   async create(
     dto: CreateProjectAssignmentDto,
     userId: string,
   ): Promise<ProjectAssignment> {
+    await this.timePeriodLockService.assertPeriodOpen(
+      //userId,
+      dto.date,
+    );
     const user = await this.userRepo.findOne({
       where: { id: userId },
     });
@@ -36,6 +43,9 @@ export class ProjectAssignmentService {
       throw new NotFoundException('User not found');
     }
 
+    if (!dto.projectId) {
+      throw new BadRequestException('WORK entry requires projectId');
+    }
     const project = await this.projectRepo.findOne({
       where: { id: dto.projectId },
     });
@@ -45,9 +55,7 @@ export class ProjectAssignmentService {
       dto.endTime,
       dto.breakMinutes,
     );
-    if (!dto.projectId) {
-      throw new BadRequestException('WORK entry requires projectId');
-    }
+    
     const assignment = this.assignmentRepo.create({
       user,
       project,
@@ -70,12 +78,22 @@ export class ProjectAssignmentService {
   async update(
     id: string,
     dto: UpdateProjectAssignmentDto,
+    //userId: string,
   ): Promise<ProjectAssignment> {
     const assignment = await this.assignmentRepo.findOne({
       where: { id },
       relations: ['project'],
     });
     if (!assignment) throw new NotFoundException('Assignment not found');
+    /*
+    if (assignment.user.id !== userId) {
+      throw new ForbiddenException();
+    }*/
+
+    await this.timePeriodLockService.assertPeriodOpen(
+      //userId,
+      assignment.date,
+    );
 
     const start = dto.startTime ?? assignment.startTime;
     const end = dto.endTime ?? assignment.endTime;
@@ -104,7 +122,7 @@ export class ProjectAssignmentService {
   ): Promise<ProjectAssignment> {
     const assignment = await this.assignmentRepo.findOne({ where: { id } });
     if (!assignment) throw new NotFoundException('Assignment not found');
-
+    await this.timePeriodLockService.assertPeriodOpen(assignment.date);
     assignment.comment = comment;
     return this.assignmentRepo.save(assignment);
   }
@@ -117,10 +135,21 @@ export class ProjectAssignmentService {
   }
 
   async remove(id: string): Promise<void> {
+    const assignment = await this.assignmentRepo.findOne({
+      where: { id },
+    });
+
+    if (!assignment) {
+      throw new NotFoundException('Assignment not found');
+    }
+
+    await this.timePeriodLockService.assertPeriodOpen(assignment.date);
+    await this.assignmentRepo.remove(assignment);
+    /*
     const result = await this.assignmentRepo.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException('Assignment not found');
-    }
+    }*/
   }
   async findByPeriod(userId: string, from: string, to: string) {
     return this.assignmentRepo.find({

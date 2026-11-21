@@ -264,6 +264,10 @@ export default {
     date: 'Dată',
     weekTotal: 'Total săptămână',
     monthTotal: 'Total lună',
+    closeWeek: 'Închide săptămâna',
+    openWeek: 'Deschide săptămâna',
+    closed: 'Închis',
+    unlockWeek: 'Deblochează săptămâna'
   },
 
   week: {

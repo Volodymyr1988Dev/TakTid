@@ -264,6 +264,10 @@ export default {
     date: 'Data',
     weekTotal: 'Suma tygodnia',
     monthTotal: 'Suma miesiąca',
+    closeWeek: 'Zamknij tydzień',
+    openWeek: 'Otwórz tydzień',
+    closed: 'Zamknięty',
+    unlockWeek: 'Odblokuj tydzień'
   },
 
   week: {

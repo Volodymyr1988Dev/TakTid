@@ -9,6 +9,8 @@
 }
 
 .week-day {
+  position: relative;
+
   flex: 1;
   background: white;
   border-radius: 16px;
@@ -79,4 +81,10 @@
 .week-day.holiday .weekday {
   color: #d32f2f;
   font-weight: 600;
+}
+.day-lock-icon {
+  display: block;
+  margin: 3px auto 0;
+  color: #dc2626;
+  pointer-events: none;
 }

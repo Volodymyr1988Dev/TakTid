@@ -22,6 +22,7 @@ import { CleanupModule } from './modules/cleanup.module';
 import { SalaryHistoryModule } from './modules/salary-history.module';
 import { ProjectTaskModule } from './modules/projectTask.module';
 import { ProjectMaterialModule } from './modules/ProjectMaterial.module';
+import { TimePeriodLockModule } from './modules/timePeriodLock.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { ProjectMaterialModule } from './modules/ProjectMaterial.module';
     SalaryHistoryModule,
     ProjectTaskModule,
     ProjectMaterialModule,
+    TimePeriodLockModule,
   ],
   controllers: [AppController],
   providers: [
