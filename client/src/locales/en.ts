@@ -269,6 +269,13 @@ export default {
     closed: 'Closed',
     unlockWeek: 'Unlock week',
     closeOpenWeeks: 'Close all open weeks',
+    confirmCloseWeek: 'Are you sure you want to close this week?',
+    confirmUnlockWeek: 'Are you sure you want to unlock this week for 7 days?',
+    confirmCloseMonth: 'Are you sure you want to close all open weeks in this month?',
+    confirmUnlockMonth: 'Are you sure you want to unlock all weeks in this month for 7 days?',
+    closeMonth: 'Close month',
+    unlockMonth: 'Unlock month',
+
   },
     week: {
     mon: 'Mon',

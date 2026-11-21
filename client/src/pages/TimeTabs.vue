@@ -81,36 +81,68 @@ const monthWeekStatuses = computed(() =>
 )
 
 // Do not offer bulk closing until every week has a loaded status.
-const monthStatusesLoaded = computed(() =>
+/*const monthStatusesLoaded = computed(() =>
   monthWeekStatuses.value.every(status => status !== undefined),
 )
-
-// The month is considered open if at least one week is open.
 const monthHasOpenWeeks = computed(() =>
   monthStatusesLoaded.value &&
   monthWeekStatuses.value.some(status => status?.locked === false),
-)
-
-// The month is considered locked only if every week is locked.
+)*/
+const monthStatusesLoaded = computed(() =>
+  monthWeekStatuses.value.every(status => status !== null),
+)/*
+const monthHasOpenWeeks = computed(() =>
+  monthStatusesLoaded.value &&
+  monthWeekStatuses.value.some(status => status?.locked === false),
+)*/
 const monthAllLocked = computed(() =>
   monthStatusesLoaded.value &&
   monthWeekStatuses.value.every(status => status?.locked === true),
 )
-async function closeOpenWeeksInMonth() {
+
+const monthLocked = computed(() =>
+  monthStatusesLoaded.value ? monthAllLocked.value : true,
+)
+
+
+// The month is considered locked only if every week is locked.
+/*const monthAllLocked = computed(() =>
+  monthStatusesLoaded.value &&
+  monthWeekStatuses.value.every(status => status?.locked === true),
+)*/
+async function toggleMonthLock() {
   if (!monthStatusesLoaded.value) return
 
-  for (const date of monthWeekDates.value) {
-    const status = lockStore.getStatusForDate(date)
+  const shouldUnlock = monthAllLocked.value
 
-    if (status && !status.locked) {
-      await lockStore.close(date)
+  const confirmed = window.confirm(
+    shouldUnlock
+      ? t('calendar.confirmUnlockMonth')
+      : t('calendar.confirmCloseMonth'),
+  )
+
+  if (!confirmed) return
+
+  try {
+    for (const date of monthWeekDates.value) {
+      if (shouldUnlock) {
+        await lockStore.unlock(date)
+      } else {
+        const status = lockStore.getStatusForDate(date)
+
+        if (status && !status.locked) {
+          await lockStore.close(date)
+        }
+      }
     }
+
+    const from = current.value.clone().startOf('month')
+    const to = current.value.clone().endOf('month')
+
+    await loadVisibleLockStatuses(from, to)
+  } catch (error) {
+    console.error('Failed to toggle month lock:', error)
   }
-
-  const from = current.value.clone().startOf('month')
-  const to = current.value.clone().endOf('month')
-
-  await loadVisibleLockStatuses(from, to)
 }
 const suggestionsStore = useSuggestionsStore()
 async function loadVisibleLockStatuses(from: Dayjs, to: Dayjs) {
@@ -423,20 +455,28 @@ async function reloadCalendar () {
 }
 
 async function toggleWeekLock() {
-  if (mode.value === 'month') {
-    await closeOpenWeeksInMonth()
-    return
-  }
-
   const date = current.value.format('YYYY-MM-DD')
+  const shouldUnlock = lockStore.status?.locked === true
 
-  if (lockStore.status?.locked) {
-    await lockStore.unlock(date)
-  } else {
-    await lockStore.close(date)
+  const confirmed = window.confirm(
+    shouldUnlock
+      ? t('calendar.confirmUnlockWeek')
+      : t('calendar.confirmCloseWeek'),
+  )
+
+  if (!confirmed) return
+
+  try {
+    if (shouldUnlock) {
+      await lockStore.unlock(date)
+    } else {
+      await lockStore.close(date)
+    }
+
+    await lockStore.loadStatus(date)
+  } catch (error) {
+    console.error('Failed to toggle week lock:', error)
   }
-
-  await lockStore.loadStatus(date)
 }
 </script>
 
@@ -449,21 +489,21 @@ async function toggleWeekLock() {
         ? t('calendar.weekLabel', { num: current.week() }) //`Week ${current.week()}`
         : current.format('MMMM YYYY')"
       :locked="mode === 'week'
-      ? (lockStore.status?.locked ?? true)
-      : monthAllLocked"
-      :is-admin="isAdmin"
-      :show-lock-controls="true"
-      :show-lock-action="
-        mode === 'week' || monthHasOpenWeeks
-      "
-      :lock-action-label="
-        mode === 'month'
-          ? t('calendar.closeOpenWeeks')
-          : undefined
-      "
+    ? (lockStore.status?.locked ?? true)
+    : monthLocked"
+    :is-admin="isAdmin"
+    :show-lock-controls="true"
+    :show-lock-action="mode === 'week' || monthStatusesLoaded"
+    :lock-action-label="mode === 'month'
+    ? (monthAllLocked
+      ? t('calendar.unlockMonth')
+      : t('calendar.closeMonth'))
+    : undefined"
       @prev="prev"
       @next="next"
-      @toggle-lock="toggleWeekLock"
+      @toggle-lock="mode === 'week'
+      ? toggleWeekLock()
+      : toggleMonthLock()"
     />
 
     <WeekView

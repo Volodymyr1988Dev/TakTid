@@ -268,6 +268,12 @@ export default {
     closed: 'Stängd',
     unlockWeek: 'Lås upp vecka',
     closeOpenWeeks: 'Stäng alla öppna veckor',
+    confirmCloseWeek: 'Är du säker på att du vill stänga denna vecka?',
+    confirmUnlockWeek: 'Är du säker på att du vill låsa upp denna vecka för 7 dagar?',
+    confirmCloseMonth: 'Är du säker på att du vill stänga alla öppna veckor i denna månad?',
+    confirmUnlockMonth: 'Är du säker på att du vill låsa upp alla veckor i denna månad för 7 dagar?',
+    closeMonth: 'Stäng månad',
+    unlockMonth: 'Lås upp månad',
   },
 
   week: {

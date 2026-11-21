@@ -45,7 +45,7 @@ export class TimesheetPeriodController {
   @Post('close')
   close(
     @Query('date') date: string,
-    @Body() body: { reason?: string },
+    @Body() body: { reason?: string } | undefined,
     @Req() req: AuthRequest,
   ) {
     const adminId = req.user?.id;
@@ -57,7 +57,7 @@ export class TimesheetPeriodController {
     return this.timePeriodLockService.closeWeek(
       date,
       adminId,
-      body.reason,
+      body?.reason,
     );
   }
 
@@ -65,7 +65,7 @@ export class TimesheetPeriodController {
   @Post('unlock')
   unlock(
     @Query('date') date: string,
-    @Body() body: { reason?: string },
+    @Body() body: { reason?: string } | undefined,
     @Req() req: AuthRequest,
   ) {
     const adminId = req.user?.id;
@@ -77,7 +77,7 @@ export class TimesheetPeriodController {
     return this.timePeriodLockService.unlockWeek(
       date,
       adminId,
-      body.reason,
+      body?.reason,
     );
   }
 }
